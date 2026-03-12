@@ -31,8 +31,6 @@ urlpatterns = [
     path("services/", ServiceListCreateAPIView.as_view(), name="service-list"),
     path("services/<uuid:pk>/", ServiceRetrieveUpdateDestroyAPIView.as_view(), name="service-detail"),
     
-
-
     path("availability/<str:date>/<uuid:service>/", AvailabilityAPIView.as_view()),
     path("bookings/<uuid:pk>/", BookingRetrieveUpdateDestroyAPIView.as_view(), name="booking-detail"),
     path("vehicles/<uuid:pk>/", VehicleRetrieveUpdateDestroyAPIView.as_view(), name="vehicle-detail"),
@@ -44,10 +42,5 @@ urlpatterns = [
     path("users/", UserCreateAPIView.as_view(), name="user-register"),
     path('admin/companies/', CompanyCreateAPIView.as_view(), name='company-create'),
     path('', include(router.urls)),
-    # Indemnity Endpoints
-    path('indemnity/', include("indemnity.urls")),
-    
-    #payments
-    path('payments/', include("payments.urls")),
     
 ]
