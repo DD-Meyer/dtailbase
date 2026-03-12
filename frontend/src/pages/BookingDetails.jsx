@@ -147,7 +147,7 @@ export default function BookingDetail() {
             <div className="photo-grid">
               {beforePhotos.map((img, index) => (
                 <a href={img.image} target="_blank" key={index} rel="noreferrer">
-                  <img src={img.image} alt="Before" className="gallery-img" />
+                  <img src={img.image.startsWith('http') ? img.image : `${API_BASE_URL}${img.image}`} alt="Before" className="gallery-img" />
                 </a>
               ))}
               {beforePhotos.length === 0 && <p className="text-muted">No arrival photos recorded.</p>}
