@@ -39,13 +39,17 @@ urlpatterns = [
     path('api/payments/', include('payments.urls')),
 
     path('api/', include('core.urls')),
-    
+
     path('api/token/', MyTokenView.as_view(), name='token_obtain_pair'),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 ]
 
 # This allows Django to serve files during development
+# Serve Media Files (Add this BEFORE the catch-all)
 if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+else:
+    # On Render, we force it even in production for now
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # THE CATCH-ALL: Keep this at the very bottom so media/api routes match first

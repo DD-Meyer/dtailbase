@@ -132,6 +132,7 @@ ROOT_URLCONF = 'bookingweb.urls'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'frontend_build'),
+    os.path.join(BASE_DIR, 'media'),
 ]
 WHITENOISE_INDEX_PAGE_SELF_CHECK = False
 WHITENOISE_ROOT = os.path.join(BASE_DIR, 'frontend_build')
@@ -221,7 +222,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Media files (Images uploaded by users)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 ASGI_APPLICATION = 'bookingweb.asgi.application'
 
