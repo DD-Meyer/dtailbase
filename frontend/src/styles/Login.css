@@ -1,0 +1,138 @@
+/* Login Page Specific Styling */
+/* Fix the 100vh scroll issue */
+.login-container {
+  min-height: 100vh; /* Changed from height to min-height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc;
+  padding: 2rem; /* Adds breathing room on mobile */
+  box-sizing: border-box;
+}
+
+.login-card {
+  background: white;
+  padding: 3rem; /* Increased padding for a premium feel */
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 450px; /* Slightly wider to prevent squashing */
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.login-header h1 {
+  font-size: 1.8rem;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.login-header p {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.login-form .form-group {
+  margin-bottom: 1.25rem;
+}
+
+.login-form label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 0.5rem;
+}
+
+.login-form input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.login-form input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Ensure the button doesn't feel cramped */
+.btn-full {
+  width: 100%;
+  padding: 0.875rem;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  background-color: #3b82f6;
+  color: white;
+  transition: background 0.2s;
+}
+
+.btn-full:hover {
+  background-color: #2563eb;
+}
+
+
+/* Clean up footer spacing */
+.login-footer {
+  margin-top: 2rem;
+  border-top: 1px solid #f1f5f9; /* Subtle divider */
+  padding-top: 1.5rem;
+  text-align: center;
+}
+
+.error-banner {
+  background-color: #fef2f2;
+  border-left: 4px solid #ef4444;
+  color: #b91c1c;
+  padding: 12px;
+  margin-bottom: 1.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.login-footer a {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-footer a:hover {
+  text-decoration: underline;
+}
+
+.login-footer {
+  margin-top: 2rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.login-footer a {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 5px;
+}
+
+.login-footer a:hover {
+  text-decoration: underline;
+}
+
+.mt-4 { margin-top: 1rem; }
+.text-xs { font-size: 0.75rem; color: #94a3b8; }
+
+/* Fix input spacing */
+.form-group {
+  margin-bottom: 1.5rem; /* More space between inputs */
+  text-align: left; /* Ensure labels stay left */
+}

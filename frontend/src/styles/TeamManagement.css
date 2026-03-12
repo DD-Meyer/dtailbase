@@ -1,0 +1,273 @@
+/* --- 0. VISIBILITY RESET (Add this to the top) --- */
+.team-management-page, 
+.main-content, 
+.page-body {
+  background-color: #f8fafc !important;
+  color: #1e293b !important; /* Forces dark text globally for this page */
+}
+
+/* Fix Headings and Labels that are likely inheriting 'white' */
+.team-management-page h1, 
+.team-management-page h2, 
+.team-management-page h3,
+.form-group label {
+  color: #0f172a !important;
+}
+
+/* --- 1. THE ACTION HEADER --- */
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* --- 2. ADD MEMBER FORM (GRID) --- */
+.grid-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  align-items: center;
+  background: #ffffff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  color: #1e293b !important; /* Ensures text inside form is dark */
+}
+
+/* Ensure inputs themselves have dark text and light backgrounds */
+.grid-form input, 
+.grid-form select {
+  background: #ffffff !important;
+  color: #1e293b !important;
+  border: 1px solid #cbd5e1;
+}
+
+/* Ensure the button spans appropriately if the grid wraps */
+.grid-form .btn-success {
+  height: 44px;
+}
+
+/* --- 3. INLINE EDITING (SMALL INPUTS) --- */
+.input-sm {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  width: 100%;
+  color: #1e293b !important;
+  background-color: #ffffff !important;
+}
+
+.input-sm:focus {
+  border-color: #3b82f6;
+  outline: none;
+  background: #fff;
+}
+
+/* --- 4. BADGES (ROLES & STATUS) --- */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Roles */
+.badge-OWNER {
+  background: #fef3c7;
+  color: #92400e !important;
+  border: 1px solid #fde68a;
+}
+
+.badge-STAFF {
+  background: #e0f2fe;
+  color: #075985 !important;
+  border: 1px solid #bae6fd;
+}
+
+/* Statuses */
+.badge-success {
+  background: #dcfce7;
+  color: #166534 !important;
+}
+
+.badge-ghost {
+  background: #f1f5f9;
+  color: #475569 !important;
+  opacity: 0.6;
+}
+
+/* --- 5. BUTTON VARIANTS --- */
+.btn-xs {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  border-radius: 4px;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid #cbd5e1;
+  color: #475569 !important;
+}
+
+.btn-outline:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.btn-warning {
+  border-color: #f59e0b;
+  color: #d97706 !important;
+}
+
+.btn-warning:hover {
+  background: #fffbeb;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: none;
+  color: #64748b !important;
+}
+
+/* --- 6. UTILITIES --- */
+.w-full { width: 100%; }
+.flex-col { display: flex; flex-direction: column; }
+.gap-2 { gap: 0.5rem; }
+
+/* TABLE REFRESH */
+.table-standard {
+  background-color: #ffffff !important;
+}
+
+.table-standard thead th {
+  color: #64748b !important; /* Grey headers */
+  background: #f8fafc !important;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.table-standard tbody td {
+  color: #1e293b !important; /* Dark body text */
+  background-color: #ffffff !important;
+}
+
+/* --- BUTTON VISIBILITY FIXES --- */
+
+/* 1. General Button Reset (Ensures no white text leakage) */
+.team-management-page button,
+.team-management-page .btn {
+  color: #1e293b; /* Default dark text */
+}
+
+/* 2. EDIT BUTTON (Warning/Yellow) */
+.btn-warning {
+  background: #fffbeb !important; /* Very light yellow background */
+  border: 1px solid #f59e0b !important;
+  color: #b45309 !important; /* Deep amber text for contrast */
+  font-weight: 600;
+}
+
+.btn-warning:hover {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+  box-shadow: 0 2px 4px rgba(180, 83, 9, 0.1);
+}
+
+/* 3. DEACTIVATE BUTTON (Ghost/Outline/Red) */
+/* If you want Deactivate to look like a danger action */
+.btn-ghost.deactivate, 
+.btn-outline.deactivate {
+  background: #fff1f2 !important; /* Light red wash */
+  color: #e11d48 !important;      /* Sharp red text */
+  border: 1px solid #fecdd3 !important;
+}
+
+.btn-ghost.deactivate:hover, 
+.btn-outline.deactivate:hover {
+  background: #ffe4e6 !important;
+  border-color: #fb7185 !important;
+  color: #be123c !important;
+}
+
+/* 4. DEFAULT OUTLINE BUTTON (If used for other actions) */
+.btn-outline {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #475569 !important; /* Slate grey text */
+}
+
+.btn-outline:hover {
+  background: #f8fafc !important;
+  border-color: #94a3b8 !important;
+  color: #1e293b !important;
+}
+
+/* 5. ICON VISIBILITY (If buttons have SVG icons) */
+.btn i, .btn svg {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+/* --- TEAM MANAGEMENT OVERRIDES --- */
+
+/* Force the page container to have dark text */
+.page-container {
+    color: #1e293b !important;
+}
+
+/* Fix Headings */
+.page-container h1 {
+    color: #0f172a !important;
+    margin-bottom: 20px;
+}
+
+/* --- THE BUTTON FIX --- */
+/* Target buttons specifically within the table actions */
+.page-container .btn {
+    font-weight: 600 !important;
+}
+
+/* Edit Button */
+.page-container .btn-outline {
+    background-color: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #475569 !important;
+}
+
+.page-container .btn-outline:hover {
+    background-color: #f1f5f9 !important;
+    color: #1e293b !important;
+}
+
+/* Deactivate / Warning Button */
+.page-container .btn-warning {
+    background-color: #fffbeb !important; /* Light amber wash */
+    color: #92400e !important;           /* Deep brown/gold text */
+    border: 1px solid #fcd34d !important;
+}
+
+.page-container .btn-warning:hover {
+    background-color: #fef3c7 !important;
+    color: #78350f !important;
+}
+
+/* Save / Success Button */
+.page-container .btn-success {
+    background-color: #dcfce7 !important;
+    color: #166534 !important;
+    border: 1px solid #86efac !important;
+}
+
+/* Fix Inputs (typed text visibility) */
+.page-container input, 
+.page-container select {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+.page-container input::placeholder {
+    color: #94a3b8 !important;
+}

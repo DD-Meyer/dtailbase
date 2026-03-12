@@ -1,0 +1,169 @@
+:root {
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 80px;
+  --primary-blue: #3b82f6;
+  --bg-dark: #0f172a;
+}
+
+.sidebar {
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--bg-dark);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 15px;
+  position: sticky;
+  top: 0;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 1000;
+  overflow-x: hidden; /* Prevents text from poking out during transition */
+}
+
+/* 1. Header & Toggle Fixes */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30px;
+  padding: 0 5px;
+  width: 100%;
+}
+
+.sidebar.collapsed {
+  width: var(--sidebar-collapsed-width);
+}
+
+.sidebar.collapsed .sidebar-header {
+  flex-direction: column; /* Stacks DF and button */
+  gap: 15px;
+  justify-content: center;
+  padding: 0;
+}
+
+.collapse-toggle {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0; /* Prevents button from squishing */
+}
+
+.collapse-toggle:hover {
+  background: var(--primary-blue);
+  color: white;
+  border-color: var(--primary-blue);
+}
+
+/* 2. Logo Logic */
+.sidebar-logo h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+}
+
+.sidebar.collapsed .sidebar-logo h2 {
+  font-size: 1.1rem;
+}
+
+/* 3. Navigation Links */
+.sidebar-links {
+  list-style: none;
+  padding: 0;
+  flex-grow: 1;
+}
+
+.sidebar-links li {
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.sidebar-links a {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  text-decoration: none;
+  color: #94a3b8;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+/* Center icons when collapsed */
+.sidebar.collapsed .sidebar-links a {
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.sidebar-links li.active a {
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--primary-blue);
+  font-weight: 600;
+}
+
+.sidebar-links a:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+}
+
+.icon {
+  font-size: 1.2rem;
+  min-width: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+/* 4. Footer & Admin Headers */
+.sidebar-footer {
+  margin-top: auto;
+}
+
+.admin-header {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: #64748b;
+  margin: 20px 0 10px 15px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.sidebar.collapsed .admin-header {
+  display: none; /* Hide 'ADMIN' text when small */
+}
+
+.sidebar-divider {
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 15px 0;
+}
+
+.home-link {
+  background: rgba(59, 130, 246, 0.05); /* Subtle blue tint */
+  margin-bottom: 8px;
+  color: #3b82f6 !important; /* Brand color */
+  font-weight: 600;
+}
+
+.home-link:hover {
+  background: rgba(59, 130, 246, 0.1) !important;
+}
+
+.admin-header {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #94a3b8;
+  margin: 16px 0 8px 12px;
+  font-weight: 700;
+}

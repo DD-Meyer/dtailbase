@@ -1,0 +1,197 @@
+/* --- 0. THE ULTIMATE VISIBILITY FIX --- */
+.settings-wrapper, 
+.settings-wrapper *, 
+.modal-overlay,
+.modal-overlay * {
+  color: #0f172a !important; /* Force dark text everywhere in settings */
+}
+
+/* --- 1. LAYOUT & HEADER --- */
+.settings-wrapper {
+  background-color: #f8fafc;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.settings-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.settings-header {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 1rem;
+}
+
+.settings-header h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.settings-header p {
+  color: #64748b !important;
+  margin-top: 4px;
+}
+
+/* --- 2. SETTINGS CARDS --- */
+.settings-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* --- 3. FORM GRID --- */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.input-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #475569 !important;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.input-group input, 
+.input-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.input-group input:focus, 
+.input-group textarea:focus {
+  background: white;
+  border-color: #3b82f6;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.content-textarea {
+  min-height: 250px;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.6;
+}
+
+/* --- 4. CHECKBOX STYLING --- */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f1f5f9;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.checkbox-wrapper span {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* --- 5. HISTORY TABLE --- */
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.history-table th {
+  text-align: left;
+  padding: 12px;
+  color: #64748b !important;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.history-table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.95rem;
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-badge.active { background: #dcfce7; color: #166534 !important; }
+.status-badge.archived { background: #f1f5f9; color: #475569 !important; }
+
+/* --- 6. BUTTONS --- */
+.btn-save {
+  background: #0f172a;
+  color: white !important;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-save:hover { background: #1e293b; transform: translateY(-1px); }
+
+.btn-text {
+  background: transparent;
+  border: none;
+  color: #3b82f6 !important;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.btn-text.secondary { color: #64748b !important; }
+
+/* --- 7. ALERTS --- */
+.alert-success {
+  background: #dcfce7;
+  color: #166534 !important;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  border: 1px solid #bbf7d0;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

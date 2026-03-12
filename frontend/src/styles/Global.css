@@ -1,0 +1,273 @@
+/* 1. VARIABLES & RESET */
+:root {
+  --primary: #0066ff;
+  --primary-hover: #0052cc;
+  --bg-main: #f8fafc;
+  --bg-sidebar: #1e293b;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --header-height: 64px;
+  --sidebar-width: 260px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 2. CORE LAYOUT (DASHBOARD) */
+/* Ensure the overall layout is a flex row */
+/* 1. Lock the Viewport */
+.app-layout {
+  display: flex;
+  height: 100vh;      /* Force exactly the screen height */
+  width: 100vw;
+  overflow: hidden;   /* Stop the WHOLE page from scrolling */
+}
+
+/* 1. If your Sidebar uses 'fixed', the main-content needs margin. 
+/* Sidebar should have a fixed width */
+/* 2. The Stationary Sidebar */
+.sidebar {
+  width: 260px;
+  height: 100vh;      /* Full height */
+  flex-shrink: 0;     /* Don't let it get squished */
+  background: var(--bg-sidebar);
+  position: relative; /* No sticky/fixed needed if parent is locked */
+  z-index: 20;
+  border-right: 1px solid var(--border-color);
+}
+
+/* 3. The Independent Scroll Area */
+.main-content {
+  flex-grow: 1;
+  height: 100vh;
+  overflow-y: auto;   /* THIS is the only part that scrolls */
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+}
+
+/* 4. Keep the Header at the top of the content */
+.main-header {
+  height: 64px;
+  flex-shrink: 0;     /* Header doesn't shrink */
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  z-index: 10;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Page body adds padding so content isn't touching the edges */
+.page-body {
+  padding: 2rem;
+  width: 100%;
+}
+
+.auth-wrapper {
+  width: 100%;
+  height: 100vh; /* Strictly full height */
+  height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  background-color: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden; /* This kills the scrollbar */
+  position: fixed; /* Ensures it stays locked to the screen */
+  top: 0;
+  left: 0;
+}
+
+.auth-content {
+  width: 100%;
+  max-width: 450px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 4. REUSABLE COMPONENTS */
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.card {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--card-shadow);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Buttons */
+.btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-hover); }
+
+.btn-full { width: 100%; }
+
+/* Action Buttons (Table icons) */
+.action-group {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  display: flex;
+  transition: 0.2s;
+}
+
+.btn-edit { color: #3b82f6; }
+.btn-edit:hover { background: #dbeafe; }
+
+.btn-delete { color: #ef4444; }
+.btn-delete:hover { background: #fee2e2; }
+
+/* Tables */
+.table-standard {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-standard th {
+  text-align: left;
+  padding: 12px;
+  border-bottom: 2px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table-standard td {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+/* Modals */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 95%;
+  max-width: 550px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Form Layouts */
+.grid-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-main);
+}
+
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+/* Badges */
+.badge {
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-interior { background: #e0f2fe; color: #0369a1; }
+.badge-exterior { background: #fef3c7; color: #92400e; }
+.badge-full-detail { background: #dcfce7; color: #166534; }
+.badge-add-on { background: #f1f5f9; color: #475569; }
+
+/* Ensure the login page doesn't bring its own height */
+.login-container {
+  height: auto !important; 
+  width: 100%;
+  padding: 1rem;
+}
+
+/* Toast Notification */
+.toast-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  animation: slideIn 0.3s ease-out;
+}
+
+.toast-notification.success {
+  background-color: #28a745; /* Success Green */
+}
+
+.toast-notification.error {
+  background-color: #dc3545; /* Error Red */
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}

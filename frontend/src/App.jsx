@@ -1,0 +1,217 @@
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext, AuthProvider } from "./context/AuthContext";
+import Header from "./components/Header";
+import Sidebar from "./components/Sidebar";
+import ProtectedRoute from "./components/ProtectedRoute";
+import PublicLayout from "./components/PublicLayout";
+import { CompanyProvider } from './context/CompanyContext';
+
+// Pages
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Customers from "./pages/Customers";
+import Vehicles from "./pages/Vehicles";
+import Services from "./pages/Services";
+import Bookings from "./pages/Bookings";
+import NewBooking from "./pages/NewBooking";
+import IndemnityForm from "./components/IndemnityForm";
+import AgreementsList from "./components/AgreementsList";
+import TeamManagement from "./components/TeamManagement";
+import Profile from "./components/Profile";
+import Settings from "./pages/Settings";
+import IndemnitySettings from "./pages/IndemnitySettings";
+import Hero from "./components/Hero";
+import BookingDetail from "./pages/BookingDetails";
+import About from "./pages/About";
+import Products from "./pages/Products";
+import Pricing from "./pages/Pricing";
+import Legal from "./pages/Legal";
+import Contact from "./pages/Contact";
+import ContentPage from "./pages/ContentPage";
+import PublicBooking from "./pages/PublicBooking";
+import Upgrade from "./pages/Upgrade";
+
+
+function AppContent() {
+  const { isAuthenticated, user } = useContext(AuthContext); 
+  const location = useLocation();
+
+  // 1. Identify ALL public-facing "Marketing" pages
+  const publicRoutes = ["/", "/hero", "/about", "/products", "/pricing", "/contact", "/legal", "/community", "/features", "/security", "/our-Story", "/support", "/help-center", "/tutorials", "/public-booking/:companySlug", "/upgrade"];
+  const isLandingPage = publicRoutes.includes(location.pathname);
+
+  const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
+  
+  // 2. Sidebar/Header only show if Authenticated AND not on any public/auth pages
+  const showDashboardChrome = isAuthenticated && !isLandingPage && !isAuthPage;
+
+
+  // Example: Legal Page
+  const Features = () => (
+    <ContentPage 
+      title="Engineered for" highlight="Performance."
+      intro="The only tool built specifically for high-end detailing studios where precision isn't optional."
+      sections={[
+        { title: "Smart Scheduling", desc: "Accounts for coating cure times and weather variables automatically.", tag: "CORE", wide: true },
+        { title: "WhatsApp CRM", desc: "Automatic follow-ups and maintenance reminders sent directly to client phones.", tag: "AUTOMATION" },
+        { title: "Digital Inspections", desc: "360° high-res inspection forms that clients can sign digitally.", tag: "TRUST" },
+        { title: "Inventory Tracking", desc: "Track every ml of ceramic coating used and know your exact profit-per-car.", tag: "FINANCE", wide: true }
+      ]}
+    />
+  );
+
+  const Tutorials = () => (
+    <ContentPage 
+      title="Master the" highlight="Workflow."
+      intro="Get the most out of DetailerFlow with step-by-step guides, video tutorials, and best practices from top studios."
+      sections={[
+        { title: "Getting Started", desc: "Setup your first service and booking link in under 10 minutes.", button: "Read Article" },
+        { title: "WhatsApp Automation", desc: "How to setup automated follow-ups for ceramic maintenance.", button: "Watch Video", wide: true },
+        { title: "Team Management", desc: "Managing multiple technicians and bay assignments.", button: "Learn More" }
+      ]}
+    />
+  );
+
+  const HelpCenter = () => (
+    <ContentPage 
+      title="We're here to" highlight="Help."
+      intro="Whether you're facing a technical issue or need guidance on best practices, our support team has your back."
+      sections={[
+        { title: "Contact Support", desc: "Get in touch with our support team for personalized assistance.", button: "Contact Us" },
+        { title: "FAQs", desc: "Find answers to common questions about using DetailerFlow.", button: "View FAQs", wide: true },
+        { title: "Community Forums", desc: "Connect with other detailers, share tips, and learn from each other's experiences.", button: "Join the Community" }
+      ]}
+    />
+  );
+
+  const Security = () => (
+    <ContentPage 
+      title="Bank-Grade" highlight="Protection."
+      intro="Your studio's data is your most valuable asset. We guard it like a 1-of-1 hypercar."
+      sections={[
+        { title: "AES-256 Encryption", desc: "Every byte of data is encrypted at rest and in transit.", tag: "ENCRYPTION" },
+        { title: "Data Ownership", desc: "You own your data. Export your entire client list at any time with one click.", tag: "LEGAL", wide: true },
+        { title: "99.9% Uptime", desc: "Built on global cloud infrastructure to ensure your business never stops.", tag: "INFRA" }
+      ]}
+    />
+  );
+
+  const OurStory = () => (
+    <ContentPage 
+      title="Built by" highlight="Detailers."
+      intro="We didn't build DetailerFlow in a tech office. We built it in the wash bay, between ceramic coatings."
+      sections={[
+        { title: "The Problem", desc: "General CRM tools are too messy. Detailers need specific workflows for cure times and inspections.", wide: true },
+        { title: "The Mission", desc: "To give every detailer the software 'operating system' they need to go from hobbyist to studio owner.", tag: "VISION" }
+      ]}
+    />
+  );
+
+  const Support = () => (
+    <ContentPage 
+      title="Knowledge" highlight="Base."
+      intro="Master the workflow. Learn how to automate your business in under 10 minutes."
+      sections={[
+        { title: "Quick Start Guide", desc: "Setup your first service and booking link in 5 minutes.", button: "Read Article" },
+        { title: "Mastering WhatsApp", desc: "How to setup automated follow-ups for ceramic maintenance.", button: "Watch Video", wide: true },
+        { title: "Team Management", desc: "Managing multiple technicians and bay assignments.", button: "Learn More" }
+      ]}
+    />
+  );
+
+  // Example: Community Page
+  const CommunityPage = () => (
+    <ContentPage 
+      title="The" 
+      subtitle="Inner Circle" 
+      sections={[
+        { header: "Global Discord", content: "Connect with 5,000+ detailers worldwide.", link: "#" },
+        { header: "Monthly Meetups", content: "Live webinars on business scaling.", link: "#" },
+        { header: "Resource Library", content: "Downloadable checklist and SOP templates.", wide: true }
+      ]} 
+    />
+  );
+
+  return (
+  
+    <div className={isAuthPage ? "auth-wrapper" : isLandingPage ? "landing-wrapper" : "app-layout"}>
+      
+      {/* Sidebar hidden on Hero and Auth pages */}
+      {showDashboardChrome && <Sidebar />}
+      
+      <main className={isLandingPage || isAuthPage ? "full-page-content" : "main-content"}>
+        
+        {/* Header hidden on Hero and Auth pages */}
+        {showDashboardChrome && <Header />}
+        
+        <div className={isLandingPage || isAuthPage ? "" : "page-body"}>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/book/:companySlug" element={<PublicBooking />} />
+            
+            {/* Landing Page is now the root */}
+            <Route path="/" element={<Hero isAuthenticated={isAuthenticated} />} />
+            <Route path="/hero" element={<Navigate to="/" replace />} />
+            <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
+            <Route path="/products" element={<PublicLayout><Products /></PublicLayout>} />
+            <Route path="/pricing" element={<PublicLayout><Pricing /></PublicLayout>} />
+            <Route path="/legal" element={<PublicLayout><Legal /></PublicLayout>} />
+            <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
+            <Route path="/upgrade" element={<PublicLayout><Upgrade /></PublicLayout>} />
+
+            {/* Example of using the reusable ContentPage for a new "Community" page */}
+            <Route path="/Features" element={<Features />} />
+            <Route path="/Security" element={<Security />} />
+            <Route path="/Our-Story" element={<OurStory />} />
+            <Route path="/Support" element={<Support />} />
+            <Route path="/community" element={<CommunityPage />} />
+            <Route path="/tutorials" element={<Tutorials />} />
+            <Route path="/help-center" element={<HelpCenter />} />
+
+
+            {/* Public Auth Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            
+            {/* Protected Routes */}
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/bookings" element={<ProtectedRoute><Bookings /></ProtectedRoute>} />
+            <Route path="/bookings/:id" element={<ProtectedRoute><BookingDetail /></ProtectedRoute>} />
+            <Route path="/new-booking" element={<ProtectedRoute><NewBooking /></ProtectedRoute>} />
+            <Route path="/customers" element={<ProtectedRoute><Customers /></ProtectedRoute>} />
+            <Route path="/vehicles" element={<ProtectedRoute><Vehicles /></ProtectedRoute>} />
+            <Route path="/services" element={<ProtectedRoute><Services /></ProtectedRoute>} />
+            <Route path="/indemnity" element={<AgreementsList />} />
+            <Route path="/indemnity/sign/:bookingId" element={<IndemnityForm />} />
+            <Route path="/settings/indemnity" element={<ProtectedRoute><IndemnitySettings /></ProtectedRoute>} />
+            
+            {/* Admin Only */}
+            <Route path="/team" element={(isAuthenticated && user?.role === 'OWNER') ? <TeamManagement /> : <Navigate to="/bookings" />} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            
+            {/* Catch-all redirect */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
+      </main>
+    </div>
+  
+  );
+}
+
+
+
+function App() {
+  return (
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <AuthProvider>
+        <CompanyProvider>
+          <AppContent />
+        </CompanyProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
+
+export default App;

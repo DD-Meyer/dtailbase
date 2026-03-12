@@ -1,0 +1,35 @@
+
+services:
+  web:
+    build: .
+    command: gunicorn bookingweb.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - ./media:/app/media            # Maps to MEDIA_ROOT
+      - ./staticfiles:/app/staticfiles # Maps to STATIC_ROOT
+    env_file: .env
+    depends_on:
+      - db
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8080:80"  # This maps your Windows 8080 to the Container 80
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./media:/app/media:ro
+      - ./staticfiles:/app/staticfiles:ro
+    depends_on:
+      - web
+
+  # The Database
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=bookingdb
+      - POSTGRES_USER=bookinguser
+      - POSTGRES_PASSWORD=postgres123
+
+volumes:
+  postgres_data:

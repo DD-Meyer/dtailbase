@@ -1,0 +1,212 @@
+/* --- 1. THE LEGAL CARD --- */
+.indemnity-card {
+  max-width: 800px;
+  margin: 2rem auto;
+  background: white;
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
+}
+
+.indemnity-card h1 {
+  margin-bottom: 0.5rem;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #0f172a;
+  text-align: center;
+}
+
+.indemnity-subtitle {
+  text-align: center;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
+}
+
+/* --- 2. TERMS & CONDITIONS VIEWPORT --- */
+.template-body-html {
+  background: #f8fafc;
+  padding: 1.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #334155;
+  /* Custom scrollbar for a cleaner look */
+}
+
+.template-body-html::-webkit-scrollbar {
+  width: 6px;
+}
+.template-body-html::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+/* --- 3. VEHICLE CONDITION PHOTOS --- */
+.photo-upload-section {
+  margin-top: 2rem;
+}
+
+.photo-upload-section h3 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #1e293b;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 16px;
+  margin-bottom: 2rem;
+}
+
+.photo-preview-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+}
+
+.photo-preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+/* --- PHOTO PREVIEW CONTAINER --- */
+.photo-preview-item {
+  position: relative; /* REQUIRED for the button to anchor correctly */
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.photo-preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* --- THE REMOVE BUTTON (Targeting your existing class) --- */
+.remove-photo-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 24px;
+  height: 24px;
+  background: rgba(239, 68, 68, 0.9) !important; /* Bold Red */
+  color: white !important;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1;
+  z-index: 10; /* Ensures it sits ABOVE the image */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease;
+}
+
+.remove-photo-btn:hover {
+  transform: scale(1.1);
+  background: #dc2626 !important;
+}
+
+.remove-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-weight: bold;
+  backdrop-filter: blur(4px);
+  z-index: 10;
+}
+
+.add-photo-box {
+  aspect-ratio: 1;
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: #fdfdfd;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.add-photo-box:hover {
+  border-color: var(--primary);
+  background: #f0f7ff;
+  color: var(--primary);
+}
+
+/* --- 4. SIGNATURE PAD (CRITICAL) --- */
+.signature-section {
+  margin-top: 2.5rem;
+}
+
+.sig-canvas-container {
+  background: #ffffff;
+  border: 2px solid #0f172a; /* Darker border for focus */
+  border-radius: 8px;
+  margin: 12px 0;
+  touch-action: none; /* Prevents scrolling while signing */
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.sigCanvas {
+  width: 100%;
+  height: 200px;
+  cursor: crosshair;
+}
+
+.sig-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-clear {
+  background: transparent;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-clear:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* --- 5. SUBMIT BUTTON --- */
+.submit-indemnity {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.1rem;
+  margin-top: 2rem;
+}
