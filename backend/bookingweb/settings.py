@@ -83,9 +83,9 @@ USE_X_FORWARDED_PORT = True
 
 # 3. Clean up Middleware (You had duplicates here too!)
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware', # Keep this at the top
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.middleware.security.SecurityMiddleware', # Move this to the TOP
+    'whitenoise.middleware.WhiteNoiseMiddleware',    # Move this to SECOND
+    'corsheaders.middleware.CorsMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -131,13 +131,14 @@ ROOT_URLCONF = 'bookingweb.urls'
 # ]
 
 STATICFILES_DIRS = [
-    BASE_DIR / "frontend_build",
+    os.path.join(BASE_DIR, 'frontend_build'),
 ]
+WHITENOISE_INDEX_PAGE_SELF_CHECK = False
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "frontend_build"],
+        'DIRS': [os.path.join(BASE_DIR, 'frontend_build')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -215,7 +216,7 @@ STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Whitenoise is excellent for serving static files on Render
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Media files (Images uploaded by users)
 MEDIA_URL = '/media/'
