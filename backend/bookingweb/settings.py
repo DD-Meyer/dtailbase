@@ -134,6 +134,7 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'frontend_build'),
 ]
 WHITENOISE_INDEX_PAGE_SELF_CHECK = False
+WHITENOISE_ROOT = os.path.join(BASE_DIR, 'frontend_build')
 
 TEMPLATES = [
     {

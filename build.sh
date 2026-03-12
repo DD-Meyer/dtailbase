@@ -12,7 +12,7 @@ cd ..
 # 2. Move build files to Backend (so Django can serve them)
 echo "Syncing build files..."
 mkdir -p backend/frontend_build
-cp -r frontend/dist/* backend/frontend_build/
+cp -a frontend/dist/. backend/frontend_build/
 
 # 3. Build the Backend
 echo "Building Backend..."
