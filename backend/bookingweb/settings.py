@@ -34,7 +34,7 @@ AUTH_USER_MODEL = "accounts.User"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com']  # Update this in production to specify allowed hosts
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '187.124.208.220', '.netictechnologies.com']  # Update this in production to specify allowed hosts
 
 
 # Application definition
@@ -56,8 +56,8 @@ INSTALLED_APPS = [
 
 # 1. Unified CORS list (Delete the duplicate at the bottom of your file!)
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8080",
-    "http://127.0.0.1:8080",
+    "http://187.124.208.220",
+    "https://detailerflow.netictechnologies.com",
     "http://localhost:5173",  # For local Vite dev
 ]
 
@@ -65,8 +65,9 @@ CORS_ALLOW_CREDENTIALS = True
 
 # 2. Unified CSRF list
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8080",
-    "http://127.0.0.1:8080",
+    "http://187.124.208.220",
+    "https://detailerflow.netictechnologies.com",
+    "http://localhost:5173",  # For local Vite dev
 ]
 
 # CORS and CSRF
