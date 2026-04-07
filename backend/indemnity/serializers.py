@@ -7,7 +7,6 @@ from core.models import *
 from core.serializers import *
 from drf_extra_fields.fields import Base64ImageField
 from core.plan_limits import PLAN_CONFIG
-from rest_framework.exceptions import PermissionDenied
 from geopy.geocoders import Nominatim
 # indemnity/serializers.py
 from .utils import generate_agreement_pdf
@@ -92,20 +91,10 @@ class IndemnityAgreementSerializer(serializers.ModelSerializer):
                 "uploaded_images": f"Your {company.plan} plan allows a maximum of {plan_limits['max_images_before']} 'Before' photos."
             })
 
-        # 🛡️ TIER CHECK: History Restriction
-        # If Starter users aren't allowed history, we check if they already have 
-        # a signed agreement for this specific booking (since they only get 1 attempt/no archive).
-        # More importantly, we can enforce the 'indemnity_history_limit' here.
-        if company.plan != 'ENTERPRISE':
-            history_count = IndemnityAgreement.objects.filter(company=company).count()
-            limit = plan_limits.get('indemnity_history_limit', 0)
-            
-            if company.plan == 'STARTER':
-                # For Starter, maybe we just allow them to sign it but don't show it in a list later.
-                # If you want to block signing altogether after a certain point:
-                pass 
-            elif history_count >= limit:
-                raise PermissionDenied("Indemnity history limit reached. Upgrade to Enterprise for unlimited records.")
+        # SIGNING IS ALLOWED FOR ALL PLANS
+        # Plan limits (indemnity_history_limit) only control what records are visible in list views
+        # They do NOT block the creation or signing of new indemnity agreements
+        # This allows 1 form to be reused across multiple bookings regardless of plan
         
         # Metadata extraction
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
