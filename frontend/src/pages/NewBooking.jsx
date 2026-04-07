@@ -71,10 +71,11 @@ const NewBooking = () => {
       if (formData.booking_date && formData.service) {
         setLoadingSlots(true);
         try {
-          const res = await api.get(`availability/${formData.booking_date}/${formData.service}/`);
-          if (res.data.service?.available_slots) {
-            setAvailableSlots(res.data.service.available_slots);
-          }
+          const res = await api.get(`availability/${formData.booking_date}/`);
+          const selectedService = res.data.services?.find(
+            (svc) => String(svc.service?.id) === String(formData.service)
+          );
+          setAvailableSlots(selectedService?.available_slots || []);
         } catch (err) {
           setAvailableSlots([]);
         } finally {

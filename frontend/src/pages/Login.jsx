@@ -54,6 +54,7 @@ function Login() {
             <label>Email Address</label>
             <input
               type="email"
+              autoComplete="username"
               placeholder="e.g. admin@company.com"
               value={email}
               onChange={e => setEmail(e.target.value)}
@@ -65,6 +66,7 @@ function Login() {
             <label>Password</label>
             <input
               type="password"
+              autoComplete="current-password"
               placeholder="••••••••"
               value={password}
               onChange={e => setPassword(e.target.value)}
