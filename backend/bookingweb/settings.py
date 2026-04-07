@@ -26,15 +26,21 @@ from datetime import timedelta
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'f72c9340552c3b1311141639b05a4b3e'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-insecure-change-me')
 
 # Custom user model
 AUTH_USER_MODEL = "accounts.User"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+# Set DEBUG=True in your local .env file. Production must have DEBUG=False.
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '187.124.208.220', '.netictechnologies.com']  # Update this in production to specify allowed hosts
+ALLOWED_HOSTS = [
+    host.strip() for host in os.environ.get(
+        'ALLOWED_HOSTS',
+        'localhost,127.0.0.1,187.124.208.220,detailerflow.netictechnologies.com,www.detailerflow.netictechnologies.com,.netictechnologies.com'
+    ).split(',') if host.strip()
+]
 
 
 # Application definition
@@ -54,20 +60,22 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
-# 1. Unified CORS list (Delete the duplicate at the bottom of your file!)
+# 1. Unified CORS list
 CORS_ALLOWED_ORIGINS = [
-    "http://187.124.208.220",
-    "https://detailerflow.netictechnologies.com",
-    "http://localhost:5173",  # For local Vite dev
+    origin.strip() for origin in os.environ.get(
+        'CORS_ALLOWED_ORIGINS',
+        'http://187.124.208.220,https://detailerflow.netictechnologies.com,https://www.detailerflow.netictechnologies.com,http://localhost:5173'
+    ).split(',') if origin.strip()
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 
 # 2. Unified CSRF list
 CSRF_TRUSTED_ORIGINS = [
-    "http://187.124.208.220",
-    "https://detailerflow.netictechnologies.com",
-    "http://localhost:5173",  # For local Vite dev
+    origin.strip() for origin in os.environ.get(
+        'CSRF_TRUSTED_ORIGINS',
+        'http://187.124.208.220,https://detailerflow.netictechnologies.com,https://www.detailerflow.netictechnologies.com,http://localhost:5173'
+    ).split(',') if origin.strip()
 ]
 
 # CORS and CSRF
@@ -133,7 +141,6 @@ ROOT_URLCONF = 'bookingweb.urls'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'frontend_build'),
-    os.path.join(BASE_DIR, 'media'),
 ]
 WHITENOISE_INDEX_PAGE_SELF_CHECK = False
 WHITENOISE_ROOT = os.path.join(BASE_DIR, 'frontend_build')
@@ -215,7 +222,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Whitenoise is excellent for serving static files on Render

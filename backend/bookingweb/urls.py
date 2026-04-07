@@ -20,6 +20,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
 from django.urls import re_path
+from django.views.static import serve
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 from core.serializers import MyTokenSerializer
@@ -51,6 +52,11 @@ if settings.DEBUG:
 else:
     # On Render, we force it even in production for now
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Explicit media route for local runserver when DEBUG=False
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+]
 
 # THE CATCH-ALL: Keep this at the very bottom so media/api routes match first
 urlpatterns += [
