@@ -1,9 +1,0 @@
-services:
-  web:
-    volumes:
-      - ./backend/media:/app/backend/media
-      - ./backend/staticfiles:/app/staticfiles
-  nginx:
-    volumes:
-      - ./backend/media:/app/backend/media:ro
-      - ./backend/staticfiles:/app/staticfiles:ro
