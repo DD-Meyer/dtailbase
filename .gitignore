@@ -1,0 +1,12 @@
+# Local environment variants (do not commit)
+.env.local
+.env.prod
+backend/.env.local
+backend/.env.prod
+
+# Python
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
