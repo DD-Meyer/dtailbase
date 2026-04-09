@@ -22,7 +22,7 @@ except ImportError:
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-PROJECT_ROOT = BASE_DIR.parent.parent
+PROJECT_ROOT = BASE_DIR.parent
 
 
 def env_bool(name, default=False):
@@ -37,14 +37,18 @@ def env_list(name, default=""):
     return [item.strip() for item in raw_value.split(',') if item.strip()]
 
 
-# Load environment files in priority order: local/prod overrides root .env
+# Load environment files from the repository root.
+# This supports a single root .env on production and optional env-specific overrides.
 ENVIRONMENT = os.environ.get('DJANGO_ENV', os.environ.get('ENVIRONMENT', 'development')).lower()
 env_files = [PROJECT_ROOT / '.env']
 
 if ENVIRONMENT in {'development', 'local'}:
     env_files.insert(0, PROJECT_ROOT / '.env.local')
 elif ENVIRONMENT in {'production', 'prod'}:
-    env_files.insert(0, PROJECT_ROOT / '.env.prod')
+    env_files[:0] = [
+        PROJECT_ROOT / '.env.production',
+        PROJECT_ROOT / '.env.prod',
+    ]
 
 for env_file in env_files:
     if env_file.exists():
