@@ -1,4 +1,33 @@
 # VPS Deployment & Debugging Commands
+## SETUP .ENV for Production Ready Fix
+cd /var/www/DetailerFlow
+
+# backup
+cp .env .env.bak.$(date +%F-%H%M%S)
+
+# switch to sqlite on VPS (quickest stable fix)
+cat > .env << 'EOF'
+DEBUG=False
+DJANGO_ENV=production
+SECRET_KEY='django-insecure-k1tf3^tazr^$hevd926wb(9i+9pakqgi5#8yme^3v#xozn5*4s'
+USE_POSTGRES=False
+ALLOWED_HOSTS=detailerflow.netictechnologies.com,www.detailerflow.netictechnologies.com,187.124.208.220,127.0.0.1,localhost
+CORS_ALLOWED_ORIGINS=https://detailerflow.netictechnologies.com,https://www.detailerflow.netictechnologies.com
+CSRF_TRUSTED_ORIGINS=https://detailerflow.netictechnologies.com,https://www.detailerflow.netictechnologies.com
+EOF
+
+# fix sqlite and writable dirs for app user
+chown lsadm:lsadm /var/www/DetailerFlow/backend/db.sqlite3
+chmod 664 /var/www/DetailerFlow/backend/db.sqlite3
+chown -R lsadm:lsadm /var/www/DetailerFlow/backend/media /var/www/DetailerFlow/backend/staticfiles
+find /var/www/DetailerFlow/backend/media -type d -exec chmod 775 {} \;
+find /var/www/DetailerFlow/backend/staticfiles -type d -exec chmod 775 {} \;
+
+# restart OLS (and app worker)
+systemctl restart lsws
+sleep 3
+
+
 
 ## STEP 1: Local Test (Windows)
 
