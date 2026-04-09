@@ -198,27 +198,28 @@ WSGI_APPLICATION = 'bookingweb.wsgi.application'
 
 # Use SQLite for local development, PostgreSQL for Docker
 USE_POSTGRES = env_bool('USE_POSTGRES', default=False)
-database_url = os.environ.get('DATABASE_URL')
 
-if USE_POSTGRES and not database_url:
-    postgres_db = os.environ.get('POSTGRES_DB')
-    postgres_user = os.environ.get('POSTGRES_USER')
-    postgres_password = os.environ.get('POSTGRES_PASSWORD')
-    db_host = os.environ.get('DB_HOST', 'localhost')
-    db_port = os.environ.get('DB_PORT', '5432')
-
-    if postgres_db and postgres_user and postgres_password:
-        database_url = f"postgres://{postgres_user}:{postgres_password}@{db_host}:{db_port}/{postgres_db}"
-
-if USE_POSTGRES or database_url:
+# Priority: DATABASE_URL (production Render) > individual postgres vars > SQLite (local)
+if os.environ.get('DATABASE_URL'):
     DATABASES = {
         'default': dj_database_url.config(
-            # If DATABASE_URL is set (Render/Production), use it.
-            # If not set, we can build one from POSTGRES_* vars.
-            # Otherwise, fall back to local SQLite.
-            default=database_url or f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+            default=os.environ.get('DATABASE_URL'),
             conn_max_age=600
         )
+    }
+elif USE_POSTGRES:
+    # Use individual postgres env vars (Docker Compose or manual setup)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('POSTGRES_DB', 'bookingdb'),
+            'USER': os.environ.get('POSTGRES_USER', 'bookinguser'),
+            'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'password'),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
+            'ATOMIC_REQUESTS': True,
+            'CONN_MAX_AGE': 600,
+        }
     }
 else:
     # Local development with SQLite
