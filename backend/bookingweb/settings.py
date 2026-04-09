@@ -196,7 +196,7 @@ WSGI_APPLICATION = 'bookingweb.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-# Use SQLite for local development, PostgreSQL for Docker
+# Use SQLite for local development, PostgreSQL for VPS production
 USE_POSTGRES = env_bool('USE_POSTGRES', default=False)
 
 # Priority: DATABASE_URL (production Render) > individual postgres vars > SQLite (local)
@@ -208,7 +208,7 @@ if os.environ.get('DATABASE_URL'):
         )
     }
 elif USE_POSTGRES:
-    # Use individual postgres env vars (Docker Compose or manual setup)
+    # Use individual postgres env vars (manual VPS setup)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
