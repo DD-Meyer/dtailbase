@@ -5,6 +5,15 @@ import "../styles/Bookings.css";
 import { useNavigate } from "react-router-dom";
 import { useCompany } from "../context/CompanyContext";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+
+const toAbsoluteUrl = (url) => {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) return url;
+  if (url.startsWith("/")) return `${API_BASE_URL}${url}`;
+  return `${API_BASE_URL}/${url}`;
+};
+
 const VALID_STATUS_TRANSITIONS = {
   PENDING: ["CONFIRMED", "CANCELLED"],
   CONFIRMED: ["CANCELLED"], 
@@ -499,7 +508,7 @@ function Bookings() {
                 <td>
                   {b.admin_signature ? (
                     <div className="admin-sig-container">
-                      <img src={b.admin_signature} alt="Auth" className="admin-sig-img" />
+                      <img src={toAbsoluteUrl(b.admin_signature)} alt="Auth" className="admin-sig-img" />
                       <span className="verify-tag">Authorized</span>
                     </div>
                   ) : (

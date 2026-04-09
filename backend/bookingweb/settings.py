@@ -14,10 +14,37 @@ from pathlib import Path
 import os
 
 import dj_database_url
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 PROJECT_ROOT = BASE_DIR.parent.parent
+
+
+def env_bool(name, default=False):
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def env_list(name, default=""):
+    raw_value = os.environ.get(name, default)
+    return [item.strip() for item in raw_value.split(',') if item.strip()]
+
+
+# Load environment files without overriding values already provided by the host.
+ENVIRONMENT = os.environ.get('DJANGO_ENV', os.environ.get('ENVIRONMENT', 'development')).lower()
+env_files = [PROJECT_ROOT / '.env']
+
+if ENVIRONMENT in {'development', 'local'}:
+    env_files.insert(0, PROJECT_ROOT / '.env.local')
+elif ENVIRONMENT in {'production', 'prod'}:
+    env_files.insert(0, PROJECT_ROOT / '.env.prod')
+
+for env_file in env_files:
+    if env_file.exists():
+        load_dotenv(env_file, override=False)
 
 # import datetime to manage sessions
 from datetime import timedelta
@@ -33,14 +60,12 @@ AUTH_USER_MODEL = "accounts.User"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # Set DEBUG=True in your local .env file. Production must have DEBUG=False.
-DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+DEBUG = env_bool('DEBUG', default=False)
 
-ALLOWED_HOSTS = [
-    host.strip() for host in os.environ.get(
-        'ALLOWED_HOSTS',
-        'localhost,127.0.0.1,187.124.208.220,detailerflow.netictechnologies.com,www.detailerflow.netictechnologies.com,.netictechnologies.com'
-    ).split(',') if host.strip()
-]
+ALLOWED_HOSTS = env_list(
+    'ALLOWED_HOSTS',
+    'localhost,127.0.0.1,187.124.208.220,detailerflow.netictechnologies.com,www.detailerflow.netictechnologies.com,.netictechnologies.com'
+)
 
 
 # Application definition
@@ -62,20 +87,20 @@ INSTALLED_APPS = [
 
 # 1. Unified CORS list
 CORS_ALLOWED_ORIGINS = [
-    origin.strip() for origin in os.environ.get(
+    origin for origin in env_list(
         'CORS_ALLOWED_ORIGINS',
         'http://187.124.208.220,https://detailerflow.netictechnologies.com,https://www.detailerflow.netictechnologies.com,http://localhost:5173'
-    ).split(',') if origin.strip()
+    )
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 
 # 2. Unified CSRF list
 CSRF_TRUSTED_ORIGINS = [
-    origin.strip() for origin in os.environ.get(
+    origin for origin in env_list(
         'CSRF_TRUSTED_ORIGINS',
         'http://187.124.208.220,https://detailerflow.netictechnologies.com,https://www.detailerflow.netictechnologies.com,http://localhost:5173'
-    ).split(',') if origin.strip()
+    )
 ]
 
 # CORS and CSRF
@@ -168,12 +193,26 @@ WSGI_APPLICATION = 'bookingweb.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 # Use SQLite for local development, PostgreSQL for Docker
-if os.environ.get('USE_POSTGRES'):
+USE_POSTGRES = env_bool('USE_POSTGRES', default=False)
+database_url = os.environ.get('DATABASE_URL')
+
+if USE_POSTGRES and not database_url:
+    postgres_db = os.environ.get('POSTGRES_DB')
+    postgres_user = os.environ.get('POSTGRES_USER')
+    postgres_password = os.environ.get('POSTGRES_PASSWORD')
+    db_host = os.environ.get('DB_HOST', 'localhost')
+    db_port = os.environ.get('DB_PORT', '5432')
+
+    if postgres_db and postgres_user and postgres_password:
+        database_url = f"postgres://{postgres_user}:{postgres_password}@{db_host}:{db_port}/{postgres_db}"
+
+if USE_POSTGRES or database_url:
     DATABASES = {
         'default': dj_database_url.config(
             # If DATABASE_URL is set (Render/Production), use it.
-            # Otherwise, fall back to your local SQLite.
-            default=os.environ.get('DATABASE_URL', f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
+            # If not set, we can build one from POSTGRES_* vars.
+            # Otherwise, fall back to local SQLite.
+            default=database_url or f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
             conn_max_age=600
         )
     }

@@ -57,6 +57,12 @@ export default function BookingDetail() {
   // --- LOGIC: Handle nested Indemnity & Photos ---
   const indemnity = booking.indemnity_data;
   const photos = indemnity?.photos || [];
+  const toAbsoluteUrl = (url) => {
+    if (!url) return "";
+    if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) return url;
+    if (url.startsWith("/")) return `${API_BASE_URL}${url}`;
+    return `${API_BASE_URL}/${url}`;
+  };
   
   // Filter photos by type from the combined list
   const beforePhotos = photos.filter(p => p.photo_type === 'BEFORE');
@@ -131,7 +137,7 @@ export default function BookingDetail() {
           <div className="mt-3">
             <strong>Staff Authorization (Check-in):</strong><br/>
             {booking.admin_signature ? (
-                <img src={booking.admin_signature} alt="Admin Auth" style={{ width: '150px', borderBottom: '1px solid #eee', background: 'white' }} />
+                <img src={toAbsoluteUrl(booking.admin_signature)} alt="Admin Auth" style={{ width: '150px', borderBottom: '1px solid #eee', background: 'white' }} />
             ) : <p className="text-muted">No staff signature</p>}
           </div>
         </div>
@@ -146,8 +152,8 @@ export default function BookingDetail() {
             <h4>Before Service (Arrival)</h4>
             <div className="photo-grid">
               {beforePhotos.map((img, index) => (
-                <a href={img.image} target="_blank" key={index} rel="noreferrer">
-                  <img src={img.image.startsWith('http') ? img.image : `${API_BASE_URL}${img.image}`} alt="Before" className="gallery-img" />
+                <a href={toAbsoluteUrl(img.image)} target="_blank" key={index} rel="noreferrer">
+                  <img src={toAbsoluteUrl(img.image)} alt="Before" className="gallery-img" />
                 </a>
               ))}
               {beforePhotos.length === 0 && <p className="text-muted">No arrival photos recorded.</p>}
@@ -158,8 +164,8 @@ export default function BookingDetail() {
           <h4>After Service (Completion)</h4>
           <div className="photo-grid">
             {afterPhotos.map((img, index) => (
-              <a href={img.image} target="_blank" key={index} rel="noreferrer">
-                <img src={img.image} alt="After" className="gallery-img" />
+              <a href={toAbsoluteUrl(img.image)} target="_blank" key={index} rel="noreferrer">
+                <img src={toAbsoluteUrl(img.image)} alt="After" className="gallery-img" />
               </a>
             ))}
             {afterPhotos.length === 0 && <p className="text-muted">No completion photos uploaded yet.</p>}
@@ -172,7 +178,7 @@ export default function BookingDetail() {
         <h3>Customer Indemnity Signature</h3>
         {indemnity?.signature_image ? (
             <>
-                <img src={indemnity.signature_image} alt="Customer Sig" style={{ maxWidth: '300px', background: '#fff', border: '1px solid #ddd' }} />
+            <img src={toAbsoluteUrl(indemnity.signature_image)} alt="Customer Sig" style={{ maxWidth: '300px', background: '#fff', border: '1px solid #ddd' }} />
                 <p className="text-muted small mt-2">
                     Signed on: {new Date(indemnity.signed_at).toLocaleString()}<br/>
                     IP Address: {indemnity.signer_ip}
