@@ -37,7 +37,7 @@ def env_list(name, default=""):
     return [item.strip() for item in raw_value.split(',') if item.strip()]
 
 
-# Load environment files without overriding values already provided by the host.
+# Load environment files in priority order: local/prod overrides root .env
 ENVIRONMENT = os.environ.get('DJANGO_ENV', os.environ.get('ENVIRONMENT', 'development')).lower()
 env_files = [PROJECT_ROOT / '.env']
 
@@ -48,7 +48,7 @@ elif ENVIRONMENT in {'production', 'prod'}:
 
 for env_file in env_files:
     if env_file.exists():
-        load_dotenv(env_file, override=False)
+        load_dotenv(env_file, override=True)
 
 # import datetime to manage sessions
 from datetime import timedelta
