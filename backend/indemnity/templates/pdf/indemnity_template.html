@@ -4,6 +4,7 @@
 <html>
     <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Indemnity Agreement</title>
         <style>
             @page {
@@ -65,6 +66,48 @@
                 font-size: 8pt;
                 color: #777;
                 margin-top: 10px;
+            }
+
+            @media screen and (max-width: 768px) {
+                body {
+                    font-size: 10pt;
+                    padding: 12px;
+                }
+
+                .info-table,
+                .photo-table {
+                    display: block;
+                    width: 100%;
+                    overflow-x: auto;
+                    white-space: nowrap;
+                }
+
+                .photo-cell {
+                    width: 100%;
+                    display: block;
+                    padding: 6px 0;
+                }
+
+                .photo-img,
+                .sig-img {
+                    width: 100%;
+                    max-width: 100%;
+                    height: auto;
+                }
+            }
+
+            @media print {
+                body {
+                    font-size: 11pt;
+                }
+
+                .photo-img {
+                    width: 280px;
+                }
+
+                .sig-img {
+                    width: 200px;
+                }
             }
         </style>
     </head>

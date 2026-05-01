@@ -162,7 +162,7 @@ function Services() {
       </div>
 
       {/* Services Table */}
-      <div className="card">
+      <div className="card services-table-container">
         <table className="table-standard">
           <thead>
             <tr>

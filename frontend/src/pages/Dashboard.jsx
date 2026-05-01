@@ -80,7 +80,7 @@ function DashboardOverview() {
       </div>
 
       {/* RECENT ACTIVITY TABLE */}
-      <div className="card">
+      <div className="card dashboard-table-card">
         <div className="flex-between mb-4">
           <h3>Recent Bookings</h3>
           <button className="btn-text">View All</button>

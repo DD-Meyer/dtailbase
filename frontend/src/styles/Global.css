@@ -26,13 +26,18 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+body.mobile-nav-open {
+  overflow: hidden;
+}
+
 /* 2. CORE LAYOUT (DASHBOARD) */
 /* Ensure the overall layout is a flex row */
 /* 1. Lock the Viewport */
 .app-layout {
   display: flex;
-  height: 100vh;      /* Force exactly the screen height */
-  width: 100vw;
+  height: 100dvh;
+  min-height: 100vh;
+  width: 100%;
   overflow: hidden;   /* Stop the WHOLE page from scrolling */
 }
 
@@ -40,7 +45,7 @@ body {
 /* Sidebar should have a fixed width */
 /* 2. The Stationary Sidebar */
 .sidebar {
-  width: 260px;
+  width: var(--sidebar-width);
   height: 100vh;      /* Full height */
   flex-shrink: 0;     /* Don't let it get squished */
   background: var(--bg-sidebar);
@@ -52,7 +57,8 @@ body {
 /* 3. The Independent Scroll Area */
 .main-content {
   flex-grow: 1;
-  height: 100vh;
+  min-width: 0;
+  height: 100dvh;
   overflow-y: auto;   /* THIS is the only part that scrolls */
   display: flex;
   flex-direction: column;
@@ -61,7 +67,7 @@ body {
 
 /* 4. Keep the Header at the top of the content */
 .main-header {
-  height: 64px;
+  height: var(--header-height);
   flex-shrink: 0;     /* Header doesn't shrink */
   position: sticky;
   top: 0;
@@ -74,6 +80,35 @@ body {
 .page-body {
   padding: 2rem;
   width: 100%;
+}
+
+@media (max-width: 1024px) {
+  .page-body {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-layout {
+    width: 100%;
+  }
+
+  .page-body {
+    padding: 1rem;
+  }
+
+  .modal-card {
+    padding: 1.25rem;
+    width: min(96vw, 550px);
+  }
+
+  .grid-form {
+    grid-template-columns: 1fr;
+  }
+
+  .table-standard {
+    min-width: 740px;
+  }
 }
 
 .auth-wrapper {

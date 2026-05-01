@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import "../styles/Header.css";
 
-function Header() {
+function Header({ onOpenMobileMenu = () => {} }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { user, logout } = useContext(AuthContext); // Assuming your context has a logout function
   const dropdownRef = useRef(null);
@@ -27,6 +27,10 @@ function Header() {
 
   return (
     <header className="app-header">
+      <button className="mobile-menu-btn" type="button" onClick={onOpenMobileMenu} aria-label="Open navigation menu">
+        ☰
+      </button>
+
       <div className="header-search">
         {/* Optional: Add a global search bar here later */}
       </div>

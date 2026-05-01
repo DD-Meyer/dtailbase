@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #eff6ff;
+  --color-brand-500: #0066ff;
+  --color-brand-700: #0052cc;
+  --color-surface-0: #ffffff;
+  --color-surface-50: #f8fafc;
+  --color-ink-700: #334155;
+  --color-ink-900: #0f172a;
+  --spacing-safe: max(1rem, env(safe-area-inset-left));
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    text-wrap: pretty;
+  }
+}
+
+@layer components {
+  .df-page-shell {
+    @apply px-4 md:px-6 lg:px-8;
+  }
+
+  .df-table-scroll {
+    @apply w-full overflow-x-auto overflow-y-hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .df-touch-target {
+    @apply min-h-11 min-w-11;
+  }
+}

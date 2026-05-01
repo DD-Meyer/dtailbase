@@ -830,3 +830,78 @@ body {
 .nav-logo {
   z-index: 1100; /* Keep logo visible above glass */
 }
+
+@media (max-width: 1024px) {
+  .hero-container {
+    padding: 120px 16px 70px;
+    min-height: auto;
+  }
+
+  .story-row,
+  .story-row.reverse {
+    flex-direction: column;
+    gap: 28px;
+    min-height: auto;
+    margin-bottom: 72px;
+  }
+
+  .features-grid,
+  .pricing-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .feature-card.highlight-card {
+    grid-column: span 2;
+  }
+
+  .glass-mockup {
+    width: 100%;
+    height: 360px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-cta {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .hero-cta .btn-main,
+  .hero-cta .btn-outline {
+    width: 100%;
+    min-height: 46px;
+  }
+
+  .features-grid,
+  .pricing-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .feature-card,
+  .pricing-card {
+    padding: 24px;
+  }
+
+  .feature-card.highlight-card {
+    grid-column: auto;
+  }
+
+  .glass-mockup {
+    height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-main,
+  .btn-outline,
+  .btn-primary-plan,
+  .btn-secondary-plan,
+  .btn-login,
+  .btn-get-started {
+    padding: 12px 18px;
+  }
+
+  .pricing-card.featured {
+    transform: none;
+  }
+}

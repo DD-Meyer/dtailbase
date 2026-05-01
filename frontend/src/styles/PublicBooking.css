@@ -136,12 +136,29 @@
 }
 
 /* --- Responsive Adjustments --- */
-@media (max-width: 480px) {
-  .public-card {
-    padding: 25px;
+@media (max-width: 768px) {
+  .public-wrapper {
+    align-items: flex-start;
+    padding: 12px;
   }
-  
+
+  .public-card {
+    padding: 24px;
+    max-width: 100%;
+  }
+
   .input-row {
     grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .btn-submit {
+    min-height: 46px;
+  }
+}
+
+@media (max-width: 480px) {
+  .public-card {
+    padding: 20px;
   }
 }

@@ -6,6 +6,16 @@
   align-items: end;
 }
 
+.vehicles-table-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.vehicles-table-container .table-standard {
+  min-width: 680px;
+}
+
 /* Make sure the owner select and buttons can span full width if needed */
 .full-width {
   grid-column: 1 / -1;
@@ -110,4 +120,22 @@
 @keyframes slideInRight {
   from { transform: translateX(100%); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .input-grid {
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+  }
+
+  .toast-notification {
+    top: 12px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+  }
+
+  .vehicles-table-container .table-standard {
+    min-width: 640px;
+  }
 }

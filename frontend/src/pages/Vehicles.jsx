@@ -182,7 +182,7 @@ const startEdit = (v) => {
         </form>
       </div>
 
-      <div className="card">
+      <div className="card vehicles-table-container">
         <table className="table-standard">
           <thead>
             <tr>

@@ -210,3 +210,40 @@
   font-size: 1.1rem;
   margin-top: 2rem;
 }
+
+@media (max-width: 768px) {
+  .indemnity-card {
+    margin: 1rem;
+    padding: 1.25rem;
+    border-radius: 12px;
+  }
+
+  .indemnity-card h1 {
+    font-size: 1.4rem;
+  }
+
+  .template-body-html {
+    max-height: 240px;
+    padding: 1rem;
+  }
+
+  .photo-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .sigCanvas {
+    height: 180px;
+  }
+
+  .submit-indemnity {
+    min-height: 46px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .photo-grid {
+    grid-template-columns: 1fr;
+  }
+}

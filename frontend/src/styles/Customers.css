@@ -35,6 +35,16 @@
   font-weight: 500;
 }
 
+.customers-table-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.customers-table-container .table-standard {
+  min-width: 700px;
+}
+
 .text-btn {
   background: #eff6ff;
   color: #2563eb;
@@ -147,3 +157,20 @@
 .gap-2 { gap: 0.5rem; }
 .mt-4 { margin-top: 1rem; }
 .mb-4 { margin-bottom: 1rem; }
+
+@media (max-width: 768px) {
+  .flex-between {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .search-input {
+    max-width: 100%;
+  }
+
+  .modal-content {
+    padding: 1.25rem;
+    width: min(94vw, 500px);
+  }
+}

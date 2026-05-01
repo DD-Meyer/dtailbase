@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext, AuthProvider } from "./context/AuthContext";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
@@ -36,6 +36,7 @@ import Upgrade from "./pages/Upgrade";
 function AppContent() {
   const { isAuthenticated, user } = useContext(AuthContext); 
   const location = useLocation();
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // 1. Identify ALL public-facing "Marketing" pages
   const publicRoutes = ["/", "/hero", "/about", "/products", "/pricing", "/contact", "/legal", "/community", "/features", "/security", "/our-Story", "/support", "/help-center", "/tutorials", "/public-booking/:companySlug", "/upgrade"];
@@ -45,6 +46,25 @@ function AppContent() {
   
   // 2. Sidebar/Header only show if Authenticated AND not on any public/auth pages
   const showDashboardChrome = isAuthenticated && !isLandingPage && !isAuthPage;
+
+  useEffect(() => {
+    setIsMobileSidebarOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!showDashboardChrome) {
+      document.body.classList.remove("mobile-nav-open");
+      return;
+    }
+
+    if (isMobileSidebarOpen) {
+      document.body.classList.add("mobile-nav-open");
+    } else {
+      document.body.classList.remove("mobile-nav-open");
+    }
+
+    return () => document.body.classList.remove("mobile-nav-open");
+  }, [isMobileSidebarOpen, showDashboardChrome]);
 
 
   // Example: Legal Page
@@ -138,12 +158,21 @@ function AppContent() {
     <div className={isAuthPage ? "auth-wrapper" : isLandingPage ? "landing-wrapper" : "app-layout"}>
       
       {/* Sidebar hidden on Hero and Auth pages */}
-      {showDashboardChrome && <Sidebar />}
+      {showDashboardChrome && (
+        <Sidebar
+          isMobileOpen={isMobileSidebarOpen}
+          onCloseMobile={() => setIsMobileSidebarOpen(false)}
+        />
+      )}
       
       <main className={isLandingPage || isAuthPage ? "full-page-content" : "main-content"}>
         
         {/* Header hidden on Hero and Auth pages */}
-        {showDashboardChrome && <Header />}
+        {showDashboardChrome && (
+          <Header
+            onOpenMobileMenu={() => setIsMobileSidebarOpen(true)}
+          />
+        )}
         
         <div className={isLandingPage || isAuthPage ? "" : "page-body"}>
           <Routes>

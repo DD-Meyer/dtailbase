@@ -114,7 +114,7 @@ function Customers() {
         onChange={(e) => setSearch(e.target.value)} 
       />
 
-      <div className="card">
+      <div className="card customers-table-container">
         <table className="table-standard">
           <thead>
             <tr>

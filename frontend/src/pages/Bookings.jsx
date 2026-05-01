@@ -442,7 +442,7 @@ function Bookings() {
         </div>
       </div>
 
-      <div className="card">
+      <div className="card bookings-table-container">
         <table className="table-standard">
           <thead>
             <tr>

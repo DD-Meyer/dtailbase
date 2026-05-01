@@ -137,15 +137,16 @@ function IndemnitySettings() {
 
         <section className="settings-card">
           <h2 className="card-title">📜 Template History</h2>
-          <table className="history-table">
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Version</th>
-                <th>Status</th>
-                <th style={{textAlign: 'right'}}>Actions</th>
-              </tr>
-            </thead>
+          <div className="history-table-wrap">
+            <table className="history-table">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Version</th>
+                  <th>Status</th>
+                  <th style={{textAlign: 'right'}}>Actions</th>
+                </tr>
+              </thead>
             <tbody>
               {templates.map(t => (
                 <tr key={t.id}>
@@ -163,8 +164,9 @@ function IndemnitySettings() {
                   </td>
                 </tr>
               ))}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </section>
       </div>
 

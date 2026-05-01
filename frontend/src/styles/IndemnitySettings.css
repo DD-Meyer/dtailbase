@@ -123,8 +123,15 @@
 }
 
 /* --- 5. HISTORY TABLE --- */
+.history-table-wrap {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
 .history-table {
   width: 100%;
+  min-width: 680px;
   border-collapse: collapse;
 }
 
@@ -194,4 +201,32 @@
 @keyframes slideIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .settings-wrapper {
+    padding: 1rem;
+  }
+
+  .settings-card {
+    padding: 1.2rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .full-width {
+    grid-column: auto;
+  }
+
+  .card-title {
+    font-size: 1rem;
+  }
+
+  .btn-save {
+    width: 100%;
+    min-height: 44px;
+  }
 }
