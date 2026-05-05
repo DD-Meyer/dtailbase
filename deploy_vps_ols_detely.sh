@@ -31,6 +31,25 @@ require_cmd() {
   }
 }
 
+preflight_db_env_check() {
+  local env_file="$APP_DIR/.env"
+
+  # Guard against Docker-style DB host names when running on a single VPS.
+  if [[ -f "$env_file" ]]; then
+    if grep -Eq '^DB_HOST\s*=\s*db\s*$' "$env_file"; then
+      echo "Invalid DB_HOST in $env_file: DB_HOST=db" >&2
+      echo "Set DB_HOST=127.0.0.1 (or your PostgreSQL server IP), then re-run deploy." >&2
+      exit 1
+    fi
+
+    if grep -Eq '^DATABASE_URL\s*=\s*.+@db(:[0-9]+)?/' "$env_file"; then
+      echo "Invalid DATABASE_URL in $env_file: host is 'db'" >&2
+      echo "Set DATABASE_URL host to 127.0.0.1 or your PostgreSQL host, then re-run deploy." >&2
+      exit 1
+    fi
+  fi
+}
+
 require_cmd git
 require_cmd python3
 require_cmd systemctl
@@ -103,6 +122,7 @@ if [[ -f "$FRONTEND_DIR/package.json" ]]; then
 fi
 
 log "Running Django migrations and collectstatic"
+preflight_db_env_check
 cd "$BACKEND_DIR"
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput
