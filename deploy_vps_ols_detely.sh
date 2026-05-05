@@ -5,9 +5,9 @@ set -euo pipefail
 # Usage:
 #   bash deploy_vps_ols_detely.sh
 # Optional env overrides:
-#   APP_DIR=/var/www/detely BRANCH=main VENV_DIR=venv bash deploy_vps_ols_detely.sh
+#   APP_DIR=/var/www/Detely BRANCH=main VENV_DIR=venv bash deploy_vps_ols_detely.sh
 
-APP_DIR="${APP_DIR:-/var/www/detely}"
+APP_DIR="${APP_DIR:-/var/www/Detely}"
 BRANCH="${BRANCH:-staging}"
 VENV_DIR="${VENV_DIR:-venv}"
 BACKEND_DIR="${APP_DIR}/backend"
