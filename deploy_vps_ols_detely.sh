@@ -7,11 +7,20 @@ set -euo pipefail
 # Optional env overrides:
 #   APP_DIR=/var/www/Detely BRANCH=main VENV_DIR=venv bash deploy_vps_ols_detely.sh
 
-APP_DIR="${APP_DIR:-/var/www/Detely}"
+if [[ -z "${APP_DIR:-}" ]]; then
+  if [[ -d "/var/www/Detely" ]]; then
+    APP_DIR="/var/www/Detely"
+  elif [[ -d "/var/www/detely" ]]; then
+    APP_DIR="/var/www/detely"
+  else
+    APP_DIR="/var/www/Detely"
+  fi
+fi
 BRANCH="${BRANCH:-staging}"
 VENV_DIR="${VENV_DIR:-venv}"
 BACKEND_DIR="${APP_DIR}/backend"
 FRONTEND_DIR="${APP_DIR}/frontend"
+NODE_MIN_MAJOR="${NODE_MIN_MAJOR:-20}"
 
 log() { echo "[deploy] $*"; }
 
@@ -55,12 +64,38 @@ pip install -r "$BACKEND_DIR/requirements.txt"
 
 if [[ -f "$FRONTEND_DIR/package.json" ]]; then
   require_cmd npm
+  require_cmd node
+
+  NODE_VERSION_RAW="$(node -v | sed 's/^v//')"
+  NODE_MAJOR="${NODE_VERSION_RAW%%.*}"
+  if ! [[ "$NODE_MAJOR" =~ ^[0-9]+$ ]]; then
+    echo "Unable to parse Node version from: $(node -v)" >&2
+    exit 1
+  fi
+  if (( NODE_MAJOR < NODE_MIN_MAJOR )); then
+    echo "Node.js $(node -v) is too old. Required: >= ${NODE_MIN_MAJOR}.x (Vite 7 requires >=20.19)." >&2
+    echo "Install Node 22 LTS, then re-run deploy:" >&2
+    echo "  curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -" >&2
+    echo "  sudo apt-get install -y nodejs" >&2
+    exit 1
+  fi
+
+  log "Using Node $(node -v) and npm $(npm -v)"
   log "Installing frontend dependencies"
   cd "$FRONTEND_DIR"
-  npm install
+  if [[ -f "package-lock.json" ]]; then
+    npm ci --include=optional
+  else
+    npm install --include=optional
+  fi
 
   log "Building frontend"
-  npm run build
+  if ! npm run build; then
+    log "Frontend build failed. Retrying with clean npm reinstall (optional dependency recovery)."
+    rm -rf node_modules package-lock.json
+    npm install --include=optional
+    npm run build
+  fi
 
   log "Syncing frontend build to backend/frontend_build"
   rm -rf "$BACKEND_DIR/frontend_build"
