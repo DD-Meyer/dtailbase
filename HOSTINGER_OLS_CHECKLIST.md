@@ -14,9 +14,9 @@ Use this checklist to verify each field in your OLS WebAdmin console matches the
 
 | Field | Expected Value | Your Value | ✓ |
 |-------|------------------|------------|---|
-| **Document Root** | `/var/www/DetailerFlow/backend/frontend_build` | | ✓|
-| **Domain Name** | `detailerflow.netictechnologies.com` | | |
-| **Domain Aliases** | `www.detailerflow.netictechnologies.com` | | |
+| **Document Root** | `/var/www/detely/backend/frontend_build` | | ✓|
+| **Domain Name** | `www.detely.com` | | |
+| **Domain Aliases** | `detely.com` | | |
 | **Enable GZIP Compression** | `Yes` | | |
 | **Index Files** | `index.html, index.php` | | |
 | **Auto Index** | `No` | | |
@@ -43,7 +43,7 @@ You should have **3 contexts total**. Click each and verify:
 |-------|------------------|------------|---|
 | **Type** | `Static` | | |
 | **URI** | `/` | | |
-| **Location** | `/var/www/DetailerFlow/backend/frontend_build` | | |
+| **Location** | `/var/www/detely/backend/frontend_build` | | |
 | **Accessible** | `Yes` | | |
 | **Enable Rewrite** | `No` (rewrite is at vhost level) | | |
 
@@ -52,8 +52,8 @@ You should have **3 contexts total**. Click each and verify:
 |-------|------------------|------------|---|
 | **Type** | `App Server` | | |
 | **URI** | `/api` | | |
-| **Location** | `/var/www/DetailerFlow/backend` | | |
-| **Binary Path** | `/var/www/DetailerFlow/backend/venv/bin/gunicorn` | | |
+| **Location** | `/var/www/detely/backend` | | |
+| **Binary Path** | `/var/www/detely/backend/venv/bin/gunicorn` | | |
 | **Application Type** | `WSGI` | | |
 | **Startup File** | `bookingweb/wsgi.py` | | |
 | **Max Connections** | `Not Set` (leave blank) | | |
@@ -65,8 +65,8 @@ You should have **3 contexts total**. Click each and verify:
 |-------|------------------|------------|---|
 | **Type** | `App Server` | | |
 | **URI** | `/admin` | | |
-| **Location** | `/var/www/DetailerFlow/backend` | | |
-| **Binary Path** | `/var/www/DetailerFlow/backend/venv/bin/gunicorn` | | |
+| **Location** | `/var/www/detely/backend` | | |
+| **Binary Path** | `/var/www/detely/backend/venv/bin/gunicorn` | | |
 | **Application Type** | `WSGI` | | |
 | **Startup File** | `bookingweb/wsgi.py` | | |
 
@@ -75,7 +75,7 @@ You should have **3 contexts total**. Click each and verify:
 |-------|------------------|------------|---|
 | **Type** | `Static` | | |
 | **URI** | `/media/` | | |
-| **Location** | `/var/www/DetailerFlow/backend/media/` | | |
+| **Location** | `/var/www/detely/backend/media/` | | |
 | **Accessible** | `Yes` | | |
 | **Enable Rewrite** | `No` | | |
 
@@ -158,14 +158,14 @@ Skip this for now. When you add HTTPS later, you'll:
    ```
 3. **Collect Django static files:**
    ```bash
-   cd /var/www/DetailerFlow/backend
+   cd /var/www/detely/backend
    source venv/bin/activate
    python manage.py collectstatic --noinput
    ```
 4. **Check file permissions:**
    ```bash
-   chown -R lsadm:lsadm /var/www/DetailerFlow/backend
-   chmod -R 755 /var/www/DetailerFlow/backend
+   chown -R lsadm:lsadm /var/www/detely/backend
+   chmod -R 755 /var/www/detely/backend
    ```
 
 ### Perform Graceful Restart:
@@ -189,15 +189,15 @@ http://187.124.208.220/admin/               (should load Django admin login)
 ## ❌ TROUBLESHOOTING IF STILL 404
 
 ### Problem: Still seeing 404 at root
-- Check: Document Root in General tab is `/var/www/DetailerFlow/backend/frontend_build`
+- Check: Document Root in General tab is `/var/www/detely/backend/frontend_build`
 - Check: Static context URI `/` exists and points to same path
 - Check: No App Server context on URI `/`
 
 ### Problem: /api calls return 404
 - Check: App Server context URI `/api` exists
-- Check: Binary Path is `/var/www/DetailerFlow/backend/venv/bin/gunicorn`
+- Check: Binary Path is `/var/www/detely/backend/venv/bin/gunicorn`
 - Check: Startup File is `bookingweb/wsgi.py`
-- On VPS, run: `cd /var/www/DetailerFlow/backend && python manage.py check`
+- On VPS, run: `cd /var/www/detely/backend && python manage.py check`
 
 ### Problem: React routes like /login return 404
 - Check: Rewrite Rules are enabled
@@ -231,5 +231,6 @@ You'll know deployment is working when:
 4. ✅ Browser DevTools Network tab shows `/api/` calls going to your backend
 5. ✅ API calls return JSON or proper error responses, not 502/504
 
-Once all 5 are true, your DetailerFlow app is live on production! 🎉
+Once all 5 are true, your Detely app is live on production! 🎉
+
 

@@ -78,7 +78,7 @@ const Hero = ({ isAuthenticated }) => {
       </div>
 
       <nav className="public-nav">
-        <div className="nav-logo">DetailerFlow<span>.</span></div>
+        <div className="nav-logo">Detely<span>.</span></div>
 
         {isMenuOpen && (
           <div 
@@ -158,7 +158,7 @@ const Hero = ({ isAuthenticated }) => {
       <section className="features-section container">
         <div className="section-header animate-on-scroll">
           <h2 className="section-title">Engineered for Perfection</h2>
-          <p className="section-desc">Traditional shop management is fragmented. DetailerFlow is a unified ecosystem.</p>
+          <p className="section-desc">Traditional shop management is fragmented. Detely is a unified ecosystem.</p>
         </div>
         <div className="features-grid">
           <div className="feature-card animate-on-scroll">
@@ -272,7 +272,7 @@ const Hero = ({ isAuthenticated }) => {
       <footer className="main-footer">
         <div className="container footer-content animate-on-scroll">
           <div className="footer-brand">
-            <div className="nav-logo">DetailerFlow<span>.</span></div>
+            <div className="nav-logo">Detely<span>.</span></div>
             <p>The operating system for the world's most meticulous studios.</p>
             
             <div className="whatsapp-cta-box">
@@ -281,7 +281,7 @@ const Hero = ({ isAuthenticated }) => {
                 <span className="status-text">Studio Support Online</span>
               </div>
               <a 
-                href={`https://wa.me/27769778522?text=Hi%20DetailerFlow,%20I'm%20looking%20at%20the%20${window.location.pathname}%20page%20and%20have%20a%20question.`} 
+                href={`https://wa.me/27769778522?text=Hi%20Detely,%20I'm%20looking%20at%20the%20${window.location.pathname}%20page%20and%20have%20a%20question.`} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="btn-whatsapp"
@@ -315,7 +315,7 @@ const Hero = ({ isAuthenticated }) => {
         </div>
         
         <div className="footer-bottom container">
-          <p>© 2026 DetailerFlow. A software product of - Netic Technologies (PTY) LTD</p>
+          <p>© 2026 Detely. A software product of - Netic Technologies (PTY) LTD</p>
           <div className="social-links">
             <span>IG</span>
             <span>FB</span>

@@ -38,17 +38,12 @@ def env_list(name, default=""):
 
 
 # Load environment files from the repository root.
-# This supports a single root .env on production and optional env-specific overrides.
+# VPS production uses a single root .env file.
 ENVIRONMENT = os.environ.get('DJANGO_ENV', os.environ.get('ENVIRONMENT', 'development')).lower()
 env_files = [PROJECT_ROOT / '.env']
 
 if ENVIRONMENT in {'development', 'local'}:
     env_files.insert(0, PROJECT_ROOT / '.env.local')
-elif ENVIRONMENT in {'production', 'prod'}:
-    env_files[:0] = [
-        PROJECT_ROOT / '.env.production',
-        PROJECT_ROOT / '.env.prod',
-    ]
 
 for env_file in env_files:
     if env_file.exists():
@@ -72,7 +67,7 @@ DEBUG = env_bool('DEBUG', default=False)
 
 ALLOWED_HOSTS = env_list(
     'ALLOWED_HOSTS',
-    'localhost,127.0.0.1,187.124.208.220,detailerflow.netictechnologies.com,www.detailerflow.netictechnologies.com,.netictechnologies.com'
+    'localhost,127.0.0.1,187.124.208.220,detely.com,www.detely.com'
 )
 
 
@@ -97,7 +92,7 @@ INSTALLED_APPS = [
 CORS_ALLOWED_ORIGINS = [
     origin for origin in env_list(
         'CORS_ALLOWED_ORIGINS',
-        'http://187.124.208.220,https://detailerflow.netictechnologies.com,https://www.detailerflow.netictechnologies.com,http://localhost:5173'
+        'http://187.124.208.220,https://detely.com,https://www.detely.com,http://localhost:5173'
     )
 ]
 
@@ -107,15 +102,9 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     origin for origin in env_list(
         'CSRF_TRUSTED_ORIGINS',
-        'http://187.124.208.220,https://detailerflow.netictechnologies.com,https://www.detailerflow.netictechnologies.com,http://localhost:5173'
+        'http://187.124.208.220,https://detely.com,https://www.detely.com,http://localhost:5173'
     )
 ]
-
-# CORS and CSRF
-RENDER_EXTERNAL_URL = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_URL:
-    CORS_ALLOWED_ORIGINS.append(f"https://{RENDER_EXTERNAL_URL}")
-    CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_URL}")
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
@@ -203,7 +192,7 @@ WSGI_APPLICATION = 'bookingweb.wsgi.application'
 # Use SQLite for local development, PostgreSQL for VPS production
 USE_POSTGRES = env_bool('USE_POSTGRES', default=False)
 
-# Priority: DATABASE_URL (production Render) > individual postgres vars > SQLite (local)
+# Priority: DATABASE_URL > individual postgres vars > SQLite (local)
 if os.environ.get('DATABASE_URL'):
     DATABASES = {
         'default': dj_database_url.config(
@@ -273,7 +262,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Whitenoise is excellent for serving static files on Render
+# Whitenoise serves compressed static files efficiently.
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Media files (Images uploaded by users)

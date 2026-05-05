@@ -78,7 +78,7 @@ const PublicLayout = ({ children }) => {
 
       {/* SHARED NAV */}
       <nav className="public-nav">
-        <Link to="/" className="nav-logo">DetailerFlow<span>.</span></Link>
+        <Link to="/" className="nav-logo">Detely<span>.</span></Link>
 
         {isMenuOpen && (
           <div className="menu-overlay" onClick={() => setIsMenuOpen(false)}></div>
@@ -120,7 +120,7 @@ const PublicLayout = ({ children }) => {
       <footer className="main-footer">
         <div className="container footer-content animate-on-scroll">
           <div className="footer-brand">
-            <div className="nav-logo">DetailerFlow<span>.</span></div>
+            <div className="nav-logo">Detely<span>.</span></div>
             <p>The operating system for the world's most meticulous studios.</p>
             
             <div className="whatsapp-cta-box">
@@ -129,7 +129,7 @@ const PublicLayout = ({ children }) => {
                 <span className="status-text">Studio Support Online</span>
               </div>
               <a 
-                href={`https://wa.me/27769778522?text=Hi%20DetailerFlow,%20I'm%20looking%20at%20the%20${window.location.pathname}%20page%20and%20have%20a%20question.`} 
+                href={`https://wa.me/27769778522?text=Hi%20Detely,%20I'm%20looking%20at%20the%20${window.location.pathname}%20page%20and%20have%20a%20question.`} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="btn-whatsapp"
@@ -163,7 +163,7 @@ const PublicLayout = ({ children }) => {
         </div>
         
         <div className="footer-bottom container">
-          <p>© 2026 DetailerFlow. A software product of - Netic Technologies (PTY) LTD</p>
+          <p>© 2026 Detely. A software product of - Netic Technologies (PTY) LTD</p>
           <div className="social-links">
             <span>IG</span>
             <span>FB</span>

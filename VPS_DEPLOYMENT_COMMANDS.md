@@ -1,6 +1,6 @@
 # VPS Deployment & Debugging Commands
 ## SETUP .ENV for Production Ready Fix
-cd /var/www/DetailerFlow
+cd /var/www/detely
 
 # backup
 cp .env .env.bak.$(date +%F-%H%M%S)
@@ -11,17 +11,17 @@ DEBUG=False
 DJANGO_ENV=production
 SECRET_KEY='django-insecure-k1tf3^tazr^$hevd926wb(9i+9pakqgi5#8yme^3v#xozn5*4s'
 USE_POSTGRES=False
-ALLOWED_HOSTS=detailerflow.netictechnologies.com,www.detailerflow.netictechnologies.com,187.124.208.220,127.0.0.1,localhost
-CORS_ALLOWED_ORIGINS=https://detailerflow.netictechnologies.com,https://www.detailerflow.netictechnologies.com
-CSRF_TRUSTED_ORIGINS=https://detailerflow.netictechnologies.com,https://www.detailerflow.netictechnologies.com
+ALLOWED_HOSTS=detely.com,www.detely.com,187.124.208.220,127.0.0.1,localhost
+CORS_ALLOWED_ORIGINS=https://www.detely.com,https://www.detely.com
+CSRF_TRUSTED_ORIGINS=https://www.detely.com,https://www.detely.com
 EOF
 
 # fix sqlite and writable dirs for app user
-chown lsadm:lsadm /var/www/DetailerFlow/backend/db.sqlite3
-chmod 664 /var/www/DetailerFlow/backend/db.sqlite3
-chown -R lsadm:lsadm /var/www/DetailerFlow/backend/media /var/www/DetailerFlow/backend/staticfiles
-find /var/www/DetailerFlow/backend/media -type d -exec chmod 775 {} \;
-find /var/www/DetailerFlow/backend/staticfiles -type d -exec chmod 775 {} \;
+chown lsadm:lsadm /var/www/detely/backend/db.sqlite3
+chmod 664 /var/www/detely/backend/db.sqlite3
+chown -R lsadm:lsadm /var/www/detely/backend/media /var/www/detely/backend/staticfiles
+find /var/www/detely/backend/media -type d -exec chmod 775 {} \;
+find /var/www/detely/backend/staticfiles -type d -exec chmod 775 {} \;
 
 # restart OLS (and app worker)
 systemctl restart lsws
@@ -55,11 +55,11 @@ git commit -m "Make dotenv import optional for VPS compatibility"
 git push origin main
 
 # On VPS, pull latest:
-cd /var/www/DetailerFlow
+cd /var/www/detely
 git pull origin main
 
 # Install/upgrade dependencies
-cd /var/www/DetailerFlow/backend
+cd /var/www/detely/backend
 source venv/bin/activate
 pip install -r requirements.txt
 ```
@@ -68,13 +68,13 @@ pip install -r requirements.txt
 
 ```bash
 # On VPS, verify production env file is present:
-ls -la /var/www/DetailerFlow/.env
+ls -la /var/www/detely/.env
 
 # If it doesn't exist, create it from example:
-cp /var/www/DetailerFlow/.env.production.example /var/www/DetailerFlow/.env
+cp /var/www/detely/.env.production.example /var/www/detely/.env
 
 # Edit it with your actual secrets:
-nano /var/www/DetailerFlow/.env
+nano /var/www/detely/.env
 
 # Required fields:
 # DEBUG=False
@@ -134,21 +134,21 @@ sudo systemctl reload lsws
 
 ```bash
 # Test API is responding (should return JSON, not 500)
-curl -i https://detailerflow.netictechnologies.com/api/bookings/
+curl -i https://www.detely.com/api/bookings/
 
 # Test with auth header (replace TOKEN with real JWT):
 curl -i -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  https://detailerflow.netictechnologies.com/api/bookings/
+  https://www.detely.com/api/bookings/
 
 # Test status update endpoint:
 curl -i -X PATCH \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"status":"IN_PROGRESS"}' \
-  https://detailerflow.netictechnologies.com/api/bookings/UUID-HERE/update_status/
+  https://www.detely.com/api/bookings/UUID-HERE/update_status/
 
 # Check media files are accessible
-curl -i https://detailerflow.netictechnologies.com/media/vehicle_photos/sample.jpg
+curl -i https://www.detely.com/media/vehicle_photos/sample.jpg
 ```
 
 ## STEP 6: Common Issues & Quick Fixes
@@ -182,8 +182,8 @@ ValueError
 ```bash
 # Force reload settings:
 # 1. Delete old .pyc/cache files
-find /var/www/DetailerFlow -name "*.pyc" -delete
-find /var/www/DetailerFlow -type d -name "__pycache__" -exec rm -rf {} +
+find /var/www/detely -name "*.pyc" -delete
+find /var/www/detely -type d -name "__pycache__" -exec rm -rf {} +
 
 # 2. Restart app
 sudo systemctl restart gunicorn  # or lsws
@@ -193,7 +193,7 @@ sudo systemctl restart gunicorn  # or lsws
 
 ```bash
 # Check Django can even import settings without starting server:
-cd /var/www/DetailerFlow/backend
+cd /var/www/detely/backend
 source ../venv/bin/activate
 python -c "from django.conf import settings; print(settings.DEBUG, settings.DATABASES['default']['ENGINE'])"
 
@@ -204,13 +204,13 @@ python -c "from django.conf import settings; print(settings.DEBUG, settings.DATA
 
 ```bash
 # 1. All bookings responsive?
-curl -s https://detailerflow.netictechnologies.com/api/bookings/ | head -20
+curl -s https://www.detely.com/api/bookings/ | head -20
 
 # 2. Images load?
-curl -I https://detailerflow.netictechnologies.com/media/vehicle_photos/test.png
+curl -I https://www.detely.com/media/vehicle_photos/test.png
 
 # 3. Static files load?
-curl -I https://detailerflow.netictechnologies.com/assets/index-DVyh7LtE.js
+curl -I https://www.detely.com/assets/index-DVyh7LtE.js
 
 # 4. Check error logs for new errors in last 5 minutes:
 sudo journalctl -u gunicorn --since "5 minutes ago" | grep -i error
@@ -224,7 +224,7 @@ python manage.py dbshell  # Should drop you into psql prompt
 
 ```bash
 # Run Django shell and import the problematic view:
-cd /var/www/DetailerFlow/backend
+cd /var/www/detely/backend
 source ../venv/bin/activate
 python manage.py shell
 
@@ -243,7 +243,7 @@ python manage.py runserver 0.0.0.0:8000 --nothreading --noreload
 | Environment | .env Location | Load Priority |
 |-------------|---------------|----------------|
 | Local (Windows) | `E:\Work\...\` | `.env.local` → `.env` |
-| VPS (Production) | `/var/www/DetailerFlow/` | `.env.prod` → `.env` |
+| VPS (Production) | `/var/www/detely/` | `.env` |
 | OLS App Server | (same location, app inherits env) | exports from `.env` at startup |
 
 ## CRITICAL: Don't Forget After Each Change
@@ -254,3 +254,5 @@ python manage.py runserver 0.0.0.0:8000 --nothreading --noreload
 4. **Restart app:** `sudo systemctl restart gunicorn` or `lsws`
 5. **Tail logs immediately:** `sudo journalctl -u gunicorn -f` (watch for startup errors)
 6. **Test endpoint:** `curl -i https://yourdomain.com/api/bookings/`
+
+

@@ -48,9 +48,6 @@ urlpatterns = [
 # Serve Media Files (Add this BEFORE the catch-all)
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-else:
-    # On Render, we force it even in production for now
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # THE CATCH-ALL: Keep this at the very bottom so media/api routes match first
 urlpatterns += [

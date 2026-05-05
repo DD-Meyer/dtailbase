@@ -31,7 +31,7 @@ function Sidebar({ isMobileOpen = false, onCloseMobile = () => {} }) {
       {/* NEW HEADER SECTION */}
       <div className="sidebar-header">
         <div className="sidebar-logo">
-          <h2>{isCollapsed ? "DF" : "DetailerFlow"}</h2>
+          <h2>{isCollapsed ? "DY" : "Detely"}</h2>
         </div>
         <button className="collapse-toggle" onClick={toggleSidebar} title="Toggle Sidebar">
           {isCollapsed ? (
