@@ -79,7 +79,7 @@ nano /var/www/detely/.env
 # Required fields:
 # DEBUG=False
 # SECRET_KEY=<your-strong-secret>
-# DATABASE_URL=postgres://user:password@localhost:5432/dbname
+# DATABASE_URL=postgres://detely_prod_user:strong-password@127.0.0.1:5432/detely_prod
 # USE_POSTGRES=True
 # DJANGO_ENV=production
 ```
