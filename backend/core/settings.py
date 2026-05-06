@@ -111,11 +111,11 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
 
-# 3. Clean up Middleware (You had duplicates here too!)
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware', # Move this to the TOP
-    'whitenoise.middleware.WhiteNoiseMiddleware',    # Move this to SECOND
-    'corsheaders.middleware.CorsMiddleware', 
+    'django.middleware.security.SecurityMiddleware',
+    # WhiteNoise only in production — in DEBUG mode Django's dev server handles static files natively
+    *(['whitenoise.middleware.WhiteNoiseMiddleware'] if not DEBUG else []),
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -261,8 +261,10 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Whitenoise serves compressed static files efficiently.
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+# Whitenoise serves compressed static files in production.
+# In local dev (DEBUG=True), use Django's default finder so admin CSS works without collectstatic.
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Media files (Images uploaded by users)
 MEDIA_URL = '/media/'

@@ -6,9 +6,9 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api': 'http://localhost:8080',
-      '/media': 'http://localhost:8080',
-      '/admin': 'http://localhost:8080',
+      '/api': 'http://localhost:8000',
+      '/media': 'http://localhost:8000',
+      '/admin': 'http://localhost:8000',
     }
   }
 })
