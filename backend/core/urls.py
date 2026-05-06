@@ -1,46 +1,46 @@
-# core/urls.py
-from django.urls import path, include
-from .views import *
-from rest_framework.routers import DefaultRouter
-from indemnity.views import *
+"""
+URL configuration for detely project.
 
-router = DefaultRouter()
-# Change 'companies' to 'company'
-router.register(r'company', CompanyViewSet, basename='company')
+The `urlpatterns` list routes URLs to views. For more information please see:
+    https://docs.djangoproject.com/en/6.0/topics/http/urls/
+"""
+from django.contrib import admin
+from django.urls import include, path
+from django.conf import settings
+from django.conf.urls.static import static
+from django.views.generic import TemplateView
+from django.urls import re_path
+
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
+
+from core.serializers import MyTokenSerializer
+
+
+class MyTokenView(TokenObtainPairView):
+    serializer_class = MyTokenSerializer
+
 
 urlpatterns = [
-    path("company/team/", CompanyTeamListView.as_view(), name="team-list"),
-    path("company/team/<uuid:pk>/", CompanyUserDetailView.as_view(), name="team-detail"),
+    path('admin/', admin.site.urls),
 
-    # Public Endpoints
-    # Note: These are intentionally placed before the authenticated endpoints to avoid any potential conflicts with URL patterns.
-    path("public/company/<slug:slug>/", CompanyPublicDetailView.as_view(), name="public-company-detail"),
-    path("public/services/", ServicePublicListView.as_view(), name="public-services-list"),
-    path("public/availability/<str:date>/<uuid:service_id>/", PublicAvailabilityView.as_view(), name="public-availability"),
-    path("public/book/<slug:company_slug>/", PublicBookingCreateView.as_view(), name="public-booking-create"),
+    path('api/indemnity/', include('indemnity.urls')),
+    path('api/payments/', include('payments.urls')),
 
-    path("auth/users/me/", UserMeView.as_view(), name="user-me"),
-    path("availability/<str:date>/", AvailabilityAPIView.as_view()),
+    path('api/', include('core.api_urls')),
 
-    path('auth/set-password/', ChangePasswordView.as_view(), name='set-password'),
+    path('api/token/', MyTokenView.as_view(), name='token_obtain_pair'),
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+]
 
-    path("customers/<uuid:customer_id>/vehicles/", CustomerVehicleListAPIView.as_view()),
-    path("customers/<uuid:customer_id>/", CustomerDetailAPIView.as_view(), name="customer-detail"),
-    path("customers/", CustomerListAPIView.as_view(), name="customers-list-create"),
-    path("bookings/", BookingListCreateAPIView.as_view()),
-    path("services/", ServiceListCreateAPIView.as_view(), name="service-list"),
-    path("services/<uuid:pk>/", ServiceRetrieveUpdateDestroyAPIView.as_view(), name="service-detail"),
-    
-    path("availability/<str:date>/<uuid:service>/", AvailabilityAPIView.as_view()),
-    path("bookings/<uuid:pk>/", BookingRetrieveUpdateDestroyAPIView.as_view(), name="booking-detail"),
-    path("vehicles/<uuid:pk>/", VehicleRetrieveUpdateDestroyAPIView.as_view(), name="vehicle-detail"),
-    path("vehicles/", VehicleListCreateAPIView.as_view(), name="vehicle-list-create"),
-    path("bookings/<uuid:pk>/status/", BookingStatusUpdateView.as_view()),
-    path('bookings/<uuid:pk>/update_status/', BookingStatusUpdateView.as_view(), name='booking-status-update'),
-    
-    # New user registration endpoint
-    path("users/", UserCreateAPIView.as_view(), name="user-register"),
-    path('admin/companies/', CompanyCreateAPIView.as_view(), name='company-create'),
-    path('', include(router.urls)),
-    
+# This allows Django to serve files during development
+# Serve Media Files (Add this BEFORE the catch-all)
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# THE CATCH-ALL: Keep this at the very bottom so media/api routes match first
+urlpatterns += [
+    re_path(r'^.*$', TemplateView.as_view(template_name='index.html'), name='home'),
 ]

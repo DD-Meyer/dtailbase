@@ -50,7 +50,7 @@ python .\manage.py runserver 127.0.0.1:8080
 
 ```bash
 # On your local machine, commit the dotenv optional import fix:
-git add backend/bookingweb/settings.py
+git add backend/core/settings.py
 git commit -m "Make dotenv import optional for VPS compatibility"
 git push origin main
 
