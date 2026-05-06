@@ -3,6 +3,14 @@
 // shows the indemnity signature and photos, and allows downloading the signed PDF agreement if available.
 const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 
+const normalizeSecureUrl = (rawUrl) => {
+  if (!rawUrl) return "";
+  if (window.location.protocol === "https:" && rawUrl.startsWith("http://")) {
+    return rawUrl.replace("http://", "https://");
+  }
+  return rawUrl;
+};
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../axios_instance";
@@ -59,9 +67,12 @@ export default function BookingDetail() {
   const photos = indemnity?.photos || [];
   const toAbsoluteUrl = (url) => {
     if (!url) return "";
-    if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) return url;
-    if (url.startsWith("/")) return `${API_BASE_URL}${url}`;
-    return `${API_BASE_URL}/${url}`;
+    if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
+      return normalizeSecureUrl(url);
+    }
+    const safeBaseUrl = normalizeSecureUrl(API_BASE_URL);
+    if (url.startsWith("/")) return `${safeBaseUrl}${url}`;
+    return `${safeBaseUrl}/${url}`;
   };
   
   // Filter photos by type from the combined list

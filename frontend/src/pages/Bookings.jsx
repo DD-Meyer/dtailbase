@@ -7,11 +7,22 @@ import { useCompany } from "../context/CompanyContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 
+const normalizeSecureUrl = (rawUrl) => {
+  if (!rawUrl) return "";
+  if (window.location.protocol === "https:" && rawUrl.startsWith("http://")) {
+    return rawUrl.replace("http://", "https://");
+  }
+  return rawUrl;
+};
+
 const toAbsoluteUrl = (url) => {
   if (!url) return "";
-  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) return url;
-  if (url.startsWith("/")) return `${API_BASE_URL}${url}`;
-  return `${API_BASE_URL}/${url}`;
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
+    return normalizeSecureUrl(url);
+  }
+  const safeBaseUrl = normalizeSecureUrl(API_BASE_URL);
+  if (url.startsWith("/")) return `${safeBaseUrl}${url}`;
+  return `${safeBaseUrl}/${url}`;
 };
 
 const VALID_STATUS_TRANSITIONS = {
