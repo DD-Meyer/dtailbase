@@ -92,7 +92,7 @@ INSTALLED_APPS = [
 CORS_ALLOWED_ORIGINS = [
     origin for origin in env_list(
         'CORS_ALLOWED_ORIGINS',
-        'http://187.124.208.220,https://detely.com,https://www.detely.com,http://localhost:5173'
+        'https://187.124.208.220,https://detely.com,https://www.detely.com,http://localhost:5173'
     )
 ]
 
@@ -102,7 +102,7 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     origin for origin in env_list(
         'CSRF_TRUSTED_ORIGINS',
-        'http://187.124.208.220,https://detely.com,https://www.detely.com,http://localhost:5173'
+        'https://187.124.208.220,https://detely.com,https://www.detely.com,http://localhost:5173'
     )
 ]
 
