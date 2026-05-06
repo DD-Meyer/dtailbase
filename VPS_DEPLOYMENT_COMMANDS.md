@@ -1,6 +1,6 @@
 # VPS Deployment & Debugging Commands
 ## SETUP .ENV for Production Ready Fix
-cd /var/www/detely
+cd /var/www/Detely
 
 # backup
 cp .env .env.bak.$(date +%F-%H%M%S)
@@ -17,11 +17,11 @@ CSRF_TRUSTED_ORIGINS=https://www.detely.com,https://www.detely.com
 EOF
 
 # fix sqlite and writable dirs for app user
-chown lsadm:lsadm /var/www/detely/backend/db.sqlite3
-chmod 664 /var/www/detely/backend/db.sqlite3
-chown -R lsadm:lsadm /var/www/detely/backend/media /var/www/detely/backend/staticfiles
-find /var/www/detely/backend/media -type d -exec chmod 775 {} \;
-find /var/www/detely/backend/staticfiles -type d -exec chmod 775 {} \;
+chown lsadm:lsadm /var/www/Detely/backend/db.sqlite3
+chmod 664 /var/www/Detely/backend/db.sqlite3
+chown -R lsadm:lsadm /var/www/Detely/backend/media /var/www/Detely/backend/staticfiles
+find /var/www/Detely/backend/media -type d -exec chmod 775 {} \;
+find /var/www/Detely/backend/staticfiles -type d -exec chmod 775 {} \;
 
 # restart OLS (and app worker)
 systemctl restart lsws
@@ -55,11 +55,11 @@ git commit -m "Make dotenv import optional for VPS compatibility"
 git push origin main
 
 # On VPS, pull latest:
-cd /var/www/detely
+cd /var/www/Detely
 git pull origin main
 
 # Install/upgrade dependencies
-cd /var/www/detely/backend
+cd /var/www/Detely/backend
 source venv/bin/activate
 pip install -r requirements.txt
 ```
@@ -68,13 +68,13 @@ pip install -r requirements.txt
 
 ```bash
 # On VPS, verify production env file is present:
-ls -la /var/www/detely/.env
+ls -la /var/www/Detely/.env
 
 # If it doesn't exist, create it from example:
-cp /var/www/detely/.env.production.example /var/www/detely/.env
+cp /var/www/Detely/.env.production.example /var/www/Detely/.env
 
 # Edit it with your actual secrets:
-nano /var/www/detely/.env
+nano /var/www/Detely/.env
 
 # Required fields:
 # DEBUG=False
@@ -108,7 +108,7 @@ tail -f /var/log/gunicorn/error.log
 tail -f /var/log/gunicorn/access.log
 ```
 
-### **If using OpenLiteSpeed App Server:**
+### **If using OpenLiteSpeed Proxy Context:**
 
 ```bash
 # Restart OpenLiteSpeed
@@ -122,6 +122,9 @@ tail -f /usr/local/lsws/logs/error.log
 
 # App stdout/stderr log (if configured)
 tail -f /usr/local/lsws/logs/app.log
+
+# If OLS proxies to Django on 127.0.0.1:8000, confirm the backend listener exists
+ss -ltnp | grep 8000
 
 # Check OLS access log
 tail -f /usr/local/lsws/logs/access.log
@@ -182,8 +185,8 @@ ValueError
 ```bash
 # Force reload settings:
 # 1. Delete old .pyc/cache files
-find /var/www/detely -name "*.pyc" -delete
-find /var/www/detely -type d -name "__pycache__" -exec rm -rf {} +
+find /var/www/Detely -name "*.pyc" -delete
+find /var/www/Detely -type d -name "__pycache__" -exec rm -rf {} +
 
 # 2. Restart app
 sudo systemctl restart gunicorn  # or lsws
@@ -193,7 +196,7 @@ sudo systemctl restart gunicorn  # or lsws
 
 ```bash
 # Check Django can even import settings without starting server:
-cd /var/www/detely/backend
+cd /var/www/Detely/backend
 source ../venv/bin/activate
 python -c "from django.conf import settings; print(settings.DEBUG, settings.DATABASES['default']['ENGINE'])"
 
@@ -215,7 +218,10 @@ curl -I https://www.detely.com/assets/index-DVyh7LtE.js
 # 4. Check error logs for new errors in last 5 minutes:
 sudo journalctl -u gunicorn --since "5 minutes ago" | grep -i error
 
-# 5. Database accessible?
+# 5. Proxy target listening?
+ss -ltnp | grep 8000
+
+# 6. Database accessible?
 source venv/bin/activate
 python manage.py dbshell  # Should drop you into psql prompt
 ```
@@ -224,7 +230,7 @@ python manage.py dbshell  # Should drop you into psql prompt
 
 ```bash
 # Run Django shell and import the problematic view:
-cd /var/www/detely/backend
+cd /var/www/Detely/backend
 source ../venv/bin/activate
 python manage.py shell
 
@@ -243,15 +249,15 @@ python manage.py runserver 0.0.0.0:8000 --nothreading --noreload
 | Environment | .env Location | Load Priority |
 |-------------|---------------|----------------|
 | Local (Windows) | `E:\Work\...\` | `.env.local` → `.env` |
-| VPS (Production) | `/var/www/detely/` | `.env` |
-| OLS App Server | (same location, app inherits env) | exports from `.env` at startup |
+| VPS (Production) | `/var/www/Detely/` | `.env` |
+| OLS Proxy + Django backend | (same location, Django reads `.env`) | `.env` loaded by Django at startup |
 
 ## CRITICAL: Don't Forget After Each Change
 
 1. **Install dependencies:** `pip install -r requirements.txt`
 2. **Migrations:** `python manage.py migrate` (if schema changes)
 3. **Collect static:** `python manage.py collectstatic --noinput` (if using whitenoise)
-4. **Restart app:** `sudo systemctl restart gunicorn` or `lsws`
+4. **Restart app:** restart Django backend and then `sudo systemctl restart lsws` if needed
 5. **Tail logs immediately:** `sudo journalctl -u gunicorn -f` (watch for startup errors)
 6. **Test endpoint:** `curl -i https://yourdomain.com/api/bookings/`
 

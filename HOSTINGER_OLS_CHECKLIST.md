@@ -14,7 +14,7 @@ Use this checklist to verify each field in your OLS WebAdmin console matches the
 
 | Field | Expected Value | Your Value | ✓ |
 |-------|------------------|------------|---|
-| **Document Root** | `/var/www/detely/backend/frontend_build` | | ✓|
+| **Document Root** | `/var/www/Detely/backend/frontend_build` | | ✓|
 | **Domain Name** | `www.detely.com` | | |
 | **Domain Aliases** | `detely.com` | | |
 | **Enable GZIP Compression** | `Yes` | | |
@@ -43,45 +43,41 @@ You should have **3 contexts total**. Click each and verify:
 |-------|------------------|------------|---|
 | **Type** | `Static` | | |
 | **URI** | `/` | | |
-| **Location** | `/var/www/detely/backend/frontend_build` | | |
+| **Location** | `/var/www/Detely/backend/frontend_build` | | |
 | **Accessible** | `Yes` | | |
 | **Enable Rewrite** | `No` (rewrite is at vhost level) | | |
 
-### Context 3: App Server API
+### Context 3: Proxy API
 | Field | Expected Value | Your Value | ✓ |
 |-------|------------------|------------|---|
-| **Type** | `App Server` | | |
-| **URI** | `/api` | | |
-| **Location** | `/var/www/detely/backend` | | |
-| **Binary Path** | `/var/www/detely/backend/venv/bin/gunicorn` | | |
-| **Application Type** | `WSGI` | | |
-| **Startup File** | `bookingweb/wsgi.py` | | |
-| **Max Connections** | `Not Set` (leave blank) | | |
-| **Environment** | Leave blank or clear defaults | | |
+| **Type** | `Proxy` | | |
+| **URI** | `/api/` | | |
+| **Web Server** | `[VHost Level]: django_backend` | | |
+| **Header Operations** | `Not Set` | | |
 | **Enable Expires** | `Not Set` | | |
 
-### Context 4: App Server Admin (Optional but recommended)
+### External App: Django Proxy Target
 | Field | Expected Value | Your Value | ✓ |
 |-------|------------------|------------|---|
-| **Type** | `App Server` | | |
-| **URI** | `/admin` | | |
-| **Location** | `/var/www/detely/backend` | | |
-| **Binary Path** | `/var/www/detely/backend/venv/bin/gunicorn` | | |
-| **Application Type** | `WSGI` | | |
-| **Startup File** | `bookingweb/wsgi.py` | | |
+| **Type** | `Web Server (Proxy)` | | |
+| **Name** | `django_backend` | | |
+| **Address** | `127.0.0.1:8000` | | |
+| **Max Connections** | `100` | | |
+| **Initial Request Timeout (secs)** | `60` | | |
+| **Response Buffering** | `No` | | |
 
-### Context 5: Static Media Files ⚠️ REQUIRED FOR IMAGE DISPLAY
+### Context 4: Static Media Files ⚠️ REQUIRED FOR IMAGE DISPLAY
 | Field | Expected Value | Your Value | ✓ |
 |-------|------------------|------------|---|
 | **Type** | `Static` | | |
 | **URI** | `/media/` | | |
-| **Location** | `/var/www/detely/backend/media/` | | |
+| **Location** | `/var/www/Detely/backend/media/` | | |
 | **Accessible** | `Yes` | | |
 | **Enable Rewrite** | `No` | | |
 
 **Without this context, uploaded images (vehicle photos, logos, signatures) return 404.**
 
-**⚠️ CRITICAL:** Do NOT have an App Server context with URI `/`. If you see one, delete it.
+**⚠️ CRITICAL:** Do NOT have an App Server or Proxy context with URI `/`. If you see one, delete it.
 
 ---
 
@@ -158,14 +154,14 @@ Skip this for now. When you add HTTPS later, you'll:
    ```
 3. **Collect Django static files:**
    ```bash
-   cd /var/www/detely/backend
+   cd /var/www/Detely/backend
    source venv/bin/activate
    python manage.py collectstatic --noinput
    ```
 4. **Check file permissions:**
    ```bash
-   chown -R lsadm:lsadm /var/www/detely/backend
-   chmod -R 755 /var/www/detely/backend
+   chown -R lsadm:lsadm /var/www/Detely/backend
+   chmod -R 755 /var/www/Detely/backend
    ```
 
 ### Perform Graceful Restart:
@@ -180,8 +176,8 @@ Skip this for now. When you add HTTPS later, you'll:
 ```
 http://187.124.208.220/                    (should load React homepage)
 http://187.124.208.220/login                (should load React login page, not 404)
-http://187.124.208.220/api/                 (should hit Django and return error or JSON)
-http://187.124.208.220/admin/               (should load Django admin login)
+http://187.124.208.220/api/                 (should proxy to Django and return JSON or auth error)
+http://187.124.208.220/admin/               (should load Django admin through the Django backend)
 ```
 
 ---
@@ -189,15 +185,20 @@ http://187.124.208.220/admin/               (should load Django admin login)
 ## ❌ TROUBLESHOOTING IF STILL 404
 
 ### Problem: Still seeing 404 at root
-- Check: Document Root in General tab is `/var/www/detely/backend/frontend_build`
+- Check: Document Root in General tab is `/var/www/Detely/backend/frontend_build`
 - Check: Static context URI `/` exists and points to same path
-- Check: No App Server context on URI `/`
+- Check: No Proxy or App Server context exists on URI `/`
 
 ### Problem: /api calls return 404
-- Check: App Server context URI `/api` exists
-- Check: Binary Path is `/var/www/detely/backend/venv/bin/gunicorn`
-- Check: Startup File is `bookingweb/wsgi.py`
-- On VPS, run: `cd /var/www/detely/backend && python manage.py check`
+- Check: Proxy context URI `/api/` exists
+- Check: Proxy context points to `[VHost Level]: django_backend`
+- Check: External App `django_backend` points to `127.0.0.1:8000`
+- On VPS, run: `cd /var/www/Detely/backend && python manage.py check`
+
+### Problem: /api returns 502 or times out
+- Check: Django is actually listening on `127.0.0.1:8000`
+- Check: External App `django_backend` address is exactly `127.0.0.1:8000`
+- Check: your Django process or gunicorn service is running
 
 ### Problem: React routes like /login return 404
 - Check: Rewrite Rules are enabled
@@ -228,7 +229,7 @@ You'll know deployment is working when:
 1. ✅ http://187.124.208.220/ loads a page with your React homepage UI
 2. ✅ React CSS/JS load (not broken styling)
 3. ✅ You can click /login and see login form (not a 404 error page)
-4. ✅ Browser DevTools Network tab shows `/api/` calls going to your backend
+4. ✅ Browser DevTools Network tab shows `/api/` calls being proxied to your Django backend
 5. ✅ API calls return JSON or proper error responses, not 502/504
 
 Once all 5 are true, your Detely app is live on production! 🎉
