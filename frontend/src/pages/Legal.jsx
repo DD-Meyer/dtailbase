@@ -6,7 +6,7 @@ const Legal = () => {
     {
       id: "terms",
       title: "Terms of Service",
-      content: "By using Detely, you agree to our cloud service terms. We provide a platform for studio management, and users are responsible for the accuracy of the data entered into the system."
+      content: "By using Dtailbase, you agree to our cloud service terms. We provide a platform for studio management, and users are responsible for the accuracy of the data entered into the system."
     },
     {
       id: "privacy",
@@ -16,12 +16,12 @@ const Legal = () => {
     {
       id: "data",
       title: "Data Ownership",
-      content: "You own your data. Should you choose to leave Detely, you can export your customer lists and service history in CSV format at any time."
+      content: "You own your data. Should you choose to leave Dtailbase, you can export your customer lists and service history in CSV format at any time."
     },
     {
       id: "liability",
       title: "Limitation of Liability",
-      content: "Detely is a management tool. While we provide digital indemnity forms, the legal validity of signed waivers remains the responsibility of the studio owner under local South African law."
+      content: "Dtailbase is a management tool. While we provide digital indemnity forms, the legal validity of signed waivers remains the responsibility of the studio owner under local South African law."
     }
   ];
 

@@ -10,7 +10,7 @@ import logging
 from django.utils import timezone
 
 class PayFastCheckoutView(APIView):
-    domain = os.environ.get('PUBLIC_BASE_URL', 'https://www.detely.com').rstrip('/')
+    domain = os.environ.get('PUBLIC_BASE_URL', 'https://www.dtailbase.com').rstrip('/')
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -38,7 +38,7 @@ class PayFastCheckoutView(APIView):
             'email_address': user.email,
             'm_payment_id': f"{company.id}_{plan_id}",
             'amount': f"{amount:.2f}",
-            'item_name': f"Detely {plan_id} Subscription",
+            'item_name': f"Dtailbase {plan_id} Subscription",
             'subscription_type': '1',             # 1 = Subscription
             'billing_date': timezone.now().strftime('%Y-%m-%d'), 
             'recurring_amount': f"{amount:.2f}",
@@ -54,14 +54,14 @@ class PayFastCheckoutView(APIView):
         payload_parts = []
         for key, value in payfast_data.items():
             if value:
-                # quote_plus turns "Detely PRO" into "Detely+PRO"
+                # quote_plus turns "Dtailbase PRO" into "Dtailbase+PRO"
                 payload_parts.append(f"{key}={quote_plus(str(value))}")
 
         # 2. Join them with '&'
         pf_param_string = "&".join(payload_parts)
 
         # 3. Print this to your console to verify it looks like:
-        # item_name=Detely+PRO+Subscription
+        # item_name=Dtailbase+PRO+Subscription
         print(f"DEBUG: Final Signature String: {pf_param_string}")
 
         # 4. Generate the MD5

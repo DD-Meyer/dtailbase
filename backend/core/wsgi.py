@@ -1,5 +1,5 @@
 """
-WSGI config for detely project.
+WSGI config for dtailbase project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

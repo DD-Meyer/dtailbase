@@ -1,14 +1,14 @@
 # Run these commands on VPS in order
 
 # 1. Check current .env configuration
-cat /var/www/Detely/.env
+cat /var/www/Dtailbase/.env
 
 # 2. If .env looks empty or wrong, copy from the production example:
-# cp /var/www/Detely/.env.production.example /var/www/Detely/.env
-# Then edit it: nano /var/www/Detely/.env
+# cp /var/www/Dtailbase/.env.production.example /var/www/Dtailbase/.env
+# Then edit it: nano /var/www/Dtailbase/.env
 
 # 3. Verify .env has these CRITICAL fields set:
-grep -E "DEBUG|DJANGO_ENV|SECRET_KEY|DATABASE_URL|USE_POSTGRES" /var/www/Detely/.env
+grep -E "DEBUG|DJANGO_ENV|SECRET_KEY|DATABASE_URL|USE_POSTGRES" /var/www/Dtailbase/.env
 
 # 4. Check that OLS and the Django backend listener are running:
 ps aux | grep -E "gunicorn|lsws|litespeed"
@@ -21,7 +21,7 @@ sudo systemctl restart lsws
 tail -f /usr/local/lsws/logs/error.log
 
 # 7. In another terminal window, test the API:
-curl -i https://www.detely.com/api/bookings/
+curl -i https://www.dtailbase.com/api/bookings/
 # or if testing locally:
 curl -i http://127.0.0.1:8000/api/bookings/
 

@@ -14,9 +14,9 @@ Use this checklist to verify each field in your OLS WebAdmin console matches the
 
 | Field | Expected Value | Your Value | ✓ |
 |-------|------------------|------------|---|
-| **Document Root** | `/var/www/Detely/backend/frontend_build` | | ✓|
-| **Domain Name** | `www.detely.com` | | |
-| **Domain Aliases** | `detely.com` | | |
+| **Document Root** | `/var/www/Dtailbase/backend/frontend_build` | | ✓|
+| **Domain Name** | `www.dtailbase.com` | | |
+| **Domain Aliases** | `dtailbase.com` | | |
 | **Enable GZIP Compression** | `Yes` | | |
 | **Index Files** | `index.html, index.php` | | |
 | **Auto Index** | `No` | | |
@@ -43,7 +43,7 @@ You should have **3 contexts total**. Click each and verify:
 |-------|------------------|------------|---|
 | **Type** | `Static` | | |
 | **URI** | `/` | | |
-| **Location** | `/var/www/Detely/backend/frontend_build` | | |
+| **Location** | `/var/www/Dtailbase/backend/frontend_build` | | |
 | **Accessible** | `Yes` | | |
 | **Enable Rewrite** | `No` (rewrite is at vhost level) | | |
 
@@ -71,7 +71,7 @@ You should have **3 contexts total**. Click each and verify:
 |-------|------------------|------------|---|
 | **Type** | `Static` | | |
 | **URI** | `/media/` | | |
-| **Location** | `/var/www/Detely/backend/media/` | | |
+| **Location** | `/var/www/Dtailbase/backend/media/` | | |
 | **Accessible** | `Yes` | | |
 | **Enable Rewrite** | `No` | | |
 
@@ -154,14 +154,14 @@ Skip this for now. When you add HTTPS later, you'll:
    ```
 3. **Collect Django static files:**
    ```bash
-   cd /var/www/Detely/backend
+   cd /var/www/Dtailbase/backend
    source venv/bin/activate
    python manage.py collectstatic --noinput
    ```
 4. **Check file permissions:**
    ```bash
-   chown -R lsadm:lsadm /var/www/Detely/backend
-   chmod -R 755 /var/www/Detely/backend
+   chown -R lsadm:lsadm /var/www/Dtailbase/backend
+   chmod -R 755 /var/www/Dtailbase/backend
    ```
 
 ### Perform Graceful Restart:
@@ -185,7 +185,7 @@ http://187.124.208.220/admin/               (should load Django admin through th
 ## ❌ TROUBLESHOOTING IF STILL 404
 
 ### Problem: Still seeing 404 at root
-- Check: Document Root in General tab is `/var/www/Detely/backend/frontend_build`
+- Check: Document Root in General tab is `/var/www/Dtailbase/backend/frontend_build`
 - Check: Static context URI `/` exists and points to same path
 - Check: No Proxy or App Server context exists on URI `/`
 
@@ -193,7 +193,7 @@ http://187.124.208.220/admin/               (should load Django admin through th
 - Check: Proxy context URI `/api/` exists
 - Check: Proxy context points to `[VHost Level]: django_backend`
 - Check: External App `django_backend` points to `127.0.0.1:8000`
-- On VPS, run: `cd /var/www/Detely/backend && python manage.py check`
+- On VPS, run: `cd /var/www/Dtailbase/backend && python manage.py check`
 
 ### Problem: /api returns 502 or times out
 - Check: Django is actually listening on `127.0.0.1:8000`
@@ -232,6 +232,6 @@ You'll know deployment is working when:
 4. ✅ Browser DevTools Network tab shows `/api/` calls being proxied to your Django backend
 5. ✅ API calls return JSON or proper error responses, not 502/504
 
-Once all 5 are true, your Detely app is live on production! 🎉
+Once all 5 are true, your Dtailbase app is live on production! 🎉
 
 

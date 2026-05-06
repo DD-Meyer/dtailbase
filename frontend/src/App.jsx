@@ -84,7 +84,7 @@ function AppContent() {
   const Tutorials = () => (
     <ContentPage 
       title="Master the" highlight="Workflow."
-      intro="Get the most out of Detely with step-by-step guides, video tutorials, and best practices from top studios."
+      intro="Get the most out of Dtailbase with step-by-step guides, video tutorials, and best practices from top studios."
       sections={[
         { title: "Getting Started", desc: "Setup your first service and booking link in under 10 minutes.", button: "Read Article" },
         { title: "WhatsApp Automation", desc: "How to setup automated follow-ups for ceramic maintenance.", button: "Watch Video", wide: true },
@@ -99,7 +99,7 @@ function AppContent() {
       intro="Whether you're facing a technical issue or need guidance on best practices, our support team has your back."
       sections={[
         { title: "Contact Support", desc: "Get in touch with our support team for personalized assistance.", button: "Contact Us" },
-        { title: "FAQs", desc: "Find answers to common questions about using Detely.", button: "View FAQs", wide: true },
+        { title: "FAQs", desc: "Find answers to common questions about using Dtailbase.", button: "View FAQs", wide: true },
         { title: "Community Forums", desc: "Connect with other detailers, share tips, and learn from each other's experiences.", button: "Join the Community" }
       ]}
     />
@@ -120,7 +120,7 @@ function AppContent() {
   const OurStory = () => (
     <ContentPage 
       title="Built by" highlight="Detailers."
-      intro="We didn't build Detely in a tech office. We built it in the wash bay, between ceramic coatings."
+      intro="We didn't build Dtailbase in a tech office. We built it in the wash bay, between ceramic coatings."
       sections={[
         { title: "The Problem", desc: "General CRM tools are too messy. Detailers need specific workflows for cure times and inspections.", wide: true },
         { title: "The Mission", desc: "To give every detailer the software 'operating system' they need to go from hobbyist to studio owner.", tag: "VISION" }

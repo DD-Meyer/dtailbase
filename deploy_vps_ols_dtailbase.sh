@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Detely VPS deploy script for Hostinger OpenLiteSpeed (Ubuntu)
+# Dtailbase VPS deploy script for Hostinger OpenLiteSpeed (Ubuntu)
 # Usage:
-#   bash deploy_vps_ols_detely.sh
+#   bash deploy_vps_ols_dtailbase.sh
 # Optional env overrides:
-#   APP_DIR=/var/www/Detely BRANCH=main VENV_DIR=venv bash deploy_vps_ols_detely.sh
+#   APP_DIR=/var/www/Dtailbase BRANCH=main VENV_DIR=venv bash deploy_vps_ols_dtailbase.sh
 
 if [[ -z "${APP_DIR:-}" ]]; then
-  if [[ -d "/var/www/Detely" ]]; then
-    APP_DIR="/var/www/Detely"
-  elif [[ -d "/var/www/detely" ]]; then
-    APP_DIR="/var/www/detely"
+  if [[ -d "/var/www/Dtailbase" ]]; then
+    APP_DIR="/var/www/Dtailbase"
+  elif [[ -d "/var/www/dtailbase" ]]; then
+    APP_DIR="/var/www/dtailbase"
   else
-    APP_DIR="/var/www/Detely"
+    APP_DIR="/var/www/Dtailbase"
   fi
 fi
 BRANCH="${BRANCH:-main}"
@@ -146,6 +146,6 @@ sudo systemctl restart lsws
 
 log "Deployment completed successfully"
 log "Quick checks:"
-log "  curl -I https://www.detely.com/"
-log "  curl -I https://www.detely.com/api/"
+log "  curl -I https://www.dtailbase.com/"
+log "  curl -I https://www.dtailbase.com/api/"
 log "  sudo tail -n 100 /usr/local/lsws/logs/error.log"

@@ -1,6 +1,6 @@
 # VPS Deployment & Debugging Commands
 ## SETUP .ENV for Production Ready Fix
-cd /var/www/Detely
+cd /var/www/Dtailbase
 
 # backup
 cp .env .env.bak.$(date +%F-%H%M%S)
@@ -11,17 +11,17 @@ DEBUG=False
 DJANGO_ENV=production
 SECRET_KEY='django-insecure-k1tf3^tazr^$hevd926wb(9i+9pakqgi5#8yme^3v#xozn5*4s'
 USE_POSTGRES=False
-ALLOWED_HOSTS=detely.com,www.detely.com,187.124.208.220,127.0.0.1,localhost
-CORS_ALLOWED_ORIGINS=https://www.detely.com,https://www.detely.com
-CSRF_TRUSTED_ORIGINS=https://www.detely.com,https://www.detely.com
+ALLOWED_HOSTS=dtailbase.com,www.dtailbase.com,187.124.208.220,127.0.0.1,localhost
+CORS_ALLOWED_ORIGINS=https://www.dtailbase.com,https://www.dtailbase.com
+CSRF_TRUSTED_ORIGINS=https://www.dtailbase.com,https://www.dtailbase.com
 EOF
 
 # fix sqlite and writable dirs for app user
-chown lsadm:lsadm /var/www/Detely/backend/db.sqlite3
-chmod 664 /var/www/Detely/backend/db.sqlite3
-chown -R lsadm:lsadm /var/www/Detely/backend/media /var/www/Detely/backend/staticfiles
-find /var/www/Detely/backend/media -type d -exec chmod 775 {} \;
-find /var/www/Detely/backend/staticfiles -type d -exec chmod 775 {} \;
+chown lsadm:lsadm /var/www/Dtailbase/backend/db.sqlite3
+chmod 664 /var/www/Dtailbase/backend/db.sqlite3
+chown -R lsadm:lsadm /var/www/Dtailbase/backend/media /var/www/Dtailbase/backend/staticfiles
+find /var/www/Dtailbase/backend/media -type d -exec chmod 775 {} \;
+find /var/www/Dtailbase/backend/staticfiles -type d -exec chmod 775 {} \;
 
 # restart OLS (and app worker)
 systemctl restart lsws
@@ -55,11 +55,11 @@ git commit -m "Make dotenv import optional for VPS compatibility"
 git push origin main
 
 # On VPS, pull latest:
-cd /var/www/Detely
+cd /var/www/Dtailbase
 git pull origin main
 
 # Install/upgrade dependencies
-cd /var/www/Detely/backend
+cd /var/www/Dtailbase/backend
 source venv/bin/activate
 pip install -r requirements.txt
 ```
@@ -68,18 +68,18 @@ pip install -r requirements.txt
 
 ```bash
 # On VPS, verify production env file is present:
-ls -la /var/www/Detely/.env
+ls -la /var/www/Dtailbase/.env
 
 # If it doesn't exist, create it from example:
-cp /var/www/Detely/.env.production.example /var/www/Detely/.env
+cp /var/www/Dtailbase/.env.production.example /var/www/Dtailbase/.env
 
 # Edit it with your actual secrets:
-nano /var/www/Detely/.env
+nano /var/www/Dtailbase/.env
 
 # Required fields:
 # DEBUG=False
 # SECRET_KEY=<your-strong-secret>
-# DATABASE_URL=postgres://detely_prod_user:strong-password@127.0.0.1:5432/detely_prod
+# DATABASE_URL=postgres://dtailbase_prod_user:strong-password@127.0.0.1:5432/dtailbase_prod
 # USE_POSTGRES=True
 # DJANGO_ENV=production
 ```
@@ -137,21 +137,21 @@ sudo systemctl reload lsws
 
 ```bash
 # Test API is responding (should return JSON, not 500)
-curl -i https://www.detely.com/api/bookings/
+curl -i https://www.dtailbase.com/api/bookings/
 
 # Test with auth header (replace TOKEN with real JWT):
 curl -i -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  https://www.detely.com/api/bookings/
+  https://www.dtailbase.com/api/bookings/
 
 # Test status update endpoint:
 curl -i -X PATCH \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"status":"IN_PROGRESS"}' \
-  https://www.detely.com/api/bookings/UUID-HERE/update_status/
+  https://www.dtailbase.com/api/bookings/UUID-HERE/update_status/
 
 # Check media files are accessible
-curl -i https://www.detely.com/media/vehicle_photos/sample.jpg
+curl -i https://www.dtailbase.com/media/vehicle_photos/sample.jpg
 ```
 
 ## STEP 6: Common Issues & Quick Fixes
@@ -185,8 +185,8 @@ ValueError
 ```bash
 # Force reload settings:
 # 1. Delete old .pyc/cache files
-find /var/www/Detely -name "*.pyc" -delete
-find /var/www/Detely -type d -name "__pycache__" -exec rm -rf {} +
+find /var/www/Dtailbase -name "*.pyc" -delete
+find /var/www/Dtailbase -type d -name "__pycache__" -exec rm -rf {} +
 
 # 2. Restart app
 sudo systemctl restart gunicorn  # or lsws
@@ -196,7 +196,7 @@ sudo systemctl restart gunicorn  # or lsws
 
 ```bash
 # Check Django can even import settings without starting server:
-cd /var/www/Detely/backend
+cd /var/www/Dtailbase/backend
 source ../venv/bin/activate
 python -c "from django.conf import settings; print(settings.DEBUG, settings.DATABASES['default']['ENGINE'])"
 
@@ -207,13 +207,13 @@ python -c "from django.conf import settings; print(settings.DEBUG, settings.DATA
 
 ```bash
 # 1. All bookings responsive?
-curl -s https://www.detely.com/api/bookings/ | head -20
+curl -s https://www.dtailbase.com/api/bookings/ | head -20
 
 # 2. Images load?
-curl -I https://www.detely.com/media/vehicle_photos/test.png
+curl -I https://www.dtailbase.com/media/vehicle_photos/test.png
 
 # 3. Static files load?
-curl -I https://www.detely.com/assets/index-DVyh7LtE.js
+curl -I https://www.dtailbase.com/assets/index-DVyh7LtE.js
 
 # 4. Check error logs for new errors in last 5 minutes:
 sudo journalctl -u gunicorn --since "5 minutes ago" | grep -i error
@@ -230,7 +230,7 @@ python manage.py dbshell  # Should drop you into psql prompt
 
 ```bash
 # Run Django shell and import the problematic view:
-cd /var/www/Detely/backend
+cd /var/www/Dtailbase/backend
 source ../venv/bin/activate
 python manage.py shell
 
@@ -249,7 +249,7 @@ python manage.py runserver 0.0.0.0:8000 --nothreading --noreload
 | Environment | .env Location | Load Priority |
 |-------------|---------------|----------------|
 | Local (Windows) | `E:\Work\...\` | `.env.local` → `.env` |
-| VPS (Production) | `/var/www/Detely/` | `.env` |
+| VPS (Production) | `/var/www/Dtailbase/` | `.env` |
 | OLS Proxy + Django backend | (same location, Django reads `.env`) | `.env` loaded by Django at startup |
 
 ## CRITICAL: Don't Forget After Each Change
