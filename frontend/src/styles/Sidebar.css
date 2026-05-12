@@ -1,8 +1,8 @@
 :root {
   --sidebar-width: 260px;
   --sidebar-collapsed-width: 80px;
-  --primary-blue: #3b82f6;
-  --bg-dark: #0f172a;
+  --primary-blue: #23b4ff;
+  --bg-dark: #060d18;
 }
 
 .sidebar {
@@ -16,7 +16,7 @@
   position: sticky;
   top: 0;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid rgba(123, 154, 196, 0.25);
   z-index: 1000;
   overflow-x: hidden; /* Prevents text from poking out during transition */
 }
@@ -116,8 +116,8 @@
 }
 
 .sidebar-links li.active a {
-  background: rgba(59, 130, 246, 0.15);
-  color: var(--primary-blue);
+  background: linear-gradient(90deg, rgba(35, 180, 255, 0.2), rgba(70, 255, 179, 0.14));
+  color: #e9f8ff;
   font-weight: 600;
 }
 

@@ -32,6 +32,18 @@ class Company(models.Model):
 
     is_subscription_active = models.BooleanField(default=False)
     payfast_token = models.CharField(max_length=255, blank=True, null=True) # To store the token for future recurring payments
+    
+    # PayPal Subscription fields
+    paypal_subscription_id = models.CharField(max_length=255, blank=True, null=True)
+    paypal_customer_id = models.CharField(max_length=255, blank=True, null=True)
+    
+    # Geolocation and Currency
+    CURRENCY_CHOICES = [
+        ('ZAR', 'South African Rand'),
+        ('USD', 'US Dollar'),
+    ]
+    country_code = models.CharField(max_length=2, default='US', blank=True)  # ISO country code
+    currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default='USD')
 
     # 📈 Add this to track usage
     def get_monthly_booking_count(self):

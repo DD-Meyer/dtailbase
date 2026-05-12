@@ -3,6 +3,7 @@ import api from "../axios_instance";
 import "../styles/TeamManagement.css";
 import { AuthContext } from "../context/AuthContext";
 import { useCompany } from "../context/CompanyContext";
+import UpgradeValueCards from "./UpgradeValueCards";
 
 function TeamManagement() {
   const { user } = useContext(AuthContext);
@@ -214,6 +215,8 @@ function TeamManagement() {
         type="text" placeholder="Search team members..." className="search-input"
         value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
       />
+
+      <UpgradeValueCards currentPlan={currentPlan} />
 
       {/* If no members match the search query, show a friendly message */}
       {filteredTeam.length === 0 && <p className="text-center text-gray-500">No team members found.</p>}

@@ -2,6 +2,7 @@ import { useEffect, useState, useContext } from "react";
 import api from "../axios_instance";
 import "../styles/Customers.css";
 import { useCompany } from "../context/CompanyContext";
+import UpgradeValueCards from "../components/UpgradeValueCards";
 
 function Customers() {
   const [customers, setCustomers] = useState([]);
@@ -113,6 +114,8 @@ function Customers() {
         value={search}
         onChange={(e) => setSearch(e.target.value)} 
       />
+
+      <UpgradeValueCards currentPlan={currentPlan} />
 
       <div className="card customers-table-container">
         <table className="table-standard">

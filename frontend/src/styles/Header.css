@@ -1,7 +1,8 @@
 .app-header {
   height: 70px;
-  background: white;
-  border-bottom: 1px solid #e2e8f0;
+  background: rgba(7, 13, 24, 0.88);
+  border-bottom: 1px solid rgba(123, 154, 196, 0.22);
+  backdrop-filter: blur(8px);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -13,9 +14,9 @@
 
 .mobile-menu-btn {
   display: none;
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-  color: #0f172a;
+  border: 1px solid rgba(123, 154, 196, 0.28);
+  background: rgba(18, 30, 48, 0.78);
+  color: #d9e8ff;
   border-radius: 10px;
   width: 40px;
   height: 40px;
@@ -41,13 +42,13 @@
 }
 
 .profile-trigger:hover {
-  background: #f8fafc;
+  background: rgba(123, 154, 196, 0.15);
 }
 
 .avatar {
   width: 36px;
   height: 36px;
-  background: #3b82f6;
+  background: linear-gradient(145deg, #23b4ff, #32f0ca);
   color: white;
   border-radius: 10px;
   display: flex;
@@ -64,12 +65,12 @@
   display: block;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #0f172a;
+  color: #eff6ff;
 }
 
 .user-role {
   font-size: 0.75rem;
-  color: #64748b;
+  color: #9ab2d2;
   text-transform: capitalize;
 }
 
@@ -79,8 +80,8 @@
   top: calc(100% + 10px);
   right: 0;
   width: 220px;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: rgba(12, 22, 36, 0.95);
+  border: 1px solid rgba(123, 154, 196, 0.24);
   border-radius: 12px;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
   padding: 8px 0;
@@ -102,7 +103,7 @@
 .user-email {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #1e293b;
+  color: #e5f0ff;
   word-break: break-all;
 }
 
@@ -116,7 +117,7 @@
   display: block;
   padding: 10px 16px;
   text-decoration: none;
-  color: #475569;
+  color: #d8e8ff;
   font-size: 0.9rem;
   width: 100%;
   text-align: left;
@@ -127,8 +128,8 @@
 }
 
 .dropdown-links a:hover {
-  background: #f1f5f9;
-  color: #3b82f6;
+  background: rgba(35, 180, 255, 0.12);
+  color: #e9f8ff;
 }
 
 .logout-btn {

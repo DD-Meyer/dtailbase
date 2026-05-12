@@ -37,13 +37,13 @@ def env_list(name, default=""):
     return [item.strip() for item in raw_value.split(',') if item.strip()]
 
 
-# Load environment files from the repository root.
-# VPS production uses a single root .env file.
+# Load environment files from both the repository root and backend folder.
+# Local development has used both locations, so support both explicitly.
 ENVIRONMENT = os.environ.get('DJANGO_ENV', os.environ.get('ENVIRONMENT', 'development')).lower()
-env_files = [PROJECT_ROOT / '.env']
+env_files = [PROJECT_ROOT / '.env', BASE_DIR / '.env']
 
 if ENVIRONMENT in {'development', 'local'}:
-    env_files.insert(0, PROJECT_ROOT / '.env.local')
+    env_files = [PROJECT_ROOT / '.env.local', BASE_DIR / '.env.local', *env_files]
 
 for env_file in env_files:
     if env_file.exists():
@@ -275,5 +275,26 @@ ASGI_APPLICATION = 'core.asgi.application'
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
+
+# ========== PayPal Configuration ==========
+PAYPAL_MODE = os.environ.get('PAYPAL_MODE', 'sandbox')
+PAYPAL_CLIENT_ID = os.environ.get('PAYPAL_CLIENT_ID', '')
+PAYPAL_CLIENT_SECRET = os.environ.get('PAYPAL_CLIENT_SECRET', '')
+PAYPAL_WEBHOOK_URL = os.environ.get('PAYPAL_WEBHOOK_URL', '')
+PAYPAL_WEBHOOK_ID = os.environ.get('PAYPAL_WEBHOOK_ID', '')
+
+# ========== Geolocation Service (ipstack) ==========
+IPSTACK_API_KEY = os.environ.get('IPSTACK_API_KEY', '')
+
+# ========== Cache Configuration ==========
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'dtailbase-cache',
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000
+        }
     }
 }

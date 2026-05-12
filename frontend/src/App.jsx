@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext, AuthProvider } from "./context/AuthContext";
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -31,6 +32,7 @@ import Contact from "./pages/Contact";
 import ContentPage from "./pages/ContentPage";
 import PublicBooking from "./pages/PublicBooking";
 import Upgrade from "./pages/Upgrade";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 
 function AppContent() {
@@ -39,7 +41,7 @@ function AppContent() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // 1. Identify ALL public-facing "Marketing" pages
-  const publicRoutes = ["/", "/hero", "/about", "/products", "/pricing", "/contact", "/legal", "/community", "/features", "/security", "/our-Story", "/support", "/help-center", "/tutorials", "/public-booking/:companySlug", "/upgrade"];
+  const publicRoutes = ["/", "/hero", "/about", "/products", "/pricing", "/contact", "/legal", "/community", "/features", "/security", "/our-Story", "/support", "/help-center", "/tutorials", "/public-booking/:companySlug", "/upgrade", "/payment-success"];
   const isLandingPage = publicRoutes.includes(location.pathname);
 
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
@@ -188,6 +190,7 @@ function AppContent() {
             <Route path="/legal" element={<PublicLayout><Legal /></PublicLayout>} />
             <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
             <Route path="/upgrade" element={<PublicLayout><Upgrade /></PublicLayout>} />
+            <Route path="/payment-success" element={<PublicLayout><PaymentSuccess /></PublicLayout>} />
 
             {/* Example of using the reusable ContentPage for a new "Community" page */}
             <Route path="/Features" element={<Features />} />
@@ -232,11 +235,20 @@ function AppContent() {
 
 
 function App() {
+  const paypalInitialOptions = {
+    'client-id': import.meta.env.VITE_PAYPAL_CLIENT_ID || 'test',
+    currency: 'USD', // Default, will be overridden per order
+    intent: 'subscription',
+    vault: true,
+  };
+
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <CompanyProvider>
-          <AppContent />
+          <PayPalScriptProvider options={paypalInitialOptions}>
+            <AppContent />
+          </PayPalScriptProvider>
         </CompanyProvider>
       </AuthProvider>
     </BrowserRouter>

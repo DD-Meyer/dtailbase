@@ -1,0 +1,500 @@
+"""
+PayPal subscription integration service.
+Handles PayPal API calls for creating and managing subscriptions.
+"""
+
+import logging
+import json
+import requests
+from django.conf import settings
+
+logger = logging.getLogger(__name__)
+
+# API Base URLs
+PAYPAL_API_BASE = {
+    'sandbox': 'https://api-m.sandbox.paypal.com',
+    'live': 'https://api-m.paypal.com'
+}
+
+PAYPAL_WEB_BASE = {
+    'sandbox': 'https://www.sandbox.paypal.com',
+    'live': 'https://www.paypal.com'
+}
+
+# Pricing Configuration
+PRICING = {
+    'ZAR': {
+        'PRO': {
+            'amount': '499.00',
+            'currency': 'ZAR',
+            'description': 'Dtailbase Pro - ZAR'
+        },
+        'ENTERPRISE': {
+            'amount': '1299.00',
+            'currency': 'ZAR',
+            'description': 'Dtailbase Enterprise - ZAR'
+        }
+    },
+    'USD': {
+        'PRO': {
+            'amount': '29.00',
+            'currency': 'USD',
+            'description': 'Dtailbase Pro - USD'
+        },
+        'ENTERPRISE': {
+            'amount': '149.00',
+            'currency': 'USD',
+            'description': 'Dtailbase Enterprise - USD'
+        }
+    }
+}
+
+
+def get_paypal_access_token():
+    """Get OAuth 2.0 access token from PayPal."""
+    paypal_mode = getattr(settings, 'PAYPAL_MODE', 'sandbox')
+    paypal_client_id = getattr(settings, 'PAYPAL_CLIENT_ID', '')
+    paypal_client_secret = getattr(settings, 'PAYPAL_CLIENT_SECRET', '')
+
+    logger.debug(
+        f"PayPal config - MODE: {paypal_mode}, CLIENT_ID exists: {bool(paypal_client_id)}, SECRET exists: {bool(paypal_client_secret)}"
+    )
+    
+    if not paypal_client_id or not paypal_client_secret:
+        error_msg = (
+            f"PayPal credentials not configured: CLIENT_ID={bool(paypal_client_id)}, SECRET={bool(paypal_client_secret)}"
+        )
+        logger.error(error_msg)
+        return None
+    
+    url = f"{PAYPAL_API_BASE[paypal_mode]}/v1/oauth2/token"
+    headers = {'Accept': 'application/json', 'Accept-Language': 'en_US'}
+    
+    logger.debug(f"Requesting PayPal token from: {url}")
+    
+    try:
+        response = requests.post(
+            url,
+            auth=(paypal_client_id, paypal_client_secret),
+            headers=headers,
+            data={'grant_type': 'client_credentials'},
+            timeout=10
+        )
+        response.raise_for_status()
+        data = response.json()
+        return data.get('access_token')
+    except requests.RequestException as e:
+        logger.error(f"Failed to get PayPal access token: {str(e)}")
+        return None
+
+
+def get_subscription_plan(plan_id, currency):
+    """
+    Get pricing details for a subscription plan.
+    
+    Args:
+        plan_id: 'PRO' or 'ENTERPRISE'
+        currency: 'ZAR' or 'USD'
+    
+    Returns:
+        dict with plan details or None if not found
+    """
+    if currency not in PRICING or plan_id not in PRICING[currency]:
+        logger.error(f"Invalid plan/currency combination: {plan_id}/{currency}")
+        return None
+    
+    return PRICING[currency][plan_id]
+
+
+def create_paypal_subscription(user_email, plan_id, currency, return_url, cancel_url):
+    """
+    Create a PayPal subscription for a user using Subscriptions API.
+    
+    Args:
+        user_email: User's email
+        plan_id: 'PRO' or 'ENTERPRISE'
+        currency: 'ZAR' or 'USD'
+        return_url: Success return URL
+        cancel_url: Cancel return URL
+    
+    Returns:
+        dict with 'success': bool, 'approval_url': str (if success), 'error': str (if failed)
+    """
+    
+    access_token = get_paypal_access_token()
+    if not access_token:
+        return {'success': False, 'error': 'Failed to authenticate with PayPal'}
+    
+    plan_details = get_subscription_plan(plan_id, currency)
+    if not plan_details:
+        return {'success': False, 'error': f'Invalid plan: {plan_id}/{currency}'}
+    
+    try:
+        paypal_mode = getattr(settings, 'PAYPAL_MODE', 'sandbox')
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {access_token}'
+        }
+        
+        # Step 1: Ensure Product exists (or create it)
+        # Use an app-owned identifier. PayPal reserves the PROD- prefix.
+        product_id = 'DTAILBASE-SUBSCRIPTIONS-001'
+        product_url = f"{PAYPAL_API_BASE[paypal_mode]}/v1/catalogs/products/{product_id}"
+        
+        logger.info(f"Checking PayPal product: {product_id}")
+        
+        # Try to get the product
+        product_response = requests.get(product_url, headers=headers, timeout=10)
+        
+        # If product doesn't exist (404), create it
+        if product_response.status_code == 404:
+            logger.info("Product not found, creating new product")
+            products_url = f"{PAYPAL_API_BASE[paypal_mode]}/v1/catalogs/products"
+            product_payload = {
+                'id': product_id,
+                'name': 'Dtailbase Subscriptions',
+                'description': 'Professional detailing management software',
+                'type': 'SERVICE',
+                'category': 'SOFTWARE'
+            }
+            
+            product_create_response = requests.post(
+                products_url,
+                headers=headers,
+                json=product_payload,
+                timeout=10
+            )
+            product_create_response.raise_for_status()
+            logger.info(f"Created PayPal product: {product_id}")
+        elif product_response.status_code == 200:
+            logger.info(f"Product already exists: {product_id}")
+        else:
+            product_response.raise_for_status()
+        
+        # Step 2: Create a billing plan
+        plan_url = f"{PAYPAL_API_BASE[paypal_mode]}/v1/billing/plans"
+        
+        # Create unique plan name to avoid duplicates
+        import time
+        timestamp = int(time.time())
+        unique_plan_name = f"{plan_id}-{currency}-{timestamp}"
+        
+        plan_payload = {
+            'product_id': product_id,
+            'name': unique_plan_name,
+            'description': plan_details['description'],
+            'type': 'SUBSCRIPTION',
+            'billing_cycles': [
+                {
+                    'frequency': {
+                        'interval_unit': 'MONTH',
+                        'interval_count': 1
+                    },
+                    'tenure_type': 'REGULAR',
+                    'sequence': 1,
+                    'total_cycles': 0,  # Infinite
+                    'pricing_scheme': {
+                        'fixed_price': {
+                            'value': plan_details['amount'],
+                            'currency_code': currency
+                        }
+                    }
+                }
+            ],
+            'payment_preferences': {
+                'setup_fee': {
+                    'value': '0',
+                    'currency_code': currency
+                },
+                'setup_fee_failure_action': 'CONTINUE',
+                'payment_failure_threshold': 3
+            }
+        }
+        
+        logger.info(f"Creating billing plan with payload: {plan_payload}")
+        
+        plan_response = requests.post(
+            plan_url,
+            headers=headers,
+            json=plan_payload,
+            timeout=10
+        )
+        
+        if plan_response.status_code >= 400:
+            error_data = plan_response.json() if plan_response.headers.get('content-type') == 'application/json' else {}
+            error_msg = error_data.get('message', plan_response.text)
+            logger.error(f"Failed to create billing plan: {error_msg}")
+            return {'success': False, 'error': f'PayPal plan creation failed: {error_msg}'}
+        
+        plan_response.raise_for_status()
+        plan_response_data = plan_response.json()
+        plan_paypal_id = plan_response_data.get('id')
+        
+        logger.info(f"Created PayPal plan: {plan_paypal_id}")
+        
+        if not plan_paypal_id:
+            return {'success': False, 'error': 'Failed to create billing plan'}
+        
+        # Step 3: Create subscription
+        subscription_url = f"{PAYPAL_API_BASE[paypal_mode]}/v1/billing/subscriptions"
+        
+        subscription_payload = {
+            'plan_id': plan_paypal_id,
+            'subscriber': {
+                'name': {
+                    'given_name': user_email.split('@')[0][:126]  # PayPal limits to 126 chars
+                },
+                'email_address': user_email
+            },
+            'application_context': {
+                'brand_name': 'Dtailbase',
+                'locale': 'en-US',
+                'user_action': 'SUBSCRIBE_NOW',
+                'return_url': return_url,
+                'cancel_url': cancel_url
+            }
+        }
+        
+        logger.info(f"Creating subscription with payload: {subscription_payload}")
+        
+        sub_response = requests.post(
+            subscription_url,
+            headers=headers,
+            json=subscription_payload,
+            timeout=10
+        )
+        
+        if sub_response.status_code >= 400:
+            error_data = sub_response.json() if sub_response.headers.get('content-type') == 'application/json' else {}
+            error_msg = error_data.get('message', sub_response.text)
+            logger.error(f"Failed to create subscription: {error_msg}")
+            return {'success': False, 'error': f'PayPal subscription creation failed: {error_msg}'}
+        
+        sub_response.raise_for_status()
+        sub_response_data = sub_response.json()
+        subscription_id = sub_response_data.get('id')
+        
+        logger.info(f"Created PayPal subscription: {subscription_id}")
+        
+        # Get approval link
+        links = sub_response_data.get('links', [])
+        approval_url = None
+        for link in links:
+            if link.get('rel') == 'approve':
+                approval_url = link.get('href')
+                break
+        
+        if not approval_url:
+            return {'success': False, 'error': 'No approval URL in response'}
+        
+        return {
+            'success': True,
+            'approval_url': approval_url,
+            'subscription_id': subscription_id,
+            'plan_id': plan_paypal_id
+        }
+    
+    except requests.RequestException as e:
+        error_msg = str(e)
+        logger.error(f"PayPal API error: {error_msg}", exc_info=True)
+        if hasattr(e, 'response') and e.response is not None:
+            try:
+                error_data = e.response.json()
+                error_msg = error_data.get('message', error_msg)
+            except:
+                error_msg = e.response.text if e.response.text else error_msg
+        return {'success': False, 'error': error_msg}
+    
+    except Exception as e:
+        error_msg = str(e)
+        logger.error(f"Unexpected error in create_paypal_subscription: {error_msg}", exc_info=True)
+        return {'success': False, 'error': error_msg}
+
+
+def verify_paypal_webhook(webhook_data, request_headers=None):
+    """
+    Verify PayPal webhook signature.
+    Uses PayPal's verify-webhook-signature endpoint for modern webhooks.
+    Falls back to permissive handling for legacy IPN-style payloads.
+    """
+    headers = request_headers or {}
+
+    # Legacy IPN fallback payload (no modern webhook signature headers)
+    if 'txn_type' in webhook_data and 'PAYPAL-TRANSMISSION-ID' not in headers:
+        logger.warning("Processing legacy IPN payload without modern signature headers")
+        return True
+
+    paypal_webhook_id = getattr(settings, 'PAYPAL_WEBHOOK_ID', '')
+    if not paypal_webhook_id:
+        logger.error("PAYPAL_WEBHOOK_ID is not configured")
+        return False
+
+    transmission_id = headers.get('PAYPAL-TRANSMISSION-ID')
+    transmission_time = headers.get('PAYPAL-TRANSMISSION-TIME')
+    transmission_sig = headers.get('PAYPAL-TRANSMISSION-SIG')
+    cert_url = headers.get('PAYPAL-CERT-URL')
+    auth_algo = headers.get('PAYPAL-AUTH-ALGO')
+
+    required_headers = [
+        transmission_id,
+        transmission_time,
+        transmission_sig,
+        cert_url,
+        auth_algo,
+    ]
+    if not all(required_headers):
+        logger.error("Missing required PayPal webhook signature headers")
+        return False
+
+    access_token = get_paypal_access_token()
+    if not access_token:
+        return False
+
+    try:
+        paypal_mode = getattr(settings, 'PAYPAL_MODE', 'sandbox')
+        url = f"{PAYPAL_API_BASE[paypal_mode]}/v1/notifications/verify-webhook-signature"
+        req_headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {access_token}'
+        }
+        payload = {
+            'auth_algo': auth_algo,
+            'cert_url': cert_url,
+            'transmission_id': transmission_id,
+            'transmission_sig': transmission_sig,
+            'transmission_time': transmission_time,
+            'webhook_id': paypal_webhook_id,
+            'webhook_event': webhook_data,
+        }
+
+        response = requests.post(url, headers=req_headers, data=json.dumps(payload), timeout=10)
+        response.raise_for_status()
+        verification_data = response.json()
+        status = (verification_data.get('verification_status') or '').upper()
+
+        if status != 'SUCCESS':
+            logger.error(f"PayPal webhook verification failed: {verification_data}")
+            return False
+
+        return True
+    except requests.RequestException as e:
+        logger.error(f"PayPal webhook verification request failed: {str(e)}")
+        return False
+
+
+def get_paypal_subscription_details(subscription_id):
+    """
+    Fetch subscription details from PayPal Subscriptions API.
+
+    Returns:
+        dict with subscription details, or None on failure.
+    """
+    access_token = get_paypal_access_token()
+    if not access_token:
+        return None
+
+    try:
+        paypal_mode = getattr(settings, 'PAYPAL_MODE', 'sandbox')
+        url = f"{PAYPAL_API_BASE[paypal_mode]}/v1/billing/subscriptions/{subscription_id}"
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {access_token}'
+        }
+
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        logger.error(f"Failed to fetch PayPal subscription {subscription_id}: {str(e)}")
+        return None
+
+
+def get_paypal_plan_tier(subscription_id):
+    """
+    Resolve Dtailbase plan tier (PRO/ENTERPRISE) from a PayPal subscription.
+
+    Returns:
+        tuple (plan_tier, status) where plan_tier is PRO/ENTERPRISE or None.
+    """
+    subscription_data = get_paypal_subscription_details(subscription_id)
+    if not subscription_data:
+        return None, None
+
+    status = (subscription_data.get('status') or '').upper()
+    plan_paypal_id = subscription_data.get('plan_id')
+    if not plan_paypal_id:
+        return None, status
+
+    return get_paypal_tier_from_plan_id(plan_paypal_id), status
+
+
+def get_paypal_tier_from_plan_id(plan_paypal_id):
+    """
+    Resolve Dtailbase plan tier (PRO/ENTERPRISE) from a PayPal billing plan id.
+    """
+    if not plan_paypal_id:
+        return None
+
+    access_token = get_paypal_access_token()
+    if not access_token:
+        return None
+
+    try:
+        paypal_mode = getattr(settings, 'PAYPAL_MODE', 'sandbox')
+        url = f"{PAYPAL_API_BASE[paypal_mode]}/v1/billing/plans/{plan_paypal_id}"
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {access_token}'
+        }
+
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        plan_data = response.json()
+        plan_name = (plan_data.get('name') or '').upper()
+
+        if plan_name.startswith('PRO-'):
+            return 'PRO'
+        if plan_name.startswith('ENTERPRISE-'):
+            return 'ENTERPRISE'
+
+        logger.warning(f"Unable to infer Dtailbase tier from PayPal plan name '{plan_name}'")
+        return None
+    except requests.RequestException as e:
+        logger.error(f"Failed to fetch PayPal plan {plan_paypal_id}: {str(e)}")
+        return None
+
+
+def cancel_subscription(subscription_id):
+    """
+    Cancel a PayPal subscription.
+    
+    Args:
+        subscription_id: PayPal subscription ID
+    
+    Returns:
+        bool: True if successful
+    """
+    access_token = get_paypal_access_token()
+    if not access_token:
+        return False
+    
+    try:
+        paypal_mode = getattr(settings, 'PAYPAL_MODE', 'sandbox')
+        url = f"{PAYPAL_API_BASE[paypal_mode]}/v1/billing/subscriptions/{subscription_id}/cancel"
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {access_token}'
+        }
+        
+        response = requests.post(
+            url,
+            headers=headers,
+            json={'reason': 'User requested cancellation'},
+            timeout=10
+        )
+        response.raise_for_status()
+        logger.info(f"Cancelled PayPal subscription: {subscription_id}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to cancel subscription {subscription_id}: {str(e)}")
+        return False

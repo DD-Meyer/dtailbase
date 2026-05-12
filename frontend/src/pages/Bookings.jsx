@@ -4,6 +4,7 @@ import "../styles/Global.css";
 import "../styles/Bookings.css";
 import { useNavigate } from "react-router-dom";
 import { useCompany } from "../context/CompanyContext";
+import UpgradeValueCards from "../components/UpgradeValueCards";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 
@@ -91,7 +92,7 @@ function Bookings() {
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
 
   // Inside Bookings function
-  const { planLimits, usageStats, company } = useCompany();
+  const { planLimits, usageStats, company, refreshCompany } = useCompany();
 
   // 1. Get the current count from usageStats (matching your context)
   const monthlyUsage = usageStats?.monthly_bookings || 0;
@@ -201,7 +202,7 @@ function Bookings() {
       await api.patch(`bookings/${bookingId}/`, { status: newStatus });
       triggerToast(`Status updated to ${ALL_STATUS_OPTIONS[newStatus]}`, "info");
       fetchBookings();
-      refreshCompanyData();
+      refreshCompany();
     } catch (err) {
       triggerToast("Update failed", "error");
     }
@@ -386,6 +387,8 @@ function Bookings() {
         </div>
       </div>
 
+      <UpgradeValueCards currentPlan={company?.plan} />
+
       <div className="search-filter-container mb-4">
         <input 
           type="text" placeholder="Search customer or plate..." className="search-input"
@@ -500,6 +503,9 @@ function Bookings() {
                 </td>
                 
                 <td>
+                  <div className={`status-chip status-chip-${b.status.toLowerCase()} ${b.status === "IN_PROGRESS" ? "pulse-chip" : ""}`}>
+                    {ALL_STATUS_OPTIONS[b.status]}
+                  </div>
                   <select 
                     value={b.status} 
                     onChange={(e) => handleStatusChange(b.id, e.target.value)}

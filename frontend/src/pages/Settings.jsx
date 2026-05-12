@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import api from "../axios_instance";
 import "../styles/Settings.css";
 import { useCompany } from "../context/CompanyContext";
+import UpgradeValueCards from "../components/UpgradeValueCards";
 
 function Settings() {
   const [company, setCompany] = useState(null);
@@ -60,6 +61,8 @@ function Settings() {
       </header>
 
       {msg && <div className="alert-success">✅ {msg}</div>}
+
+      <UpgradeValueCards currentPlan={currentPlan} />
 
       <form onSubmit={handleSave}>
         

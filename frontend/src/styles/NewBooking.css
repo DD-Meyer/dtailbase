@@ -9,8 +9,8 @@
   margin-bottom: 40px;
 }
 
-.wizard-header h1 { font-size: 1.8rem; color: #1e293b; margin-bottom: 8px; }
-.wizard-header p { color: #64748b; }
+.wizard-header h1 { font-size: 1.8rem; color: #f5f9ff; margin-bottom: 8px; }
+.wizard-header p { color: #b8cbe3; }
 
 /* Progress Bar */
 .progress-container {
@@ -64,15 +64,15 @@
 .step-item.completed .step-circle { background-color: #0066ff; border-color: #0066ff; color: #fff; }
 
 .step-label { font-size: 0.8rem; font-weight: 600; color: #94a3b8; transition: 0.3s; }
-.step-item.active .step-label { color: #1e293b; }
+.step-item.active .step-label { color: #e4f1ff; }
 
 /* Card Content */
 .wizard-step-card {
-  background: #fff;
+  background: rgba(15, 26, 43, 0.82);
   padding: 40px;
   border-radius: 16px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-  border: 1px solid #f1f5f9;
+  box-shadow: 0 20px 40px -30px rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(123, 154, 196, 0.26);
   min-height: 400px;
   display: flex;
   flex-direction: column;
@@ -81,23 +81,35 @@
 .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .full-width { grid-column: span 2; }
 
-.input-label { display: block; font-size: 0.85rem; font-weight: 600; color: #475569; margin-bottom: 8px; }
+.input-label { display: block; font-size: 0.85rem; font-weight: 600; color: #d7e8ff; margin-bottom: 8px; }
 
 .input-field {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid rgba(123, 154, 196, 0.35);
   border-radius: 8px;
   font-size: 1rem;
   transition: all 0.2s;
-  background: #f8fafc;
+  background: rgba(8, 16, 28, 0.72);
+  color: #dfeeff;
 }
 
 .input-field:focus {
-  background: #fff;
+  background: rgba(10, 20, 34, 0.9);
+  color: #f3f8ff;
   border-color: #0066ff;
   box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.1);
   outline: none;
+}
+
+/* Ensure select dropdown options never render white text on white background */
+select.input-field option {
+  background: #ffffff;
+  color: #0b1b2f;
+}
+
+select.input-field:disabled {
+  opacity: 0.75;
 }
 
 .sig-canvas-container {
@@ -121,7 +133,7 @@
 .wizard-actions { margin-top: auto; padding-top: 30px; display: flex; }
 
 .btn-next { background: #0066ff; color: #fff; padding: 12px 32px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-.btn-back { background: #fff; border: 1px solid #e2e8f0; color: #64748b; padding: 12px 24px; border-radius: 8px; cursor: pointer; }
+.btn-back { background: rgba(123, 154, 196, 0.14); border: 1px solid rgba(123, 154, 196, 0.35); color: #d0e1fb; padding: 12px 24px; border-radius: 8px; cursor: pointer; }
 
 @media (max-width: 600px) {
   .input-grid { grid-template-columns: 1fr; }
@@ -171,7 +183,8 @@
   .btn-next,
   .btn-back {
     width: 100%;
-    min-height: 44px;
+    min-height: 58px;
+    font-size: 1.02rem;
   }
 
   .progress-container {
@@ -223,10 +236,10 @@
 
 /* Time Slot Grid */
 .time-slot-wrapper {
-  background: #f8fafc;
+  background: rgba(8, 16, 28, 0.62);
   padding: 15px;
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid rgba(123, 154, 196, 0.3);
   min-height: 80px;
 }
 
@@ -237,13 +250,14 @@
 }
 
 .slot-chip {
-  padding: 8px 4px;
-  background: white;
-  border: 1px solid #cbd5e1;
+  min-height: 52px;
+  padding: 10px 8px;
+  background: rgba(11, 22, 38, 0.84);
+  border: 1px solid rgba(123, 154, 196, 0.35);
   border-radius: 6px;
-  font-size: 0.85rem;
+  font-size: 0.93rem;
   font-weight: 600;
-  color: #475569;
+  color: #d5e7ff;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -255,10 +269,10 @@
 }
 
 .slot-chip.selected {
-  background: #0066ff;
+  background: linear-gradient(120deg, #0b82c7, #23b4ff);
   color: white;
-  border-color: #0066ff;
-  box-shadow: 0 4px 6px rgba(0, 102, 255, 0.2);
+  border-color: #23b4ff;
+  box-shadow: 0 8px 16px rgba(35, 180, 255, 0.26);
 }
 
 .slot-loader {

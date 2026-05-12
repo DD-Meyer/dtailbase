@@ -91,3 +91,92 @@
   cursor: pointer;
   transition: 0.3s;
 }
+
+/* Currency Note */
+.currency-note {
+  margin-top: 15px;
+  font-size: 0.9rem;
+  color: #00ff88;
+  background: rgba(0, 255, 136, 0.05);
+  padding: 10px 15px;
+  border-radius: 8px;
+  border-left: 3px solid #00ff88;
+}
+
+/* Loading and Error States */
+.loading-state,
+.error-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  margin: 20px 0;
+}
+
+.loading-state p,
+.error-state p {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.error-state p {
+  color: #ff6b6b;
+}
+
+.error-state {
+  border-left: 4px solid #ff6b6b;
+}
+
+/* Payment Info Section */
+.payment-info {
+  margin-top: 60px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 30px;
+  text-align: center;
+}
+
+.payment-info h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+  color: #fff;
+}
+
+.payment-info ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+.payment-info li {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.payment-info li::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  background: rgba(0, 255, 136, 0.2);
+  border: 1px solid #00ff88;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.limit-overview {
+  margin-top: 40px;
+  text-align: center;
+  padding: 20px;
+}

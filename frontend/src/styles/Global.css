@@ -1,13 +1,15 @@
 /* 1. VARIABLES & RESET */
 :root {
-  --primary: #0066ff;
-  --primary-hover: #0052cc;
-  --bg-main: #f8fafc;
-  --bg-sidebar: #1e293b;
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --border-color: #e2e8f0;
-  --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --primary: #23b4ff;
+  --primary-hover: #0f8ed4;
+  --accent-neon: #46ffb3;
+  --bg-main: #070d17;
+  --bg-panel: #0f1a2b;
+  --bg-sidebar: #060d18;
+  --text-main: #ebf2ff;
+  --text-muted: #8ba1bf;
+  --border-color: rgba(123, 154, 196, 0.28);
+  --card-shadow: 0 20px 40px -26px rgba(3, 8, 18, 0.78);
   --header-height: 64px;
   --sidebar-width: 260px;
 }
@@ -21,7 +23,7 @@
 body {
   background-color: var(--bg-main);
   color: var(--text-main);
-  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  font-family: 'Sora', -apple-system, system-ui, sans-serif;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
@@ -62,7 +64,10 @@ body.mobile-nav-open {
   overflow-y: auto;   /* THIS is the only part that scrolls */
   display: flex;
   flex-direction: column;
-  background: #f8fafc;
+  background:
+    radial-gradient(1200px 600px at 90% -10%, rgba(35, 180, 255, 0.16), transparent 60%),
+    radial-gradient(900px 500px at -10% 10%, rgba(70, 255, 179, 0.12), transparent 60%),
+    var(--bg-main);
 }
 
 /* 4. Keep the Header at the top of the content */
@@ -71,7 +76,8 @@ body.mobile-nav-open {
   flex-shrink: 0;     /* Header doesn't shrink */
   position: sticky;
   top: 0;
-  background: #ffffff;
+  background: rgba(8, 14, 25, 0.84);
+  backdrop-filter: blur(8px);
   z-index: 10;
   border-bottom: 1px solid var(--border-color);
 }
@@ -140,12 +146,35 @@ body.mobile-nav-open {
 }
 
 .card {
-  background: white;
-  border-radius: 8px;
+  background: rgba(20, 34, 54, 0.9);
+  border-radius: 12px;
   border: 1px solid var(--border-color);
   box-shadow: var(--card-shadow);
   padding: 1.5rem;
   margin-bottom: 1rem;
+  backdrop-filter: blur(8px);
+  color: #eaf3ff;
+}
+
+.card h1,
+.card h2,
+.card h3,
+.card h4,
+.card p,
+.card label,
+.card strong,
+.card span,
+.card li,
+.card td,
+.card th,
+.card small {
+  color: #edf5ff;
+}
+
+.text-gray-500,
+.text-gray-600,
+.text-gray-700 {
+  color: #9fb7d6 !important;
 }
 
 /* Buttons */
@@ -164,6 +193,16 @@ body.mobile-nav-open {
 
 .btn-primary { background: var(--primary); color: white; }
 .btn-primary:hover { background: var(--primary-hover); }
+
+.btn-secondary {
+  background: rgba(123, 154, 196, 0.18);
+  color: #d8e7ff;
+  border: 1px solid rgba(123, 154, 196, 0.32);
+}
+
+.btn-secondary:hover {
+  background: rgba(123, 154, 196, 0.26);
+}
 
 .btn-full { width: 100%; }
 
@@ -199,7 +238,7 @@ body.mobile-nav-open {
   text-align: left;
   padding: 12px;
   border-bottom: 2px solid var(--border-color);
-  color: var(--text-muted);
+  color: #95afcf;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -209,6 +248,10 @@ body.mobile-nav-open {
   padding: 14px 12px;
   border-bottom: 1px solid var(--border-color);
   vertical-align: middle;
+}
+
+.text-muted {
+  color: var(--text-muted) !important;
 }
 
 /* Modals */

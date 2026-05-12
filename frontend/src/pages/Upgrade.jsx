@@ -1,17 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/Upgrade.css';
 import api from '../axios_instance';
 import { useCompany } from '../context/CompanyContext';
+import PayPalSubscribeButton from '../components/PayPalSubscribeButton';
 
 const Upgrade = () => {
   const [loading, setLoading] = useState(false);
+  const [currency, setCurrency] = useState('USD');
+  const [pricing, setPricing] = useState(null);
+  const [error, setError] = useState(null);
   const { currentPlan, planLimits } = useCompany();
+
+  // Fetch pricing and detect user's currency
+  useEffect(() => {
+    const fetchPricing = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get('/payments/pricing/');
+        const { currency: detectedCurrency, pricing: priceData } = response.data;
+        
+        setCurrency(detectedCurrency);
+        setPricing(priceData);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching pricing:', err);
+        setError('Failed to load pricing information');
+        // Fallback to USD pricing
+        setCurrency('USD');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPricing();
+  }, []);
+
+  const getCurrencySymbol = (curr) => {
+    return curr === 'ZAR' ? 'R' : '$';
+  };
 
   const plans = [
     {
       id: 'STARTER',
       name: 'Starter',
-      price: '0',
       description: 'Essential tools for solo detailers.',
       features: [
         '10 Monthly Bookings',
@@ -20,13 +51,12 @@ const Upgrade = () => {
         'Basic Digital Waivers',
         'Up to 1,000 Customers'
       ],
-      cta: 'Current Plan',
-      featured: false
+      featured: false,
+      cta: 'Current Plan'
     },
     {
       id: 'PRO',
       name: 'Professional',
-      price: '499',
       description: 'Built for growing studios and small teams.',
       features: [
         '60 Monthly Bookings',
@@ -36,13 +66,12 @@ const Upgrade = () => {
         'Buffer Timer Enabled',
         'Unlimited Customers'
       ],
-      cta: 'Upgrade to Pro',
-      featured: true
+      featured: true,
+      cta: 'Upgrade to Pro'
     },
     {
       id: 'ENTERPRISE',
       name: 'Studio Elite',
-      price: '1250',
       description: 'Maximum performance for high-volume franchises.',
       features: [
         'Unlimited Bookings',
@@ -52,41 +81,35 @@ const Upgrade = () => {
         'Priority Bay Support',
         'Unlimited Customers',
       ],
-      cta: 'Go Elite',
-      featured: false
+      featured: false,
+      cta: 'Go Elite'
     }
   ];
 
-  const handleUpgrade = async (planId) => {
-    setLoading(true);
-    try {
-        // 1. Ask Django for the signed parameters
-        const response = await api.post('/payments/payfast-initiate/', { plan_id: planId });
-        const { url, params } = response.data;
+  const getPrice = (planId) => {
+    if (!pricing || planId === 'STARTER') return '0';
+    return pricing[planId]?.amount || '0';
+  };
 
-        // 2. Create the hidden "Ghost Form"
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = url; // This is the PayFast Sandbox/Live URL
+  if (loading) {
+    return (
+      <div className="upgrade-container">
+        <div className="loading-state">
+          <p>Loading pricing information...</p>
+        </div>
+      </div>
+    );
+  }
 
-        // 3. Map the Django params to hidden inputs
-        Object.keys(params).forEach(key => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = params[key];
-        form.appendChild(input);
-        });
-
-        // 4. Send the user to PayFast
-        document.body.appendChild(form);
-        form.submit();
-        
-    } catch (err) {
-        console.error("Redirection failed", err);
-        setLoading(false);
-    }
-    };
+  if (error) {
+    return (
+      <div className="upgrade-container">
+        <div className="error-state">
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="upgrade-container">
@@ -94,11 +117,16 @@ const Upgrade = () => {
         <span className="badge">Studio Status: {currentPlan}</span>
         <h1>Engineered for <span className="highlight">Growth</span></h1>
         <p>You are currently utilizing the {currentPlan} configuration.</p>
+        <p className="currency-note">
+          💱 Pricing displayed in: <strong>{currency === 'ZAR' ? 'South African Rand (ZAR)' : 'US Dollars (USD)'}</strong>
+        </p>
       </div>
 
       <div className="pricing-grid">
         {plans.map((plan) => {
           const isCurrent = plan.id === currentPlan;
+          const price = getPrice(plan.id);
+          const currencySymbol = getCurrencySymbol(currency);
           
           return (
             <div 
@@ -110,8 +138,8 @@ const Upgrade = () => {
               
               <span className="tier-name">{plan.name}</span>
               <div className="price-box">
-                <span className="currency">R</span>
-                <span className="amount">{plan.price}</span>
+                <span className="currency">{currencySymbol}</span>
+                <span className="amount">{price}</span>
                 <span className="period">/mo</span>
               </div>
               
@@ -125,13 +153,16 @@ const Upgrade = () => {
                 ))}
               </ul>
 
-              <button 
-                className={`btn-upgrade ${isCurrent ? 'btn-current' : (plan.featured ? 'btn-main' : 'btn-outline')}`}
-                disabled={isCurrent || loading}
-                onClick={() => handleUpgrade(plan.id)}
-              >
-                {loading ? 'Connecting...' : (isCurrent ? 'Current Plan' : plan.cta)}
-              </button>
+              {isCurrent ? (
+                <button className="btn-upgrade btn-current" disabled>
+                  {plan.cta}
+                </button>
+              ) : (
+                <PayPalSubscribeButton 
+                  planId={plan.id}
+                  disabled={isCurrent || loading}
+                />
+              )}
             </div>
           );
         })}
@@ -140,6 +171,16 @@ const Upgrade = () => {
       <div className="limit-overview">
         <h3>Technical Specifications</h3>
         <p>Your current plan allows for <strong>{planLimits.max_images_before}</strong> inspection photos per vehicle. Upgrading increases this to provide better legal protection.</p>
+      </div>
+
+      <div className="payment-info">
+        <h3>💳 Payment Information</h3>
+        <ul>
+          <li>✓ Secure PayPal payments</li>
+          <li>✓ Monthly recurring billing</li>
+          <li>✓ Cancel anytime from your settings</li>
+          <li>✓ Automatic invoice delivery</li>
+        </ul>
       </div>
     </div>
   );
