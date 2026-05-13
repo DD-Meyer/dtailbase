@@ -1,3 +1,4 @@
+/* ===== Desktop Styles ===== */
 /* Login Page Specific Styling */
 /* Fix the 100vh scroll issue */
 .login-container {
@@ -10,6 +11,15 @@
   box-sizing: border-box;
 }
 
+.login-shell {
+  width: 100%;
+  max-width: 980px;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 20px;
+}
+
 .login-card {
   background: white;
   padding: 3rem; /* Increased padding for a premium feel */
@@ -17,6 +27,67 @@
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   width: 100%;
   max-width: 450px; /* Slightly wider to prevent squashing */
+}
+
+.login-from-plan .login-card,
+.login-from-plan .login-plan-context {
+  animation: loginSlideIn 0.35s ease-out;
+}
+
+.login-plan-context {
+  width: 100%;
+  max-width: 300px;
+  background: linear-gradient(145deg, #0f172a, #111827);
+  color: #e2e8f0;
+  border-radius: 16px;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  padding: 1.5rem;
+  box-shadow: 0 16px 30px -18px rgba(30, 64, 175, 0.45);
+}
+
+.plan-context-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #93c5fd;
+  margin-bottom: 0.4rem;
+}
+
+.login-plan-context h3 {
+  margin: 0 0 0.6rem;
+  font-size: 1.35rem;
+  color: #f8fafc;
+}
+
+.login-plan-context p {
+  margin: 0;
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+
+@keyframes loginSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.auth-back-link {
+  display: inline-flex;
+  align-items: center;
+  color: #475569;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.auth-back-link:hover {
+  color: #1d4ed8;
 }
 
 .login-header {
@@ -135,4 +206,26 @@
 .form-group {
   margin-bottom: 1.5rem; /* More space between inputs */
   text-align: left; /* Ensure labels stay left */
+}
+
+@media (max-width: 768px) {
+  .login-container {
+    align-items: flex-start;
+    padding: 1rem;
+  }
+
+  .login-shell {
+    flex-direction: column;
+    max-width: 460px;
+    gap: 12px;
+  }
+
+  .login-card {
+    margin: 1rem 0 2rem;
+    padding: 1.5rem;
+  }
+
+  .login-plan-context {
+    max-width: 100%;
+  }
 }

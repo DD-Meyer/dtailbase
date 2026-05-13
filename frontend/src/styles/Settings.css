@@ -1,3 +1,4 @@
+/* ===== Desktop Styles ===== */
 /* Settings Page Container */
 .settings-wrapper {
   margin-left: 0;
@@ -212,6 +213,7 @@ td { font-size: 0.9rem; }
   padding-bottom: 100px; /* Extra space at the bottom */
 }
 
+/* ===== Tablet Styles (<= 1024px) ===== */
 @media (max-width: 1024px) {
   .settings-wrapper {
     padding: 24px;
@@ -224,6 +226,7 @@ td { font-size: 0.9rem; }
   }
 }
 
+/* ===== Mobile Styles (<= 768px) ===== */
 @media (max-width: 768px) {
   .settings-wrapper {
     padding: 16px;

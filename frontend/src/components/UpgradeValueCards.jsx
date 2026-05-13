@@ -51,7 +51,7 @@ function UpgradeValueCards({ currentPlan }) {
                 <li key={perk}>{perk}</li>
               ))}
             </ul>
-            <Link className="plan-cta" to="/upgrade">
+            <Link className="plan-cta" to={`/payments?plan=${plan.id}`}>
               Upgrade to {plan.title}
             </Link>
           </article>

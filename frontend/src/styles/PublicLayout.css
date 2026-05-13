@@ -1,3 +1,4 @@
+/* ===== Desktop Styles ===== */
 /* --- 1. CORE VARIABLES & GLOBAL RESET --- */
 :root {
   --primary: #3b82f6;
@@ -71,6 +72,50 @@ body {
 
 /* --- ENHANCED NAVIGATION --- */
 /* --- ENHANCED NAVIGATION FIXES --- */
+
+.public-nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 5%;
+  background: rgba(2, 6, 23, 0.7);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.nav-menu {
+  position: fixed;
+  top: 0;
+  right: -360px;
+  width: min(340px, 88vw);
+  height: 100vh;
+  background: rgba(2, 6, 23, 0.92);
+  backdrop-filter: blur(20px) saturate(165%);
+  -webkit-backdrop-filter: blur(20px) saturate(165%);
+  border-left: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  padding: 96px 20px 24px;
+  z-index: 1090;
+  transition: right 0.35s ease;
+}
+
+.nav-menu.active {
+  right: 0;
+}
+
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.58);
+  z-index: 1080;
+}
 
 /* 1. Fix the Logo (Removing standard link blue/underline) */
 .nav-logo { 
@@ -164,6 +209,42 @@ body {
   font-weight: 700;
   font-size: 0.85rem;
   text-decoration: none;
+}
+
+.hamburger {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.65);
+  cursor: pointer;
+  z-index: 1100;
+  padding: 0;
+}
+
+.bar {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--text-main);
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.hamburger.active .bar:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.hamburger.active .bar:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.active .bar:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
 }
 
 /* --- DROPDOWN LOGIC --- */
@@ -519,17 +600,8 @@ body {
 }
 
 /* --- MOBILE STATS FIX --- */
-@media (max-width: 768px) {
-  .stats-bar {
-    flex-direction: column;
-    gap: 40px;
-    margin-top: 40px;
-    width: 90%;
-  }
-  .stat-divider {
-    display: none;
-  }
-}
+
+
 
 /* --- ADD THIS TO HERO.CSS --- */
 
@@ -666,27 +738,8 @@ body {
 }
 
 /* --- RESPONSIVE FOOTER --- */
-@media (max-width: 768px) {
-  .footer-content {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .footer-brand {
-    max-width: 100%;
-    margin: 0 auto;
-  }
-  
-  .footer-links-grid {
-    grid-template-columns: 1fr;
-    gap: 40px;
-  }
-  
-  .footer-bottom {
-    flex-direction: column;
-    gap: 20px;
-  }
-}
+
+
 
 /* --- WHATSAPP FOOTER CTA --- */
 .whatsapp-cta-box {
@@ -777,14 +830,8 @@ body {
 }
 
 /* Ensure the floating button doesn't block footer links on mobile */
-@media (max-width: 768px) {
-  .floating-whatsapp {
-    bottom: 20px;
-    right: 20px;
-    width: 50px;
-    height: 50px;
-  }
-}
+
+
 
 
 /* --- PERSISTENT AUTH (TOP RIGHT) --- */
@@ -795,48 +842,25 @@ body {
   z-index: 1100; /* Higher than the menu */
 }
 
-/* --- MOBILE GLASS MENU --- */
-@media (max-width: 1024px) {
-  .nav-menu {
-    position: fixed;
-    top: 0;
-    right: -100%; /* Slide from right for natural feel */
-    width: 100%;
-    height: 100vh;
-    
-    /* GLASSMORPHISM EFFECT */
-    background: rgba(2, 6, 23, 0.85); 
-    backdrop-filter: blur(25px) saturate(180%);
-    -webkit-backdrop-filter: blur(25px) saturate(180%);
-    border-left: 1px solid var(--border-light);
-    
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 35px;
-    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-  }
-
-  .nav-menu.active {
-    right: 0;
-  }
-
-  /* Hide the "Login" text on very small screens to save space */
-  .hide-mobile {
-    display: none;
-  }
-
-  .btn-join-now {
-    padding: 8px 16px; /* Slightly smaller for mobile header */
-    font-size: 0.75rem;
-  }
-
-  .hamburger {
-    display: flex;
-    margin-left: 10px;
-  }
+.btn-dashboard-sm {
+  background: var(--primary);
+  color: white !important;
+  padding: 7px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-decoration: none;
+  transition: var(--transition);
 }
+
+.btn-dashboard-sm:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+/* --- MOBILE GLASS MENU --- */
+
+
 
 /* --- LOGO Tweak --- */
 .nav-logo {
@@ -871,6 +895,18 @@ body {
 .mt-10 { margin-top: 4rem; }
 .mb-10 { margin-bottom: 4rem; }
 
+/* ===== Tablet Styles (<= 1024px) ===== */
+@media (max-width: 1024px) {
+  .btn-join-now {
+    padding: 8px 16px; /* Slightly smaller for mobile header */
+    font-size: 0.75rem;
+  }
+
+  .hamburger {
+    margin-left: 10px;
+  }
+}
+
 @media (max-width: 1024px) {
   .hero-container {
     padding: 120px 16px 72px;
@@ -899,6 +935,50 @@ body {
   }
 }
 
+/* ===== Mobile Styles (<= 768px) ===== */
+@media (max-width: 768px) {
+  .stats-bar {
+    flex-direction: column;
+    gap: 40px;
+    margin-top: 40px;
+    width: 90%;
+  }
+  .stat-divider {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .footer-brand {
+    max-width: 100%;
+    margin: 0 auto;
+  }
+  
+  .footer-links-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  
+  .footer-bottom {
+    flex-direction: column;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .floating-whatsapp {
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+  }
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 0 16px;
@@ -906,6 +986,15 @@ body {
 
   .public-nav {
     padding: 10px 16px;
+  }
+
+  .nav-auth-persistent {
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .btn-login-text {
+    font-size: 0.82rem;
   }
 
   .hero-container {

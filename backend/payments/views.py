@@ -12,6 +12,7 @@ from payments.paypal_service import (
     get_subscription_plan,
     get_paypal_plan_tier,
     get_paypal_tier_from_plan_id,
+    cancel_subscription,
     verify_paypal_webhook,
     PRICING
 )
@@ -23,23 +24,25 @@ class PricingView(APIView):
     """
     Get pricing based on user's detected country/currency.
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     
     def get(self, request):
         try:
             # Detect user's country and currency from IP
             country_code, currency = detect_user_currency(request)
-            
-            # Update user's company with detected info (only if not already set)
-            company = request.user.company
-            if not company.currency:
-                company.country_code = country_code
-                company.currency = currency
-                company.save(update_fields=['country_code', 'currency'])
-            else:
-                # Use user's existing preference
-                country_code = company.country_code
-                currency = company.currency
+
+            # For authenticated users, keep company currency aligned with detected preference.
+            if request.user.is_authenticated and hasattr(request.user, 'company') and request.user.company:
+                company = request.user.company
+                update_fields = []
+                if company.country_code != country_code:
+                    company.country_code = country_code
+                    update_fields.append('country_code')
+                if company.currency != currency:
+                    company.currency = currency
+                    update_fields.append('currency')
+                if update_fields:
+                    company.save(update_fields=update_fields)
             
             # Get pricing for this currency
             pricing = PRICING.get(currency, PRICING['USD'])
@@ -102,7 +105,7 @@ class PayPalSubscribeView(APIView):
             # Generate return/cancel URLs
             domain = os.environ.get('PUBLIC_BASE_URL', 'https://www.dtailbase.com').rstrip('/')
             return_url = f"{domain}/payment-success?plan={plan_id}"
-            cancel_url = f"{domain}/upgrade"
+            cancel_url = f"{domain}/plans"
             
             logger.info(f"Creating PayPal subscription: user={user.email}, plan={plan_id}, currency={currency}")
             
@@ -138,6 +141,44 @@ class PayPalSubscribeView(APIView):
             error_msg = str(e)
             logger.error(f"Error in PayPalSubscribeView: {error_msg}", exc_info=True)
             return Response({'error': error_msg}, status=500)
+
+
+class PayPalCancelSubscriptionView(APIView):
+    """Cancel the active PayPal subscription to allow downgrade actions."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            user = request.user
+            if not hasattr(user, 'company') or not user.company:
+                return Response({'error': 'User company not found'}, status=400)
+
+            company = user.company
+            subscription_id = company.paypal_subscription_id
+            if not subscription_id:
+                return Response({'error': 'No active PayPal subscription found'}, status=400)
+
+            cancel_result = cancel_subscription(subscription_id)
+            if not cancel_result.get('success'):
+                return Response(
+                    {'error': cancel_result.get('error') or 'Failed to cancel PayPal subscription'},
+                    status=502
+                )
+
+            # Apply immediate local downgrade state while webhook reconciliation completes.
+            company.is_subscription_active = False
+            company.plan = 'STARTER'
+            company.paypal_subscription_id = ''
+            company.save(update_fields=['is_subscription_active', 'plan', 'paypal_subscription_id'])
+
+            return Response({
+                'success': True,
+                'message': cancel_result.get('message') or 'Subscription cancelled on PayPal. Any penalties due are handled by PayPal billing terms.',
+                'plan': company.plan,
+            }, status=200)
+        except Exception as e:
+            logger.error(f"Error in PayPalCancelSubscriptionView: {str(e)}", exc_info=True)
+            return Response({'error': 'Unable to cancel subscription right now'}, status=500)
 
 
 class PayPalWebhookView(APIView):

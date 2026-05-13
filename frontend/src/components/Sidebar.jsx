@@ -6,7 +6,7 @@ import "../styles/Sidebar.css";
 
 // ... imports stay the same ...
 
-function Sidebar({ isMobileOpen = false, onCloseMobile = () => {} }) {
+function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
   const { user } = useContext(AuthContext);
@@ -25,13 +25,13 @@ function Sidebar({ isMobileOpen = false, onCloseMobile = () => {} }) {
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
 
   return (
+    // {/* NEW: only displays sidebar on desktop - remove all references to mobile here*/}
     <>
-      {isMobileOpen && <button className="sidebar-mobile-backdrop" onClick={onCloseMobile} aria-label="Close navigation" />}
-      <nav className={`sidebar ${isCollapsed ? "collapsed" : ""} ${isMobileOpen ? "mobile-open" : ""}`}>
+      <nav className={`sidebar ${isCollapsed ? "collapsed" : ""}`}>
       {/* NEW HEADER SECTION */}
       <div className="sidebar-header">
         <div className="sidebar-logo">
-          <h2 className="tracking-tight">{isCollapsed ? (<><span className="text-white">D</span><span className="bg-gradient-to-r from-blue-500 to-sky-400 bg-clip-text text-transparent">B</span></>) : (<><span className="text-white">Dtail</span><span className="bg-gradient-to-r from-blue-500 to-sky-400 bg-clip-text text-transparent">base</span></>)}</h2>
+          <h2 className="tracking-tight">{isCollapsed ? (<><span className="text-white">D</span><span className="bg-linear-to-r from-blue-500 to-sky-400 bg-clip-text text-transparent">B</span></>) : (<><span className="text-white">Dtail</span><span className="bg-linear-to-r from-blue-500 to-sky-400 bg-clip-text text-transparent">base</span></>)}</h2>
         </div>
         <button className="collapse-toggle" onClick={toggleSidebar} title="Toggle Sidebar">
           {isCollapsed ? (
@@ -41,22 +41,13 @@ function Sidebar({ isMobileOpen = false, onCloseMobile = () => {} }) {
           )}
         </button>
       </div>
-      {/* Top Link: Return to Landing */}
-      <ul className="sidebar-links home-nav">
-        <li>
-          <Link to="/" className="home-link" title="Return Home" onClick={onCloseMobile}>
-            <span className="icon">🏠</span>
-            {!isCollapsed && <span className="label">Return Home</span>}
-          </Link>
-        </li>
-      </ul>
 
       <hr className="sidebar-divider" />
 
       <ul className="sidebar-links">
         {menuItems.map((item) => (
           <li key={item.path} className={location.pathname === item.path ? "active" : ""}>
-            <Link to={item.path} title={item.label} onClick={onCloseMobile}>
+            <Link to={item.path} title={item.label}>
               <span className="icon">{item.icon}</span>
               {!isCollapsed && <span className="label">{item.label}</span>}
             </Link>
@@ -69,7 +60,7 @@ function Sidebar({ isMobileOpen = false, onCloseMobile = () => {} }) {
       <div className="sidebar-footer">
         <ul className="sidebar-links">
           <li className={location.pathname === "/profile" ? "active" : ""}>
-            <Link to="/profile" title="My Profile" onClick={onCloseMobile}>
+            <Link to="/profile" title="My Profile">
               <span className="icon">👤</span>
               {!isCollapsed && <span className="label">My Profile</span>}
             </Link>
@@ -79,13 +70,13 @@ function Sidebar({ isMobileOpen = false, onCloseMobile = () => {} }) {
             <>
               {!isCollapsed && <p className="admin-header">Admin</p>}
               <li className={location.pathname === "/team" ? "active" : ""}>
-                <Link to="/team" title="Team Management" onClick={onCloseMobile}>
+                <Link to="/team" title="Team Management">
                   <span className="icon">🏗️</span>
                   {!isCollapsed && <span className="label">Team</span>}
                 </Link>
               </li>
               <li className={location.pathname === "/settings" ? "active" : ""}>
-                <Link to="/settings" title="Business Settings" onClick={onCloseMobile}>
+                <Link to="/settings" title="Business Settings">
                   <span className="icon">⚙️</span>
                   {!isCollapsed && <span className="label">Settings</span>}
                 </Link>

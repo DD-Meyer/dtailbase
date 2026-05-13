@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { AuthContext } from "../context/AuthContext";
 import { NavLink, Link, useLocation} from 'react-router-dom';
+import UserDropdownMenu from './UserDropdownMenu';
 import '../styles/PublicLayout.css';
 
-const PublicLayout = ({ children }) => {
+const PublicLayout = ({ children, showNav = true, showFooter = true }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isAuthenticated } = useContext(AuthContext);
   const location = useLocation();
@@ -77,46 +78,61 @@ const PublicLayout = ({ children }) => {
       </div>
 
       {/* SHARED NAV */}
+      {showNav && (
       <nav className="public-nav">
         <Link to="/" className="nav-logo"><span className="bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">Dtail</span><span className="bg-gradient-to-r from-blue-500 to-sky-400 bg-clip-text text-transparent">base</span><span className="text-blue-500 font-black">.</span></Link>
 
         {isMenuOpen && (
           <div className="menu-overlay" onClick={() => setIsMenuOpen(false)}></div>
         )}
-        
-        <div className={`nav-menu ${isMenuOpen ? 'active' : ''}`}>
+
+        {/* NAVIGATION MENU for mobile devices with a toggle */}
+
+        <div id="public-nav-menu" className={`nav-menu ${isMenuOpen ? 'active' : ''}`}>
           <NavLink to="/" className="nav-item" onClick={() => setIsMenuOpen(false)}>Home</NavLink>
           <NavLink to="/about" className="nav-item" onClick={() => setIsMenuOpen(false)}>About</NavLink>
           <NavLink to="/products" className="nav-item" onClick={() => setIsMenuOpen(false)}>Products</NavLink>
-          <NavLink to="/pricing" className="nav-item" onClick={() => setIsMenuOpen(false)}>Pricing</NavLink>
+          <NavLink to="/plans" className="nav-item" onClick={() => setIsMenuOpen(false)}>Plans</NavLink>
           <NavLink to="/legal" className="nav-item" onClick={() => setIsMenuOpen(false)}>Legal</NavLink>
           <NavLink to="/contact" className="nav-item" onClick={() => setIsMenuOpen(false)}>Contact</NavLink>
         </div>
 
         <div className="nav-auth-persistent">
           {isAuthenticated ? (
-            <Link to="/bookings" className="btn-main-sm">Dashboard</Link>
+            <>
+              <Link to="/bookings" className="btn-dashboard-sm">Dashboard</Link>
+              <UserDropdownMenu />
+            </>
           ) : (
             <>
-              <Link to="/login" className="btn-login-text hide-mobile">Login</Link>
+              <Link to="/login" className="btn-login-text">Login</Link>
               <Link to="/register" className="btn-join-now">Join Now</Link>
             </>
           )}
           
-          <div className={`hamburger ${isMenuOpen ? 'active' : ''}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          <button
+            type="button"
+            className={`hamburger ${isMenuOpen ? 'active' : ''}`}
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={isMenuOpen}
+            aria-controls="public-nav-menu"
+          >
             <span className="bar"></span>
             <span className="bar"></span>
             <span className="bar"></span>
-          </div>
+          </button>
         </div>
       </nav>
+      )}
 
       {/* PAGE CONTENT (This is where Hero, Pricing, or Contact renders) */}
-      <main className="public-main-wrapper">
+      <main className={showNav ? "public-main-wrapper" : ""}>
         {children}
       </main>
 
       {/* SHARED FOOTER */}
+      {showFooter && (
       <footer className="main-footer">
         <div className="container footer-content animate-on-scroll">
           <div className="footer-brand">
@@ -144,7 +160,7 @@ const PublicLayout = ({ children }) => {
             <div className="footer-col">
               <h4>Platform</h4>
               <Link to="/features">Features</Link>
-              <Link to="/pricing">Pricing</Link>
+              <Link to="/plans">Plans</Link>
               <Link to="/security">Security</Link>
             </div>
             <div className="footer-col">
@@ -171,6 +187,8 @@ const PublicLayout = ({ children }) => {
           </div>
         </div>
       </footer>
+      )}
+      {showFooter && (
       <a 
         href={`https://wa.me/27769778522?text=Hi!%20I'm%20on%20the%20landing%20page%20and%20would%20like%20to%20see%20a%20Live%20Demo.`} 
         className="floating-whatsapp"
@@ -179,6 +197,7 @@ const PublicLayout = ({ children }) => {
       >
         <span className="wa-float-icon">💬</span>
       </a>
+      )}
     </div>
   );
 };

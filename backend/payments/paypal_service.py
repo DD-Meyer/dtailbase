@@ -472,11 +472,19 @@ def cancel_subscription(subscription_id):
         subscription_id: PayPal subscription ID
     
     Returns:
-        bool: True if successful
+        dict: {
+            success: bool,
+            message: str,
+            error: str | None
+        }
     """
     access_token = get_paypal_access_token()
     if not access_token:
-        return False
+        return {
+            'success': False,
+            'message': '',
+            'error': 'Unable to authenticate with PayPal',
+        }
     
     try:
         paypal_mode = getattr(settings, 'PAYPAL_MODE', 'sandbox')
@@ -492,9 +500,54 @@ def cancel_subscription(subscription_id):
             json={'reason': 'User requested cancellation'},
             timeout=10
         )
-        response.raise_for_status()
-        logger.info(f"Cancelled PayPal subscription: {subscription_id}")
-        return True
+
+        if response.status_code in (200, 204):
+            logger.info(f"Cancelled PayPal subscription: {subscription_id}")
+            return {
+                'success': True,
+                'message': 'Subscription cancelled on PayPal.',
+                'error': None,
+            }
+
+        # PayPal may return non-2xx for already-cancelled/inactive subscriptions.
+        try:
+            error_data = response.json()
+        except Exception:
+            error_data = {}
+
+        issue = ''
+        details = error_data.get('details')
+        if isinstance(details, list) and details:
+            issue = details[0].get('issue', '')
+        message = error_data.get('message', '')
+
+        already_inactive_issues = {
+            'SUBSCRIPTION_STATUS_INVALID',
+            'RESOURCE_NOT_FOUND',
+            'INVALID_RESOURCE_ID',
+        }
+        if response.status_code in (404, 422) or issue in already_inactive_issues:
+            logger.warning(
+                f"PayPal cancel returned inactive/not-found for {subscription_id}: "
+                f"status={response.status_code}, issue={issue}, message={message}"
+            )
+            return {
+                'success': True,
+                'message': 'Subscription is already inactive on PayPal.',
+                'error': None,
+            }
+
+        error_msg = message or issue or f'PayPal cancel failed with status {response.status_code}'
+        logger.error(f"Failed to cancel subscription {subscription_id}: {error_msg}")
+        return {
+            'success': False,
+            'message': '',
+            'error': error_msg,
+        }
     except Exception as e:
         logger.error(f"Failed to cancel subscription {subscription_id}: {str(e)}")
-        return False
+        return {
+            'success': False,
+            'message': '',
+            'error': str(e),
+        }

@@ -2,6 +2,7 @@
 from django.urls import path
 from .views import (
     PayPalSubscribeView, 
+    PayPalCancelSubscriptionView,
     PayPalConfirmView,
     PayPalWebhookView, 
     PricingView,
@@ -12,6 +13,7 @@ urlpatterns = [
     # PayPal Endpoints
     path('pricing/', PricingView.as_view(), name='pricing'),
     path('subscribe/', PayPalSubscribeView.as_view(), name='paypal_subscribe'),
+    path('cancel-subscription/', PayPalCancelSubscriptionView.as_view(), name='paypal_cancel_subscription'),
     path('confirm/', PayPalConfirmView.as_view(), name='paypal_confirm'),
     path('webhook/', PayPalWebhookView.as_view(), name='paypal_webhook'),
     

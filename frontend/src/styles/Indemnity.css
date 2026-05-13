@@ -1,3 +1,4 @@
+/* ===== Desktop Styles ===== */
 /* --- 1. THE LEGAL CARD --- */
 .indemnity-card {
   max-width: 800px;
@@ -211,6 +212,7 @@
   margin-top: 2rem;
 }
 
+/* ===== Mobile Styles (<= 768px) ===== */
 @media (max-width: 768px) {
   .indemnity-card {
     margin: 1rem;

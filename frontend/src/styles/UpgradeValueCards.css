@@ -1,3 +1,4 @@
+/* ===== Desktop Styles ===== */
 .upgrade-value-wrap {
   margin: 0 0 1.25rem;
   padding: 1.1rem;
@@ -91,6 +92,7 @@
   background: linear-gradient(90deg, #0f84c8, #1bbf92);
 }
 
+/* ===== Mobile Styles (<= 768px) ===== */
 @media (max-width: 768px) {
   .plan-cta {
     min-height: 46px;

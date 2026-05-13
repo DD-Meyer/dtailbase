@@ -1,3 +1,4 @@
+/* ===== Desktop Styles ===== */
 /* --- 1. SEARCH BAR WITH ICON --- */
 .search-wrapper {
   position: relative;
@@ -97,6 +98,7 @@ tr:hover {
   background-color: #f8fafc;
 }
 
+/* ===== Mobile Styles (<= 768px) ===== */
 @media (max-width: 768px) {
   .search-wrapper {
     max-width: 100%;

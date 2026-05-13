@@ -1,3 +1,4 @@
+/* ===== Desktop Styles ===== */
 /* --- 0. THE ULTIMATE VISIBILITY FIX --- */
 .settings-wrapper, 
 .settings-wrapper *, 
@@ -203,6 +204,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ===== Mobile Styles (<= 768px) ===== */
 @media (max-width: 768px) {
   .settings-wrapper {
     padding: 1rem;

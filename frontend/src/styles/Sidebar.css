@@ -1,3 +1,4 @@
+/* ===== Desktop Styles ===== */
 :root {
   --sidebar-width: 260px;
   --sidebar-collapsed-width: 80px;
@@ -177,26 +178,9 @@
   font-weight: 700;
 }
 
+/* ===== Mobile Styles (<= 768px) ===== */
 @media (max-width: 768px) {
   .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    transform: translateX(-100%);
-    width: min(82vw, 320px);
-    z-index: 1000;
-    transition: transform 0.25s ease;
-  }
-
-  .sidebar.mobile-open {
-    transform: translateX(0);
-  }
-
-  .sidebar.collapsed {
-    width: min(82vw, 320px);
-  }
-
-  .collapse-toggle {
-    display: none;
+    display: none; /* Hide sidebar on mobile - we will use a different mobile menu component */
   }
 }

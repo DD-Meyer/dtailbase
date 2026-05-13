@@ -1,3 +1,4 @@
+/* ===== Desktop Styles ===== */
 .app-header {
   height: 70px;
   background: rgba(7, 13, 24, 0.88);
@@ -38,11 +39,17 @@
   cursor: pointer;
   padding: 6px;
   border-radius: 12px;
+  color: #d8e8ff;
   transition: background 0.2s;
 }
 
 .profile-trigger:hover {
   background: rgba(123, 154, 196, 0.15);
+}
+
+/* if profile dropdown is open then highlight the profile-trigger */
+.profile-trigger.open {
+  background: rgba(123, 154, 196, 0.25);
 }
 
 .avatar {
@@ -145,6 +152,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ===== Mobile Styles (<= 768px) ===== */
 @media (max-width: 768px) {
   .app-header {
     height: 64px;
@@ -156,6 +164,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
   }
 
   .header-search {

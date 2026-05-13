@@ -1,6 +1,6 @@
 import { useState, useContext } from "react";
 import api from "../axios_instance";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import "../styles/Login.css"; 
 
@@ -17,6 +17,8 @@ function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
+  const planContext = location.state?.fromPlanCta ? location.state : null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,8 +44,13 @@ function Register() {
           password: formData.password,
         });
 
-        login(loginRes.data.access, loginRes.data.refresh, formData.email);
-        navigate("/bookings");
+        login(loginRes.data.access, loginRes.data.refresh, loginRes.data.user);
+
+        if (planContext?.selectedPlanId && planContext.selectedPlanId !== "STARTER") {
+          navigate(planContext.redirectTo || `/payments?plan=${planContext.selectedPlanId}`);
+        } else {
+          navigate("/bookings");
+        }
       }
     } catch (err) {
       console.error("Registration Error:", err.response?.data);
@@ -60,6 +67,10 @@ function Register() {
   return (
     <div className="login-container">
       <div className="login-card">
+        <Link to="/" className="auth-back-link" aria-label="Back to home">
+          &larr; Back to home
+        </Link>
+
         <div className="login-header">
           <h1>Create Account</h1>
           <p>Join the platform to get started</p>
@@ -141,7 +152,10 @@ function Register() {
         </form>
 
         <div className="login-footer">
-          <p>Already have an account? <Link to="/login">Sign In</Link></p>
+          <p>
+            Already have an account?{' '}
+            <Link to="/login" state={planContext || undefined}>Sign In</Link>
+          </p>
         </div>
       </div>
     </div>

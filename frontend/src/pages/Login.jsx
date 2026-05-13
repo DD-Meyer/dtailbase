@@ -1,6 +1,6 @@
 import { useState, useContext } from "react";
 import api from "../axios_instance";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import "../styles/Login.css"
@@ -11,6 +11,8 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
+  const planContext = location.state?.fromPlanCta ? location.state : null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,9 +25,13 @@ function Login() {
       
       // res.data.user should contain the object: { email, role, id, ... }
       // Pass the user object instead of just the email string
-      login(res.data.access, res.data.refresh, res.data.user); 
-      
-      navigate("/bookings");
+      login(res.data.access, res.data.refresh, res.data.user);
+
+      if (planContext?.selectedPlanId && planContext.selectedPlanId !== "STARTER") {
+        navigate(planContext.redirectTo || `/payments?plan=${planContext.selectedPlanId}`);
+      } else {
+        navigate("/bookings");
+      }
     } catch (err) {
       // This will print the EXACT reason the backend said "No"
       console.error("Login Error Details:", err.response?.data);
@@ -42,8 +48,13 @@ function Login() {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
+    <div className={`login-container ${planContext ? "login-from-plan" : ""}`}>
+      <div className="login-shell">
+        <div className="login-card">
+        <Link to="/" className="auth-back-link" aria-label="Back to home">
+          &larr; Back to home
+        </Link>
+
         <div className="login-header">
           <h1>Welcome Back</h1>
           <p>Please enter your details to sign in</p>
@@ -83,9 +94,25 @@ function Login() {
           </button>
         </form>
         <div className="login-footer">
-          <p>Don't have an account? <Link to="/register">Register here</Link></p>
+          <p>
+            Don't have an account?{' '}
+            <Link to="/register" state={planContext || undefined}>Register here</Link>
+          </p>
           <p className="mt-4 text-xs">© 2026 Your Company Service Portal</p>
         </div>
+        </div>
+
+        {planContext && (
+          <aside className="login-plan-context">
+            <p className="plan-context-label">Selected Plan</p>
+            <h3>{planContext.selectedPlan}</h3>
+            <p>
+              {planContext.ctaType === "try-now"
+                ? "Sign in to start with this plan."
+                : "Sign in to continue upgrading this plan."}
+            </p>
+          </aside>
+        )}
       </div>
     </div>
   );

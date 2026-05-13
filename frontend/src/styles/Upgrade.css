@@ -1,3 +1,4 @@
+/* ===== Desktop Styles ===== */
 .upgrade-container {
   padding: 80px 20px;
   max-width: 1200px;
@@ -85,11 +86,212 @@
 
 .btn-upgrade {
   margin-top: auto;
-  padding: 15px;
+  min-height: 48px;
+  padding: 0.85rem 1rem;
   border-radius: 12px;
-  font-weight: 700;
+  width: 100%;
+  border: 1px solid rgba(0, 255, 136, 0.35);
+  background: linear-gradient(135deg, #10b981, #047857);
+  color: #dcfce7;
+  font-weight: 800;
+  font-size: 0.95rem;
+  text-align: center;
   cursor: pointer;
-  transition: 0.3s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.btn-upgrade:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px -14px rgba(16, 185, 129, 0.7);
+  filter: brightness(1.06);
+}
+
+.btn-current {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.btn-current:disabled {
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.btn-downgrade {
+  background: linear-gradient(135deg, #10b9811f, #18181b);
+  border-color: rgba(113, 113, 122, 0.65);
+  color: #f4f4f5;
+}
+
+.btn-downgrade:hover:not(:disabled) {
+  box-shadow: 0 10px 22px -14px rgba(24, 24, 27, 0.8);
+  filter: brightness(1.12);
+}
+
+.plan-action-message,
+.plan-action-error {
+  margin: 12px auto 0;
+  max-width: 760px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.92rem;
+}
+
+.plan-action-message {
+  background: #10b9811f;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #a7f3d0;
+}
+
+.plan-action-error {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fecaca;
+}
+
+.plan-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(3px);
+  z-index: 1300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.plan-modal-card {
+  width: min(560px, 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(113, 113, 122, 0.5);
+  background: linear-gradient(150deg, #111827, #0b1120);
+  padding: 20px;
+  box-shadow: 0 20px 40px -25px rgba(0, 0, 0, 0.8);
+}
+
+.plan-modal-card h3 {
+  margin: 0 0 10px;
+  color: #f8fafc;
+}
+
+.plan-modal-card p {
+  margin: 0 0 10px;
+  color: #cbd5e1;
+  line-height: 1.45;
+}
+
+.plan-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.plan-modal-actions .btn-upgrade {
+  margin-top: 0;
+}
+
+.pricing-card .paypal-subscribe-button-wrapper {
+  width: 100%;
+  margin-top: auto;
+}
+
+.pricing-card .btn-paypal-subscribe {
+  min-height: 48px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.checkout-focus-card {
+  margin: -10px auto 36px;
+  max-width: 860px;
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 18px;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.payments-no-scroll {
+  overflow: hidden;
+}
+
+.payments-page {
+  position: fixed;
+  inset: 0;
+  min-height: 100dvh;
+  height: 100dvh;
+  width: 100vw;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 40px 20px;
+}
+
+.payment-overlay-card {
+  width: min(620px, 100%);
+  margin: 0 auto;
+  border-radius: 18px;
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  background: rgba(2, 6, 23, 0.85);
+  backdrop-filter: blur(14px);
+  padding: 28px;
+  box-shadow: 0 30px 55px -35px rgba(0, 0, 0, 0.78);
+}
+
+.payment-overlay-card h2 {
+  margin: 6px 0 10px;
+}
+
+.payment-overlay-card p {
+  margin: 0 0 14px;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.payment-overlay-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.checkout-focus-kicker {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #6ee7b7;
+  font-weight: 700;
+}
+
+.checkout-focus-card h3 {
+  margin: 0 0 8px;
+  font-size: 1.3rem;
+}
+
+.checkout-focus-card p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.slide-in-right {
+  animation: slideInRight 0.35s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* Currency Note */
@@ -179,4 +381,31 @@
   margin-top: 40px;
   text-align: center;
   padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .upgrade-container {
+    padding: 56px 16px;
+  }
+
+  .checkout-focus-card {
+    grid-template-columns: 1fr;
+    margin: 0 0 26px;
+  }
+
+  .payments-page {
+    min-height: 100dvh;
+    height: 100dvh;
+    padding: 24px 12px;
+    padding-top: calc(24px + env(safe-area-inset-top));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+
+  .payment-overlay-card {
+    padding: 20px;
+  }
+
+  .plan-modal-actions {
+    flex-direction: column;
+  }
 }

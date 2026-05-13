@@ -4,6 +4,7 @@ import { AuthContext, AuthProvider } from "./context/AuthContext";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
+import MenuMobile from "./components/MenuMobile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicLayout from "./components/PublicLayout";
 import { CompanyProvider } from './context/CompanyContext';
@@ -26,48 +27,27 @@ import Hero from "./components/Hero";
 import BookingDetail from "./pages/BookingDetails";
 import About from "./pages/About";
 import Products from "./pages/Products";
-import Pricing from "./pages/Pricing";
+import Plans from "./pages/Plans";
 import Legal from "./pages/Legal";
 import Contact from "./pages/Contact";
 import ContentPage from "./pages/ContentPage";
 import PublicBooking from "./pages/PublicBooking";
-import Upgrade from "./pages/Upgrade";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import Payments from "./pages/Payments";
 
 
 function AppContent() {
   const { isAuthenticated, user } = useContext(AuthContext); 
   const location = useLocation();
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // 1. Identify ALL public-facing "Marketing" pages
-  const publicRoutes = ["/", "/hero", "/about", "/products", "/pricing", "/contact", "/legal", "/community", "/features", "/security", "/our-Story", "/support", "/help-center", "/tutorials", "/public-booking/:companySlug", "/upgrade", "/payment-success"];
+  const publicRoutes = ["/", "/hero", "/about", "/products", "/plans", "/payments", "/contact", "/legal", "/community", "/features", "/security", "/our-Story", "/support", "/help-center", "/tutorials", "/public-booking/:companySlug", "/payment-success"];
   const isLandingPage = publicRoutes.includes(location.pathname);
 
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
   
   // 2. Sidebar/Header only show if Authenticated AND not on any public/auth pages
   const showDashboardChrome = isAuthenticated && !isLandingPage && !isAuthPage;
-
-  useEffect(() => {
-    setIsMobileSidebarOpen(false);
-  }, [location.pathname]);
-
-  useEffect(() => {
-    if (!showDashboardChrome) {
-      document.body.classList.remove("mobile-nav-open");
-      return;
-    }
-
-    if (isMobileSidebarOpen) {
-      document.body.classList.add("mobile-nav-open");
-    } else {
-      document.body.classList.remove("mobile-nav-open");
-    }
-
-    return () => document.body.classList.remove("mobile-nav-open");
-  }, [isMobileSidebarOpen, showDashboardChrome]);
-
 
   // Example: Legal Page
   const Features = () => (
@@ -161,19 +141,18 @@ function AppContent() {
       
       {/* Sidebar hidden on Hero and Auth pages */}
       {showDashboardChrome && (
-        <Sidebar
-          isMobileOpen={isMobileSidebarOpen}
-          onCloseMobile={() => setIsMobileSidebarOpen(false)}
-        />
+        <Sidebar />
+      )}
+
+      {showDashboardChrome && (
+        <MenuMobile />
       )}
       
       <main className={isLandingPage || isAuthPage ? "full-page-content" : "main-content"}>
         
         {/* Header hidden on Hero and Auth pages */}
         {showDashboardChrome && (
-          <Header
-            onOpenMobileMenu={() => setIsMobileSidebarOpen(true)}
-          />
+          <Header />
         )}
         
         <div className={isLandingPage || isAuthPage ? "" : "page-body"}>
@@ -186,10 +165,10 @@ function AppContent() {
             <Route path="/hero" element={<Navigate to="/" replace />} />
             <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
             <Route path="/products" element={<PublicLayout><Products /></PublicLayout>} />
-            <Route path="/pricing" element={<PublicLayout><Pricing /></PublicLayout>} />
+            <Route path="/plans" element={<PublicLayout><Plans /></PublicLayout>} />
+            <Route path="/payments" element={<PublicLayout showNav={false} showFooter={false}><Payments /></PublicLayout>} />
             <Route path="/legal" element={<PublicLayout><Legal /></PublicLayout>} />
             <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
-            <Route path="/upgrade" element={<PublicLayout><Upgrade /></PublicLayout>} />
             <Route path="/payment-success" element={<PublicLayout><PaymentSuccess /></PublicLayout>} />
 
             {/* Example of using the reusable ContentPage for a new "Community" page */}

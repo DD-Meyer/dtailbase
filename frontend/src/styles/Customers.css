@@ -1,3 +1,4 @@
+/* ===== Desktop Styles ===== */
 /* --- 1. PAGE HEADER & SEARCH --- */
 .page-container {
   animation: fadeIn 0.4s ease-out;
@@ -158,6 +159,7 @@
 .mt-4 { margin-top: 1rem; }
 .mb-4 { margin-bottom: 1rem; }
 
+/* ===== Mobile Styles (<= 768px) ===== */
 @media (max-width: 768px) {
   .flex-between {
     flex-direction: column;

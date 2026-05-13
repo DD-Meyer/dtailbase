@@ -95,7 +95,7 @@ const PaymentSuccess = () => {
 
       <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '20px' }}>
         <Link className="btn-upgrade" to="/bookings">Go to Dashboard</Link>
-        <Link className="btn-upgrade btn-current" to="/upgrade">Back to Plans</Link>
+        <Link className="btn-upgrade btn-current" to="/plans">Back to Plans</Link>
       </div>
     </div>
   );

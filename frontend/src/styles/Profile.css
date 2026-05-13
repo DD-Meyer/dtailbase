@@ -1,3 +1,4 @@
+/* ===== Desktop Styles ===== */
 /* --- 0. VISIBILITY & THEME ENFORCEMENT --- */
 .page-container, 
 .page-container * {
@@ -11,11 +12,8 @@
   gap: 2rem;
 }
 
-@media (max-width: 768px) {
-  .grid.cols-2 {
-    grid-template-columns: 1fr; /* Stack on mobile */
-  }
-}
+
+
 
 /* --- 2. CARD & FORM STYLING --- */
 .card {
@@ -102,3 +100,10 @@ input:focus {
 .text-center { text-align: center; }
 .mt-2 { margin-top: 0.5rem; }
 .mb-4 { margin-bottom: 1rem; }
+
+/* ===== Mobile Styles (<= 768px) ===== */
+@media (max-width: 768px) {
+  .grid.cols-2 {
+    grid-template-columns: 1fr; /* Stack on mobile */
+  }
+}

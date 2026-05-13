@@ -1,3 +1,4 @@
+/* ===== Desktop Styles ===== */
 /* PayPal Subscribe Button Styles */
 
 .paypal-subscribe-button-wrapper {
@@ -91,6 +92,8 @@
 }
 
 /* Responsive */
+
+/* ===== Mobile Styles (<= 768px) ===== */
 @media (max-width: 640px) {
   .btn-paypal-subscribe {
     padding: 0.75rem 1rem;

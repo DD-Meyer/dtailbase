@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import UserDropdownMenu from './UserDropdownMenu';
 import '../styles/Hero.css';
 
 const Hero = ({ isAuthenticated }) => {
@@ -88,32 +89,42 @@ const Hero = ({ isAuthenticated }) => {
         )}
         
         {/* The Menu Links - Slides in from side on mobile */}
-        <div className={`nav-menu ${isMenuOpen ? 'active' : ''}`}>
+        <div id="public-nav-menu" className={`nav-menu ${isMenuOpen ? 'active' : ''}`}>
+          <Link to="/" className="nav-item" onClick={() => setIsMenuOpen(false)}>Home</Link>
           <Link to="/about" className="nav-item" onClick={() => setIsMenuOpen(false)}>About</Link>
           <Link to="/products" className="nav-item" onClick={() => setIsMenuOpen(false)}>Products</Link>
-          <Link to="/pricing" className="nav-item" onClick={() => setIsMenuOpen(false)}>Pricing</Link>
+          <Link to="/plans" className="nav-item" onClick={() => setIsMenuOpen(false)}>Plans</Link>
           <Link to="/legal" className="nav-item" onClick={() => setIsMenuOpen(false)}>Legal</Link>
           <Link to="/contact" className="nav-item" onClick={() => setIsMenuOpen(false)}>Contact</Link>
-          <Link to="/upgrade" className="nav-item" onClick={() => setIsMenuOpen(false)}>Upgrade</Link>
         </div>
 
         {/* Persistent Auth Section - Always Top Right */}
         <div className="nav-auth-persistent">
           {isAuthenticated ? (
-            <Link to="/bookings" className="btn-main-sm">Dashboard</Link>
+            <>
+              <Link to="/bookings" className="btn-dashboard-sm">Dashboard</Link>
+              <UserDropdownMenu />
+            </>
           ) : (
             <>
-              <Link to="/login" className="btn-login-text hide-mobile">Login</Link>
+              <Link to="/login" className="btn-login-text">Login</Link>
               <Link to="/register" className="btn-join-now">Join Now</Link>
             </>
           )}
           
-          {/* Hamburger stays inside the auth area for alignment */}
-          <div className={`hamburger ${isMenuOpen ? 'active' : ''}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          {/* Hamburger controls all heading links */}
+          <button
+            type="button"
+            className={`hamburger ${isMenuOpen ? 'active' : ''}`}
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={isMenuOpen}
+            aria-controls="public-nav-menu"
+          >
             <span className="bar"></span>
             <span className="bar"></span>
             <span className="bar"></span>
-          </div>
+          </button>
         </div>
       </nav>
 
@@ -296,7 +307,7 @@ const Hero = ({ isAuthenticated }) => {
             <div className="footer-col">
               <h4>Platform</h4>
               <Link to="/features">Features</Link>
-              <Link to="/pricing">Pricing</Link>
+              <Link to="/plans">Plans</Link>
               <Link to="/security">Security</Link>
             </div>
             <div className="footer-col">

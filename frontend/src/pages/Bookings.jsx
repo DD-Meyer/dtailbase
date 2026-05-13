@@ -305,7 +305,8 @@ function Bookings() {
   if (loading) return <div className="page-container">Loading Dashboard...</div>;
 
   return (
-    <div className="page-container">
+    // Fit the page container to the screen size for mobile devices, use tailwind utilities for responsive design, and ensure the table is scrollable on smaller screens
+    <div className="page-container w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {toast.show && <div className={`toast-notification ${toast.type}`}>{toast.message}</div>}
 
       {/* --- COMPLETION MODAL --- */}
@@ -389,15 +390,36 @@ function Bookings() {
 
       <UpgradeValueCards currentPlan={company?.plan} />
 
-      <div className="search-filter-container mb-4">
+      <div className="search-filter-container mb-4 gap-4">
         <input 
-          type="text" placeholder="Search customer or plate..." className="search-input"
+          type="text" placeholder="Search customer or plate..." className="search-input w-full md:w-1/3 self-center pl-10"
           value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
         />
 
         {/* Date Pickers & Quick Filters */}
         <div className="date-filter-section">
-          <div className="quick-filter-badges mb-2">
+          <div className="date-inputs flex items-center gap-2 ">
+            <input 
+              type="date" 
+              className="date-input"
+              value={startDate} 
+              onChange={(e) => setStartDate(e.target.value)} 
+            />
+            <span className="text-muted">to</span>
+            <input 
+              type="date" 
+              className="date-input"
+              value={endDate} 
+              onChange={(e) => setEndDate(e.target.value)} 
+            />
+            {(startDate || endDate) && (
+              <button className="reset-link ml-2 flex" onClick={() => {setStartDate(""); setEndDate("");}}>
+                Reset
+              </button>
+            )}
+          </div>
+
+          <div className="quick-filter-badges mb-4 flex gap-2">
             <button 
               type="button" 
               className={`badge-filter ${startDate === new Date().toISOString().split('T')[0] ? 'active' : ''}`} 
@@ -413,32 +435,11 @@ function Bookings() {
               This Week
             </button>
           </div>
-
-          <div className="date-range-picker">
-            <input 
-              type="date" 
-              className="date-input"
-              value={startDate} 
-              onChange={(e) => setStartDate(e.target.value)} 
-            />
-            <span className="text-muted">to</span>
-            <input 
-              type="date" 
-              className="date-input"
-              value={endDate} 
-              onChange={(e) => setEndDate(e.target.value)} 
-            />
-            {(startDate || endDate) && (
-              <button className="reset-link ml-2" onClick={() => {setStartDate(""); setEndDate("");}}>
-                Reset
-              </button>
-            )}
-          </div>
         </div>
 
         {/* Date Range Filters */}
         <select 
-          className="sort-select" 
+          className="sort-select size-20 pl-10 pr-10" 
           value={sortBy} 
           onChange={(e) => setSortBy(e.target.value)}
         >
@@ -471,8 +472,11 @@ function Bookings() {
           </thead>
           <tbody>
             {filteredAndSortedBookings.map((b) => (
-              <tr key={b.id}>
-                <td>
+              <tr 
+                key={b.id} 
+                className="booking-row-clickable"
+              >
+                <td data-label="Schedule">
                   <div className="mb-1"><strong>{b.booking_date}</strong></div>
                   <div className="text-sm">
                     <span className="text-muted">Est: </span> 
@@ -496,19 +500,22 @@ function Bookings() {
                   )}
                 </td>
                 
-                <td>{b.customer_name} {b.customer_lastname}</td>
-                <td>
+                <td className="td-customer" data-label="Customer">
+                  <div className="customer-name-mobile">{b.customer_name} {b.customer_lastname}</div>
+                </td>
+                
+                <td className="td-vehicle" data-label="Vehicle">
                   {b.vehicle_details?.make} {b.vehicle_details?.model}<br/>
                   <small className="text-muted">{b.vehicle_details?.registration}</small>
                 </td>
                 
-                <td>
+                <td className="td-status" data-label="Status">
                   <div className={`status-chip status-chip-${b.status.toLowerCase()} ${b.status === "IN_PROGRESS" ? "pulse-chip" : ""}`}>
                     {ALL_STATUS_OPTIONS[b.status]}
                   </div>
                   <select 
                     value={b.status} 
-                    onChange={(e) => handleStatusChange(b.id, e.target.value)}
+                    onChange={(e) => { e.stopPropagation(); handleStatusChange(b.id, e.target.value); }}
                     className={`status-select ${b.status.toLowerCase()}`}
                     disabled={VALID_STATUS_TRANSITIONS[b.status].length === 0}
                   >
@@ -522,7 +529,7 @@ function Bookings() {
                   )}
                 </td>
                 
-                <td>
+                <td className="td-auth" data-label="Authorization">
                   {b.admin_signature ? (
                     <div className="admin-sig-container">
                       <img src={toAbsoluteUrl(b.admin_signature)} alt="Auth" className="admin-sig-img" />
@@ -533,41 +540,57 @@ function Bookings() {
                   )}
                 </td>
                 
-                <td>
+                <td className="td-indemnity" data-label="Indemnity">
                   {b.is_signed ? (
                     <span className="badge badge-success">✅ Signed</span>
                   ) : b.status === "CONFIRMED" ? (
-                    <button className="btn btn-primary btn-sm" onClick={() => navigate(`/indemnity/sign/${b.id}`)}>✍️ Sign & Start</button>
+                    <button 
+                      className="btn btn-primary btn-sm" 
+                      onClick={(e) => { e.stopPropagation(); navigate(`/indemnity/sign/${b.id}`); }}
+                    >
+                      ✍️ Sign & Start
+                    </button>
                   ) : (
                     <span className="text-muted small">N/A</span>
                   )}
                 </td>
                 
-                <td>
-                  <button 
-                    className="btn-info btn-sm" 
-                    onClick={() => navigate(`/bookings/${b.id}`)}
-                  >
-                    👁️ View
-                  </button>
-                  
-                  {!["IN_PROGRESS", "COMPLETED"].includes(b.status) ? (
-                    <button className="text-btn-danger" onClick={async () => {
-                      if (window.confirm("Are you sure you want to delete this booking?")) {
-                        try {
-                          await api.delete(`bookings/${b.id}/`);
-                          triggerToast("Booking deleted successfully", "success");
-                          fetchBookings();
-                        } catch (err) {
-                          const errorMsg = err.response?.data?.error || "Delete failed";
-                          triggerToast(errorMsg, "error");
-                        }
-                      }
-                    }}>Delete
-                </button>
-                ) : (
-                <span className="text-muted small">Locked 🔒</span>
-                )}
+                <td className="td-actions" data-label="Actions">
+                  <div className="booking-action-group">
+                    <button 
+                      className="btn-info btn-sm" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/bookings/${b.id}`);
+                      }}
+                    >
+                      View
+                    </button>
+
+                    {!['IN_PROGRESS', 'COMPLETED'].includes(b.status) ? (
+                      <button 
+                        className="text-btn-danger" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (window.confirm("Are you sure you want to delete this booking?")) {
+                            api.delete(`bookings/${b.id}/`)
+                              .then(() => {
+                                triggerToast("Booking deleted successfully", "success");
+                                fetchBookings();
+                              })
+                              .catch((err) => {
+                                const errorMsg = err.response?.data?.error || "Delete failed";
+                                triggerToast(errorMsg, "error");
+                              });
+                          }
+                        }}
+                      >
+                        Delete
+                      </button>
+                    ) : (
+                      <span className="text-muted small">Locked 🔒</span>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}

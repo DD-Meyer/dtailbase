@@ -1,3 +1,4 @@
+/* ===== Desktop Styles ===== */
 /* --- Public Wrapper (The Background) --- */
 .public-wrapper {
   min-height: 100vh;
@@ -136,6 +137,8 @@
 }
 
 /* --- Responsive Adjustments --- */
+
+/* ===== Mobile Styles (<= 768px) ===== */
 @media (max-width: 768px) {
   .public-wrapper {
     align-items: flex-start;

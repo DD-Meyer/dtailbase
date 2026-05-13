@@ -1,3 +1,4 @@
+/* ===== Desktop Styles ===== */
 /* --- 1. THE REGISTRATION FORM (GRID) --- */
 .input-grid {
   display: grid;
@@ -122,6 +123,7 @@
   to { transform: translateX(0); opacity: 1; }
 }
 
+/* ===== Mobile Styles (<= 768px) ===== */
 @media (max-width: 768px) {
   .input-grid {
     grid-template-columns: 1fr;
