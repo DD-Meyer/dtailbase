@@ -1,6 +1,6 @@
 // Floating navigation menu for mobile devices
 import React from "react";
-import { useContext } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { CalendarDays, Car, Users, Wrench, UserCog } from "lucide-react";
@@ -8,7 +8,59 @@ import { CalendarDays, Car, Users, Wrench, UserCog } from "lucide-react";
 
 function MenuMobile() {
   const location = useLocation();
-    const { user } = useContext(AuthContext);
+        const { user } = useContext(AuthContext);
+        const [isPhone, setIsPhone] = useState(() => window.matchMedia("(max-width: 768px)").matches);
+        const [isDockVisible, setIsDockVisible] = useState(false);
+        const lastScrollPosition = useRef(0);
+
+        useEffect(() => {
+            const mediaQuery = window.matchMedia("(max-width: 768px)");
+            const handleViewportChange = (event) => {
+                setIsPhone(event.matches);
+                if (!event.matches) {
+                    setIsDockVisible(true);
+                }
+            };
+
+            mediaQuery.addEventListener("change", handleViewportChange);
+            return () => mediaQuery.removeEventListener("change", handleViewportChange);
+        }, []);
+
+        useEffect(() => {
+            if (!isPhone) {
+                setIsDockVisible(true);
+                return;
+            }
+
+            const scrollContainer = document.querySelector(".main-content") || window;
+            const readScrollTop = () =>
+                scrollContainer === window
+                    ? window.scrollY || document.documentElement.scrollTop || 0
+                    : scrollContainer.scrollTop;
+
+            lastScrollPosition.current = readScrollTop();
+            setIsDockVisible(false);
+
+            const onScroll = () => {
+                const currentScrollTop = readScrollTop();
+                const delta = currentScrollTop - lastScrollPosition.current;
+
+                if (Math.abs(delta) < 8) {
+                    return;
+                }
+
+                if (delta < 0) {
+                    setIsDockVisible(true);
+                } else {
+                    setIsDockVisible(false);
+                }
+
+                lastScrollPosition.current = currentScrollTop;
+            };
+
+            scrollContainer.addEventListener("scroll", onScroll, { passive: true });
+            return () => scrollContainer.removeEventListener("scroll", onScroll);
+        }, [isPhone]);
     // Menu items - same as Sidebar but without the collapse toggle and with icons only
 
     const menuItems = [
@@ -32,7 +84,9 @@ function MenuMobile() {
         // Moved menu items into sub menu and display only 4 icons/text for mobile, with option to expand to show all
         <div
         // Use env(safe-area-inset-bottom) to ensure the menu is above the iOS home indicator
-            className="fixed bottom-3 left-1/2 z-1000 w-[calc(100%-1rem)] max-w-md -translate-x-1/2 md:hidden"
+                        className={`fixed bottom-3 left-1/2 z-1000 w-[calc(100%-1rem)] max-w-md -translate-x-1/2 transition-all duration-300 ease-out md:hidden ${
+                            isDockVisible ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0 pointer-events-none"
+                        }`}
             style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
         >
             <div

@@ -155,9 +155,7 @@
 /* ===== Mobile Styles (<= 768px) ===== */
 @media (max-width: 768px) {
   .app-header {
-    height: 64px;
-    padding: 0 12px;
-    gap: 10px;
+    display: none;
   }
 
   .mobile-menu-btn {
