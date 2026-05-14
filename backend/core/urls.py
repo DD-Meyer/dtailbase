@@ -42,5 +42,9 @@ if settings.DEBUG:
 
 # THE CATCH-ALL: Keep this at the very bottom so media/api routes match first
 urlpatterns += [
-    re_path(r'^.*$', TemplateView.as_view(template_name='index.html'), name='home'),
+    re_path(
+        r'^(?!api/|admin/|media/|static/).*$',
+        TemplateView.as_view(template_name='index.html'),
+        name='home',
+    ),
 ]
