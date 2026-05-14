@@ -23,9 +23,9 @@ const warnInvalidPayload = (source, response, attemptedUrl) => {
 
 export const fetchPricingWithFallback = async (apiClient, source) => {
   const attempts = [
-    "payments/pricing/",
-    `${window.location.origin}/api/payments/pricing/`,
-    `${window.location.origin}/payments/pricing/`,
+    "payments/plans/",
+    `${window.location.origin}/api/payments/plans/`,
+    `${window.location.origin}/payments/plans/`,
   ];
 
   let lastError = null;

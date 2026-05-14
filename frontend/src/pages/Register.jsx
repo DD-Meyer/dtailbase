@@ -43,7 +43,7 @@ function Register() {
 
     const detectCountryAndCurrency = async () => {
       try {
-        const response = await api.get("payments/pricing/");
+        const response = await api.get("payments/plans/");
         const detectedCountry = (response.data?.country_code || "US").toUpperCase();
         const detectedCurrency = (response.data?.currency || "USD").toUpperCase();
         const browserFallback = getBrowserCountryFallback();

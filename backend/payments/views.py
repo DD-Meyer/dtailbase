@@ -20,27 +20,26 @@ from payments.paypal_service import (
 logger = logging.getLogger(__name__)
 
 
-class PricingView(APIView):
+
+# Use PlansView for plan/pricing info
+class PlansView(APIView):
     """
-    Get pricing based on user's detected country/currency.
+    Get available plans and pricing based on user's detected country/currency.
     """
     permission_classes = [AllowAny]
-    
+
     def get(self, request):
         try:
             from core.plan_limits import PLAN_CONFIG
 
-            # Helper to convert float('inf') to string for JSON
             def safe_plan(plan):
                 return {
                     k: ("unlimited" if isinstance(v, float) and v == float('inf') else v)
                     for k, v in plan.items()
                 }
 
-            # Detect user's country and currency from IP
             country_code, currency = detect_user_currency(request)
 
-            # For authenticated users, keep company currency aligned with detected preference.
             if request.user.is_authenticated and hasattr(request.user, 'company') and request.user.company:
                 company = request.user.company
                 update_fields = []
@@ -53,10 +52,8 @@ class PricingView(APIView):
                 if update_fields:
                     company.save(update_fields=update_fields)
 
-            # Get pricing for this currency
             pricing = PRICING.get(currency, PRICING['USD'])
 
-            # Build plans with features and pricing
             plans = {}
             for plan_name in PLAN_CONFIG:
                 plan_features = safe_plan(PLAN_CONFIG[plan_name])
@@ -77,7 +74,7 @@ class PricingView(APIView):
                 'plans': plans
             })
         except Exception as e:
-            logger.error(f"Error in PricingView: {str(e)}")
+            logger.error(f"Error in PlansView: {str(e)}")
             return Response({'error': str(e)}, status=500)
 
 
