@@ -121,8 +121,22 @@ const Plans = () => {
         setError(null);
       } catch (err) {
         console.error('Error fetching pricing:', err);
-        setError('Failed to load pricing information');
-        setCurrency('USD');
+        // Keep plans page usable even if pricing endpoint is temporarily unavailable.
+        const fallbackCurrency = currency === 'ZAR' ? 'ZAR' : 'USD';
+        const fallbackCurrencyPricing = PRICE_FALLBACKS[fallbackCurrency] || PRICE_FALLBACKS.USD;
+
+        setCurrency(fallbackCurrency);
+        setPricing({
+          PRO: {
+            amount: fallbackCurrencyPricing.PRO,
+            currency: fallbackCurrency,
+          },
+          ENTERPRISE: {
+            amount: fallbackCurrencyPricing.ENTERPRISE,
+            currency: fallbackCurrency,
+          },
+        });
+        setError(null);
       } finally {
         setLoading(false);
       }
