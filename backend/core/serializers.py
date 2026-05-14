@@ -436,7 +436,12 @@ class UserSerializer(serializers.ModelSerializer):
                 if Company.objects.filter(name__iexact=company_name).exists():
                     raise serializers.ValidationError({"company_name": "A company with this name is already registered."})
 
-                new_company = Company.objects.create(name=company_name, plan='STARTER')
+                new_company = Company.objects.create(
+                    name=company_name,
+                    plan='STARTER',
+                    country_code='US',
+                    currency='USD',
+                )
                 validated_data['company'] = new_company
                 validated_data['role'] = 'OWNER'
                 return User.objects.create_user(**validated_data)
