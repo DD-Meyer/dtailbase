@@ -122,15 +122,10 @@ body {
   font-size: 1.6rem; 
   font-weight: 900; 
   letter-spacing: -1.5px; 
-  text-decoration: none !important; /* Kills the underline */
-  color: var(--text-main) !important; /* Kills the dark blue */
+  text-decoration: none; /* Kills the underline */
   z-index: 1100;
   display: flex;
   align-items: center;
-}
-
-.nav-logo span { 
-  color: var(--primary); 
 }
 
 /* 2. Nav Items with Active Border Logic */
@@ -284,7 +279,6 @@ body {
 }
 
 .nav-logo { font-size: 1.6rem; font-weight: 900; letter-spacing: -1.5px; }
-.nav-logo span { color: var(--primary); }
 
 /* --- 4. HERO SECTION --- */
 .hero-container {

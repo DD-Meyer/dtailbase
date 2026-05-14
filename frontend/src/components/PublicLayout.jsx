@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { AuthContext } from "../context/AuthContext";
-import { NavLink, Link, useLocation} from 'react-router-dom';
-import UserDropdownMenu from './UserDropdownMenu';
+import { Link, useLocation} from 'react-router-dom';
+import PublicHeader from './PublicHeader';
 import '../styles/PublicLayout.css';
 
 const PublicLayout = ({ children, showNav = true, showFooter = true }) => {
@@ -79,51 +79,11 @@ const PublicLayout = ({ children, showNav = true, showFooter = true }) => {
 
       {/* SHARED NAV */}
       {showNav && (
-      <nav className="public-nav">
-        <Link to="/" className="nav-logo"><span className="bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">Dtail</span><span className="bg-gradient-to-r from-blue-500 to-sky-400 bg-clip-text text-transparent">base</span><span className="text-blue-500 font-black">.</span></Link>
-
-        {isMenuOpen && (
-          <div className="menu-overlay" onClick={() => setIsMenuOpen(false)}></div>
-        )}
-
-        {/* NAVIGATION MENU for mobile devices with a toggle */}
-
-        <div id="public-nav-menu" className={`nav-menu ${isMenuOpen ? 'active' : ''}`}>
-          <NavLink to="/" className="nav-item" onClick={() => setIsMenuOpen(false)}>Home</NavLink>
-          <NavLink to="/about" className="nav-item" onClick={() => setIsMenuOpen(false)}>About</NavLink>
-          <NavLink to="/products" className="nav-item" onClick={() => setIsMenuOpen(false)}>Products</NavLink>
-          <NavLink to="/plans" className="nav-item" onClick={() => setIsMenuOpen(false)}>Plans</NavLink>
-          <NavLink to="/legal" className="nav-item" onClick={() => setIsMenuOpen(false)}>Legal</NavLink>
-          <NavLink to="/contact" className="nav-item" onClick={() => setIsMenuOpen(false)}>Contact</NavLink>
-        </div>
-
-        <div className="nav-auth-persistent">
-          {isAuthenticated ? (
-            <>
-              <Link to="/bookings" className="btn-dashboard-sm">Dashboard</Link>
-              <UserDropdownMenu />
-            </>
-          ) : (
-            <>
-              <Link to="/login" className="btn-login-text">Login</Link>
-              <Link to="/register" className="btn-join-now">Join Now</Link>
-            </>
-          )}
-          
-          <button
-            type="button"
-            className={`hamburger ${isMenuOpen ? 'active' : ''}`}
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-            aria-expanded={isMenuOpen}
-            aria-controls="public-nav-menu"
-          >
-            <span className="bar"></span>
-            <span className="bar"></span>
-            <span className="bar"></span>
-          </button>
-        </div>
-      </nav>
+      <PublicHeader
+        isAuthenticated={isAuthenticated}
+        isMenuOpen={isMenuOpen}
+        setIsMenuOpen={setIsMenuOpen}
+      />
       )}
 
       {/* PAGE CONTENT (This is where Hero, Pricing, or Contact renders) */}
@@ -136,7 +96,7 @@ const PublicLayout = ({ children, showNav = true, showFooter = true }) => {
       <footer className="main-footer">
         <div className="container footer-content animate-on-scroll">
           <div className="footer-brand">
-            <div className="nav-logo"><span className="bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">Dtail</span><span className="bg-gradient-to-r from-blue-500 to-sky-400 bg-clip-text text-transparent">base</span><span className="text-blue-500 font-black">.</span></div>
+            <div className="nav-logo"><span className="text-white">Dtail</span><span className="bg-linear-to-r from-blue-500 to-sky-400 bg-clip-text text-transparent">base</span><span className="text-blue-500 font-black">.</span></div>
             <p>The operating system for the world's most meticulous studios.</p>
             
             <div className="whatsapp-cta-box">

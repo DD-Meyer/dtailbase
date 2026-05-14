@@ -15,6 +15,55 @@
   z-index: 100;
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+  min-width: 180px;
+}
+
+
+.dashboard-logo {
+  display: flex;
+  align-items: center;
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+  user-select: none;
+}
+
+/* Hide logo on desktop, show only on mobile */
+.dashboard-logo.mobile-only {
+  display: none;
+}
+@media (max-width: 768px) {
+  .dashboard-logo.mobile-only {
+    display: flex;
+    font-size: 1.2rem;
+    padding-left: 2px;
+  }
+}
+
+.header-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .dashboard-logo {
+    font-size: 1.2rem;
+    padding-left: 2px;
+  }
+  .header-install-btn {
+    padding: 5px 10px;
+    font-size: 0.82rem;
+    margin-right: 4px;
+    min-width: 0;
+    box-shadow: 0 2px 8px -2px rgba(15, 132, 200, 0.25);
+  }
+}
+
 .mobile-menu-btn {
   display: none;
   border: 1px solid rgba(123, 154, 196, 0.28);

@@ -244,12 +244,10 @@ function AppContent() {
       )}
       
       <main className={isLandingPage || isAuthPage ? "full-page-content" : "main-content"}>
-        
         {/* Header hidden on Hero and Auth pages */}
         {showDashboardChrome && (
-          <Header />
+          <Header showInstallButton={showInstallButton && !isInstalledApp && !isWebsiteOnlyRoute} handleInstallClick={handleInstallClick} />
         )}
-        
         <div className={isLandingPage || isAuthPage ? "" : "page-body"}>
           <Routes>
             {/* Public Routes */}
@@ -300,11 +298,7 @@ function AppContent() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
 
-          {showInstallButton && !isInstalledApp && !isWebsiteOnlyRoute && (
-            <button className="install-app-fab" onClick={handleInstallClick}>
-              Install App
-            </button>
-          )}
+          {/* Install button is now only in the header for all devices */}
         </div>
       </main>
     </div>

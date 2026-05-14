@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import UserDropdownMenu from './UserDropdownMenu';
+import PublicHeader from './PublicHeader';
 import '../styles/Hero.css';
 
 const Hero = ({ isAuthenticated }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   useEffect(() => {
 
     if (isMenuOpen) {
@@ -78,55 +79,11 @@ const Hero = ({ isAuthenticated }) => {
         <div className="ring ring-4"></div>
       </div>
 
-      <nav className="public-nav">
-        <div className="nav-logo"><span className="bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">Dtail</span><span className="bg-gradient-to-r from-blue-500 to-sky-400 bg-clip-text text-transparent">base</span><span className="text-blue-500 font-black">.</span></div>
-
-        {isMenuOpen && (
-          <div 
-            className="menu-overlay" 
-            onClick={() => setIsMenuOpen(false)}
-          ></div>
-        )}
-        
-        {/* The Menu Links - Slides in from side on mobile */}
-        <div id="public-nav-menu" className={`nav-menu ${isMenuOpen ? 'active' : ''}`}>
-          <Link to="/" className="nav-item" onClick={() => setIsMenuOpen(false)}>Home</Link>
-          <Link to="/about" className="nav-item" onClick={() => setIsMenuOpen(false)}>About</Link>
-          <Link to="/products" className="nav-item" onClick={() => setIsMenuOpen(false)}>Products</Link>
-          <Link to="/plans" className="nav-item" onClick={() => setIsMenuOpen(false)}>Plans</Link>
-          <Link to="/legal" className="nav-item" onClick={() => setIsMenuOpen(false)}>Legal</Link>
-          <Link to="/contact" className="nav-item" onClick={() => setIsMenuOpen(false)}>Contact</Link>
-        </div>
-
-        {/* Persistent Auth Section - Always Top Right */}
-        <div className="nav-auth-persistent">
-          {isAuthenticated ? (
-            <>
-              <Link to="/bookings" className="btn-dashboard-sm">Dashboard</Link>
-              <UserDropdownMenu />
-            </>
-          ) : (
-            <>
-              <Link to="/login" className="btn-login-text">Login</Link>
-              <Link to="/register" className="btn-join-now">Join Now</Link>
-            </>
-          )}
-          
-          {/* Hamburger controls all heading links */}
-          <button
-            type="button"
-            className={`hamburger ${isMenuOpen ? 'active' : ''}`}
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-            aria-expanded={isMenuOpen}
-            aria-controls="public-nav-menu"
-          >
-            <span className="bar"></span>
-            <span className="bar"></span>
-            <span className="bar"></span>
-          </button>
-        </div>
-      </nav>
+      <PublicHeader
+        isAuthenticated={isAuthenticated}
+        isMenuOpen={isMenuOpen}
+        setIsMenuOpen={setIsMenuOpen}
+      />
 
       <section className="hero-container">
         <div className="hero-content">
@@ -283,7 +240,7 @@ const Hero = ({ isAuthenticated }) => {
       <footer className="main-footer">
         <div className="container footer-content animate-on-scroll">
           <div className="footer-brand">
-            <div className="nav-logo"><span className="bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">Dtail</span><span className="bg-gradient-to-r from-blue-500 to-sky-400 bg-clip-text text-transparent">base</span><span className="text-blue-500 font-black">.</span></div>
+            <div className="nav-logo"><span className="text-white">Dtail</span><span className="bg-linear-to-r from-blue-500 to-sky-400 bg-clip-text text-transparent">base</span><span className="text-blue-500 font-black">.</span></div>
             <p>The operating system for the world's most meticulous studios.</p>
             
             <div className="whatsapp-cta-box">

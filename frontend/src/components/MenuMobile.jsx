@@ -13,13 +13,10 @@ function MenuMobile() {
 
     const menuItems = [
         // display text below icons only mobile
-        // { path: "/", label: "Home", icon: "🏠" },
         { path: "/customers", label: "Customers", icon: Users, text: "Customers" },
         { path: "/vehicles", label: "Vehicles", icon: Car, text: "Vehicles" },
         { path: "/bookings", label: "Bookings", icon: CalendarDays, text: "Bookings" },
         { path: "/services", label: "Services", icon: Wrench, text: "Services" },
-        // sub menu
-        // { path: "/profile", label: "Profile", icon: "👤" },
     ];
 
     if (user?.role === 'OWNER') {
@@ -32,8 +29,8 @@ function MenuMobile() {
         // Moved menu items into sub menu and display only 4 icons/text for mobile, with option to expand to show all
         <div
         // Use env(safe-area-inset-bottom) to ensure the menu is above the iOS home indicator
-            className="fixed bottom-3 left-1/2 z-1000 w-[calc(100%-1rem)] max-w-md -translate-x-1/2 md:hidden"
-            style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+            className="fixed bottom-3 left-1/2 z-1000 w-[calc(100%-3rem)] max-w-md -translate-x-1/2 md:hidden"
+            style={{ bottom: "max(2rem, env(safe-area-inset-bottom))" }}
         >
             <div
                 className="rounded-2xl border border-cyan-400/20 bg-linear-to-br from-slate-900/95 via-slate-800/92 to-cyan-950/90 p-4 shadow-2xl backdrop-blur-md"
@@ -47,11 +44,11 @@ function MenuMobile() {
                                 <Link
                                     to={item.path}
                                     title={item.label}
-                                    className={`flex opacity-100 min-h-12 flex-col items-center justify-center rounded-xl text-xl transition-colors ${isActive ? "bg-cyan-500/20 text-cyan-200" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}
+                                    className={`flex text-[9px] opacity-100 min-h-12 flex-col items-center justify-center rounded-2xl text-xl transition-colors ${isActive ? "bg-cyan-500/20 text-emerald-500 border text-[9px]" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}
                                 >
                                     {/* Center item pop out above the nav and is a larger icon */}
-                                    <Icon className="h-4.5 w-4.5" strokeWidth={2.1} aria-hidden="true" />
-                                    <span className="text-[11px] leading-tight tracking-wide">{item.text}</span>
+                                    <Icon className={`h-4.5 w-4.5 ${isActive ? 'h-5 w-5' : ''}`} strokeWidth={2.1} aria-hidden="true" />
+                                    <span className="leading-tight tracking-wide">{item.text}</span>
                                 </Link>
                             </li>
                         );
