@@ -1,8 +1,11 @@
 import axios from "axios";
 import { clearAuthStorage, getAccessToken } from "./utils/authStorage";
 
+const configuredApiUrl = (import.meta.env.VITE_API_URL || "").trim();
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000/api",
+  // Default to same-origin /api so production works even if VITE_API_URL is not injected.
+  baseURL: configuredApiUrl || "/api",
   withCredentials: true,
 });
 
