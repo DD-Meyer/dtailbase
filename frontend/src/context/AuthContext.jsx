@@ -1,5 +1,6 @@
 // context/AuthContext.jsx
 import { createContext, useState, useEffect } from "react";
+import { clearAuthStorage, getAccessToken, getStoredUserData, saveAuthSession } from "../utils/authStorage";
 
 export const AuthContext = createContext();
 
@@ -9,8 +10,8 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const access = localStorage.getItem("accessToken");
-    const storedUser = localStorage.getItem("userData");
+    const access = getAccessToken();
+    const storedUser = getStoredUserData();
 
     // Only try to parse if BOTH the token and the user string exist
     if (access && storedUser && storedUser !== "undefined") {
@@ -19,25 +20,25 @@ export function AuthProvider({ children }) {
         setUser(JSON.parse(storedUser));
       } catch (error) {
         console.error("Error parsing stored user data:", error);
-        // If data is corrupt, clear it
-        localStorage.removeItem("userData");
+        // If data is corrupt, clear both storage locations
+        clearAuthStorage();
       }
     }
     setLoading(false);
   }, []);
 
   // 🔑 Updated login to accept the full user object (including role)
-  const login = (accessToken, refreshToken, userData) => {
-    localStorage.setItem("accessToken", accessToken);
-    localStorage.setItem("refreshToken", refreshToken);
-    localStorage.setItem("userData", JSON.stringify(userData)); // 👈 Save as string
+  const login = (accessToken, refreshToken, userData, options = {}) => {
+    const rememberMe = options?.rememberMe ?? true;
+
+    saveAuthSession({ accessToken, refreshToken, userData, rememberMe });
     
     setUser(userData);
     setIsAuthenticated(true);
   };
 
   const logout = () => {
-    localStorage.clear();
+    clearAuthStorage();
     setIsAuthenticated(false);
     setUser(null);
     window.location.href = "/";

@@ -20,6 +20,7 @@ urlpatterns = [
     path("public/book/<slug:company_slug>/", PublicBookingCreateView.as_view(), name="public-booking-create"),
 
     path("auth/users/me/", UserMeView.as_view(), name="user-me"),
+    path("auth/google-login/", GoogleLoginView.as_view(), name="google-login"),
     path("availability/<str:date>/", AvailabilityAPIView.as_view()),
 
     path('auth/set-password/', ChangePasswordView.as_view(), name='set-password'),

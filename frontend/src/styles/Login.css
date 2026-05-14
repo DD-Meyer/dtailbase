@@ -133,6 +133,28 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+.login-options-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: -0.25rem 0 1rem;
+}
+
+.remember-me-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #334155;
+  cursor: pointer;
+}
+
+.remember-me-checkbox input {
+  width: 16px;
+  height: 16px;
+  accent-color: #2563eb;
+}
+
 /* Ensure the button doesn't feel cramped */
 .btn-full {
   width: 100%;
@@ -150,6 +172,57 @@
 
 .btn-full:hover {
   background-color: #2563eb;
+}
+
+.google-login-wrap {
+  margin-top: 1.25rem;
+}
+
+.login-divider {
+  position: relative;
+  text-align: center;
+  margin: 0.75rem 0 1rem;
+}
+
+.login-divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+.login-divider span {
+  position: relative;
+  z-index: 1;
+  background: #ffffff;
+  padding: 0 0.65rem;
+  color: #64748b;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.google-login-button {
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+}
+
+.google-login-note {
+  margin: 0.65rem 0 0;
+  font-size: 0.82rem;
+  text-align: center;
+  color: #64748b;
+}
+
+.google-login-error {
+  margin: 0.65rem 0 0;
+  font-size: 0.85rem;
+  text-align: center;
+  color: #b91c1c;
 }
 
 

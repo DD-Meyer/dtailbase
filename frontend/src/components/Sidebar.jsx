@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
+import { CalendarDays, Car, ShieldCheck, Settings, UserRound, Users, UserCog, Wrench } from "lucide-react";
 import "../styles/Sidebar.css";
 
 // ... imports stay the same ...
@@ -12,14 +13,14 @@ function Sidebar() {
   const { user } = useContext(AuthContext);
 
   const menuItems = [
-    { path: "/bookings", label: "Bookings", icon: "📅" },
-    { path: "/customers", label: "Customers", icon: "👥" },
-    { path: "/vehicles", label: "Vehicles", icon: "🚗" },
-    { path: "/services", label: "Services", icon: "🛠️" },
+    { path: "/bookings", label: "Bookings", icon: CalendarDays },
+    { path: "/customers", label: "Customers", icon: Users },
+    { path: "/vehicles", label: "Vehicles", icon: Car },
+    { path: "/services", label: "Services", icon: Wrench },
   ];
 
   if (user?.role === 'OWNER') {
-    menuItems.push({ path: "/settings/indemnity", label: "Indemnity", icon: "🛡️" });
+    menuItems.push({ path: "/settings/indemnity", label: "Indemnity", icon: ShieldCheck });
   }
 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
@@ -45,14 +46,16 @@ function Sidebar() {
       <hr className="sidebar-divider" />
 
       <ul className="sidebar-links">
-        {menuItems.map((item) => (
+        {menuItems.map((item) => {
+          const Icon = item.icon;
+          return (
           <li key={item.path} className={location.pathname === item.path ? "active" : ""}>
             <Link to={item.path} title={item.label}>
-              <span className="icon">{item.icon}</span>
+              <span className="icon"><Icon size={18} strokeWidth={2.1} aria-hidden="true" /></span>
               {!isCollapsed && <span className="label">{item.label}</span>}
             </Link>
           </li>
-        ))}
+        )})}
       </ul>
 
       <hr className="sidebar-divider" />
@@ -61,7 +64,7 @@ function Sidebar() {
         <ul className="sidebar-links">
           <li className={location.pathname === "/profile" ? "active" : ""}>
             <Link to="/profile" title="My Profile">
-              <span className="icon">👤</span>
+              <span className="icon"><UserRound size={18} strokeWidth={2.1} aria-hidden="true" /></span>
               {!isCollapsed && <span className="label">My Profile</span>}
             </Link>
           </li>
@@ -71,13 +74,13 @@ function Sidebar() {
               {!isCollapsed && <p className="admin-header">Admin</p>}
               <li className={location.pathname === "/team" ? "active" : ""}>
                 <Link to="/team" title="Team Management">
-                  <span className="icon">🏗️</span>
+                  <span className="icon"><UserCog size={18} strokeWidth={2.1} aria-hidden="true" /></span>
                   {!isCollapsed && <span className="label">Team</span>}
                 </Link>
               </li>
               <li className={location.pathname === "/settings" ? "active" : ""}>
                 <Link to="/settings" title="Business Settings">
-                  <span className="icon">⚙️</span>
+                  <span className="icon"><Settings size={18} strokeWidth={2.1} aria-hidden="true" /></span>
                   {!isCollapsed && <span className="label">Settings</span>}
                 </Link>
               </li>

@@ -526,17 +526,21 @@ class CompanySerializer(serializers.ModelSerializer):
         return None
 
 class MyTokenSerializer(TokenObtainPairSerializer):
+    @staticmethod
+    def build_user_payload(user):
+        return {
+            'email': user.email,
+            'role': user.role,
+            'username': user.username,
+            'company_id': user.company.id if user.company else None,
+            # Adding plan and usage to the token response for frontend convenience
+            'plan': user.company.plan if user.company else 'STARTER',
+            'usage': user.company.get_monthly_booking_count() if user.company else 0
+        }
+
     def validate(self, attrs):
         data = super().validate(attrs)
-        data['user'] = {
-            'email': self.user.email,
-            'role': self.user.role,
-            'username': self.user.username,
-            'company_id': self.user.company.id if self.user.company else None,
-            # Adding plan and usage to the token response for frontend convenience
-            'plan': self.user.company.plan if self.user.company else 'STARTER',
-            'usage': self.user.company.get_monthly_booking_count() if self.user.company else 0
-        }
+        data['user'] = self.build_user_payload(self.user)
         return data
 
 # core/serializers.py

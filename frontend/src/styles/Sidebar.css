@@ -128,10 +128,15 @@
 }
 
 .icon {
-  font-size: 1.2rem;
   min-width: 30px;
   display: flex;
+  align-items: center;
   justify-content: center;
+  color: currentColor;
+}
+
+.icon svg {
+  display: block;
 }
 
 /* 4. Footer & Admin Headers */

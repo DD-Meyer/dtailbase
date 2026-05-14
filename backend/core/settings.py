@@ -70,6 +70,8 @@ ALLOWED_HOSTS = env_list(
     'localhost,127.0.0.1,187.124.208.220,dtailbase.com,www.dtailbase.com'
 )
 
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '').strip()
+
 
 # Application definition
 
@@ -110,6 +112,9 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Trust X-Forwarded headers from reverse proxy (Nginx)
 USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
+
+# Allow OAuth popup postMessage flows (Google Identity Services/FedCM) while keeping same-origin isolation.
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

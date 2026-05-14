@@ -1,5 +1,10 @@
 from multiprocessing.sharedctypes import Value
 from warnings import filters
+import json
+import os
+from urllib.error import HTTPError, URLError
+from urllib.parse import quote
+from urllib.request import urlopen
 
 from django.forms import IntegerField
 from rest_framework import generics, permissions, status
@@ -8,7 +13,7 @@ from .models import *
 from .serializers import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from .permissions import IsCompanyUser, CanUpdateBookingStatus, IsAccountAdmin
 from .plan_limits import PLAN_CONFIG
 from rest_framework.exceptions import ValidationError, PermissionDenied
@@ -21,6 +26,7 @@ from rest_framework.decorators import action
 from django.db.models import Case, When, Value, IntegerField
 
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class ChangePasswordView(APIView):
@@ -53,6 +59,87 @@ class ChangePasswordView(APIView):
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenSerializer
+
+
+class GoogleLoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        credential = request.data.get("credential")
+        if not credential:
+            return Response(
+                {"detail": "Google credential is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        google_payload = self._verify_google_credential(credential)
+        if isinstance(google_payload, Response):
+            return google_payload
+
+        email = google_payload.get("email")
+        if not email:
+            return Response(
+                {"detail": "Google account did not include an email address."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = User.objects.filter(email__iexact=email).select_related("company").first()
+
+        if not user:
+            return Response(
+                {"detail": "No account exists for this Google email. Please register first."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if not user.is_active:
+            return Response(
+                {"detail": "This account is inactive. Contact support."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        refresh = RefreshToken.for_user(user)
+        return Response(
+            {
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+                "user": MyTokenSerializer.build_user_payload(user),
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    def _verify_google_credential(self, credential):
+        token_info_url = f"https://oauth2.googleapis.com/tokeninfo?id_token={quote(credential)}"
+
+        try:
+            with urlopen(token_info_url, timeout=6) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+        except (HTTPError, URLError, TimeoutError, ValueError):
+            return Response(
+                {"detail": "Invalid Google credential."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        issuer = payload.get("iss")
+        if issuer not in {"accounts.google.com", "https://accounts.google.com"}:
+            return Response(
+                {"detail": "Google credential issuer is invalid."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if str(payload.get("email_verified", "")).lower() != "true":
+            return Response(
+                {"detail": "Google email is not verified."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        expected_client_id = os.environ.get("GOOGLE_CLIENT_ID", "").strip()
+        if expected_client_id and payload.get("aud") != expected_client_id:
+            return Response(
+                {"detail": "Google credential audience does not match this app."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return payload
 
 class UserCreateAPIView(generics.CreateAPIView):
     queryset = User.objects.all()

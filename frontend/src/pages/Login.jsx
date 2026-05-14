@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect, useRef } from "react";
 import api from "../axios_instance";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
@@ -8,11 +8,95 @@ import "../styles/Login.css"
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [googleError, setGoogleError] = useState("");
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
   const planContext = location.state?.fromPlanCta ? location.state : null;
+  const googleButtonRef = useRef(null);
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+  const completeLogin = (authResponse) => {
+    login(authResponse.access, authResponse.refresh, authResponse.user, { rememberMe });
+
+    if (planContext?.selectedPlanId && planContext.selectedPlanId !== "STARTER") {
+      navigate(planContext.redirectTo || `/payments?plan=${planContext.selectedPlanId}`);
+    } else {
+      navigate("/bookings");
+    }
+  };
+
+  useEffect(() => {
+    if (!googleClientId || !googleButtonRef.current) {
+      return;
+    }
+
+    const initializeGoogleButton = () => {
+      if (!window.google?.accounts?.id || !googleButtonRef.current) {
+        return;
+      }
+
+      window.google.accounts.id.initialize({
+        client_id: googleClientId,
+        callback: async (response) => {
+          if (!response?.credential) {
+            setGoogleError("Google authentication did not return a credential.");
+            return;
+          }
+
+          setGoogleError("");
+          setIsGoogleLoading(true);
+
+          try {
+            const authResponse = await api.post("auth/google-login/", {
+              credential: response.credential,
+            });
+
+            completeLogin(authResponse.data);
+          } catch (error) {
+            console.error("Google Login Error:", error.response?.data || error.message);
+            setGoogleError(error.response?.data?.detail || "Google sign in failed. Please try again.");
+          } finally {
+            setIsGoogleLoading(false);
+          }
+        },
+      });
+
+      googleButtonRef.current.innerHTML = "";
+      window.google.accounts.id.renderButton(googleButtonRef.current, {
+        theme: "outline",
+        size: "large",
+        text: "continue_with",
+        shape: "pill",
+        width: 360,
+      });
+    };
+
+    if (window.google?.accounts?.id) {
+      initializeGoogleButton();
+      return;
+    }
+
+    const existingScript = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+    if (existingScript) {
+      existingScript.addEventListener("load", initializeGoogleButton);
+      return () => existingScript.removeEventListener("load", initializeGoogleButton);
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.addEventListener("load", initializeGoogleButton);
+    document.body.appendChild(script);
+
+    return () => {
+      script.removeEventListener("load", initializeGoogleButton);
+    };
+  }, [googleClientId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,15 +107,7 @@ function Login() {
         password: password 
       }); 
       
-      // res.data.user should contain the object: { email, role, id, ... }
-      // Pass the user object instead of just the email string
-      login(res.data.access, res.data.refresh, res.data.user);
-
-      if (planContext?.selectedPlanId && planContext.selectedPlanId !== "STARTER") {
-        navigate(planContext.redirectTo || `/payments?plan=${planContext.selectedPlanId}`);
-      } else {
-        navigate("/bookings");
-      }
+      completeLogin(res.data);
     } catch (err) {
       // This will print the EXACT reason the backend said "No"
       console.error("Login Error Details:", err.response?.data);
@@ -85,6 +161,17 @@ function Login() {
             />
           </div>
 
+          <div className="login-options-row">
+            <label className="remember-me-checkbox">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+              <span>Remember me</span>
+            </label>
+          </div>
+
           <button 
             type="submit" 
             className="btn btn-primary btn-full" 
@@ -93,6 +180,21 @@ function Login() {
             {isLoading ? "Signing in..." : "Login to Dashboard"}
           </button>
         </form>
+
+        <div className="google-login-wrap">
+          <div className="login-divider"><span>or</span></div>
+          {!googleClientId && (
+            <p className="google-login-note">Google sign-in is not configured yet. Add VITE_GOOGLE_CLIENT_ID to your frontend environment.</p>
+          )}
+          {googleClientId && (
+            <>
+              <div ref={googleButtonRef} className="google-login-button" aria-live="polite" />
+              {isGoogleLoading && <p className="google-login-note">Signing in with Google...</p>}
+            </>
+          )}
+          {googleError && <p className="google-login-error">{googleError}</p>}
+        </div>
+
         <div className="login-footer">
           <p>
             Don't have an account?{' '}

@@ -42,6 +42,8 @@ const ALL_STATUS_OPTIONS = {
   CANCELLED: "Cancelled",
 };
 
+const EMPTY_TABLE_ROW_COUNT = 6;
+
 const formatTime = (isoString) => {
   if (!isoString) return "";
   return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
@@ -390,15 +392,30 @@ function Bookings() {
 
       <UpgradeValueCards currentPlan={company?.plan} />
 
-      <div className="search-filter-container mb-4 gap-4">
+      <div className="search-filter-container mb-4">
+        <div className="search-filter-top-row">
         <input 
-          type="text" placeholder="Search customer or plate..." className="search-input w-full md:w-1/3 self-center pl-10"
+          type="text"
+          placeholder="Search customer or plate..."
+          className="search-input search-input-bookings"
           value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
         />
 
+        {/* Date Range Filters */}
+        <select 
+          className="sort-select" 
+          value={sortBy} 
+          onChange={(e) => setSortBy(e.target.value)}
+        >
+          <option value="CREATED_DESC">Recently Added</option>
+          <option value="CREATED_ASC">Oldest Added</option>
+          <option value="APPOINTMENT">Appointment Time</option>
+        </select>
+        </div>
+
         {/* Date Pickers & Quick Filters */}
         <div className="date-filter-section">
-          <div className="date-inputs flex items-center gap-2 ">
+          <div className="date-inputs">
             <input 
               type="date" 
               className="date-input"
@@ -413,13 +430,13 @@ function Bookings() {
               onChange={(e) => setEndDate(e.target.value)} 
             />
             {(startDate || endDate) && (
-              <button className="reset-link ml-2 flex" onClick={() => {setStartDate(""); setEndDate("");}}>
+              <button className="reset-link" onClick={() => {setStartDate(""); setEndDate("");}}>
                 Reset
               </button>
             )}
           </div>
 
-          <div className="quick-filter-badges mb-4 flex gap-2">
+          <div className="quick-filter-badges">
             <button 
               type="button" 
               className={`badge-filter ${startDate === new Date().toISOString().split('T')[0] ? 'active' : ''}`} 
@@ -436,17 +453,6 @@ function Bookings() {
             </button>
           </div>
         </div>
-
-        {/* Date Range Filters */}
-        <select 
-          className="sort-select size-20 pl-10 pr-10" 
-          value={sortBy} 
-          onChange={(e) => setSortBy(e.target.value)}
-        >
-          <option value="CREATED_DESC">Recently Added</option>
-          <option value="CREATED_ASC">Oldest Added</option>
-          <option value="APPOINTMENT">Appointment Time</option>
-        </select>
 
         <div className="filter-tabs">
           {["ALL", ...Object.keys(ALL_STATUS_OPTIONS)].map(s => (
@@ -471,7 +477,7 @@ function Bookings() {
             </tr>
           </thead>
           <tbody>
-            {filteredAndSortedBookings.map((b) => (
+            {filteredAndSortedBookings.length > 0 ? filteredAndSortedBookings.map((b) => (
               <tr 
                 key={b.id} 
                 className="booking-row-clickable"
@@ -592,6 +598,16 @@ function Bookings() {
                     )}
                   </div>
                 </td>
+              </tr>
+            )) : Array.from({ length: EMPTY_TABLE_ROW_COUNT }, (_, index) => (
+              <tr key={`empty-row-${index}`} className="booking-row-empty" aria-hidden="true">
+                <td data-label="Schedule">{index === 0 ? "No matching bookings" : "\u00A0"}</td>
+                <td data-label="Customer">\u00A0</td>
+                <td data-label="Vehicle">\u00A0</td>
+                <td data-label="Status">\u00A0</td>
+                <td data-label="Authorization">\u00A0</td>
+                <td data-label="Indemnity">\u00A0</td>
+                <td data-label="Actions">\u00A0</td>
               </tr>
             ))}
           </tbody>

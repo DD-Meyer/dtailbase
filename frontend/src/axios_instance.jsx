@@ -1,4 +1,5 @@
 import axios from "axios";
+import { clearAuthStorage, getAccessToken } from "./utils/authStorage";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000/api",
@@ -8,7 +9,7 @@ const api = axios.create({
 // REQUEST: Attach the token to every call
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("accessToken");
+    const token = getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -26,10 +27,8 @@ api.interceptors.response.use(
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
       console.warn("Session expired or unauthorized. Logging out...");
       
-      // 1. Clear the storage so the AuthContext 'isAuthenticated' check fails on reload
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("userEmail");
+      // 1. Clear all auth storage so AuthContext fails auth on reload
+      clearAuthStorage();
 
       // 2. Force a redirect to login
       // We use window.location.href because this file is outside the 
