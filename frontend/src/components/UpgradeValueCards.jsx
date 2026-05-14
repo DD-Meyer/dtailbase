@@ -31,6 +31,11 @@ const PLAN_CONTENT = [
   },
 ];
 
+const PRICE_FALLBACKS = {
+  USD: { PRO: "29.00", ENTERPRISE: "149.00" },
+  ZAR: { PRO: "499.00", ENTERPRISE: "1299.00" },
+};
+
 function UpgradeValueCards({ currentPlan }) {
   const [isMobile, setIsMobile] = useState(() => window.matchMedia("(max-width: 768px)").matches);
   const [currency, setCurrency] = useState("USD");
@@ -51,12 +56,29 @@ function UpgradeValueCards({ currentPlan }) {
         if (!isValidPricingPayload(response.data)) {
           throw new Error("Unexpected pricing payload");
         }
-        setCurrency(response.data?.currency || "USD");
-        setPricing(response.data?.pricing || null);
+        const detectedCurrency = (response.data?.currency || "USD").toUpperCase();
+        const apiPricing = response.data?.pricing || {};
+        const plansPricing = response.data?.plans || {};
+        const fallback = PRICE_FALLBACKS[detectedCurrency] || PRICE_FALLBACKS.USD;
+
+        setCurrency(detectedCurrency);
+        setPricing({
+          PRO: {
+            amount: String(apiPricing?.PRO?.amount || plansPricing?.PRO?.price || fallback.PRO),
+          },
+          ENTERPRISE: {
+            amount: String(
+              apiPricing?.ENTERPRISE?.amount || plansPricing?.ENTERPRISE?.price || fallback.ENTERPRISE
+            ),
+          },
+        });
       } catch {
         // Keep safe defaults if pricing endpoint is unavailable.
         setCurrency("USD");
-        setPricing(null);
+        setPricing({
+          PRO: { amount: PRICE_FALLBACKS.USD.PRO },
+          ENTERPRISE: { amount: PRICE_FALLBACKS.USD.ENTERPRISE },
+        });
       }
     };
 
@@ -92,7 +114,8 @@ function UpgradeValueCards({ currentPlan }) {
     if (!amount) {
       return null;
     }
-    const formattedAmount = amount.endsWith(".00") ? amount.slice(0, -3) : amount;
+    const amountString = String(amount);
+    const formattedAmount = amountString.endsWith(".00") ? amountString.slice(0, -3) : amountString;
     return `${currencySymbol}${formattedAmount}/mo`;
   };
 
