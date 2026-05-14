@@ -28,6 +28,15 @@ class PricingView(APIView):
     
     def get(self, request):
         try:
+            from core.plan_limits import PLAN_CONFIG
+
+            # Helper to convert float('inf') to string for JSON
+            def safe_plan(plan):
+                return {
+                    k: ("unlimited" if isinstance(v, float) and v == float('inf') else v)
+                    for k, v in plan.items()
+                }
+
             # Detect user's country and currency from IP
             country_code, currency = detect_user_currency(request)
 
@@ -43,28 +52,29 @@ class PricingView(APIView):
                     update_fields.append('currency')
                 if update_fields:
                     company.save(update_fields=update_fields)
-            
+
             # Get pricing for this currency
             pricing = PRICING.get(currency, PRICING['USD'])
-            
+
+            # Build plans with features and pricing
+            plans = {}
+            for plan_name in PLAN_CONFIG:
+                plan_features = safe_plan(PLAN_CONFIG[plan_name])
+                if plan_name == 'STARTER':
+                    price = '0'
+                else:
+                    price = pricing[plan_name]['amount']
+                plans[plan_name] = {
+                    'features': plan_features,
+                    'price': price,
+                    'currency': currency,
+                }
+
             return Response({
                 'country_code': country_code,
                 'currency': currency,
                 'pricing': pricing,
-                'plans': {
-                    'STARTER': {
-                        'price': '0',
-                        'currency': currency,
-                    },
-                    'PRO': {
-                        'price': pricing['PRO']['amount'],
-                        'currency': currency,
-                    },
-                    'ENTERPRISE': {
-                        'price': pricing['ENTERPRISE']['amount'],
-                        'currency': currency,
-                    }
-                }
+                'plans': plans
             })
         except Exception as e:
             logger.error(f"Error in PricingView: {str(e)}")

@@ -1,19 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../axios_instance";
+import { fetchPricingWithFallback, isValidPricingPayload } from "../services/pricingService";
 import "../styles/UpgradeValueCards.css";
-
-const warnIfInvalidPricingPayload = (response, source) => {
-  const contentType = (response?.headers?.['content-type'] || '').toLowerCase();
-  const isHtmlLike = contentType.includes('text/html');
-  const isObjectPayload = response?.data && typeof response.data === 'object';
-
-  if (isHtmlLike || !isObjectPayload) {
-    console.warn(
-      `[pricing] ${source}: expected JSON from /api/payments/pricing/, got content-type='${contentType || 'unknown'}' and data type='${typeof response?.data}'. Check VITE_API_URL and reverse proxy routing.`
-    );
-  }
-};
 
 const PLAN_CONTENT = [
   {
@@ -58,8 +47,10 @@ function UpgradeValueCards({ currentPlan }) {
   useEffect(() => {
     const fetchPricing = async () => {
       try {
-        const response = await api.get("payments/pricing/");
-        warnIfInvalidPricingPayload(response, 'UpgradeValueCards');
+        const response = await fetchPricingWithFallback(api, "UpgradeValueCards");
+        if (!isValidPricingPayload(response.data)) {
+          throw new Error("Unexpected pricing payload");
+        }
         setCurrency(response.data?.currency || "USD");
         setPricing(response.data?.pricing || null);
       } catch {

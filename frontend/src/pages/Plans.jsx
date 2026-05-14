@@ -4,6 +4,7 @@ import api from '../axios_instance';
 import { useCompany } from '../context/CompanyContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { fetchPricingWithFallback, isValidPricingPayload } from '../services/pricingService';
 
 const PLAN_ORDER = {
   STARTER: 0,
@@ -14,18 +15,6 @@ const PLAN_ORDER = {
 const PRICE_FALLBACKS = {
   USD: { PRO: '29.00', ENTERPRISE: '149.00' },
   ZAR: { PRO: '499.00', ENTERPRISE: '1299.00' },
-};
-
-const warnIfInvalidPricingPayload = (response, source) => {
-  const contentType = (response?.headers?.['content-type'] || '').toLowerCase();
-  const isHtmlLike = contentType.includes('text/html');
-  const isObjectPayload = response?.data && typeof response.data === 'object';
-
-  if (isHtmlLike || !isObjectPayload) {
-    console.warn(
-      `[pricing] ${source}: expected JSON from /api/payments/pricing/, got content-type='${contentType || 'unknown'}' and data type='${typeof response?.data}'. Check VITE_API_URL and reverse proxy routing.`
-    );
-  }
 };
 
 const Plans = () => {
@@ -100,9 +89,8 @@ const Plans = () => {
     const fetchPricing = async () => {
       try {
         setLoading(true);
-        const response = await api.get('payments/pricing/');
-        warnIfInvalidPricingPayload(response, 'Plans');
-        if (!response.data || typeof response.data !== 'object') {
+        const response = await fetchPricingWithFallback(api, 'Plans');
+        if (!isValidPricingPayload(response.data)) {
           throw new Error('Unexpected pricing payload');
         }
 
