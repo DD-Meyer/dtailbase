@@ -440,6 +440,10 @@ class UserSerializer(serializers.ModelSerializer):
             country_code,
             currency,
         )
+        print(
+            f"[REG_DEBUG] UserSerializer.create called: admin_user={bool(admin_user)} company_name={company_name} country_code={country_code} currency_in={currency}",
+            flush=True,
+        )
 
         # Keep currency assignment predictable even if frontend omits it.
         country_currency_map = {
@@ -452,6 +456,10 @@ class UserSerializer(serializers.ModelSerializer):
             "[REG_DEBUG] UserSerializer.create resolved locale: country_code=%s currency=%s",
             country_code,
             currency,
+        )
+        print(
+            f"[REG_DEBUG] UserSerializer.create resolved locale: country_code={country_code} currency={currency}",
+            flush=True,
         )
 
         with transaction.atomic():
@@ -475,6 +483,10 @@ class UserSerializer(serializers.ModelSerializer):
                     new_company.id,
                     new_company.country_code,
                     new_company.currency,
+                )
+                print(
+                    f"[REG_DEBUG] Company created in serializer: id={new_company.id} country_code={new_company.country_code} currency={new_company.currency}",
+                    flush=True,
                 )
                 validated_data['company'] = new_company
                 validated_data['role'] = 'OWNER'

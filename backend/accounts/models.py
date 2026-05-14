@@ -83,6 +83,10 @@ class Company(models.Model):
             self.country_code,
             self.currency,
         )
+        print(
+            f"[REG_DEBUG] Company.save before super: id={self.pk} adding={self._state.adding} name={self.name} country_code={self.country_code} currency={self.currency}",
+            flush=True,
+        )
 
         # 1. Handle Slug Generation
         if not self.slug:
@@ -115,6 +119,10 @@ class Company(models.Model):
             self.pk,
             self.country_code,
             self.currency,
+        )
+        print(
+            f"[REG_DEBUG] Company.save after super: id={self.pk} country_code={self.country_code} currency={self.currency}",
+            flush=True,
         )
         
         # 4. Seat Enforcement (Only if not brand new, or after user is created)
