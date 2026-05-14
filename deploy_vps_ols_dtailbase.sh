@@ -8,6 +8,12 @@ set -euo pipefail
 #   APP_DIR=/var/www/Dtailbase BRANCH=staging VENV_DIR=venv bash deploy_vps_ols_dtailbase.sh
 
 if [[ -z "${APP_DIR:-}" ]]; then
+  if [[ -d "/var/www/Dtailbase" && -d "/var/www/dtailbase" ]]; then
+    echo "Both /var/www/Dtailbase and /var/www/dtailbase exist." >&2
+    echo "Set APP_DIR explicitly to the live path before deploying." >&2
+    echo "Example: APP_DIR=/var/www/dtailbase bash deploy_vps_ols_dtailbase.sh" >&2
+    exit 1
+  fi
   if [[ -d "/var/www/Dtailbase" ]]; then
     APP_DIR="/var/www/Dtailbase"
   elif [[ -d "/var/www/dtailbase" ]]; then
