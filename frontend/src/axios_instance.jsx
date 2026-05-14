@@ -5,9 +5,37 @@ const configuredApiUrl = (import.meta.env.VITE_API_URL || "").trim();
 
 const isAbsoluteUrl = (url) => /^https?:\/\//i.test(url) || url.startsWith("//");
 
+const normalizeApiBaseUrl = (rawUrl) => {
+  if (!rawUrl) {
+    return "/api";
+  }
+
+  if (isAbsoluteUrl(rawUrl)) {
+    try {
+      const url = new URL(rawUrl);
+      const cleanPath = url.pathname.replace(/\/+$/, "");
+      const normalizedPath = !cleanPath || cleanPath === "/" ? "/api" : cleanPath;
+      return `${url.origin}${normalizedPath}`;
+    } catch {
+      return "/api";
+    }
+  }
+
+  const cleanRelative = rawUrl.replace(/\/+$/, "");
+  if (!cleanRelative || cleanRelative === "/") {
+    return "/api";
+  }
+  if (cleanRelative === "api") {
+    return "/api";
+  }
+  return cleanRelative.startsWith("/") ? cleanRelative : `/${cleanRelative}`;
+};
+
+const apiBaseUrl = normalizeApiBaseUrl(configuredApiUrl);
+
 const api = axios.create({
   // Default to same-origin /api so production works even if VITE_API_URL is not injected.
-  baseURL: configuredApiUrl || "/api",
+  baseURL: apiBaseUrl,
   withCredentials: true,
 });
 

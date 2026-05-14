@@ -3,6 +3,18 @@ import { PayPalButtons } from '@paypal/react-paypal-js';
 import api from '../axios_instance';
 import '../styles/PayPalSubscribeButton.css';
 
+const warnIfInvalidPricingPayload = (response, source) => {
+  const contentType = (response?.headers?.['content-type'] || '').toLowerCase();
+  const isHtmlLike = contentType.includes('text/html');
+  const isObjectPayload = response?.data && typeof response.data === 'object';
+
+  if (isHtmlLike || !isObjectPayload) {
+    console.warn(
+      `[pricing] ${source}: expected JSON from /api/payments/pricing/, got content-type='${contentType || 'unknown'}' and data type='${typeof response?.data}'. Check VITE_API_URL and reverse proxy routing.`
+    );
+  }
+};
+
 const PayPalSubscribeButton = ({ planId, onSuccess, onError, disabled = false }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -12,6 +24,7 @@ const PayPalSubscribeButton = ({ planId, onSuccess, onError, disabled = false })
   const fetchPricing = useCallback(async () => {
     try {
       const response = await api.get('payments/pricing/');
+      warnIfInvalidPricingPayload(response, 'PayPalSubscribeButton');
       const detectedCurrency = (response.data?.currency || 'USD').toUpperCase();
       const pricing = response.data?.pricing || {
         PRO: {

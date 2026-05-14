@@ -11,6 +11,23 @@ const PLAN_ORDER = {
   ENTERPRISE: 2,
 };
 
+const PRICE_FALLBACKS = {
+  USD: { PRO: '29.00', ENTERPRISE: '149.00' },
+  ZAR: { PRO: '499.00', ENTERPRISE: '1299.00' },
+};
+
+const warnIfInvalidPricingPayload = (response, source) => {
+  const contentType = (response?.headers?.['content-type'] || '').toLowerCase();
+  const isHtmlLike = contentType.includes('text/html');
+  const isObjectPayload = response?.data && typeof response.data === 'object';
+
+  if (isHtmlLike || !isObjectPayload) {
+    console.warn(
+      `[pricing] ${source}: expected JSON from /api/payments/pricing/, got content-type='${contentType || 'unknown'}' and data type='${typeof response?.data}'. Check VITE_API_URL and reverse proxy routing.`
+    );
+  }
+};
+
 const Plans = () => {
   const [loading, setLoading] = useState(false);
   const [currency, setCurrency] = useState('USD');
@@ -84,17 +101,29 @@ const Plans = () => {
       try {
         setLoading(true);
         const response = await api.get('payments/pricing/');
+        warnIfInvalidPricingPayload(response, 'Plans');
+        if (!response.data || typeof response.data !== 'object') {
+          throw new Error('Unexpected pricing payload');
+        }
+
         const detectedCurrency = (response.data?.currency || 'USD').toUpperCase();
         const priceData = response.data?.pricing;
         const plansData = response.data?.plans;
+        const fallbackCurrencyPricing = PRICE_FALLBACKS[detectedCurrency] || PRICE_FALLBACKS.USD;
 
-        const normalizedPricing = priceData || {
+        const normalizedPricing = {
           PRO: {
-            amount: plansData?.PRO?.price,
+            amount:
+              priceData?.PRO?.amount ||
+              plansData?.PRO?.price ||
+              fallbackCurrencyPricing.PRO,
             currency: plansData?.PRO?.currency || detectedCurrency,
           },
           ENTERPRISE: {
-            amount: plansData?.ENTERPRISE?.price,
+            amount:
+              priceData?.ENTERPRISE?.amount ||
+              plansData?.ENTERPRISE?.price ||
+              fallbackCurrencyPricing.ENTERPRISE,
             currency: plansData?.ENTERPRISE?.currency || detectedCurrency,
           },
         };
@@ -168,9 +197,6 @@ const Plans = () => {
   const getPrice = (planId) => {
     if (!pricing || planId === 'STARTER') return '0';
     const amount = pricing[planId]?.amount;
-    if (amount === undefined || amount === null || amount === '') {
-      return 'N/A';
-    }
     return String(amount);
   };
 
