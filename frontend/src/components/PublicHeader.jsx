@@ -1,5 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
 import UserDropdownMenu from "./UserDropdownMenu";
+import "../styles/PublicHeader.css";
 
 function PublicHeader({ isAuthenticated, isMenuOpen, setIsMenuOpen }) {
   const navLinks = [
@@ -13,7 +14,7 @@ function PublicHeader({ isAuthenticated, isMenuOpen, setIsMenuOpen }) {
 
   return (
     <nav className="public-nav">
-      <Link to="/" className="nav-logo">
+      <Link to="/" className="public-header-logo">
         <span className="text-white">Dtail</span>
         <span className="bg-linear-to-r from-blue-500 to-sky-400 bg-clip-text text-transparent">base</span>
         <span className="text-blue-500 font-black">.</span>
