@@ -4,6 +4,11 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import "../styles/Login.css"; 
 
+const COUNTRY_LABELS = {
+  US: "United States",
+  ZA: "South Africa",
+};
+
 function Register() {
   const [formData, setFormData] = useState({
     company_name: "",
@@ -21,6 +26,7 @@ function Register() {
   const navigate = useNavigate();
   const location = useLocation();
   const planContext = location.state?.fromPlanCta ? location.state : null;
+  const detectedCountryLabel = COUNTRY_LABELS[formData.country_code] || formData.country_code;
 
   useEffect(() => {
     let isMounted = true;
@@ -120,6 +126,17 @@ function Register() {
               onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
               required
             />
+          </div>
+
+          <div className="form-group">
+            <label>Detected Country</label>
+            <input
+              type="text"
+              value={`${detectedCountryLabel} (${formData.country_code})`}
+              readOnly
+              aria-readonly="true"
+            />
+            <p className="auth-meta-note">Billing currency detected: {formData.currency}</p>
           </div>
 
           <div className="form-group">

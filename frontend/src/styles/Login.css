@@ -235,6 +235,12 @@
   color: #b91c1c;
 }
 
+.auth-meta-note {
+  margin: 0.45rem 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
 
 /* Clean up footer spacing */
 .login-footer {
