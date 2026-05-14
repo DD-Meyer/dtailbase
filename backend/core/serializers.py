@@ -1,4 +1,5 @@
 from warnings import filters
+import logging
 
 from rest_framework import serializers
 from .models import *
@@ -21,6 +22,8 @@ from core.plan_limits import PLAN_CONFIG
 # accounts/serializers.py
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 # --- CUSTOMER SERIALIZERS ---
+
+logger = logging.getLogger(__name__)
 
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -430,12 +433,26 @@ class UserSerializer(serializers.ModelSerializer):
         # Check if an authenticated Admin/Owner is performing the action
         admin_user = request.user if request and request.user.is_authenticated else None
 
+        logger.warning(
+            "[REG_DEBUG] UserSerializer.create called: admin_user=%s company_name=%s country_code=%s currency_in=%s",
+            bool(admin_user),
+            company_name,
+            country_code,
+            currency,
+        )
+
         # Keep currency assignment predictable even if frontend omits it.
         country_currency_map = {
             'ZA': 'ZAR',
         }
         if not currency:
             currency = country_currency_map.get(country_code, 'USD')
+
+        logger.warning(
+            "[REG_DEBUG] UserSerializer.create resolved locale: country_code=%s currency=%s",
+            country_code,
+            currency,
+        )
 
         with transaction.atomic():
             # --- SCENARIO A: NEW BUSINESS REGISTRATION ---
@@ -452,6 +469,12 @@ class UserSerializer(serializers.ModelSerializer):
                     plan='STARTER',
                     country_code=country_code,
                     currency=currency,
+                )
+                logger.warning(
+                    "[REG_DEBUG] Company created in serializer: id=%s country_code=%s currency=%s",
+                    new_company.id,
+                    new_company.country_code,
+                    new_company.currency,
                 )
                 validated_data['company'] = new_company
                 validated_data['role'] = 'OWNER'

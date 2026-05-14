@@ -1,4 +1,5 @@
 import uuid
+import logging
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.forms import IntegerField
@@ -6,6 +7,8 @@ from django.utils.text import slugify
 from django.db.models import Case, When, Value, IntegerField
 
 from core.plan_limits import PLAN_CONFIG
+
+logger = logging.getLogger(__name__)
 
 class Company(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -65,6 +68,22 @@ class Company(models.Model):
 
 
     def save(self, *args, **kwargs):
+        # Defensive defaults: ensure required locale fields are never null/empty
+        # even if an unexpected creation path bypasses serializer logic.
+        if not self.country_code:
+            self.country_code = 'US'
+        if not self.currency:
+            self.currency = 'ZAR' if self.country_code == 'ZA' else 'USD'
+
+        logger.warning(
+            "[REG_DEBUG] Company.save before super: id=%s adding=%s name=%s country_code=%s currency=%s",
+            self.pk,
+            self._state.adding,
+            self.name,
+            self.country_code,
+            self.currency,
+        )
+
         # 1. Handle Slug Generation
         if not self.slug:
             original_slug = slugify(self.name)
@@ -90,6 +109,13 @@ class Company(models.Model):
 
         # 3. Save the Company first!
         super(Company, self).save(*args, **kwargs)
+
+        logger.warning(
+            "[REG_DEBUG] Company.save after super: id=%s country_code=%s currency=%s",
+            self.pk,
+            self.country_code,
+            self.currency,
+        )
         
         # 4. Seat Enforcement (Only if not brand new, or after user is created)
         if not is_new:
