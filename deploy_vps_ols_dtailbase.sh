@@ -5,7 +5,7 @@ set -euo pipefail
 # Usage:
 #   bash deploy_vps_ols_dtailbase.sh
 # Optional env overrides:
-#   APP_DIR=/var/www/Dtailbase BRANCH=main VENV_DIR=venv bash deploy_vps_ols_dtailbase.sh
+#   APP_DIR=/var/www/Dtailbase BRANCH=staging VENV_DIR=venv bash deploy_vps_ols_dtailbase.sh
 
 if [[ -z "${APP_DIR:-}" ]]; then
   if [[ -d "/var/www/Dtailbase" ]]; then
@@ -16,7 +16,7 @@ if [[ -z "${APP_DIR:-}" ]]; then
     APP_DIR="/var/www/Dtailbase"
   fi
 fi
-BRANCH="${BRANCH:-main}"
+BRANCH="${BRANCH:-staging}"
 VENV_DIR="${VENV_DIR:-venv}"
 BACKEND_DIR="${APP_DIR}/backend"
 FRONTEND_DIR="${APP_DIR}/frontend"
