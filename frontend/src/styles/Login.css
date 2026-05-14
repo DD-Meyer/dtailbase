@@ -118,7 +118,8 @@
   margin-bottom: 0.5rem;
 }
 
-.login-form input {
+.login-form input,
+.login-form select {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid #e2e8f0;
@@ -127,7 +128,8 @@
   transition: border-color 0.2s;
 }
 
-.login-form input:focus {
+.login-form input:focus,
+.login-form select:focus {
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);

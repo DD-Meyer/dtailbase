@@ -5,7 +5,3 @@ self.addEventListener("install", () => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });
-
-self.addEventListener("fetch", () => {
-  // Network-first pass-through; reserved for future offline caching.
-});

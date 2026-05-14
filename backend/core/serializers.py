@@ -365,6 +365,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     # This declaration is correct
     company_name = serializers.CharField(write_only=True, required=False)
+    country_code = serializers.CharField(write_only=True, required=False, max_length=2)
+    currency = serializers.CharField(write_only=True, required=False, max_length=3)
 
     plan = serializers.CharField(source='company.plan', read_only=True)
     usage_count = serializers.SerializerMethodField()
@@ -378,7 +380,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'email', 'username', 'first_name', 'last_name', 
             'password', 'role', 'is_active', 'company_id', 
-            'plan', 'usage_count', 'company_name'
+            'plan', 'usage_count', 'company_name', 'country_code', 'currency'
         ]
         read_only_fields = ['id', 'company_id', 'plan', 'usage_count']
     
@@ -422,9 +424,18 @@ class UserSerializer(serializers.ModelSerializer):
         from django.db import transaction
 
         company_name = validated_data.pop('company_name', None)
+        country_code = (validated_data.pop('country_code', None) or 'US').upper()
+        currency = (validated_data.pop('currency', None) or '').upper()
         request = self.context.get('request')
         # Check if an authenticated Admin/Owner is performing the action
         admin_user = request.user if request and request.user.is_authenticated else None
+
+        # Keep currency assignment predictable even if frontend omits it.
+        country_currency_map = {
+            'ZA': 'ZAR',
+        }
+        if not currency:
+            currency = country_currency_map.get(country_code, 'USD')
 
         with transaction.atomic():
             # --- SCENARIO A: NEW BUSINESS REGISTRATION ---
@@ -439,8 +450,8 @@ class UserSerializer(serializers.ModelSerializer):
                 new_company = Company.objects.create(
                     name=company_name,
                     plan='STARTER',
-                    country_code='US',
-                    currency='USD',
+                    country_code=country_code,
+                    currency=currency,
                 )
                 validated_data['company'] = new_company
                 validated_data['role'] = 'OWNER'

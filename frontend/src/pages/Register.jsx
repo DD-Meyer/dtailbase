@@ -4,6 +4,16 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import "../styles/Login.css"; 
 
+const COUNTRY_OPTIONS = [
+  { code: "US", label: "United States", currency: "USD" },
+  { code: "ZA", label: "South Africa", currency: "ZAR" },
+  { code: "GB", label: "United Kingdom", currency: "USD" },
+  { code: "AU", label: "Australia", currency: "USD" },
+  { code: "CA", label: "Canada", currency: "USD" },
+  { code: "NZ", label: "New Zealand", currency: "USD" },
+  { code: "AE", label: "United Arab Emirates", currency: "USD" },
+];
+
 function Register() {
   const [formData, setFormData] = useState({
     company_name: "",
@@ -12,6 +22,7 @@ function Register() {
     lastName: "",
     username: "",
     password: "",
+    country_code: "US",
   });
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -34,6 +45,8 @@ function Register() {
         last_name: formData.lastName,
         username: formData.username,
         password: formData.password,
+        country_code: formData.country_code,
+        currency: COUNTRY_OPTIONS.find((option) => option.code === formData.country_code)?.currency || "USD",
         role: "OWNER" 
       });
 
@@ -88,6 +101,21 @@ function Register() {
               onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
               required
             />
+          </div>
+
+          <div className="form-group">
+            <label>Country</label>
+            <select
+              value={formData.country_code}
+              onChange={(e) => setFormData({ ...formData, country_code: e.target.value })}
+              required
+            >
+              {COUNTRY_OPTIONS.map((option) => (
+                <option key={option.code} value={option.code}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="form-group">
