@@ -3,6 +3,8 @@ import { clearAuthStorage, getAccessToken } from "./utils/authStorage";
 
 const configuredApiUrl = (import.meta.env.VITE_API_URL || "").trim();
 
+const isAbsoluteUrl = (url) => /^https?:\/\//i.test(url) || url.startsWith("//");
+
 const api = axios.create({
   // Default to same-origin /api so production works even if VITE_API_URL is not injected.
   baseURL: configuredApiUrl || "/api",
@@ -12,6 +14,11 @@ const api = axios.create({
 // REQUEST: Attach the token to every call
 api.interceptors.request.use(
   (config) => {
+    if (typeof config.url === "string" && config.url.startsWith("/") && !isAbsoluteUrl(config.url)) {
+      // Prevent '/foo' from bypassing baseURL path segment (e.g. '/api').
+      config.url = config.url.replace(/^\/+/, "");
+    }
+
     const token = getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
