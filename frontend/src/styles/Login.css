@@ -118,26 +118,16 @@
   margin-bottom: 0.5rem;
 }
 
-.login-form input,
-.login-form select {
+.login-form input {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   font-size: 1rem;
-  color: #0f172a;
-  background-color: #ffffff;
-  -webkit-text-fill-color: #0f172a;
   transition: border-color 0.2s;
 }
 
-.login-form select option {
-  color: #0f172a;
-  background-color: #ffffff;
-}
-
-.login-form input:focus,
-.login-form select:focus {
+.login-form input:focus {
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
@@ -235,12 +225,6 @@
   color: #b91c1c;
 }
 
-.auth-meta-note {
-  margin: 0.45rem 0 0;
-  font-size: 0.78rem;
-  color: #64748b;
-}
-
 
 /* Clean up footer spacing */
 .login-footer {
@@ -318,8 +302,7 @@
     max-width: 100%;
   }
 
-  .login-form input,
-  .login-form select {
+  .login-form input {
     font-size: 16px;
     padding: 12px;
     min-height: 44px;

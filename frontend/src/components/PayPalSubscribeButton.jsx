@@ -1,7 +1,6 @@
 import { useCallback, useState } from 'react';
 import { PayPalButtons } from '@paypal/react-paypal-js';
 import api from '../axios_instance';
-import { fetchPricingWithFallback, isValidPricingPayload } from '../services/pricingService';
 import '../styles/PayPalSubscribeButton.css';
 
 const PayPalSubscribeButton = ({ planId, onSuccess, onError, disabled = false }) => {
@@ -12,22 +11,8 @@ const PayPalSubscribeButton = ({ planId, onSuccess, onError, disabled = false })
   // Fetch pricing and detect currency
   const fetchPricing = useCallback(async () => {
     try {
-      const response = await fetchPricingWithFallback(api, 'PayPalSubscribeButton');
-      if (!isValidPricingPayload(response.data)) {
-        throw new Error('Unexpected pricing payload');
-      }
-      const detectedCurrency = (response.data?.currency || 'USD').toUpperCase();
-      const pricing = response.data?.pricing || {
-        PRO: {
-          amount: response.data?.plans?.PRO?.price,
-          currency: response.data?.plans?.PRO?.currency || detectedCurrency,
-        },
-        ENTERPRISE: {
-          amount: response.data?.plans?.ENTERPRISE?.price,
-          currency: response.data?.plans?.ENTERPRISE?.currency || detectedCurrency,
-        },
-      };
-
+      const response = await api.get('/payments/pricing/');
+      const { currency: detectedCurrency, pricing } = response.data;
       setCurrency(detectedCurrency);
       return pricing;
     } catch (err) {
@@ -54,7 +39,7 @@ const PayPalSubscribeButton = ({ planId, onSuccess, onError, disabled = false })
       }
 
       // Call backend to create PayPal subscription
-      const response = await api.post('payments/subscribe/', {
+      const response = await api.post('/payments/subscribe/', {
         plan_id: planId,
       });
 

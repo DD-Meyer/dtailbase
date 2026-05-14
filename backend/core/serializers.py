@@ -1,5 +1,4 @@
 from warnings import filters
-import logging
 
 from rest_framework import serializers
 from .models import *
@@ -22,8 +21,6 @@ from core.plan_limits import PLAN_CONFIG
 # accounts/serializers.py
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 # --- CUSTOMER SERIALIZERS ---
-
-logger = logging.getLogger(__name__)
 
 class CustomerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -368,8 +365,6 @@ class UserSerializer(serializers.ModelSerializer):
 
     # This declaration is correct
     company_name = serializers.CharField(write_only=True, required=False)
-    country_code = serializers.CharField(write_only=True, required=False, max_length=2)
-    currency = serializers.CharField(write_only=True, required=False, max_length=3)
 
     plan = serializers.CharField(source='company.plan', read_only=True)
     usage_count = serializers.SerializerMethodField()
@@ -383,7 +378,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'email', 'username', 'first_name', 'last_name', 
             'password', 'role', 'is_active', 'company_id', 
-            'plan', 'usage_count', 'company_name', 'country_code', 'currency'
+            'plan', 'usage_count', 'company_name'
         ]
         read_only_fields = ['id', 'company_id', 'plan', 'usage_count']
     
@@ -427,40 +422,9 @@ class UserSerializer(serializers.ModelSerializer):
         from django.db import transaction
 
         company_name = validated_data.pop('company_name', None)
-        country_code = (validated_data.pop('country_code', None) or 'US').upper()
-        currency = (validated_data.pop('currency', None) or '').upper()
         request = self.context.get('request')
         # Check if an authenticated Admin/Owner is performing the action
         admin_user = request.user if request and request.user.is_authenticated else None
-
-        logger.warning(
-            "[REG_DEBUG] UserSerializer.create called: admin_user=%s company_name=%s country_code=%s currency_in=%s",
-            bool(admin_user),
-            company_name,
-            country_code,
-            currency,
-        )
-        print(
-            f"[REG_DEBUG] UserSerializer.create called: admin_user={bool(admin_user)} company_name={company_name} country_code={country_code} currency_in={currency}",
-            flush=True,
-        )
-
-        # Keep currency assignment predictable even if frontend omits it.
-        country_currency_map = {
-            'ZA': 'ZAR',
-        }
-        if not currency:
-            currency = country_currency_map.get(country_code, 'USD')
-
-        logger.warning(
-            "[REG_DEBUG] UserSerializer.create resolved locale: country_code=%s currency=%s",
-            country_code,
-            currency,
-        )
-        print(
-            f"[REG_DEBUG] UserSerializer.create resolved locale: country_code={country_code} currency={currency}",
-            flush=True,
-        )
 
         with transaction.atomic():
             # --- SCENARIO A: NEW BUSINESS REGISTRATION ---
@@ -472,22 +436,7 @@ class UserSerializer(serializers.ModelSerializer):
                 if Company.objects.filter(name__iexact=company_name).exists():
                     raise serializers.ValidationError({"company_name": "A company with this name is already registered."})
 
-                new_company = Company.objects.create(
-                    name=company_name,
-                    plan='STARTER',
-                    country_code=country_code,
-                    currency=currency,
-                )
-                logger.warning(
-                    "[REG_DEBUG] Company created in serializer: id=%s country_code=%s currency=%s",
-                    new_company.id,
-                    new_company.country_code,
-                    new_company.currency,
-                )
-                print(
-                    f"[REG_DEBUG] Company created in serializer: id={new_company.id} country_code={new_company.country_code} currency={new_company.currency}",
-                    flush=True,
-                )
+                new_company = Company.objects.create(name=company_name, plan='STARTER')
                 validated_data['company'] = new_company
                 validated_data['role'] = 'OWNER'
                 return User.objects.create_user(**validated_data)
