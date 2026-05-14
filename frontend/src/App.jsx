@@ -45,9 +45,8 @@ function AppContent() {
       || window.matchMedia("(display-mode: minimal-ui)").matches;
     const iosStandalone = window.navigator.standalone === true;
     const androidTrustedWebApp = document.referrer.startsWith("android-app://");
-    const persistedInstallState = localStorage.getItem("dtailbase_installed") === "true";
 
-    return displayModeMatch || iosStandalone || androidTrustedWebApp || persistedInstallState;
+    return displayModeMatch || iosStandalone || androidTrustedWebApp;
   };
 
   const [isInstalledApp, setIsInstalledApp] = useState(() => getInstalledState());
@@ -89,7 +88,6 @@ function AppContent() {
       const installed = getInstalledState();
       setIsInstalledApp(installed);
       if (installed) {
-        localStorage.setItem("dtailbase_installed", "true");
         setShowInstallButton(false);
       }
     };
@@ -103,7 +101,6 @@ function AppContent() {
     };
 
     const onInstalled = () => {
-      localStorage.setItem("dtailbase_installed", "true");
       setShowInstallButton(false);
       setDeferredInstallPrompt(null);
       setIsInstalledApp(true);
@@ -128,10 +125,8 @@ function AppContent() {
 
     deferredInstallPrompt.prompt();
     const result = await deferredInstallPrompt.userChoice;
-    if (result?.outcome !== "accepted") {
-      setShowInstallButton(false);
-    }
     setDeferredInstallPrompt(null);
+    setShowInstallButton(false);
   };
 
   // 1. Identify ALL public-facing "Marketing" pages
