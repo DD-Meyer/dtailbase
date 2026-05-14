@@ -39,10 +39,69 @@ import Payments from "./pages/Payments";
 function AppContent() {
   const { isAuthenticated, user } = useContext(AuthContext); 
   const location = useLocation();
+  const [isInstalledApp, setIsInstalledApp] = useState(false);
+  const [deferredInstallPrompt, setDeferredInstallPrompt] = useState(null);
+  const [showInstallButton, setShowInstallButton] = useState(false);
+
+  const getInstalledState = () => {
+    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  };
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(display-mode: standalone)");
+
+    const syncInstalledState = () => {
+      const installed = getInstalledState();
+      setIsInstalledApp(installed);
+      if (installed) {
+        setShowInstallButton(false);
+      }
+    };
+
+    const onBeforeInstallPrompt = (event) => {
+      event.preventDefault();
+      setDeferredInstallPrompt(event);
+      if (!getInstalledState()) {
+        setShowInstallButton(true);
+      }
+    };
+
+    const onInstalled = () => {
+      setShowInstallButton(false);
+      setDeferredInstallPrompt(null);
+      setIsInstalledApp(true);
+    };
+
+    syncInstalledState();
+    mediaQuery.addEventListener("change", syncInstalledState);
+    window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
+    window.addEventListener("appinstalled", onInstalled);
+
+    return () => {
+      mediaQuery.removeEventListener("change", syncInstalledState);
+      window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", onInstalled);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredInstallPrompt) {
+      return;
+    }
+
+    deferredInstallPrompt.prompt();
+    const result = await deferredInstallPrompt.userChoice;
+    if (result?.outcome !== "accepted") {
+      setShowInstallButton(false);
+    }
+    setDeferredInstallPrompt(null);
+  };
 
   // 1. Identify ALL public-facing "Marketing" pages
   const publicRoutes = ["/", "/hero", "/about", "/products", "/plans", "/payments", "/contact", "/legal", "/community", "/features", "/security", "/our-Story", "/support", "/help-center", "/tutorials", "/public-booking/:companySlug", "/payment-success"];
   const isLandingPage = publicRoutes.includes(location.pathname);
+  const websiteOnlyRoutes = ["/", "/hero", "/about", "/products", "/contact", "/legal", "/community", "/features", "/security", "/our-story", "/support", "/help-center", "/tutorials"];
+  const isWebsiteOnlyRoute = websiteOnlyRoutes.includes(location.pathname.toLowerCase());
 
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
   
@@ -161,24 +220,24 @@ function AppContent() {
             <Route path="/book/:companySlug" element={<PublicBooking />} />
             
             {/* Landing Page is now the root */}
-            <Route path="/" element={<Hero isAuthenticated={isAuthenticated} />} />
-            <Route path="/hero" element={<Navigate to="/" replace />} />
-            <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
-            <Route path="/products" element={<PublicLayout><Products /></PublicLayout>} />
+            <Route path="/" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Hero isAuthenticated={isAuthenticated} />} />
+            <Route path="/hero" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Navigate to="/" replace />} />
+            <Route path="/about" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <PublicLayout><About /></PublicLayout>} />
+            <Route path="/products" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <PublicLayout><Products /></PublicLayout>} />
             <Route path="/plans" element={<PublicLayout><Plans /></PublicLayout>} />
             <Route path="/payments" element={<PublicLayout showNav={false} showFooter={false}><Payments /></PublicLayout>} />
-            <Route path="/legal" element={<PublicLayout><Legal /></PublicLayout>} />
-            <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
+            <Route path="/legal" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <PublicLayout><Legal /></PublicLayout>} />
+            <Route path="/contact" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <PublicLayout><Contact /></PublicLayout>} />
             <Route path="/payment-success" element={<PublicLayout><PaymentSuccess /></PublicLayout>} />
 
             {/* Example of using the reusable ContentPage for a new "Community" page */}
-            <Route path="/Features" element={<Features />} />
-            <Route path="/Security" element={<Security />} />
-            <Route path="/Our-Story" element={<OurStory />} />
-            <Route path="/Support" element={<Support />} />
-            <Route path="/community" element={<CommunityPage />} />
-            <Route path="/tutorials" element={<Tutorials />} />
-            <Route path="/help-center" element={<HelpCenter />} />
+            <Route path="/Features" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Features />} />
+            <Route path="/Security" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Security />} />
+            <Route path="/Our-Story" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <OurStory />} />
+            <Route path="/Support" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Support />} />
+            <Route path="/community" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <CommunityPage />} />
+            <Route path="/tutorials" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Tutorials />} />
+            <Route path="/help-center" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <HelpCenter />} />
 
 
             {/* Public Auth Routes */}
@@ -204,6 +263,12 @@ function AppContent() {
             {/* Catch-all redirect */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+
+          {showInstallButton && !isInstalledApp && !isWebsiteOnlyRoute && (
+            <button className="install-app-fab" onClick={handleInstallClick}>
+              Install App
+            </button>
+          )}
         </div>
       </main>
     </div>
