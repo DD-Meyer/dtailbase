@@ -242,6 +242,7 @@ const NewBooking = () => {
         )}
 
         <div className="wizard-actions">
+          {step === 1 && <button className="btn btn-back" onClick={() => navigate("/bookings")}>Exit Booking</button>}
           {step > 1 && <button className="btn btn-back" onClick={() => setStep(step - 1)}>Back</button>}
           <button 
             className="btn btn-next" 

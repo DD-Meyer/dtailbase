@@ -39,12 +39,47 @@ import Payments from "./pages/Payments";
 function AppContent() {
   const { isAuthenticated, user } = useContext(AuthContext); 
   const location = useLocation();
-  const [isInstalledApp, setIsInstalledApp] = useState(false);
+  const getInstalledState = () => {
+    const displayModeMatch = window.matchMedia("(display-mode: standalone)").matches
+      || window.matchMedia("(display-mode: fullscreen)").matches
+      || window.matchMedia("(display-mode: minimal-ui)").matches;
+    const iosStandalone = window.navigator.standalone === true;
+    const androidTrustedWebApp = document.referrer.startsWith("android-app://");
+    const persistedInstallState = localStorage.getItem("dtailbase_installed") === "true";
+
+    return displayModeMatch || iosStandalone || androidTrustedWebApp || persistedInstallState;
+  };
+
+  const [isInstalledApp, setIsInstalledApp] = useState(() => getInstalledState());
   const [deferredInstallPrompt, setDeferredInstallPrompt] = useState(null);
   const [showInstallButton, setShowInstallButton] = useState(false);
 
-  const getInstalledState = () => {
-    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  const APP_ALLOWED_ROUTES = [
+    "/login",
+    "/register",
+    "/bookings",
+    "/customers",
+    "/vehicles",
+    "/services",
+    "/new-booking",
+    "/profile",
+    "/team",
+    "/settings",
+    "/settings/indemnity",
+    "/indemnity",
+    "/plans",
+    "/payments",
+    "/payment-success",
+  ];
+
+  const APP_ALLOWED_PREFIXES = ["/bookings/", "/indemnity/sign/"];
+
+  const isAllowedInInstalledApp = (pathname) => {
+    const normalizedPath = pathname.toLowerCase();
+    if (APP_ALLOWED_ROUTES.includes(normalizedPath)) {
+      return true;
+    }
+    return APP_ALLOWED_PREFIXES.some((prefix) => normalizedPath.startsWith(prefix));
   };
 
   useEffect(() => {
@@ -54,6 +89,7 @@ function AppContent() {
       const installed = getInstalledState();
       setIsInstalledApp(installed);
       if (installed) {
+        localStorage.setItem("dtailbase_installed", "true");
         setShowInstallButton(false);
       }
     };
@@ -67,6 +103,7 @@ function AppContent() {
     };
 
     const onInstalled = () => {
+      localStorage.setItem("dtailbase_installed", "true");
       setShowInstallButton(false);
       setDeferredInstallPrompt(null);
       setIsInstalledApp(true);
@@ -100,8 +137,12 @@ function AppContent() {
   // 1. Identify ALL public-facing "Marketing" pages
   const publicRoutes = ["/", "/hero", "/about", "/products", "/plans", "/payments", "/contact", "/legal", "/community", "/features", "/security", "/our-Story", "/support", "/help-center", "/tutorials", "/public-booking/:companySlug", "/payment-success"];
   const isLandingPage = publicRoutes.includes(location.pathname);
-  const websiteOnlyRoutes = ["/", "/hero", "/about", "/products", "/contact", "/legal", "/community", "/features", "/security", "/our-story", "/support", "/help-center", "/tutorials"];
+  const websiteOnlyRoutes = ["/", "/hero", "/about", "/products", "/contact", "/legal", "/community", "/features", "/security", "/our-story", "/support", "/help-center", "/tutorials", "/new-booking"];
   const isWebsiteOnlyRoute = websiteOnlyRoutes.includes(location.pathname.toLowerCase());
+
+  if (isInstalledApp && !isAllowedInInstalledApp(location.pathname)) {
+    return <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace />;
+  }
 
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
   

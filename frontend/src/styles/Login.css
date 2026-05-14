@@ -301,4 +301,29 @@
   .login-plan-context {
     max-width: 100%;
   }
+
+  .login-form input {
+    font-size: 16px;
+    padding: 12px;
+    min-height: 44px;
+  }
+
+  .login-form label {
+    font-size: 0.8rem;
+    margin-bottom: 6px;
+  }
+
+  .login-form .form-group {
+    margin-bottom: 1.25rem;
+  }
+
+  .btn-full {
+    min-height: 44px;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+  }
+
+  .login-header h1 {
+    font-size: 1.4rem;
+  }
 }
