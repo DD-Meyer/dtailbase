@@ -83,11 +83,24 @@ const Plans = () => {
     const fetchPricing = async () => {
       try {
         setLoading(true);
-        const response = await api.get('/payments/pricing/');
-        const { currency: detectedCurrency, pricing: priceData } = response.data;
+        const response = await api.get('payments/pricing/');
+        const detectedCurrency = (response.data?.currency || 'USD').toUpperCase();
+        const priceData = response.data?.pricing;
+        const plansData = response.data?.plans;
 
-        setCurrency(detectedCurrency || 'USD');
-        setPricing(priceData || null);
+        const normalizedPricing = priceData || {
+          PRO: {
+            amount: plansData?.PRO?.price,
+            currency: plansData?.PRO?.currency || detectedCurrency,
+          },
+          ENTERPRISE: {
+            amount: plansData?.ENTERPRISE?.price,
+            currency: plansData?.ENTERPRISE?.currency || detectedCurrency,
+          },
+        };
+
+        setCurrency(detectedCurrency);
+        setPricing(normalizedPricing);
         setError(null);
       } catch (err) {
         console.error('Error fetching pricing:', err);
@@ -154,7 +167,11 @@ const Plans = () => {
 
   const getPrice = (planId) => {
     if (!pricing || planId === 'STARTER') return '0';
-    return pricing[planId]?.amount || '0';
+    const amount = pricing[planId]?.amount;
+    if (amount === undefined || amount === null || amount === '') {
+      return 'N/A';
+    }
+    return String(amount);
   };
 
   if (loading) {

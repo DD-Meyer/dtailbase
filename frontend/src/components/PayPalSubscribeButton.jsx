@@ -11,8 +11,19 @@ const PayPalSubscribeButton = ({ planId, onSuccess, onError, disabled = false })
   // Fetch pricing and detect currency
   const fetchPricing = useCallback(async () => {
     try {
-      const response = await api.get('/payments/pricing/');
-      const { currency: detectedCurrency, pricing } = response.data;
+      const response = await api.get('payments/pricing/');
+      const detectedCurrency = (response.data?.currency || 'USD').toUpperCase();
+      const pricing = response.data?.pricing || {
+        PRO: {
+          amount: response.data?.plans?.PRO?.price,
+          currency: response.data?.plans?.PRO?.currency || detectedCurrency,
+        },
+        ENTERPRISE: {
+          amount: response.data?.plans?.ENTERPRISE?.price,
+          currency: response.data?.plans?.ENTERPRISE?.currency || detectedCurrency,
+        },
+      };
+
       setCurrency(detectedCurrency);
       return pricing;
     } catch (err) {
@@ -39,7 +50,7 @@ const PayPalSubscribeButton = ({ planId, onSuccess, onError, disabled = false })
       }
 
       // Call backend to create PayPal subscription
-      const response = await api.post('/payments/subscribe/', {
+      const response = await api.post('payments/subscribe/', {
         plan_id: planId,
       });
 

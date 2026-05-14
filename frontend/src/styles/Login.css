@@ -125,7 +125,15 @@
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   font-size: 1rem;
+  color: #0f172a;
+  background-color: #ffffff;
+  -webkit-text-fill-color: #0f172a;
   transition: border-color 0.2s;
+}
+
+.login-form select option {
+  color: #0f172a;
+  background-color: #ffffff;
 }
 
 .login-form input:focus,
@@ -304,7 +312,8 @@
     max-width: 100%;
   }
 
-  .login-form input {
+  .login-form input,
+  .login-form select {
     font-size: 16px;
     padding: 12px;
     min-height: 44px;

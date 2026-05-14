@@ -10,8 +10,7 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-IPSTACK_API_KEY = getattr(settings, 'IPSTACK_API_KEY', '')
-IPSTACK_URL = 'http://api.ipstack.com'
+IPSTACK_URL = 'https://api.ipstack.com'
 CACHE_TIMEOUT = 86400 * 30  # Cache for 30 days
 
 
@@ -33,8 +32,10 @@ def get_country_from_ip(ip_address):
         logger.info(f"Country for IP {ip_address} retrieved from cache: {cached_country}")
         return cached_country
     
+    ipstack_api_key = getattr(settings, 'IPSTACK_API_KEY', '')
+
     # If no API key configured, return default
-    if not IPSTACK_API_KEY:
+    if not ipstack_api_key:
         logger.warning("IPSTACK_API_KEY not configured in settings")
         return 'US'
     
@@ -42,7 +43,7 @@ def get_country_from_ip(ip_address):
         # Make API request to ipstack
         response = requests.get(
             f'{IPSTACK_URL}/{ip_address}',
-            params={'access_key': IPSTACK_API_KEY},
+            params={'access_key': ipstack_api_key},
             timeout=5
         )
         response.raise_for_status()
@@ -90,8 +91,10 @@ def detect_user_currency(request):
     Detect user's currency based on IP geolocation.
     Returns tuple: (country_code, currency)
     """
-    ip = get_client_ip(request)
-    country_code = get_country_from_ip(ip)
+    country_code = (request.META.get('HTTP_CF_IPCOUNTRY') or '').upper()
+    if len(country_code) != 2 or country_code == 'XX':
+        ip = get_client_ip(request)
+        country_code = get_country_from_ip(ip)
     
     # Map country code to currency
     if country_code == 'ZA':
