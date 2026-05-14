@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import mimetypes
 import os
 
 import dj_database_url
@@ -71,6 +72,10 @@ ALLOWED_HOSTS = env_list(
 )
 
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '').strip()
+
+# Ensure PWA manifests are served with the correct content type in production.
+mimetypes.add_type('application/manifest+json', '.webmanifest', strict=True)
+mimetypes.add_type('application/manifest+json', '.webmanifest', strict=False)
 
 
 # Application definition
