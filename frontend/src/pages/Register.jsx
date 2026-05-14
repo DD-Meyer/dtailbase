@@ -4,10 +4,10 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import "../styles/Login.css"; 
 
-const COUNTRY_LABELS = {
-  US: "United States",
-  ZA: "South Africa",
-};
+const COUNTRY_OPTIONS = [
+  { code: "ZA", label: "South Africa", currency: "ZAR" },
+  { code: "US", label: "United States", currency: "USD" },
+];
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -26,26 +26,52 @@ function Register() {
   const navigate = useNavigate();
   const location = useLocation();
   const planContext = location.state?.fromPlanCta ? location.state : null;
-  const detectedCountryLabel = COUNTRY_LABELS[formData.country_code] || formData.country_code;
 
   useEffect(() => {
     let isMounted = true;
+
+    const getBrowserCountryFallback = () => {
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+      const locale = navigator.language || "";
+
+      if (timezone === "Africa/Johannesburg" || locale.toUpperCase().endsWith("-ZA")) {
+        return { country_code: "ZA", currency: "ZAR" };
+      }
+
+      return { country_code: "US", currency: "USD" };
+    };
 
     const detectCountryAndCurrency = async () => {
       try {
         const response = await api.get("payments/pricing/");
         const detectedCountry = (response.data?.country_code || "US").toUpperCase();
         const detectedCurrency = (response.data?.currency || "USD").toUpperCase();
+        const browserFallback = getBrowserCountryFallback();
+
+        const normalizedCountry =
+          detectedCountry === "US" && browserFallback.country_code === "ZA"
+            ? "ZA"
+            : detectedCountry;
+
+        const normalizedCurrency =
+          normalizedCountry === "ZA" ? "ZAR" : detectedCurrency;
 
         if (isMounted) {
           setFormData((prev) => ({
             ...prev,
-            country_code: detectedCountry,
-            currency: detectedCurrency,
+            country_code: normalizedCountry,
+            currency: normalizedCurrency,
           }));
         }
       } catch {
-        // Keep US/USD defaults if geolocation is unavailable.
+        const browserFallback = getBrowserCountryFallback();
+        if (isMounted) {
+          setFormData((prev) => ({
+            ...prev,
+            country_code: browserFallback.country_code,
+            currency: browserFallback.currency,
+          }));
+        }
       }
     };
 
@@ -130,12 +156,26 @@ function Register() {
 
           <div className="form-group">
             <label>Detected Country</label>
-            <input
-              type="text"
-              value={`${detectedCountryLabel} (${formData.country_code})`}
-              readOnly
-              aria-readonly="true"
-            />
+            <select
+              value={formData.country_code}
+              onChange={(e) => {
+                const selectedCountry = e.target.value;
+                const selectedCurrency =
+                  COUNTRY_OPTIONS.find((option) => option.code === selectedCountry)?.currency || "USD";
+
+                setFormData((prev) => ({
+                  ...prev,
+                  country_code: selectedCountry,
+                  currency: selectedCurrency,
+                }));
+              }}
+            >
+              {COUNTRY_OPTIONS.map((option) => (
+                <option key={option.code} value={option.code}>
+                  {option.label} ({option.code})
+                </option>
+              ))}
+            </select>
             <p className="auth-meta-note">Billing currency detected: {formData.currency}</p>
           </div>
 

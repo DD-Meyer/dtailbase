@@ -10,6 +10,19 @@ from core.plan_limits import PLAN_CONFIG
 
 logger = logging.getLogger(__name__)
 
+
+class CompanyManager(models.Manager):
+    def create(self, **kwargs):
+        country_code = (kwargs.get('country_code') or 'US').upper()
+        currency = (kwargs.get('currency') or '').upper()
+
+        if not currency:
+            currency = 'ZAR' if country_code == 'ZA' else 'USD'
+
+        kwargs['country_code'] = country_code
+        kwargs['currency'] = currency
+        return super().create(**kwargs)
+
 class Company(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
@@ -47,6 +60,8 @@ class Company(models.Model):
     ]
     country_code = models.CharField(max_length=2, default='US', blank=True)  # ISO country code
     currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default='USD')
+
+    objects = CompanyManager()
 
     # 📈 Add this to track usage
     def get_monthly_booking_count(self):
