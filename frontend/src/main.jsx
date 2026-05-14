@@ -10,6 +10,14 @@ if (!googleClientId) {
   console.warn("[auth] VITE_GOOGLE_CLIENT_ID looks invalid. Expected a Google Web Client ID ending with .apps.googleusercontent.com");
 }
 
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch((error) => {
+      console.warn("[pwa] Service worker registration failed:", error);
+    });
+  });
+}
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <App />
