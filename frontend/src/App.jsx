@@ -137,7 +137,7 @@ function AppContent() {
   // 1. Identify ALL public-facing "Marketing" pages
   const publicRoutes = ["/", "/hero", "/about", "/products", "/plans", "/payments", "/contact", "/legal", "/community", "/features", "/security", "/our-Story", "/support", "/help-center", "/tutorials", "/public-booking/:companySlug", "/payment-success"];
   const isLandingPage = publicRoutes.includes(location.pathname);
-  const websiteOnlyRoutes = ["/", "/hero", "/about", "/products", "/contact", "/legal", "/community", "/features", "/security", "/our-story", "/support", "/help-center", "/tutorials", "/new-booking"];
+  const websiteOnlyRoutes = ["/", "/hero", "/about", "/products", "/contact", "/legal", "/community", "/features", "/security", "/our-story", "/support", "/help-center", "/tutorials"];
   const isWebsiteOnlyRoute = websiteOnlyRoutes.includes(location.pathname.toLowerCase());
 
   if (isInstalledApp && !isAllowedInInstalledApp(location.pathname)) {
