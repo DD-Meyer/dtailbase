@@ -101,13 +101,23 @@ function IndemnityForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!template || !bookingData) return;
-    if (sigCanvas.current.isEmpty()) return alert("Please provide a signature.");
+    if (sigCanvas.current.isEmpty()) {
+      triggerToast("Please provide a signature.", "error");
+      return;
+    }
+    if (beforePhotos.length < 1) {
+      triggerToast("Please upload at least one BEFORE image.", "error");
+      return;
+    }
 
     setIsSubmitting(true);
 
     // 1. Check if geolocation is supported
     if (!("geolocation" in navigator)) {
-      alert("Geolocation is not supported by your browser. Please use a different device/browser for security compliance.");
+      triggerToast(
+        "Geolocation is not supported by your browser. Please use a different device/browser for security compliance.",
+        "error"
+      );
       setIsSubmitting(false);
       return;
     }
@@ -140,7 +150,7 @@ function IndemnityForm() {
             errorMessage += "An unknown error occurred.";
         }
         
-        alert(errorMessage);
+        triggerToast(errorMessage, "error");
         setIsSubmitting(false);
       },
       { 
@@ -155,7 +165,7 @@ function IndemnityForm() {
   const processUpload = async (coords) => {
     // FINAL SAFETY CHECK
     if (!coords.lat || !coords.lng) {
-      alert("Submission blocked: Valid GPS coordinates are required.");
+      triggerToast("Submission blocked: Valid GPS coordinates are required.", "error");
       setIsSubmitting(false);
       return;
     }
@@ -194,11 +204,18 @@ function IndemnityForm() {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      alert("Indemnity submitted successfully!");
-      navigate("/bookings");
+      triggerToast("Indemnity submitted successfully!", "success");
+      setTimeout(() => navigate("/bookings"), 900);
     } catch (err) {
       console.error("API Error:", err.response?.data);
-      alert(err.response?.data?.detail || "Submission failed.");
+      const apiError = err.response?.data;
+      const firstFieldError =
+        apiError?.detail ||
+        apiError?.error ||
+        apiError?.uploaded_images?.[0] ||
+        apiError?.signature_image?.[0] ||
+        "Submission failed.";
+      triggerToast(firstFieldError, "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -220,6 +237,7 @@ function IndemnityForm() {
 
   return (
     <div className="page-container">
+      {toast.show && <div className={`toast-notification ${toast.type}`}>{toast.message}</div>}
       <div className="card indemnity-card">
         <header className="indemnity-header">
           <h1>Vehicle Condition & Indemnity</h1>

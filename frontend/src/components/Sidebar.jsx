@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { CalendarDays, Car, ShieldCheck, Settings, UserRound, Users, UserCog, Wrench } from "lucide-react";
+import { CalendarDays, Car, ChevronDown, ChevronUp, ShieldCheck, Settings, UserRound, Users, UserCog, Wrench } from "lucide-react";
 import "../styles/Sidebar.css";
 
 // ... imports stay the same ...
@@ -19,11 +19,16 @@ function Sidebar() {
     { path: "/services", label: "Services", icon: Wrench },
   ];
 
-  if (user?.role === 'OWNER') {
-    menuItems.push({ path: "/settings/indemnity", label: "Indemnity", icon: ShieldCheck });
-  }
-
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
+  const isBillingSettings = location.pathname === "/settings" && location.search.includes("tab=billing");
+  const isBusinessSettings = location.pathname === "/settings" && !location.search.includes("tab=billing");
+  const [isSettingsSubmenuOpen, setIsSettingsSubmenuOpen] = useState(isBusinessSettings || isBillingSettings);
+
+  useEffect(() => {
+    if (isBusinessSettings || isBillingSettings) {
+      setIsSettingsSubmenuOpen(true);
+    }
+  }, [isBusinessSettings, isBillingSettings]);
 
   return (
     // {/* NEW: only displays sidebar on desktop - remove all references to mobile here*/}
@@ -78,10 +83,39 @@ function Sidebar() {
                   {!isCollapsed && <span className="label">Team</span>}
                 </Link>
               </li>
-              <li className={location.pathname === "/settings" ? "active" : ""}>
-                <Link to="/settings" title="Business Settings">
-                  <span className="icon"><Settings size={18} strokeWidth={2.1} aria-hidden="true" /></span>
-                  {!isCollapsed && <span className="label">Settings</span>}
+              <li className={`sidebar-parent ${isBusinessSettings || isBillingSettings ? "active" : ""}`}>
+                <div className="sidebar-parent-head">
+                  <Link to="/settings" title="Business Settings">
+                    <span className="icon"><Settings size={18} strokeWidth={2.1} aria-hidden="true" /></span>
+                    {!isCollapsed && <span className="label">Settings</span>}
+                  </Link>
+                  {!isCollapsed && (
+                    <button
+                      type="button"
+                      className="sidebar-submenu-toggle"
+                      onClick={() => setIsSettingsSubmenuOpen((prev) => !prev)}
+                      aria-label="Toggle settings submenu"
+                      aria-expanded={isSettingsSubmenuOpen}
+                    >
+                      {isSettingsSubmenuOpen ? <ChevronUp size={14} aria-hidden="true" /> : <ChevronDown size={14} aria-hidden="true" />}
+                    </button>
+                  )}
+                </div>
+                {!isCollapsed && isSettingsSubmenuOpen && (
+                  <ul className="sidebar-submenu">
+                    <li className={isBillingSettings ? "active" : ""}>
+                      <Link to="/settings?tab=billing" title="Billing Settings">
+                        <span className="dropdown-dot" aria-hidden="true">•</span>
+                        <span className="label">Billing</span>
+                      </Link>
+                    </li>
+                  </ul>
+                )}
+              </li>
+              <li className={location.pathname === "/settings/indemnity" ? "active" : ""}>
+                <Link to="/settings/indemnity" title="Indemnity Settings">
+                  <span className="icon"><ShieldCheck size={18} strokeWidth={2.1} aria-hidden="true" /></span>
+                  {!isCollapsed && <span className="label">Settings: Indemnity</span>}
                 </Link>
               </li>
             </>

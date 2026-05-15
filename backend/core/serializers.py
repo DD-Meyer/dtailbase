@@ -184,6 +184,20 @@ class BookingSerializer(serializers.ModelSerializer):
                     )
 
             data["booking_end_time"] = end_dt.time()
+
+        requested_status = data.get("status")
+        if instance and requested_status and requested_status.upper() == "IN_PROGRESS" and instance.status != "IN_PROGRESS":
+            agreement = getattr(instance, 'booking_indemnity', None)
+            if not agreement or not agreement.signature_image:
+                raise serializers.ValidationError({
+                    "status": "Cannot start booking: client signature is required."
+                })
+
+            before_photos_count = agreement.condition_photos.filter(photo_type='BEFORE').count()
+            if before_photos_count < 1:
+                raise serializers.ValidationError({
+                    "status": "Cannot start booking: upload at least one BEFORE image first."
+                })
             
         return data
 
@@ -316,6 +330,20 @@ class BookingStatusSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({
                     "uploaded_images": f"Your {company.plan} plan allows a maximum of {limit} 'After' photos."
                 })
+
+        if new_status == 'IN_PROGRESS':
+            booking = self.instance
+            agreement = getattr(booking, 'booking_indemnity', None)
+            if not agreement or not agreement.signature_image:
+                raise serializers.ValidationError({
+                    "status": "Cannot start booking: client signature is required."
+                })
+
+            before_photos_count = agreement.condition_photos.filter(photo_type='BEFORE').count()
+            if before_photos_count < 1:
+                raise serializers.ValidationError({
+                    "status": "Cannot start booking: upload at least one BEFORE image first."
+                })
         
         return data
 
@@ -365,6 +393,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     # This declaration is correct
     company_name = serializers.CharField(write_only=True, required=False)
+    country_code = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    currency = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
     plan = serializers.CharField(source='company.plan', read_only=True)
     usage_count = serializers.SerializerMethodField()
@@ -378,7 +408,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'email', 'username', 'first_name', 'last_name', 
             'password', 'role', 'is_active', 'company_id', 
-            'plan', 'usage_count', 'company_name'
+            'plan', 'usage_count', 'company_name', 'country_code', 'currency'
         ]
         read_only_fields = ['id', 'company_id', 'plan', 'usage_count']
     
@@ -422,6 +452,8 @@ class UserSerializer(serializers.ModelSerializer):
         from django.db import transaction
 
         company_name = validated_data.pop('company_name', None)
+        selected_country_code = (validated_data.pop('country_code', '') or 'US').upper()
+        selected_currency = (validated_data.pop('currency', '') or '').upper()
         request = self.context.get('request')
         # Check if an authenticated Admin/Owner is performing the action
         admin_user = request.user if request and request.user.is_authenticated else None
@@ -436,7 +468,16 @@ class UserSerializer(serializers.ModelSerializer):
                 if Company.objects.filter(name__iexact=company_name).exists():
                     raise serializers.ValidationError({"company_name": "A company with this name is already registered."})
 
-                new_company = Company.objects.create(name=company_name, plan='STARTER')
+                normalized_currency = 'ZAR' if selected_country_code == 'ZA' else 'USD'
+                if selected_currency in {'USD', 'ZAR'}:
+                    normalized_currency = selected_currency
+
+                new_company = Company.objects.create(
+                    name=company_name,
+                    plan='STARTER',
+                    country_code=selected_country_code,
+                    currency=normalized_currency,
+                )
                 validated_data['company'] = new_company
                 validated_data['role'] = 'OWNER'
                 return User.objects.create_user(**validated_data)
@@ -482,8 +523,16 @@ class CompanySerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'plan', 'plan_limits', 'usage_stats',
                   'booking_buffer', 'opening_time', 'closing_time',
                   'slug', 'website', 'email', 'phone', 'address',
-                  'logo', 'is_active', 'created_at']
-        read_only_fields = ['id', 'created_at']
+                  'logo', 'is_active', 'created_at', 'country_code', 'currency',
+                  'requested_country_code', 'requested_currency', 'location_verification_status',
+                  'location_verification_score', 'location_verification_notes', 'location_verified_at',
+                  'location_verification_document']
+        read_only_fields = [
+            'id', 'created_at',
+            'requested_country_code', 'requested_currency', 'location_verification_status',
+            'location_verification_score', 'location_verification_notes', 'location_verified_at',
+            'location_verification_document'
+        ]
 
     def get_usage_stats(self, obj):
         return {

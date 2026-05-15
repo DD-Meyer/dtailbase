@@ -1,44 +1,23 @@
 import { useCallback, useState } from 'react';
-import { PayPalButtons } from '@paypal/react-paypal-js';
 import api from '../axios_instance';
 import '../styles/PayPalSubscribeButton.css';
 
-const PayPalSubscribeButton = ({ planId, onSuccess, onError, disabled = false }) => {
+const PayPalSubscribeButton = ({
+  planId,
+  onSuccess,
+  onError,
+  disabled = false,
+  buttonLabel = 'Upgrade via PayPal',
+}) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [currency, setCurrency] = useState('USD');
-
-  // Fetch pricing and detect currency
-  const fetchPricing = useCallback(async () => {
-    try {
-      const response = await api.get('/payments/pricing/');
-      const { currency: detectedCurrency, pricing } = response.data;
-      setCurrency(detectedCurrency);
-      return pricing;
-    } catch (err) {
-      console.error('Error fetching pricing:', err);
-      setError('Failed to load pricing information');
-      return null;
-    }
-  }, []);
 
   const handleCreateSubscription = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      // Get pricing first
-      const pricing = await fetchPricing();
-      if (!pricing) {
-        throw new Error('Could not fetch pricing');
-      }
-
-      const plan = pricing[planId];
-      if (!plan) {
-        throw new Error(`Plan ${planId} not found for currency ${currency}`);
-      }
-
-      // Call backend to create PayPal subscription
+      // Call backend to create PayPal subscription.
       const response = await api.post('/payments/subscribe/', {
         plan_id: planId,
       });
@@ -49,27 +28,21 @@ const PayPalSubscribeButton = ({ planId, onSuccess, onError, disabled = false })
 
       // Redirect to PayPal approval URL
       if (response.data.approval_url) {
+        if (onSuccess) onSuccess(response.data);
         window.location.href = response.data.approval_url;
       }
 
-      return response.data.agreement_id;
+      return response.data.subscription_id || null;
     } catch (err) {
       console.error('Subscription creation error:', err);
       const errorMsg = err.response?.data?.error || err.message || 'Failed to process subscription';
       setError(errorMsg);
       if (onError) onError(errorMsg);
-      throw err;
+      return null;
     } finally {
       setLoading(false);
     }
-  }, [planId, currency, fetchPricing, onError]);
-
-  const buttonStyle = {
-    layout: 'vertical',
-    color: 'gold',
-    shape: 'rect',
-    label: 'subscribe',
-  };
+  }, [planId, onError, onSuccess]);
 
   return (
     <div className="paypal-subscribe-button-wrapper">
@@ -91,7 +64,7 @@ const PayPalSubscribeButton = ({ planId, onSuccess, onError, disabled = false })
           disabled={disabled || loading}
           className="btn-paypal-subscribe"
         >
-          Upgrade via PayPal
+          {buttonLabel}
         </button>
       )}
     </div>

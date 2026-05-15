@@ -11,6 +11,8 @@ router.register(r'company', CompanyViewSet, basename='company')
 urlpatterns = [
     path("company/team/", CompanyTeamListView.as_view(), name="team-list"),
     path("company/team/<uuid:pk>/", CompanyUserDetailView.as_view(), name="team-detail"),
+    path("company/location-verification/", CompanyLocationVerificationView.as_view(), name="company-location-verification"),
+    path("company/account-lifecycle/", CompanyAccountLifecycleView.as_view(), name="company-account-lifecycle"),
 
     # Public Endpoints
     # Note: These are intentionally placed before the authenticated endpoints to avoid any potential conflicts with URL patterns.
@@ -20,6 +22,7 @@ urlpatterns = [
     path("public/book/<slug:company_slug>/", PublicBookingCreateView.as_view(), name="public-booking-create"),
 
     path("auth/users/me/", UserMeView.as_view(), name="user-me"),
+    path("auth/google-config/", GoogleAuthConfigView.as_view(), name="google-config"),
     path("auth/google-login/", GoogleLoginView.as_view(), name="google-login"),
     path("availability/<str:date>/", AvailabilityAPIView.as_view()),
 

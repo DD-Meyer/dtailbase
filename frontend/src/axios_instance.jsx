@@ -23,6 +23,19 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    const userLocale = typeof navigator !== "undefined" ? (navigator.language || "") : "";
+    const userTimezone = typeof Intl !== "undefined"
+      ? (Intl.DateTimeFormat().resolvedOptions().timeZone || "")
+      : "";
+
+    if (userLocale) {
+      config.headers["X-User-Locale"] = userLocale;
+    }
+    if (userTimezone) {
+      config.headers["X-User-Timezone"] = userTimezone;
+    }
+
     return config;
   },
   (error) => Promise.reject(error)

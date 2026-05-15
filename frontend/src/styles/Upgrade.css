@@ -254,6 +254,60 @@
   color: rgba(255, 255, 255, 0.86);
 }
 
+.payment-currency-fallback-note {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  background: rgba(217, 119, 6, 0.16);
+  color: #fde68a;
+  font-size: 0.9rem;
+}
+
+.payment-plan-summary {
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(15, 23, 42, 0.58);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.payment-plan-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 10px;
+  color: rgba(226, 232, 240, 0.94);
+}
+
+.payment-plan-row strong {
+  color: #ecfeff;
+}
+
+.payment-plan-features {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.payment-plan-features p {
+  margin: 0 0 6px;
+  color: #a7f3d0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.payment-plan-features ul {
+  margin: 0;
+  padding-left: 18px;
+  color: rgba(226, 232, 240, 0.95);
+  display: grid;
+  gap: 4px;
+}
+
 .payment-overlay-actions {
   display: flex;
   flex-direction: column;

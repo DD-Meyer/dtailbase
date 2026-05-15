@@ -419,6 +419,27 @@
   border-radius: 6px;
 }
 
+.plus-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.limit-warning-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.table-standard .btn,
+.table-standard button,
+.modal-content .btn,
+.flex-items-center .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .booking-action-group {
   display: flex;
   flex-wrap: wrap;

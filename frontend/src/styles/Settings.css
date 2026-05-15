@@ -13,6 +13,58 @@
   margin: 0 auto;
 }
 
+.settings-layout {
+  max-width: 1200px;
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 20px;
+}
+
+.settings-panel {
+  min-width: 0;
+}
+
+.settings-submenu {
+  height: fit-content;
+  position: sticky;
+  top: 88px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-submenu-item {
+  width: 100%;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #334155;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.settings-submenu-item:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.settings-submenu-item.active {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
 /* Header Styling */
 .settings-header {
   display: flex;
@@ -149,6 +201,19 @@
   border-radius: 12px;
   margin-bottom: 20px;
   border-left: 5px solid #10b981;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.alert-error {
+  background: #fef2f2;
+  color: #991b1b;
+  padding: 12px 14px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  border-left: 5px solid #ef4444;
+  font-weight: 600;
 }
 
 .view-site-link {
@@ -161,6 +226,174 @@
 }
 .view-site-link:hover {
   text-decoration: underline;
+}
+
+.settings-note {
+  margin: 0;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.btn-billing-manage {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.billing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.billing-footnote {
+  margin-top: 10px;
+}
+
+.billing-fallback-note {
+  margin-top: 10px;
+  border-color: #f59e0b;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.location-change-form {
+  display: grid;
+  gap: 12px;
+}
+
+.country-select {
+  min-height: 42px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0 10px;
+}
+
+.upload-field {
+  min-height: 44px;
+  border: 1.5px dashed #94a3b8;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #334155;
+  cursor: pointer;
+}
+
+.upload-field input {
+  display: none;
+}
+
+.verification-status {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.verification-approved {
+  background: #ecfdf5;
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.verification-rejected {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+}
+
+.verification-pending {
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+  color: #1d4ed8;
+}
+
+.verification-checklist {
+  display: grid;
+  gap: 10px;
+}
+
+.verification-check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid #dbe3ec;
+  border-radius: 10px;
+  padding: 10px;
+  background: #f8fafc;
+}
+
+.check-badge {
+  min-width: 48px;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 6px;
+  border-radius: 999px;
+}
+
+.check-badge.pass {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+.check-badge.fail {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+.check-content strong {
+  color: #1e293b;
+  font-size: 0.88rem;
+}
+
+.check-content p {
+  margin: 3px 0 0;
+  color: #475569;
+  font-size: 0.82rem;
+}
+
+.settings-card-danger {
+  border-color: #fecaca;
+}
+
+.danger-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-danger-outline,
+.btn-danger-solid {
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-danger-outline {
+  background: #fff;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.btn-danger-solid {
+  background: #dc2626;
+  color: #fff;
 }
 
 table { border-collapse: collapse; width: 100%; }
@@ -217,6 +450,20 @@ td { font-size: 0.9rem; }
 @media (max-width: 1024px) {
   .settings-wrapper {
     padding: 24px;
+  }
+
+  .settings-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-submenu {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .settings-submenu-item {
+    flex: 1 1 180px;
   }
 
   .settings-header {

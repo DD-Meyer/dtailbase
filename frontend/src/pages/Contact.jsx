@@ -13,7 +13,7 @@ const Contact = () => {
           <form className="orbital-form">
             <div className="form-group">
               <label>Studio Name</label>
-              <input type="text" placeholder="Glistenworx Auto" className="nav-item" style={{width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', padding: '12px', color: 'white'}} />
+              <input type="text" placeholder="Your Studio Name" className="nav-item" style={{width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', padding: '12px', color: 'white'}} />
             </div>
             <div className="form-group mt-4">
               <label>Message</label>

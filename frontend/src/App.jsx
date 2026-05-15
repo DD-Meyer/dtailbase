@@ -34,6 +34,7 @@ import ContentPage from "./pages/ContentPage";
 import PublicBooking from "./pages/PublicBooking";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Payments from "./pages/Payments";
+import ShareBooking from "./pages/ShareBooking";
 
 
 function AppContent() {
@@ -61,6 +62,7 @@ function AppContent() {
     "/vehicles",
     "/services",
     "/new-booking",
+    "/share-booking",
     "/profile",
     "/team",
     "/settings",
@@ -140,9 +142,10 @@ function AppContent() {
   }
 
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
+  const isMinimalChromeRoute = location.pathname === "/share-booking";
   
   // 2. Sidebar/Header only show if Authenticated AND not on any public/auth pages
-  const showDashboardChrome = isAuthenticated && !isLandingPage && !isAuthPage;
+  const showDashboardChrome = isAuthenticated && !isLandingPage && !isAuthPage && !isMinimalChromeRoute;
 
   // Example: Legal Page
   const Features = () => (
@@ -232,7 +235,7 @@ function AppContent() {
 
   return (
   
-    <div className={isAuthPage ? "auth-wrapper" : isLandingPage ? "landing-wrapper" : "app-layout"}>
+    <div className={isAuthPage ? "auth-wrapper" : (isLandingPage || isMinimalChromeRoute) ? "landing-wrapper" : "app-layout"}>
       
       {/* Sidebar hidden on Hero and Auth pages */}
       {showDashboardChrome && (
@@ -243,12 +246,12 @@ function AppContent() {
         <MenuMobile />
       )}
       
-      <main className={isLandingPage || isAuthPage ? "full-page-content" : "main-content"}>
+      <main className={isLandingPage || isAuthPage || isMinimalChromeRoute ? "full-page-content" : "main-content"}>
         {/* Header hidden on Hero and Auth pages */}
         {showDashboardChrome && (
           <Header showInstallButton={showInstallButton && !isInstalledApp && !isWebsiteOnlyRoute} handleInstallClick={handleInstallClick} />
         )}
-        <div className={isLandingPage || isAuthPage ? "" : "page-body"}>
+        <div className={isLandingPage || isAuthPage || isMinimalChromeRoute ? "" : "page-body"}>
           <Routes>
             {/* Public Routes */}
             <Route path="/book/:companySlug" element={<PublicBooking />} />
@@ -283,6 +286,7 @@ function AppContent() {
             <Route path="/bookings" element={<ProtectedRoute><Bookings /></ProtectedRoute>} />
             <Route path="/bookings/:id" element={<ProtectedRoute><BookingDetail /></ProtectedRoute>} />
             <Route path="/new-booking" element={<ProtectedRoute><NewBooking /></ProtectedRoute>} />
+            <Route path="/share-booking" element={<ProtectedRoute><ShareBooking /></ProtectedRoute>} />
             <Route path="/customers" element={<ProtectedRoute><Customers /></ProtectedRoute>} />
             <Route path="/vehicles" element={<ProtectedRoute><Vehicles /></ProtectedRoute>} />
             <Route path="/services" element={<ProtectedRoute><Services /></ProtectedRoute>} />
@@ -309,9 +313,18 @@ function AppContent() {
 
 
 function App() {
+  const browserLocale = typeof navigator !== "undefined" ? (navigator.language || "") : "";
+  const browserTimezone = typeof Intl !== "undefined"
+    ? (Intl.DateTimeFormat().resolvedOptions().timeZone || "")
+    : "";
+  const defaultCurrency =
+    browserTimezone === "Africa/Johannesburg" || browserLocale.toUpperCase().endsWith("-ZA")
+      ? "ZAR"
+      : "USD";
+
   const paypalInitialOptions = {
     'client-id': import.meta.env.VITE_PAYPAL_CLIENT_ID || 'test',
-    currency: 'USD', // Default, will be overridden per order
+    currency: defaultCurrency,
     intent: 'subscription',
     vault: true,
   };

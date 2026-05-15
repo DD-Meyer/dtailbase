@@ -21,30 +21,18 @@ PAYPAL_WEB_BASE = {
     'live': 'https://www.paypal.com'
 }
 
-# Pricing Configuration
+# Pricing Configuration (USD only)
 PRICING = {
-    'ZAR': {
-        'PRO': {
-            'amount': '499.00',
-            'currency': 'ZAR',
-            'description': 'Dtailbase Pro - ZAR'
-        },
-        'ENTERPRISE': {
-            'amount': '1299.00',
-            'currency': 'ZAR',
-            'description': 'Dtailbase Enterprise - ZAR'
-        }
-    },
     'USD': {
         'PRO': {
             'amount': '29.00',
             'currency': 'USD',
-            'description': 'Dtailbase Pro - USD'
+            'description': 'Dtailbase Pro'
         },
         'ENTERPRISE': {
             'amount': '149.00',
             'currency': 'USD',
-            'description': 'Dtailbase Enterprise - USD'
+            'description': 'Dtailbase Enterprise'
         }
     }
 }
@@ -88,38 +76,39 @@ def get_paypal_access_token():
         return None
 
 
-def get_subscription_plan(plan_id, currency):
+def get_subscription_plan(plan_id, currency=None):
     """
-    Get pricing details for a subscription plan.
+    Get pricing details for a subscription plan (USD only).
     
     Args:
         plan_id: 'PRO' or 'ENTERPRISE'
-        currency: 'ZAR' or 'USD'
+        currency: ignored, always USD
     
     Returns:
         dict with plan details or None if not found
     """
-    if currency not in PRICING or plan_id not in PRICING[currency]:
-        logger.error(f"Invalid plan/currency combination: {plan_id}/{currency}")
+    if plan_id not in PRICING.get('USD', {}):
+        logger.error(f"Invalid plan: {plan_id}")
         return None
     
-    return PRICING[currency][plan_id]
+    return PRICING['USD'][plan_id]
 
 
-def create_paypal_subscription(user_email, plan_id, currency, return_url, cancel_url):
+def create_paypal_subscription(user_email, plan_id, return_url, cancel_url, currency='USD'):
     """
-    Create a PayPal subscription for a user using Subscriptions API.
+    Create a PayPal subscription for a user using Subscriptions API (USD only).
     
     Args:
         user_email: User's email
         plan_id: 'PRO' or 'ENTERPRISE'
-        currency: 'ZAR' or 'USD'
         return_url: Success return URL
         cancel_url: Cancel return URL
+        currency: always USD, parameter kept for compatibility
     
     Returns:
         dict with 'success': bool, 'approval_url': str (if success), 'error': str (if failed)
     """
+    currency = 'USD'
     
     access_token = get_paypal_access_token()
     if not access_token:
@@ -164,7 +153,30 @@ def create_paypal_subscription(user_email, plan_id, currency, return_url, cancel
                 json=product_payload,
                 timeout=10
             )
+
+            if product_create_response.status_code >= 400:
+                # Some PayPal accounts reject caller-provided product ids.
+                # Retry without explicit id and use generated product id.
+                logger.warning(
+                    f"PayPal product creation with explicit id failed (status={product_create_response.status_code}). "
+                    "Retrying with PayPal-generated product id."
+                )
+                fallback_payload = {
+                    'name': 'Dtailbase Subscriptions',
+                    'description': 'Professional detailing management software',
+                    'type': 'SERVICE',
+                    'category': 'SOFTWARE'
+                }
+                product_create_response = requests.post(
+                    products_url,
+                    headers=headers,
+                    json=fallback_payload,
+                    timeout=10
+                )
+
             product_create_response.raise_for_status()
+            created_product_data = product_create_response.json()
+            product_id = created_product_data.get('id', product_id)
             logger.info(f"Created PayPal product: {product_id}")
         elif product_response.status_code == 200:
             logger.info(f"Product already exists: {product_id}")
@@ -176,7 +188,7 @@ def create_paypal_subscription(user_email, plan_id, currency, return_url, cancel
         
         # Create unique plan name to avoid duplicates
         import time
-        timestamp = int(time.time())
+        timestamp = int(time.time() * 1000)
         unique_plan_name = f"{plan_id}-{currency}-{timestamp}"
         
         plan_payload = {
@@ -202,8 +214,9 @@ def create_paypal_subscription(user_email, plan_id, currency, return_url, cancel
                 }
             ],
             'payment_preferences': {
+                'auto_bill_outstanding': True,
                 'setup_fee': {
-                    'value': '0',
+                    'value': '0.00',
                     'currency_code': currency
                 },
                 'setup_fee_failure_action': 'CONTINUE',
@@ -222,7 +235,13 @@ def create_paypal_subscription(user_email, plan_id, currency, return_url, cancel
         
         if plan_response.status_code >= 400:
             error_data = plan_response.json() if plan_response.headers.get('content-type') == 'application/json' else {}
+            details = error_data.get('details') if isinstance(error_data, dict) else None
+            issue = ''
+            if isinstance(details, list) and details:
+                issue = details[0].get('issue', '')
             error_msg = error_data.get('message', plan_response.text)
+            if issue:
+                error_msg = f"{error_msg} (issue: {issue})"
             logger.error(f"Failed to create billing plan: {error_msg}")
             return {'success': False, 'error': f'PayPal plan creation failed: {error_msg}'}
         
@@ -400,8 +419,11 @@ def get_paypal_subscription_details(subscription_id):
             'Content-Type': 'application/json',
             'Authorization': f'Bearer {access_token}'
         }
+        
+        # Include payment_source in the response
+        params = {'fields': 'payment_source'}
 
-        response = requests.get(url, headers=headers, timeout=10)
+        response = requests.get(url, headers=headers, params=params, timeout=10)
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:

@@ -15,6 +15,7 @@
     "@paypal/react-paypal-js": "^7.8.0",
     "@tailwindcss/postcss": "^4.2.1",
     "axios": "^1.13.2",
+    "i18n-iso-countries": "^7.14.0",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^1.14.0",
     "react": "^18.2.0",

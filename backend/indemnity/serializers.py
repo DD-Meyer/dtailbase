@@ -60,6 +60,22 @@ class IndemnityAgreementSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "customer", "signed_at", "document_hash", "signer_ip", "signer_user_agent", "latitude", "longitude", "signing_address"]
 
+    def validate(self, data):
+        uploaded_images = data.get('uploaded_images', [])
+        signature_image = data.get('signature_image')
+
+        if not signature_image:
+            raise serializers.ValidationError({
+                "signature_image": "Client signature is required before starting a booking."
+            })
+
+        if len(uploaded_images) < 1:
+            raise serializers.ValidationError({
+                "uploaded_images": "At least one BEFORE image is required before starting a booking."
+            })
+
+        return data
+
 
     def create(self, validated_data):
         request = self.context.get('request')
@@ -86,6 +102,11 @@ class IndemnityAgreementSerializer(serializers.ModelSerializer):
         plan_limits = PLAN_CONFIG.get(company.plan, PLAN_CONFIG['STARTER'])
         images_data = validated_data.pop('uploaded_images', [])
         
+        if len(images_data) < 1:
+            raise serializers.ValidationError({
+                "uploaded_images": "At least one BEFORE image is required before starting a booking."
+            })
+
         if len(images_data) > plan_limits['max_images_before']:
             raise serializers.ValidationError({
                 "uploaded_images": f"Your {company.plan} plan allows a maximum of {plan_limits['max_images_before']} 'Before' photos."

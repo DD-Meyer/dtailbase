@@ -224,7 +224,7 @@ const Hero = ({ isAuthenticated }) => {
 
           {/* TIER 3: STUDIO */}
           <div className="pricing-card animate-on-scroll">
-            <span className="tier">Studio Elite</span>
+            <span className="tier">Enterprise</span>
             <div className="price">R1250<span>/mo</span></div>
             <ul className="benefits">
               <li>✓ Unlimited Technicians</li>

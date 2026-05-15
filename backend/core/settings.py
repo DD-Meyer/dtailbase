@@ -15,6 +15,7 @@ import mimetypes
 import os
 
 import dj_database_url
+from corsheaders.defaults import default_headers
 try:
     from dotenv import load_dotenv
 except ImportError:
@@ -103,6 +104,11 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'x-user-locale',
+    'x-user-timezone',
+]
 
 # 2. Unified CSRF list
 CSRF_TRUSTED_ORIGINS = [

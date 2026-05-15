@@ -3,13 +3,12 @@ import api from "../axios_instance";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import "../styles/Login.css"; 
+import { countryOptions, getCountryLabel } from "../utils/countries";
 
-const COUNTRY_OPTIONS = [
-  { code: "ZA", label: "South Africa", currency: "ZAR" },
-  { code: "US", label: "United States", currency: "USD" },
-];
+const getCurrencyForCountry = (countryCode) => (countryCode === "ZA" ? "ZAR" : "USD");
 
 function Register() {
+  const [detectedCountryCode, setDetectedCountryCode] = useState("US");
   const [formData, setFormData] = useState({
     company_name: "",
     email: "",
@@ -54,9 +53,10 @@ function Register() {
             : detectedCountry;
 
         const normalizedCurrency =
-          normalizedCountry === "ZA" ? "ZAR" : detectedCurrency;
+          normalizedCountry === "ZA" ? "ZAR" : (detectedCurrency || "USD");
 
         if (isMounted) {
+          setDetectedCountryCode(normalizedCountry);
           setFormData((prev) => ({
             ...prev,
             country_code: normalizedCountry,
@@ -66,6 +66,7 @@ function Register() {
       } catch {
         const browserFallback = getBrowserCountryFallback();
         if (isMounted) {
+          setDetectedCountryCode(browserFallback.country_code);
           setFormData((prev) => ({
             ...prev,
             country_code: browserFallback.country_code,
@@ -155,13 +156,12 @@ function Register() {
           </div>
 
           <div className="form-group">
-            <label>Detected Country</label>
+            <label>Country</label>
             <select
               value={formData.country_code}
               onChange={(e) => {
                 const selectedCountry = e.target.value;
-                const selectedCurrency =
-                  COUNTRY_OPTIONS.find((option) => option.code === selectedCountry)?.currency || "USD";
+                const selectedCurrency = getCurrencyForCountry(selectedCountry);
 
                 setFormData((prev) => ({
                   ...prev,
@@ -170,13 +170,16 @@ function Register() {
                 }));
               }}
             >
-              {COUNTRY_OPTIONS.map((option) => (
+              {countryOptions.map((option) => (
                 <option key={option.code} value={option.code}>
                   {option.label} ({option.code})
                 </option>
               ))}
             </select>
-            <p className="auth-meta-note">Billing currency detected: {formData.currency}</p>
+            <p className="auth-meta-note">
+              Detected location: {getCountryLabel(detectedCountryCode)} ({detectedCountryCode})
+            </p>
+            <p className="auth-meta-note">Billing currency: {formData.currency}</p>
           </div>
 
           <div className="form-group">

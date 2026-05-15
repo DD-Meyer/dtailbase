@@ -12,12 +12,49 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [googleError, setGoogleError] = useState("");
+  const [resolvedGoogleClientId, setResolvedGoogleClientId] = useState("");
+  const [isResolvingGoogleClientId, setIsResolvingGoogleClientId] = useState(true);
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
   const planContext = location.state?.fromPlanCta ? location.state : null;
   const googleButtonRef = useRef(null);
-  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const didRenderGoogleButtonRef = useRef(false);
+  const googleClientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID || "").trim();
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const resolveGoogleClientId = async () => {
+      if (googleClientId) {
+        if (isMounted) {
+          setResolvedGoogleClientId(googleClientId);
+          setIsResolvingGoogleClientId(false);
+        }
+        return;
+      }
+
+      try {
+        const response = await api.get("auth/google-config/");
+        const runtimeClientId = (response.data?.client_id || "").trim();
+        if (isMounted) {
+          setResolvedGoogleClientId(runtimeClientId);
+        }
+      } catch (error) {
+        console.warn("Google config lookup failed:", error?.message || error);
+      } finally {
+        if (isMounted) {
+          setIsResolvingGoogleClientId(false);
+        }
+      }
+    };
+
+    resolveGoogleClientId();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [googleClientId]);
 
   const completeLogin = (authResponse) => {
     login(authResponse.access, authResponse.refresh, authResponse.user, { rememberMe });
@@ -30,7 +67,7 @@ function Login() {
   };
 
   useEffect(() => {
-    if (!googleClientId || !googleButtonRef.current) {
+    if (!resolvedGoogleClientId || !googleButtonRef.current) {
       return;
     }
 
@@ -39,31 +76,38 @@ function Login() {
         return;
       }
 
-      window.google.accounts.id.initialize({
-        client_id: googleClientId,
-        callback: async (response) => {
-          if (!response?.credential) {
-            setGoogleError("Google authentication did not return a credential.");
-            return;
-          }
+      if (!window.__dtailbaseGoogleInitialized) {
+        window.google.accounts.id.initialize({
+          client_id: resolvedGoogleClientId,
+          callback: async (response) => {
+            if (!response?.credential) {
+              setGoogleError("Google authentication did not return a credential.");
+              return;
+            }
 
-          setGoogleError("");
-          setIsGoogleLoading(true);
+            setGoogleError("");
+            setIsGoogleLoading(true);
 
-          try {
-            const authResponse = await api.post("auth/google-login/", {
-              credential: response.credential,
-            });
+            try {
+              const authResponse = await api.post("auth/google-login/", {
+                credential: response.credential,
+              });
 
-            completeLogin(authResponse.data);
-          } catch (error) {
-            console.error("Google Login Error:", error.response?.data || error.message);
-            setGoogleError(error.response?.data?.detail || "Google sign in failed. Please try again.");
-          } finally {
-            setIsGoogleLoading(false);
-          }
-        },
-      });
+              completeLogin(authResponse.data);
+            } catch (error) {
+              console.error("Google Login Error:", error.response?.data || error.message);
+              setGoogleError(error.response?.data?.detail || "Google sign in failed. Please try again.");
+            } finally {
+              setIsGoogleLoading(false);
+            }
+          },
+        });
+        window.__dtailbaseGoogleInitialized = true;
+      }
+
+      if (didRenderGoogleButtonRef.current) {
+        return;
+      }
 
       googleButtonRef.current.innerHTML = "";
       window.google.accounts.id.renderButton(googleButtonRef.current, {
@@ -73,6 +117,7 @@ function Login() {
         shape: "pill",
         width: 360,
       });
+      didRenderGoogleButtonRef.current = true;
     };
 
     if (window.google?.accounts?.id) {
@@ -95,8 +140,9 @@ function Login() {
 
     return () => {
       script.removeEventListener("load", initializeGoogleButton);
+      didRenderGoogleButtonRef.current = false;
     };
-  }, [googleClientId]);
+  }, [resolvedGoogleClientId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -183,16 +229,24 @@ function Login() {
 
         <div className="google-login-wrap">
           <div className="login-divider"><span>or</span></div>
-          {!googleClientId && (
-            <p className="google-login-note">Google sign-in is not configured yet. Add VITE_GOOGLE_CLIENT_ID to your frontend environment.</p>
+          {isResolvingGoogleClientId && (
+            <p className="google-login-note">Loading Google sign-in...</p>
           )}
-          {googleClientId && (
+          {!isResolvingGoogleClientId && !resolvedGoogleClientId && (
+            <p className="google-login-note">Google sign-in is not configured yet. Set GOOGLE_CLIENT_ID on the server or VITE_GOOGLE_CLIENT_ID in frontend build env.</p>
+          )}
+          {!!resolvedGoogleClientId && (
             <>
               <div ref={googleButtonRef} className="google-login-button" aria-live="polite" />
               {isGoogleLoading && <p className="google-login-note">Signing in with Google...</p>}
             </>
           )}
           {googleError && <p className="google-login-error">{googleError}</p>}
+          {!!resolvedGoogleClientId && (
+            <p className="google-login-note">
+              If Google button fails with "origin not allowed", add this origin to Google OAuth Authorized JavaScript origins.
+            </p>
+          )}
         </div>
 
         <div className="login-footer">

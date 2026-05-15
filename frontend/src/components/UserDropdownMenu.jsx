@@ -1,11 +1,21 @@
 import { useState, useContext, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeftCircleIcon } from "lucide-react";
+import {
+  ArrowLeftCircleIcon,
+  ChevronDown,
+  ChevronUp,
+  CreditCard,
+  LogOut,
+  Settings,
+  ShieldCheck,
+  UserRound,
+} from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
 import "../styles/Header.css";
 
 function UserDropdownMenu() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { user, logout } = useContext(AuthContext);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
@@ -14,6 +24,7 @@ function UserDropdownMenu() {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
+        setIsSettingsOpen(false);
       }
     };
 
@@ -23,6 +34,7 @@ function UserDropdownMenu() {
 
   const handleLogout = () => {
     setIsDropdownOpen(false);
+    setIsSettingsOpen(false);
     logout();
     navigate("/");
   };
@@ -38,10 +50,12 @@ function UserDropdownMenu() {
           {user?.name?.charAt(0) || user?.email?.charAt(0)?.toUpperCase() || "U"}
         </div>
         <div className="user-info">
-          <span className="user-name">{user?.name || "User"}</span>
+          <span className="user-name">{user?.name || user?.username || "User"}</span>
           <span className="user-role">{user?.role}</span>
         </div>
-        <span className={`chevron ${isDropdownOpen ? "open" : ""}`}>{isDropdownOpen ? "▴" : "▾"}</span>
+        <span className={`chevron ${isDropdownOpen ? "open" : ""}`}>
+          {isDropdownOpen ? <ChevronUp size={16} aria-hidden="true" /> : <ChevronDown size={16} aria-hidden="true" />}
+        </span>
       </button>
 
       {isDropdownOpen && (
@@ -53,20 +67,47 @@ function UserDropdownMenu() {
           <ul className="dropdown-links">
             <li>
               <Link className="flex items-center mt-1.5" to="/" onClick={() => setIsDropdownOpen(false)}>
-                <ArrowLeftCircleIcon /> Back
+                <ArrowLeftCircleIcon size={16} /> Back
               </Link>
             </li>
-            <li><Link to="/profile" onClick={() => setIsDropdownOpen(false)}>👤 Profile Settings</Link></li>
+            <li>
+              <Link to="/profile" onClick={() => setIsDropdownOpen(false)}>
+                <span className="dropdown-link-inline"><UserRound size={16} /> Profile</span>
+              </Link>
+            </li>
             {user?.role === "OWNER" && (
-              <li><Link to="/settings" onClick={() => setIsDropdownOpen(false)}>⚙️ Business Settings</Link></li>
-            )}
-            {user?.role === "OWNER" && (
-              <li><Link to="/settings/indemnity" onClick={() => setIsDropdownOpen(false)}>🛡️ Indemnity Settings</Link></li>
+              <>
+                <li>
+                  <button
+                    type="button"
+                    className="dropdown-submenu-toggle"
+                    onClick={() => setIsSettingsOpen((prev) => !prev)}
+                  >
+                    <span className="dropdown-link-inline"><Settings size={16} /> Settings</span>
+                    {isSettingsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  </button>
+                  {isSettingsOpen && (
+                    <div className="dropdown-submenu">
+                      <Link to="/settings" onClick={() => setIsDropdownOpen(false)}>
+                        <span className="dropdown-link-inline"><Settings size={15} /> Business</span>
+                      </Link>
+                      <Link to="/settings?tab=billing" onClick={() => setIsDropdownOpen(false)}>
+                        <span className="dropdown-link-inline"><CreditCard size={15} /> Billing</span>
+                      </Link>
+                    </div>
+                  )}
+                </li>
+                <li>
+                  <Link to="/settings/indemnity" onClick={() => setIsDropdownOpen(false)}>
+                    <span className="dropdown-link-inline"><ShieldCheck size={16} /> Indemnity</span>
+                  </Link>
+                </li>
+              </>
             )}
             <hr />
             <li>
               <button type="button" className="logout-btn" onClick={handleLogout}>
-                Logout 🚪
+                <span className="dropdown-link-inline"><LogOut size={16} /> Logout</span>
               </button>
             </li>
           </ul>

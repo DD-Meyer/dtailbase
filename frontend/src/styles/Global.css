@@ -296,7 +296,7 @@ body.mobile-nav-open {
 /* Toast Notification */
 .toast-notification {
   position: fixed;
-  top: 20px;
+  top: 40px;
   right: 20px;
   padding: 12px 24px;
   border-radius: 8px;

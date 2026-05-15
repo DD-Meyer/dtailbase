@@ -74,6 +74,16 @@ def get_client_ip(request):
     """
     Extract client IP from request, handling proxies and load balancers.
     """
+    # Prefer well-known proxy/CDN headers before generic forwarded headers.
+    for header in [
+        'HTTP_CF_CONNECTING_IP',
+        'HTTP_TRUE_CLIENT_IP',
+        'HTTP_X_REAL_IP',
+    ]:
+        value = request.META.get(header)
+        if value:
+            return value.strip()
+
     # Try X-Forwarded-For first (for proxies/load balancers)
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
@@ -92,6 +102,14 @@ def detect_user_currency(request):
     """
     ip = get_client_ip(request)
     country_code = get_country_from_ip(ip)
+
+    # Fallback hints from client when IP geolocation is unavailable or ambiguous.
+    locale_hint = (request.headers.get('X-User-Locale') or request.headers.get('Accept-Language') or '').upper()
+    timezone_hint = (request.headers.get('X-User-Timezone') or '').upper()
+
+    if country_code == 'US':
+        if '-ZA' in locale_hint or timezone_hint == 'AFRICA/JOHANNESBURG':
+            country_code = 'ZA'
     
     # Map country code to currency
     if country_code == 'ZA':

@@ -14,12 +14,15 @@ const PLAN_ORDER = {
 
 const PRICE_FALLBACKS = {
   USD: { PRO: '29.00', ENTERPRISE: '149.00' },
-  ZAR: { PRO: '499.00', ENTERPRISE: '1299.00' },
+};
+
+const detectBrowserCurrency = () => {
+  return 'USD';
 };
 
 const Plans = () => {
   const [loading, setLoading] = useState(false);
-  const [currency, setCurrency] = useState('USD');
+  const [currency, setCurrency] = useState(detectBrowserCurrency());
   const [pricing, setPricing] = useState(null);
   const [error, setError] = useState(null);
   const [actionMessage, setActionMessage] = useState('');
@@ -50,22 +53,23 @@ const Plans = () => {
   const executeDowngrade = async (plan) => {
     setActionMessage('');
     setActionError('');
-    setDowngradingPlanId(plan.id);
 
+    // Paid downgrades should not cancel immediately; user must explicitly continue in checkout.
+    if (plan.id !== 'STARTER') {
+      openPaymentPage(plan.id);
+      return;
+    }
+
+    setDowngradingPlanId(plan.id);
     try {
       const response = await api.post('/payments/cancel-subscription/', {
         target_plan: plan.id,
       });
 
       await refreshCompany();
-
-      if (plan.id !== 'STARTER') {
-        openPaymentPage(plan.id);
-      }
-
       setActionMessage(
         response.data?.message ||
-          'Subscription cancelled. You can now activate a lower paid tier if needed.'
+          'Subscription cancelled. Your account is now on Starter.'
       );
     } catch (err) {
       setActionError(err.response?.data?.error || 'Unable to process downgrade right now.');
@@ -122,7 +126,7 @@ const Plans = () => {
       } catch (err) {
         console.error('Error fetching pricing:', err);
         // Keep plans page usable even if pricing endpoint is temporarily unavailable.
-        const fallbackCurrency = currency === 'ZAR' ? 'ZAR' : 'USD';
+        const fallbackCurrency = detectBrowserCurrency();
         const fallbackCurrencyPricing = PRICE_FALLBACKS[fallbackCurrency] || PRICE_FALLBACKS.USD;
 
         setCurrency(fallbackCurrency);
@@ -181,7 +185,7 @@ const Plans = () => {
     },
     {
       id: 'ENTERPRISE',
-      name: 'Studio Elite',
+      name: 'Enterprise',
       description: 'Maximum performance for high-volume franchises.',
       features: [
         'Unlimited Bookings',
@@ -228,10 +232,17 @@ const Plans = () => {
         <div className="plan-modal-overlay" onClick={() => setDowngradeModalPlan(null)}>
           <div className="plan-modal-card" onClick={(e) => e.stopPropagation()}>
             <h3>Confirm Downgrade</h3>
-            <p>
-              Downgrading to <strong>{downgradeModalPlan.name}</strong> will cancel your current
-              PayPal subscription.
-            </p>
+            {downgradeModalPlan.id === 'STARTER' ? (
+              <p>
+                Downgrading to <strong>{downgradeModalPlan.name}</strong> will cancel your current
+                PayPal subscription.
+              </p>
+            ) : (
+              <p>
+                You are switching to <strong>{downgradeModalPlan.name}</strong>. Your current plan stays active
+                until you continue and confirm from the payment step.
+              </p>
+            )}
             <p>
               Any penalties due will be charged by PayPal based on your billing terms.
             </p>

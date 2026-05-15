@@ -19,7 +19,7 @@ const PLAN_CONTENT = [
   },
   {
     id: "ENTERPRISE",
-    title: "Studio Elite",
+    title: "Enterprise",
     accent: "elite",
     subtitle: "For high-volume premium operations",
     perks: [
@@ -31,14 +31,20 @@ const PLAN_CONTENT = [
   },
 ];
 
+// Plan tier hierarchy for upgrade filtering
+const PLAN_TIER_RANK = {
+  STARTER: 1,
+  PRO: 2,
+  ENTERPRISE: 3,
+};
+
 const PRICE_FALLBACKS = {
   USD: { PRO: "29.00", ENTERPRISE: "149.00" },
-  ZAR: { PRO: "499.00", ENTERPRISE: "1299.00" },
+
 };
 
 function UpgradeValueCards({ currentPlan }) {
   const [isMobile, setIsMobile] = useState(() => window.matchMedia("(max-width: 768px)").matches);
-  const [currency, setCurrency] = useState("USD");
   const [pricing, setPricing] = useState(null);
 
   useEffect(() => {
@@ -56,25 +62,21 @@ function UpgradeValueCards({ currentPlan }) {
         if (!isValidPricingPayload(response.data)) {
           throw new Error("Unexpected pricing payload");
         }
-        const detectedCurrency = (response.data?.currency || "USD").toUpperCase();
         const apiPricing = response.data?.pricing || {};
         const plansPricing = response.data?.plans || {};
-        const fallback = PRICE_FALLBACKS[detectedCurrency] || PRICE_FALLBACKS.USD;
 
-        setCurrency(detectedCurrency);
         setPricing({
           PRO: {
-            amount: String(apiPricing?.PRO?.amount || plansPricing?.PRO?.price || fallback.PRO),
+            amount: String(apiPricing?.PRO?.amount || plansPricing?.PRO?.price || PRICE_FALLBACKS.USD.PRO),
           },
           ENTERPRISE: {
             amount: String(
-              apiPricing?.ENTERPRISE?.amount || plansPricing?.ENTERPRISE?.price || fallback.ENTERPRISE
+              apiPricing?.ENTERPRISE?.amount || plansPricing?.ENTERPRISE?.price || PRICE_FALLBACKS.USD.ENTERPRISE
             ),
           },
         });
       } catch {
         // Keep safe defaults if pricing endpoint is unavailable.
-        setCurrency("USD");
         setPricing({
           PRO: { amount: PRICE_FALLBACKS.USD.PRO },
           ENTERPRISE: { amount: PRICE_FALLBACKS.USD.ENTERPRISE },
@@ -86,28 +88,34 @@ function UpgradeValueCards({ currentPlan }) {
   }, []);
 
   const visiblePlans = useMemo(() => {
-    const allUpgradeablePlans = PLAN_CONTENT.filter((plan) => plan.id !== currentPlan);
+    // Only show plans that are higher tier than current plan
+    const currentTierRank = PLAN_TIER_RANK[currentPlan] || 0;
+    const upgradeablePlans = PLAN_CONTENT.filter(
+      (plan) => PLAN_TIER_RANK[plan.id] > currentTierRank
+    );
 
     if (!isMobile) {
-      return allUpgradeablePlans;
+      return upgradeablePlans;
     }
 
-    if (currentPlan === "PRO") {
-      return PLAN_CONTENT.filter((plan) => plan.id === "ENTERPRISE");
-    }
-
-    if (currentPlan === "ENTERPRISE") {
+    // On mobile, only show the next tier up
+    if (currentTierRank >= PLAN_TIER_RANK.ENTERPRISE) {
       return [];
     }
 
-    return PLAN_CONTENT.filter((plan) => plan.id === "PRO");
+    if (currentTierRank === PLAN_TIER_RANK.PRO) {
+      return upgradeablePlans.filter((plan) => plan.id === "ENTERPRISE");
+    }
+
+    // STARTER or undefined - show PRO
+    return upgradeablePlans.filter((plan) => plan.id === "PRO");
   }, [currentPlan, isMobile]);
 
   if (!visiblePlans.length) {
     return null;
   }
 
-  const currencySymbol = currency === "ZAR" ? "R" : "$";
+  const currencySymbol = "$";
 
   const getPlanPrice = (planId) => {
     const amount = pricing?.[planId]?.amount;

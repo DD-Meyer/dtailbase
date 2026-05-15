@@ -5,6 +5,7 @@ import "../styles/Bookings.css";
 import { useNavigate } from "react-router-dom";
 import { useCompany } from "../context/CompanyContext";
 import UpgradeValueCards from "../components/UpgradeValueCards";
+import { Camera, CheckCheckIcon, Lock, Plus, Share2, Signature, Timer, CheckIcon } from "lucide-react";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 
@@ -83,7 +84,7 @@ const LiveTimer = ({ startTime }) => {
     return () => clearInterval(interval);
   }, [startTime]);
 
-  return <span className="timer-display pulse-timer">⏱️ {elapsed}</span>;
+  return <span className="timer-display pulse-timer"><Timer size={14} aria-hidden="true" /> {elapsed}</span>;
 };
 
 function Bookings() {
@@ -315,7 +316,7 @@ function Bookings() {
       {showCompleteModal && (
         <div className="modal-overlay">
           <div className="modal-content completion-modal">
-            <h3>📸 Final Completion Photos</h3>
+            <h3><Camera size={18} aria-hidden="true" /> Final Completion Photos</h3>
             
             {/* Dynamic Plan Hint */}
             <div className="plan-limit-info mb-4">
@@ -345,7 +346,7 @@ function Bookings() {
                       capture="environment" 
                       onChange={handlePhotoChange} 
                     />
-                    <span className="plus-icon">+</span>
+                    <span className="plus-icon"><Plus size={18} aria-hidden="true" /></span>
                     <span className="label-text">Add Photo</span>
                   </label>
                 ) : (
@@ -376,16 +377,24 @@ function Bookings() {
         <div className="flex-items-center gap-2">
           {isBookingLimitReached && (
             <span className="limit-warning-text">
-              ⚠️ Monthly limit reached ({monthlyUsage}/{monthlyLimit})
+              <Lock size={14} aria-hidden="true" /> Monthly limit reached ({monthlyUsage}/{monthlyLimit})
             </span>
           )}
+
+          <button className="btn btn-secondary" onClick={() => navigate("/share-booking")}>
+            <Share2 size={16} aria-hidden="true" /> Share Booking
+          </button>
           
           <button 
             className={`btn ${isBookingLimitReached ? 'btn-disabled' : 'btn-primary'}`} 
             onClick={() => !isBookingLimitReached && navigate("/new-booking")}
             disabled={isBookingLimitReached}
           >
-            {isBookingLimitReached ? "🔒 Plan Limit Reached" : "+ New Appointment"}
+            {isBookingLimitReached ? "Plan Limit Reached" : (
+              <>
+                <Plus size={16} aria-hidden="true" /> New Appointment
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -548,13 +557,20 @@ function Bookings() {
                 
                 <td className="td-indemnity" data-label="Indemnity">
                   {b.is_signed ? (
-                    <span className="badge badge-success">✅ Signed</span>
+                    // Show check icon with "Signed" badge next to it inline if signed, instead of the button
+                    <div className="flex items-center">
+                      {/* align next to each other */}
+                      <span className="badge badge-success ml-1">
+                        <CheckIcon size={10} aria-hidden="true" className="inline-block mr-1" />
+                        Signed
+                      </span>
+                    </div>
                   ) : b.status === "CONFIRMED" ? (
                     <button 
                       className="btn btn-primary btn-sm" 
                       onClick={(e) => { e.stopPropagation(); navigate(`/indemnity/sign/${b.id}`); }}
                     >
-                      ✍️ Sign & Start
+                      <Signature size={14} aria-hidden="true" /> Sign & Start
                     </button>
                   ) : (
                     <span className="text-muted small">N/A</span>
@@ -594,7 +610,7 @@ function Bookings() {
                         Delete
                       </button>
                     ) : (
-                      <span className="text-muted small">Locked 🔒</span>
+                      <span className="text-muted small"><Lock size={12} aria-hidden="true" /> Locked</span>
                     )}
                   </div>
                 </td>

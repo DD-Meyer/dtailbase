@@ -8,6 +8,13 @@ from django.db.models import Case, When, Value, IntegerField
 from core.plan_limits import PLAN_CONFIG
 
 class Company(models.Model):
+    LOCATION_VERIFICATION_STATUS = [
+        ('NONE', 'None'),
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     slug = models.SlugField(unique=True, blank=True)
@@ -44,6 +51,13 @@ class Company(models.Model):
     ]
     country_code = models.CharField(max_length=2, default='US', blank=True)  # ISO country code
     currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default='USD')
+    requested_country_code = models.CharField(max_length=2, blank=True, default='')
+    requested_currency = models.CharField(max_length=3, blank=True, default='')
+    location_verification_document = models.FileField(upload_to='location_verification_docs/', blank=True, null=True)
+    location_verification_status = models.CharField(max_length=10, choices=LOCATION_VERIFICATION_STATUS, default='NONE')
+    location_verification_score = models.FloatField(default=0.0)
+    location_verification_notes = models.TextField(blank=True, default='')
+    location_verified_at = models.DateTimeField(blank=True, null=True)
 
     # 📈 Add this to track usage
     def get_monthly_booking_count(self):

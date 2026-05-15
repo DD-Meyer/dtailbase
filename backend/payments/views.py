@@ -12,6 +12,7 @@ from payments.paypal_service import (
     get_subscription_plan,
     get_paypal_plan_tier,
     get_paypal_tier_from_plan_id,
+    get_paypal_subscription_details,
     cancel_subscription,
     verify_paypal_webhook,
     PRICING
@@ -38,21 +39,17 @@ class PlansView(APIView):
                     for k, v in plan.items()
                 }
 
-            country_code, currency = detect_user_currency(request)
+            detected_country_code, detected_currency = detect_user_currency(request)
 
+            # Location detection for reporting/compliance only; all subscriptions in USD
             if request.user.is_authenticated and hasattr(request.user, 'company') and request.user.company:
                 company = request.user.company
-                update_fields = []
-                if company.country_code != country_code:
-                    company.country_code = country_code
-                    update_fields.append('country_code')
-                if company.currency != currency:
-                    company.currency = currency
-                    update_fields.append('currency')
-                if update_fields:
-                    company.save(update_fields=update_fields)
+                country_code = (company.country_code or detected_country_code or 'US').upper()
+            else:
+                country_code = (detected_country_code or 'US').upper()
 
-            pricing = PRICING.get(currency, PRICING['USD'])
+            currency = 'USD'
+            pricing = PRICING.get('USD', {})
 
             plans = {}
             for plan_name in PLAN_CONFIG:
@@ -84,7 +81,7 @@ class PayPalSubscribeView(APIView):
     Called when user clicks the upgrade button.
     """
     permission_classes = [IsAuthenticated]
-    
+
     def post(self, request):
         try:
             plan_id = request.data.get('plan_id')
@@ -101,48 +98,56 @@ class PayPalSubscribeView(APIView):
             if plan_id not in ['PRO', 'ENTERPRISE']:
                 return Response({'error': 'Invalid plan'}, status=400)
             
-            # Get user's currency
-            currency = company.currency or 'USD'
+            # USD-only billing
+            logger.info(f"Creating PayPal subscription: user={user.email}, plan={plan_id}, currency=USD")
+            previous_subscription_id = company.paypal_subscription_id
             
-            # Get pricing
-            plan_details = get_subscription_plan(plan_id, currency)
+            plan_details = get_subscription_plan(plan_id)
             if not plan_details:
-                return Response({'error': 'Plan not available for this currency'}, status=400)
+                return Response({'error': f'Plan {plan_id} not available'}, status=400)
             
             # Generate return/cancel URLs
             domain = os.environ.get('PUBLIC_BASE_URL', 'https://www.dtailbase.com').rstrip('/')
             return_url = f"{domain}/payment-success?plan={plan_id}"
             cancel_url = f"{domain}/plans"
-            
-            logger.info(f"Creating PayPal subscription: user={user.email}, plan={plan_id}, currency={currency}")
-            
-            # Create PayPal subscription
+
             result = create_paypal_subscription(
                 user_email=user.email,
                 plan_id=plan_id,
-                currency=currency,
                 return_url=return_url,
-                cancel_url=cancel_url
+                cancel_url=cancel_url,
+                currency='USD'
             )
             
-            if result['success']:
+            if result.get('success'):
                 # Store pending subscription info in company
-                company.paypal_subscription_id = result.get('subscription_id', '')
+                subscription_id = result.get('subscription_id', '')
+
+                # If this is a paid plan switch, cancel any previous PayPal subscription now that
+                # the replacement subscription has been created successfully.
+                if previous_subscription_id and previous_subscription_id != subscription_id:
+                    cancel_result = cancel_subscription(previous_subscription_id)
+                    if not cancel_result.get('success'):
+                        logger.warning(
+                            f"Previous subscription cancellation failed for company {company.id}: "
+                            f"subscription={previous_subscription_id}, error={cancel_result.get('error')}"
+                        )
+
+                company.paypal_subscription_id = subscription_id
                 company.save(update_fields=['paypal_subscription_id'])
+                logger.info(f"Stored subscription_id for company {company.id}: {subscription_id}")
                 
                 return Response({
                     'success': True,
                     'approval_url': result['approval_url'],
-                    'subscription_id': result.get('subscription_id'),
+                    'subscription_id': subscription_id,
                     'amount': plan_details['amount'],
-                    'currency': currency
+                    'currency': 'USD'
                 })
             else:
                 error_msg = result.get('error', 'Failed to create subscription')
                 logger.error(f"Failed to create subscription: {error_msg}")
-                return Response({
-                    'error': error_msg
-                }, status=500)
+                return Response({'error': error_msg}, status=500)
         
         except Exception as e:
             error_msg = str(e)
@@ -186,6 +191,103 @@ class PayPalCancelSubscriptionView(APIView):
         except Exception as e:
             logger.error(f"Error in PayPalCancelSubscriptionView: {str(e)}", exc_info=True)
             return Response({'error': 'Unable to cancel subscription right now'}, status=500)
+
+
+class BillingSummaryView(APIView):
+    """Return current billing, subscription, and payment method details for the authenticated company."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            user = request.user
+            if not hasattr(user, 'company') or not user.company:
+                return Response({'error': 'User company not found'}, status=400)
+
+            company = user.company
+            currency = (company.currency or 'USD').upper()
+            plan = (company.plan or 'STARTER').upper()
+
+            base_pricing = PRICING.get(currency, PRICING['USD'])
+            plan_pricing = base_pricing.get(plan, {}) if plan != 'STARTER' else {}
+            monthly_amount = '0.00' if plan == 'STARTER' else str(plan_pricing.get('amount', '0.00'))
+
+            summary = {
+                'plan': plan,
+                'currency': currency,
+                'is_subscription_active': bool(company.is_subscription_active),
+                'paypal_subscription_id': company.paypal_subscription_id or '',
+                'subscription_status': 'INACTIVE',
+                'billing_cycle': 'MONTHLY',
+                'monthly_amount': monthly_amount,
+                'next_billing_time': None,
+                'last_payment': None,
+                'payment_method': None,
+                'cancel_available': bool(company.paypal_subscription_id),
+            }
+
+            subscription_id = company.paypal_subscription_id
+            if not subscription_id:
+                return Response(summary, status=200)
+
+            subscription_data = get_paypal_subscription_details(subscription_id)
+            if not subscription_data:
+                summary['subscription_status'] = 'UNKNOWN'
+                logger.warning(f"No subscription data returned for {subscription_id}")
+                return Response(summary, status=200)
+
+            logger.info(f"Subscription data keys: {subscription_data.keys()}")
+            subscription_status = (subscription_data.get('status') or '').upper() or 'UNKNOWN'
+            summary['subscription_status'] = subscription_status
+
+            billing_info = subscription_data.get('billing_info') or {}
+            summary['next_billing_time'] = billing_info.get('next_billing_time')
+
+            last_payment = billing_info.get('last_payment') or {}
+            if last_payment:
+                amount_info = last_payment.get('amount') or {}
+                summary['last_payment'] = {
+                    'time': last_payment.get('time'),
+                    'amount': amount_info.get('value'),
+                    'currency': amount_info.get('currency_code') or currency,
+                }
+
+            payment_source = subscription_data.get('payment_source') or {}
+            logger.info(f"Payment source data for {subscription_id}: {payment_source}")
+            payment_method = None
+
+            if isinstance(payment_source.get('card'), dict):
+                card = payment_source['card']
+                brand = (card.get('brand') or card.get('type') or 'Card').upper()
+                last_digits = card.get('last_digits') or card.get('last_4') or ''
+                masked = f"{brand} •••• {last_digits}".strip() if last_digits else brand
+                payment_method = {
+                    'type': 'CARD',
+                    'brand': brand,
+                    'last4': last_digits,
+                    'expiry': card.get('expiry') or card.get('expiry_date'),
+                    'display': masked,
+                }
+                logger.info(f"Extracted card payment method: {payment_method}")
+            elif isinstance(payment_source.get('paypal'), dict):
+                paypal_source = payment_source['paypal']
+                email = paypal_source.get('email_address')
+                display = f"PayPal ({email})" if email else 'PayPal Wallet'
+                payment_method = {
+                    'type': 'PAYPAL',
+                    'email': email,
+                    'display': display,
+                }
+                logger.info(f"Extracted PayPal payment method: {payment_method}")
+
+            if payment_method:
+                summary['payment_method'] = payment_method
+            else:
+                logger.warning(f"No payment method found for subscription {subscription_id}")
+
+            return Response(summary, status=200)
+        except Exception as e:
+            logger.error(f"Error in BillingSummaryView: {str(e)}", exc_info=True)
+            return Response({'error': 'Unable to load billing summary right now'}, status=500)
 
 
 class PayPalWebhookView(APIView):
@@ -423,25 +525,64 @@ class PayPalConfirmView(APIView):
     def post(self, request):
         subscription_id = request.data.get('subscription_id')
         if not subscription_id:
+            logger.error(f"Missing subscription_id in request: {request.data}")
             return Response(
                 {'error': 'Missing subscription_id'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        company = request.user.company
+        user = request.user
+        company = user.company if hasattr(user, 'company') else None
+        
         if not company:
+            logger.error(f"User {user.id} has no company")
             return Response(
                 {'error': 'User company not found'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        if company.paypal_subscription_id != subscription_id:
+        # Refresh company from database to get latest paypal_subscription_id
+        company.refresh_from_db()
+        stored_id = company.paypal_subscription_id or ''
+        
+        logger.info(f"Confirm subscription for company {company.id} - stored: '{stored_id}', received: '{subscription_id}'")
+        
+        if not stored_id:
+            logger.warning(
+                f"No stored subscription_id for company {company.id}. This may indicate the subscription creation didn't complete."
+            )
+            # Still proceed to verify with PayPal in case it was created but not saved
+            plan_tier, subscription_status = get_paypal_plan_tier(subscription_id)
+            if plan_tier and subscription_status == 'ACTIVE':
+                # Save the subscription_id that PayPal has
+                company.paypal_subscription_id = subscription_id
+                company.plan = plan_tier
+                company.is_subscription_active = True
+                company.save(update_fields=['paypal_subscription_id', 'plan', 'is_subscription_active'])
+                return Response(
+                    {
+                        'success': True,
+                        'plan': company.plan,
+                        'subscription_status': subscription_status
+                    },
+                    status=status.HTTP_200_OK
+                )
+            return Response(
+                {
+                    'success': False,
+                    'subscription_status': subscription_status,
+                    'error': 'Unable to verify subscription with PayPal'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if stored_id != subscription_id:
             logger.warning(
                 f"Subscription mismatch for company {company.id}: "
-                f"stored={company.paypal_subscription_id}, received={subscription_id}"
+                f"stored='{stored_id}', received='{subscription_id}'"
             )
             return Response(
-                {'error': 'Subscription mismatch'},
+                {'error': f'Subscription mismatch: expected {stored_id}, got {subscription_id}'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 

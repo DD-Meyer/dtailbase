@@ -2,10 +2,12 @@ from multiprocessing.sharedctypes import Value
 from warnings import filters
 import json
 import os
+from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import urlopen
 
+from django.conf import settings
 from django.forms import IntegerField
 from rest_framework import generics, permissions, status
 from django.shortcuts import get_object_or_404
@@ -24,9 +26,11 @@ from accounts.models import User
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import action
 from django.db.models import Case, When, Value, IntegerField
+from django.utils import timezone
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
+from core.location_verification import extract_document_text, verify_location_document
 
 
 class ChangePasswordView(APIView):
@@ -59,6 +63,142 @@ class ChangePasswordView(APIView):
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenSerializer
+
+
+class GoogleAuthConfigView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        client_id = (getattr(settings, 'GOOGLE_CLIENT_ID', '') or '').strip()
+        return Response(
+            {
+                "client_id": client_id,
+                "enabled": bool(client_id),
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class CompanyLocationVerificationView(APIView):
+    permission_classes = [IsAuthenticated, IsAccountAdmin]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request):
+        company = request.user.company
+        requested_country_code = (request.data.get("country_code") or "").upper().strip()
+        uploaded_document = request.FILES.get("verification_document")
+
+        if not requested_country_code or len(requested_country_code) != 2:
+            return Response({"error": "A valid 2-letter country code is required."}, status=400)
+
+        if not uploaded_document:
+            return Response({"error": "A verification document is required."}, status=400)
+
+        allowed_suffixes = {".pdf", ".txt", ".csv", ".doc", ".docx"}
+        extension = Path(uploaded_document.name or "").suffix.lower()
+        if extension not in allowed_suffixes:
+            return Response({"error": "Unsupported file type. Upload PDF or text-based files."}, status=400)
+
+        max_size_bytes = 10 * 1024 * 1024
+        if uploaded_document.size > max_size_bytes:
+            return Response({"error": "Document too large. Maximum allowed size is 10MB."}, status=400)
+
+        extracted_text, extraction_error = extract_document_text(uploaded_document)
+        match_result = verify_location_document(
+            company_name=company.name,
+            document_text=extracted_text,
+            requested_country_code=requested_country_code,
+            business_address=company.address or "",
+        )
+
+        requested_currency = "ZAR" if requested_country_code == "ZA" else "USD"
+        company.requested_country_code = requested_country_code
+        company.requested_currency = requested_currency
+        company.location_verification_document = uploaded_document
+        company.location_verification_score = match_result["score"]
+        company.location_verification_notes = match_result["reason"]
+
+        if extraction_error:
+            company.location_verification_status = "REJECTED"
+            company.location_verified_at = None
+            company.save(update_fields=[
+                "requested_country_code",
+                "requested_currency",
+                "location_verification_document",
+                "location_verification_score",
+                "location_verification_notes",
+                "location_verification_status",
+                "location_verified_at",
+            ])
+            return Response(
+                {
+                    "verified": False,
+                    "status": "REJECTED",
+                    "score": company.location_verification_score,
+                    "message": "Document could not be parsed automatically.",
+                    "details": extraction_error,
+                    "checks": match_result.get("checks", {}),
+                },
+                status=400,
+            )
+
+        if match_result["verified"]:
+            company.country_code = requested_country_code
+            company.currency = requested_currency
+            company.location_verification_status = "APPROVED"
+            company.location_verified_at = timezone.now()
+        else:
+            company.location_verification_status = "REJECTED"
+            company.location_verified_at = None
+
+        company.save(update_fields=[
+            "requested_country_code",
+            "requested_currency",
+            "location_verification_document",
+            "location_verification_score",
+            "location_verification_notes",
+            "location_verification_status",
+            "location_verified_at",
+            "country_code",
+            "currency",
+        ])
+
+        return Response(
+            {
+                "verified": company.location_verification_status == "APPROVED",
+                "status": company.location_verification_status,
+                "score": company.location_verification_score,
+                "message": company.location_verification_notes,
+                "country_code": company.country_code,
+                "currency": company.currency,
+                "checks": match_result.get("checks", {}),
+            },
+            status=200,
+        )
+
+
+class CompanyAccountLifecycleView(APIView):
+    permission_classes = [IsAuthenticated, IsAccountAdmin]
+
+    def post(self, request):
+        company = request.user.company
+        action = (request.data.get("action") or "").lower().strip()
+
+        if action == "deactivate":
+            company.is_active = False
+            company.save(update_fields=["is_active"])
+            User.objects.filter(company=company).update(is_active=False)
+            return Response({"message": "Account deactivated. All team members have been disabled."}, status=200)
+
+        if action == "delete":
+            confirmation_name = (request.data.get("confirmation_name") or "").strip()
+            if confirmation_name.lower() != (company.name or "").strip().lower():
+                return Response({"error": "Confirmation name does not match company name."}, status=400)
+
+            company.delete()
+            return Response({"message": "Company account deleted permanently."}, status=200)
+
+        return Response({"error": "Unsupported action. Use 'deactivate' or 'delete'."}, status=400)
 
 
 class GoogleLoginView(APIView):
