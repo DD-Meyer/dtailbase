@@ -96,8 +96,8 @@ function Payments() {
 
         setPlanPrice(
           String(
-            pricingData?.PRO?.amount ||
-            plansData?.PRO?.price ||
+            pricingData?.[planId]?.amount ||
+            plansData?.[planId]?.price ||
             PRICE_FALLBACKS.USD[planId] ||
             '0.00'
           )

@@ -8,7 +8,7 @@ from rest_framework import status
 from core.models import Company
 from payments.geolocation import detect_user_currency
 from payments.paypal_service import (
-    create_paypal_subscription, 
+    create_paypal_subscription,
     get_subscription_plan,
     get_paypal_plan_tier,
     get_paypal_tier_from_plan_id,
@@ -101,6 +101,22 @@ class PayPalSubscribeView(APIView):
             # USD-only billing
             logger.info(f"Creating PayPal subscription: user={user.email}, plan={plan_id}, currency=USD")
             previous_subscription_id = company.paypal_subscription_id
+
+            # When switching plans, defer the new subscription's start to the end of
+            # the current billing period so the user isn't billed twice.
+            start_time = None
+            if previous_subscription_id:
+                existing_details = get_paypal_subscription_details(previous_subscription_id)
+                if existing_details:
+                    next_billing_time = (
+                        existing_details.get('billing_info', {}).get('next_billing_time')
+                    )
+                    if next_billing_time:
+                        start_time = next_billing_time
+                        logger.info(
+                            f"Deferring new subscription start to {start_time} "
+                            f"(end of current billing period for {previous_subscription_id})"
+                        )
             
             plan_details = get_subscription_plan(plan_id)
             if not plan_details:
@@ -116,15 +132,14 @@ class PayPalSubscribeView(APIView):
                 plan_id=plan_id,
                 return_url=return_url,
                 cancel_url=cancel_url,
-                currency='USD'
+                currency='USD',
+                start_time=start_time,
             )
-            
+
             if result.get('success'):
-                # Store pending subscription info in company
                 subscription_id = result.get('subscription_id', '')
 
-                # If this is a paid plan switch, cancel any previous PayPal subscription now that
-                # the replacement subscription has been created successfully.
+                # Cancel the previous subscription now that the new one has been created.
                 if previous_subscription_id and previous_subscription_id != subscription_id:
                     cancel_result = cancel_subscription(previous_subscription_id)
                     if not cancel_result.get('success'):
@@ -139,10 +154,10 @@ class PayPalSubscribeView(APIView):
                 
                 return Response({
                     'success': True,
-                    'approval_url': result['approval_url'],
+                    'approval_url': result.get('approval_url'),
                     'subscription_id': subscription_id,
                     'amount': plan_details['amount'],
-                    'currency': 'USD'
+                    'currency': 'USD',
                 })
             else:
                 error_msg = result.get('error', 'Failed to create subscription')

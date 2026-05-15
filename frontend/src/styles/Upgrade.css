@@ -7,8 +7,13 @@
 }
 
 .upgrade-header {
-  text-align: center;
-  margin-bottom: 60px;
+  margin-top: 60px;
+  background: linear-gradient(160deg, rgba(18, 32, 52, 0.92), rgba(15, 36, 58, 0.86));
+  border: 1px solid rgba(168, 197, 235, 0.4);
+  border-radius: 16px;
+  padding: 30px;
+  justify-self: center;
+  text-align: left;
 }
 
 .badge {
@@ -392,6 +397,7 @@
   border-radius: 16px;
   padding: 30px;
   text-align: center;
+  place-items: center;
 }
 
 .payment-info h3 {
@@ -403,18 +409,16 @@
 
 .payment-info ul {
   list-style: none;
-  padding: 0;
+  padding: 20;
   margin: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  text-align: left;
 }
 
 .payment-info li {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: list-item;       /* Required to make standard bullets show up correctly */
+  text-align: left;
   font-size: 0.95rem;
   color: rgba(255, 255, 255, 0.8);
 }
@@ -461,5 +465,9 @@
 
   .plan-modal-actions {
     flex-direction: column;
+  }
+
+  .payment-info li {
+    font-size: 0.85rem;
   }
 }

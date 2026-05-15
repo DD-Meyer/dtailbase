@@ -94,7 +94,7 @@ def get_subscription_plan(plan_id, currency=None):
     return PRICING['USD'][plan_id]
 
 
-def create_paypal_subscription(user_email, plan_id, return_url, cancel_url, currency='USD'):
+def create_paypal_subscription(user_email, plan_id, return_url, cancel_url, currency='USD', existing_subscription_id=None, start_time=None):
     """
     Create a PayPal subscription for a user using Subscriptions API (USD only).
     
@@ -273,9 +273,14 @@ def create_paypal_subscription(user_email, plan_id, return_url, cancel_url, curr
                 'cancel_url': cancel_url
             }
         }
-        
+
+        # Defer billing start to the end of the current billing period when switching plans.
+        if start_time:
+            subscription_payload['start_time'] = start_time
+            logger.info(f"New subscription deferred to start at: {start_time}")
+
         logger.info(f"Creating subscription with payload: {subscription_payload}")
-        
+
         sub_response = requests.post(
             subscription_url,
             headers=headers,
@@ -292,9 +297,21 @@ def create_paypal_subscription(user_email, plan_id, return_url, cancel_url, curr
         sub_response.raise_for_status()
         sub_response_data = sub_response.json()
         subscription_id = sub_response_data.get('id')
+        sub_status = (sub_response_data.get('status') or '').upper()
         
-        logger.info(f"Created PayPal subscription: {subscription_id}")
-        
+        logger.info(f"Created PayPal subscription: {subscription_id}, status: {sub_status}")
+
+        # If PayPal activated the subscription directly (billing agreement reuse),
+        # there is no approval step required.
+        if sub_status == 'ACTIVE':
+            return {
+                'success': True,
+                'approval_url': None,
+                'subscription_id': subscription_id,
+                'plan_id': plan_paypal_id,
+                'already_active': True
+            }
+
         # Get approval link
         links = sub_response_data.get('links', [])
         approval_url = None
@@ -328,6 +345,146 @@ def create_paypal_subscription(user_email, plan_id, return_url, cancel_url, curr
         error_msg = str(e)
         logger.error(f"Unexpected error in create_paypal_subscription: {error_msg}", exc_info=True)
         return {'success': False, 'error': error_msg}
+
+
+def revise_paypal_subscription(existing_subscription_id, plan_id, return_url, cancel_url):
+    """
+    Revise an existing PayPal subscription to a new plan without requiring the
+    subscriber to re-enter payment details.
+
+    Calls POST /v1/billing/subscriptions/{id}/revise with a freshly created
+    billing plan for the target Dtailbase tier.
+
+    Returns:
+        dict with 'success', 'approval_url' (may be None if already active),
+        'subscription_id' (same as existing), and optionally 'already_active'.
+    """
+    currency = 'USD'
+
+    access_token = get_paypal_access_token()
+    if not access_token:
+        return {'success': False, 'error': 'Failed to authenticate with PayPal'}
+
+    plan_details = get_subscription_plan(plan_id, currency)
+    if not plan_details:
+        return {'success': False, 'error': f'Invalid plan: {plan_id}'}
+
+    try:
+        paypal_mode = getattr(settings, 'PAYPAL_MODE', 'sandbox')
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {access_token}'
+        }
+
+        # --- Step 1: ensure product exists (same logic as create_paypal_subscription) ---
+        product_id = 'DTAILBASE-SUBSCRIPTIONS-001'
+        product_url = f"{PAYPAL_API_BASE[paypal_mode]}/v1/catalogs/products/{product_id}"
+        product_response = requests.get(product_url, headers=headers, timeout=10)
+        if product_response.status_code == 404:
+            products_url = f"{PAYPAL_API_BASE[paypal_mode]}/v1/catalogs/products"
+            for payload in [
+                {'id': product_id, 'name': 'Dtailbase Subscriptions',
+                 'description': 'Professional detailing management software',
+                 'type': 'SERVICE', 'category': 'SOFTWARE'},
+                {'name': 'Dtailbase Subscriptions',
+                 'description': 'Professional detailing management software',
+                 'type': 'SERVICE', 'category': 'SOFTWARE'},
+            ]:
+                r = requests.post(products_url, headers=headers, json=payload, timeout=10)
+                if r.status_code < 400:
+                    product_id = r.json().get('id', product_id)
+                    break
+        elif product_response.status_code != 200:
+            product_response.raise_for_status()
+
+        # --- Step 2: create a new billing plan for the target tier ---
+        import time
+        timestamp = int(time.time() * 1000)
+        plan_payload = {
+            'product_id': product_id,
+            'name': f"{plan_id}-USD-{timestamp}",
+            'description': plan_details['description'],
+            'type': 'SUBSCRIPTION',
+            'billing_cycles': [{
+                'frequency': {'interval_unit': 'MONTH', 'interval_count': 1},
+                'tenure_type': 'REGULAR',
+                'sequence': 1,
+                'total_cycles': 0,
+                'pricing_scheme': {
+                    'fixed_price': {'value': plan_details['amount'], 'currency_code': currency}
+                }
+            }],
+            'payment_preferences': {
+                'auto_bill_outstanding': True,
+                'setup_fee': {'value': '0.00', 'currency_code': currency},
+                'setup_fee_failure_action': 'CONTINUE',
+                'payment_failure_threshold': 3
+            }
+        }
+        plan_response = requests.post(
+            f"{PAYPAL_API_BASE[paypal_mode]}/v1/billing/plans",
+            headers=headers, json=plan_payload, timeout=10
+        )
+        if plan_response.status_code >= 400:
+            error_data = plan_response.json() if plan_response.content else {}
+            return {'success': False, 'error': f"PayPal plan creation failed: {error_data.get('message', plan_response.text)}"}
+        plan_paypal_id = plan_response.json().get('id')
+        if not plan_paypal_id:
+            return {'success': False, 'error': 'Failed to create billing plan for revision'}
+
+        logger.info(f"Revising subscription {existing_subscription_id} to plan {plan_paypal_id} ({plan_id})")
+
+        # --- Step 3: revise the existing subscription ---
+        revise_payload = {
+            'plan_id': plan_paypal_id,
+            'application_context': {
+                'brand_name': 'Dtailbase',
+                'locale': 'en-US',
+                'return_url': return_url,
+                'cancel_url': cancel_url,
+            }
+        }
+        revise_url = f"{PAYPAL_API_BASE[paypal_mode]}/v1/billing/subscriptions/{existing_subscription_id}/revise"
+        revise_response = requests.post(revise_url, headers=headers, json=revise_payload, timeout=10)
+
+        if revise_response.status_code >= 400:
+            error_data = revise_response.json() if revise_response.content else {}
+            error_msg = error_data.get('message', revise_response.text)
+            logger.error(f"PayPal subscription revision failed: {error_msg}")
+            return {'success': False, 'error': f'PayPal revision failed: {error_msg}'}
+
+        revise_data = revise_response.json()
+        links = revise_data.get('links', [])
+        approval_url = next((l['href'] for l in links if l.get('rel') == 'approve'), None)
+
+        # If PayPal confirms immediately (no approval link), the revision is live.
+        if not approval_url:
+            logger.info(f"Subscription {existing_subscription_id} revised immediately to {plan_id}")
+            return {
+                'success': True,
+                'approval_url': None,
+                'subscription_id': existing_subscription_id,
+                'already_active': True,
+            }
+
+        return {
+            'success': True,
+            'approval_url': approval_url,
+            'subscription_id': existing_subscription_id,
+        }
+
+    except requests.RequestException as e:
+        error_msg = str(e)
+        if hasattr(e, 'response') and e.response is not None:
+            try:
+                error_msg = e.response.json().get('message', error_msg)
+            except Exception:
+                error_msg = e.response.text or error_msg
+        logger.error(f"PayPal revision request error: {error_msg}", exc_info=True)
+        return {'success': False, 'error': error_msg}
+    except Exception as e:
+        logger.error(f"Unexpected error in revise_paypal_subscription: {str(e)}", exc_info=True)
+        return {'success': False, 'error': str(e)}
 
 
 def verify_paypal_webhook(webhook_data, request_headers=None):

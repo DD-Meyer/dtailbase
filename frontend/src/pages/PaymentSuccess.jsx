@@ -75,7 +75,7 @@ const PaymentSuccess = () => {
 
   return (
     <div className="upgrade-container">
-      <div className="upgrade-header">
+      <div className="upgrade-header mt-10">
         <h1>{state.success ? 'Subscription Active' : 'Payment Verification'}</h1>
         <p>{state.loading ? 'Checking with PayPal...' : state.message}</p>
         {state.plan && <p>Your active tier: <strong>{state.plan}</strong></p>}

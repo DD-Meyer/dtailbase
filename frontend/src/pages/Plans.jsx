@@ -78,17 +78,6 @@ const Plans = () => {
     }
   };
 
-  const handleDowngrade = (plan) => {
-    setDowngradeModalPlan(plan);
-  };
-
-  const confirmDowngrade = async () => {
-    if (!downgradeModalPlan) return;
-    const selectedPlan = downgradeModalPlan;
-    setDowngradeModalPlan(null);
-    await executeDowngrade(selectedPlan);
-  };
-
   useEffect(() => {
     const fetchPricing = async () => {
       try {
@@ -321,12 +310,10 @@ const Plans = () => {
               ) : isDowngradeOption ? (
                 <button
                   className="btn-upgrade btn-downgrade"
-                  onClick={() => handleDowngrade(plan)}
+                  onClick={() => executeDowngrade(plan)}
                   disabled={downgradingPlanId === plan.id}
                 >
-                  {downgradingPlanId === plan.id
-                    ? 'Processing downgrade...'
-                    : 'Downgrade'}
+                  {downgradingPlanId === plan.id ? 'Processing...' : 'Downgrade'}
                 </button>
               ) : !isAuthenticated ? (
                 <button className="btn-upgrade" onClick={() => handleAuthRequired(plan)}>

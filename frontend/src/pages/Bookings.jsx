@@ -372,35 +372,43 @@ function Bookings() {
         </div>
       )}
 
-      <div className="flex-between mb-6">
-        <h1>Appointment Dashboard</h1>
-        <div className="flex-items-center gap-2">
-          {isBookingLimitReached && (
-            <span className="limit-warning-text">
-              <Lock size={14} aria-hidden="true" /> Monthly limit reached ({monthlyUsage}/{monthlyLimit})
-            </span>
-          )}
-
-          <button className="btn btn-secondary" onClick={() => navigate("/share-booking")}>
-            <Share2 size={16} aria-hidden="true" /> Share Booking
-          </button>
-          
-          <button 
-            className={`btn ${isBookingLimitReached ? 'btn-disabled' : 'btn-primary'}`} 
-            onClick={() => !isBookingLimitReached && navigate("/new-booking")}
-            disabled={isBookingLimitReached}
-          >
-            {isBookingLimitReached ? "Plan Limit Reached" : (
-              <>
-                <Plus size={16} aria-hidden="true" /> New Appointment
-              </>
+      {/* background card container for
+      the heading with a gradient background for the banner
+      , must be fullscreen*/}
+      <div className="card mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-0 shadow-sm">
+        <div className="flex-between mb-6">
+          <h1>Appointment Dashboard</h1>
+          {/* put space between buttons */}
+          <div className="flex-between gap-4">
+            {isBookingLimitReached && (
+              <span className="limit-warning-text">
+                <Lock size={14} aria-hidden="true" /> Monthly limit reached ({monthlyUsage}/{monthlyLimit})
+              </span>
             )}
-          </button>
+
+            <button className="btn btn-secondary" onClick={() => navigate("/share-booking")}>
+              <Share2 size={16} aria-hidden="true" /> Share Booking
+            </button>
+            
+            <button 
+              className={`btn ${isBookingLimitReached ? 'btn-disabled' : 'btn-primary'}`} 
+              onClick={() => !isBookingLimitReached && navigate("/new-booking")}
+              disabled={isBookingLimitReached}
+            >
+              {isBookingLimitReached ? "Plan Limit Reached" : (
+                <>
+                  <Plus size={16} aria-hidden="true" /> New Appointment
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
       <UpgradeValueCards currentPlan={company?.plan} />
 
+      {/* hide filters behind button on mobile screens to save space */}
+      {/* Search, Status Filter, and Date Range Filter */}
       <div className="search-filter-container mb-4">
         <div className="search-filter-top-row">
         <input 
