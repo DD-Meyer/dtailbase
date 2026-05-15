@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import api from "../axios_instance";
+import { Plus, X } from "lucide-react";
 import "../styles/Services.css";
 
 function Services() {
+  const TABLET_BREAKPOINT = 1024;
   const [services, setServices] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isCompactView, setIsCompactView] = useState(() => window.innerWidth <= TABLET_BREAKPOINT);
+  const [showServiceForm, setShowServiceForm] = useState(() => window.innerWidth > TABLET_BREAKPOINT);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -17,6 +21,19 @@ function Services() {
 
   useEffect(() => {
     fetchServices();
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const compact = window.innerWidth <= TABLET_BREAKPOINT;
+      setIsCompactView(compact);
+      if (!compact) {
+        setShowServiceForm(true);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const fetchServices = async () => {
@@ -44,6 +61,9 @@ function Services() {
         await api.post("services/", formData);
       }
       resetForm();
+      if (isCompactView) {
+        setShowServiceForm(false);
+      }
       fetchServices();
     } catch (err) {
       alert("Error saving service: " + (err.response?.data?.error || "Check console"));
@@ -52,6 +72,7 @@ function Services() {
 
   const startEdit = (service) => {
     setEditingId(service.id);
+    setShowServiceForm(true);
     setFormData({
       name: service.name,
       description: service.description || "",
@@ -83,21 +104,66 @@ function Services() {
     (s.description && s.description.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
+  const shouldShowServiceForm = !isCompactView || showServiceForm || editingId !== null;
+
   if (loading) return <div className="page-container">Loading Services...</div>;
 
   return (
     <div className="page-container">
-      <div className="flex-between mb-6">
-        <h1>Service Management</h1>
-        <button 
-          className="btn btn-secondary" 
-          onClick={() => { resetForm(); window.scrollTo({top: 0}); }}
-        >
-          {editingId ? "Cancel Edit" : "Reset Form"}
-        </button>
+      <div className="card-banner mb-6">
+        <div className="page-banner">
+          <div className="page-banner-copy">
+            <h1 className="text-2xl font-bold">Service Management</h1>
+            <p>{services.length} service packages ready for booking and pricing updates.</p>
+          </div>
+
+          <div className="page-banner-actions services-header-actions">
+          {isCompactView && (
+            <button
+              type="button"
+              className="btn btn-primary services-toggle-btn"
+              onClick={() => {
+                if (editingId !== null) {
+                  resetForm();
+                  return;
+                }
+                setShowServiceForm(prev => !prev);
+              }}
+              aria-expanded={shouldShowServiceForm}
+            >
+              {editingId !== null || shouldShowServiceForm ? (
+                <X size={14} aria-hidden="true" />
+              ) : (
+                <Plus size={14} aria-hidden="true" />
+              )}
+              {editingId !== null
+                ? "Cancel Edit"
+                : shouldShowServiceForm
+                  ? "Hide Service Form"
+                  : "Add Service"}
+            </button>
+          )}
+
+          {shouldShowServiceForm && (
+            <button
+              className="btn btn-secondary"
+              onClick={() => {
+                resetForm();
+                if (isCompactView) {
+                  setShowServiceForm(false);
+                }
+                window.scrollTo({ top: 0 });
+              }}
+            >
+              {editingId ? "Cancel Edit" : "Reset Form"}
+            </button>
+          )}
+          </div>
+        </div>
       </div>
 
       {/* Form Card */}
+      {shouldShowServiceForm && (
       <div className="card mb-8">
         <h2 className="mb-4">{editingId ? "Update Existing Service" : "Create New Package"}</h2>
         <form onSubmit={handleSubmit} className="grid-form">
@@ -148,6 +214,7 @@ function Services() {
           </div>
         </form>
       </div>
+      )}
 
       {/* Search Bar */}
       <div className="search-wrapper mb-4">
@@ -176,14 +243,14 @@ function Services() {
             {filteredServices.length > 0 ? (
               filteredServices.map((s) => (
                 <tr key={s.id}>
-                  <td>
+                  <td data-label="Service Details">
                     <strong>{s.name}</strong>
                     <br />
                     <small className="text-muted">{s.description || "No description provided"}</small>
                   </td>
-                  <td>{s.duration_minutes} mins</td>
-                  <td className="font-bold">${s.base_price}</td>
-                  <td className="text-right">
+                  <td data-label="Duration">{s.duration_minutes} mins</td>
+                  <td data-label="Price" className="font-bold">${s.base_price}</td>
+                  <td data-label="Actions" className="text-right">
                     <button onClick={() => startEdit(s)} className="text-btn mr-4">Edit</button>
                     <button onClick={() => handleDelete(s.id)} className="text-btn-danger">Delete</button>
                   </td>

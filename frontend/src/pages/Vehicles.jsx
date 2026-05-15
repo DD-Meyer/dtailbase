@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 import api from "../axios_instance";
+import { Plus, X } from "lucide-react";
 import "../styles/Vehicles.css";
 
 function Vehicles() {
+  const TABLET_BREAKPOINT = 1024;
   const [vehicles, setVehicles] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [newVehicle, setNewVehicle] = useState({ customer: "", make: "", model: "", year: "", registration: "" });
+  const [isCompactView, setIsCompactView] = useState(() => window.innerWidth <= TABLET_BREAKPOINT);
+  const [showVehicleForm, setShowVehicleForm] = useState(() => window.innerWidth > TABLET_BREAKPOINT);
 
   // 1. Toast State
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
@@ -21,6 +26,19 @@ function Vehicles() {
   useEffect(() => {
     api.get("vehicles/").then(res => setVehicles(res.data));
     api.get("customers/").then(res => setCustomers(res.data));
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const compact = window.innerWidth <= TABLET_BREAKPOINT;
+      setIsCompactView(compact);
+      if (!compact) {
+        setShowVehicleForm(true);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const handleSubmit = async (e) => {
@@ -39,6 +57,9 @@ function Vehicles() {
       
       setVehicles([...vehicles, res.data]);
       setNewVehicle({ customer: "", make: "", model: "", year: "", registration: "" });
+      if (isCompactView) {
+        setShowVehicleForm(false);
+      }
       
       // REMOVED alert() - Toast now triggers instantly
       triggerToast("Vehicle registered successfully!", "success");
@@ -72,6 +93,7 @@ function Vehicles() {
 // 1. Fill the form with existing data
 const startEdit = (v) => {
   setEditingVehicle(v.id);
+  setShowVehicleForm(true);
   setNewVehicle({
     customer: v.customer.id, // Ensure we send the ID
     make: v.make,
@@ -107,7 +129,20 @@ const startEdit = (v) => {
   const cancelEdit = () => {
     setEditingVehicle(null);
     setNewVehicle({ customer: "", make: "", model: "", year: "", registration: "" });
+    if (isCompactView) {
+      setShowVehicleForm(false);
+    }
   };
+
+  const shouldShowVehicleForm = !isCompactView || showVehicleForm || editingVehicle !== null;
+  const filteredVehicles = vehicles.filter((vehicle) => {
+    const ownerName = `${vehicle.customer?.firstname || ""} ${vehicle.customer?.lastname || ""}`.toLowerCase();
+    const vehicleDetails = `${vehicle.year || ""} ${vehicle.make || ""} ${vehicle.model || ""}`.toLowerCase();
+    const registration = `${vehicle.registration || ""}`.toLowerCase();
+    const query = searchQuery.toLowerCase();
+
+    return ownerName.includes(query) || vehicleDetails.includes(query) || registration.includes(query);
+  });
 
   return (
     <div className="page-container">
@@ -118,8 +153,44 @@ const startEdit = (v) => {
         </div>
       )}
 
-      <h1>Vehicle Fleet</h1>
+      <div className="card-banner mb-6">
+        <div className="page-banner">
+          <div className="page-banner-copy">
+            <h1 className="text-2xl font-bold">Vehicle Fleet</h1>
+            <p>{vehicles.length} registered vehicles across your customer base.</p>
+          </div>
+
+          <div className="page-banner-actions">
+            {isCompactView && (
+              <button
+                type="button"
+                className="btn btn-primary vehicles-toggle-btn"
+                onClick={() => {
+                  if (editingVehicle !== null) {
+                    cancelEdit();
+                    return;
+                  }
+                  setShowVehicleForm(prev => !prev);
+                }}
+                aria-expanded={shouldShowVehicleForm}
+              >
+                {editingVehicle !== null || shouldShowVehicleForm ? (
+                  <X size={14} aria-hidden="true" />
+                ) : (
+                  <Plus size={14} aria-hidden="true" />
+                )}
+                {editingVehicle !== null
+                  ? "Cancel Edit"
+                  : shouldShowVehicleForm
+                    ? "Hide Vehicle Form"
+                    : "Add Vehicle"}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
       
+      {shouldShowVehicleForm && (
       <div className="card mb-6">
         {/* Title changes based on mode */}
         <h3>{editingVehicle ? "🔧 Update Vehicle" : "🚗 Register New Vehicle"}</h3>
@@ -168,7 +239,8 @@ const startEdit = (v) => {
             required
           />
 
-          <div className="flex gap-2 full-width">
+          {/* align button right */}
+          <div className="flex gap-2 w-full mt-4">
             <button type="submit" className="btn btn-primary flex-1">
               {editingVehicle ? "Save Changes" : "Register Vehicle"}
             </button>
@@ -181,6 +253,20 @@ const startEdit = (v) => {
           </div>
         </form>
       </div>
+      )}
+
+      {isCompactView && (
+        <div className="search-wrapper vehicles-search-wrapper mb-4">
+          <input
+            type="text"
+            placeholder="Search owner, vehicle, or plate..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="search-input vehicles-search-input"
+          />
+          <span className="search-icon">🔍</span>
+        </div>
+      )}
 
       <div className="card vehicles-table-container">
         <table className="table-standard">
@@ -193,12 +279,12 @@ const startEdit = (v) => {
             </tr>
           </thead>
           <tbody>
-            {vehicles.map(v => (
+            {filteredVehicles.map(v => (
               <tr key={v.id}>
-                <td>{v.customer?.firstname} {v.customer?.lastname}</td>
-                <td>{v.year} {v.make} {v.model}</td>
-                <td><strong>{v.registration}</strong></td>
-                <td>
+                <td data-label="Owner">{v.customer?.firstname} {v.customer?.lastname}</td>
+                <td data-label="Vehicle">{v.year} {v.make} {v.model}</td>
+                <td data-label="Reg Number"><strong>{v.registration}</strong></td>
+                <td data-label="Actions">
                   <button className="text-btn-primary mr-2" onClick={() => startEdit(v)}>Edit</button>
                   <button className="text-btn-danger" onClick={() => handleDeleteVehicle(v.id)}>Delete</button>
                 </td>

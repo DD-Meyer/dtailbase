@@ -72,6 +72,8 @@ function IndemnitySettings() {
           </div>
         </header>
 
+
+
         {msg && <div className="alert-success">{msg}</div>}
 
         <section className="settings-card">

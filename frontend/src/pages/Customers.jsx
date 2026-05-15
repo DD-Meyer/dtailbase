@@ -5,11 +5,13 @@ import { useCompany } from "../context/CompanyContext";
 import UpgradeValueCards from "../components/UpgradeValueCards";
 
 function Customers() {
+  const TABLET_BREAKPOINT = 1024;
   const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState(null); // Track if we are editing
   const [formData, setFormData] = useState({ firstname: "", lastname: "", email: "", phone: "" });
+  const [isCompactView, setIsCompactView] = useState(() => window.innerWidth <= TABLET_BREAKPOINT);
   const { planLimits, currentPlan, nextPlan } = useCompany();
 
   const fetchCustomers = async () => {
@@ -22,6 +24,15 @@ function Customers() {
   };
 
   useEffect(() => { fetchCustomers(); }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsCompactView(window.innerWidth <= TABLET_BREAKPOINT);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const isUnlimited = planLimits.max_customers === null || 
                       planLimits.max_customers === undefined || 
@@ -82,10 +93,11 @@ function Customers() {
 
   return (
     <div className="page-container">
-      <div className="flex-between mb-4">
-        <span className="text-lg font-bold">
-          <h1>Customers</h1>
-          <p className="text-sm text-gray-500">
+      <div className="card-banner mb-6">
+        <div className="page-banner">
+          <div className="page-banner-copy">
+          <h1 className="text-2xl font-bold">Customers</h1>
+          <p className="text-sm text-gray-50">
             {/* 3. Improved Display Logic */}
             {customers.length} total customers out of {isUnlimited ? "unlimited" : planLimits.max_customers}.
             
@@ -96,26 +108,46 @@ function Customers() {
               </>
             )}
           </p>
-        </span>
-        
-        <button 
-          className={`btn ${isLimitReached ? 'btn-disabled opacity-50' : 'btn-primary'}`} 
-          onClick={handleAddNew}
-          disabled={isLimitReached} // Actually disable the button
-          title={isLimitReached ? "Limit reached" : "Add new customer"}
-        >
-          {isLimitReached ? "Limit Reached" : "+ Add Customer"}
-        </button>
+          </div>
+
+          <div className="page-banner-actions">
+            <button 
+              className={`btn ${isLimitReached ? 'btn-disabled opacity-50' : 'btn-primary'}`} 
+              onClick={handleAddNew}
+              disabled={isLimitReached} // Actually disable the button
+              title={isLimitReached ? "Limit reached" : "Add new customer"}
+            >
+              {isLimitReached ? "Limit Reached" : "+ Add Customer"}
+            </button>
+          </div>
+        </div>
       </div>
 
-      <input 
-        className="search-input mb-4" 
-        placeholder="Search customers..." 
-        value={search}
-        onChange={(e) => setSearch(e.target.value)} 
-      />
+      
 
       <UpgradeValueCards currentPlan={currentPlan} />
+
+      {!isCompactView && (
+        <input 
+          className="search-input mb-4" 
+          placeholder="Search customers..." 
+          value={search}
+          onChange={(e) => setSearch(e.target.value)} 
+        />
+      )}
+
+      {isCompactView && (
+        <div className="search-wrapper customers-search-wrapper mb-4">
+          <input 
+            type="text"
+            className="search-input customers-search-input"
+            placeholder="Search customers..." 
+            value={search}
+            onChange={(e) => setSearch(e.target.value)} 
+          />
+          <span className="search-icon">🔍</span>
+        </div>
+      )}
 
       <div className="card customers-table-container">
         <table className="table-standard">
@@ -130,10 +162,10 @@ function Customers() {
           <tbody>
             {filtered.map(c => (
               <tr key={c.id}>
-                <td>{c.firstname} {c.lastname}</td>
-                <td>{c.email}</td>
-                <td>{c.phone}</td>
-                <td>
+                <td data-label="Name">{c.firstname} {c.lastname}</td>
+                <td data-label="Email">{c.email}</td>
+                <td data-label="Phone">{c.phone}</td>
+                <td data-label="Actions">
                   <div className="flex gap-2">
                     <button className="text-btn" onClick={() => handleEdit(c)}>Edit</button>
                     <button className="text-btn-danger" onClick={() => deleteCustomer(c.id)}>Delete</button>

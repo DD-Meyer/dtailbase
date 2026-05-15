@@ -7,6 +7,24 @@
   max-width: 500px;
 }
 
+.services-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.services-header-actions {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.services-toggle-btn {
+  min-width: 180px;
+}
+
 .services-table-container {
   overflow-x: auto;
   overflow-y: hidden;
@@ -100,6 +118,20 @@ tr:hover {
 
 /* ===== Mobile Styles (<= 768px) ===== */
 @media (max-width: 768px) {
+  .services-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .services-header-actions {
+    width: 100%;
+  }
+
+  .services-toggle-btn,
+  .services-header-actions .btn {
+    width: 100%;
+  }
+
   .search-wrapper {
     max-width: 100%;
   }
@@ -114,7 +146,108 @@ tr:hover {
     grid-column: auto;
   }
 
+  .services-table-container {
+    padding: 0.75rem;
+    background: transparent !important;
+    border: none;
+    box-shadow: none;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  .services-table-container .table-standard,
+  .services-table-container .table-standard tbody,
+  .services-table-container .table-standard tr,
+  .services-table-container .table-standard td {
+    display: block;
+    box-sizing: border-box;
+  }
+
   .services-table-container .table-standard {
-    min-width: 660px;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+  }
+
+  .services-table-container .table-standard thead {
+    display: none;
+  }
+
+  .services-table-container .table-standard tbody {
+    display: grid;
+    gap: 0.9rem;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+  }
+
+  .services-table-container .table-standard tr {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+    padding: 0.35rem 0;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .services-table-container .table-standard td {
+    border-bottom: 1px solid #eef2f7;
+    padding: 0.66rem 0.78rem;
+    font-size: 0.88rem;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+    word-break: break-word;
+  }
+
+  .services-table-container .table-standard tr td:last-child {
+    border-bottom: none;
+  }
+
+  .services-table-container .table-standard td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 0.3rem;
+    color: #64748b;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .services-table-container .table-standard td.text-center::before {
+    content: none;
+  }
+
+  .services-table-container .text-right {
+    text-align: left;
+  }
+
+  .services-table-container td[data-label="Actions"] {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .services-table-container .text-btn,
+  .services-table-container .text-btn-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    min-height: 40px;
+    margin-right: 0;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .services-toggle-btn {
+    min-width: 220px;
   }
 }

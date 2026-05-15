@@ -5,7 +5,7 @@ import "../styles/Bookings.css";
 import { useNavigate } from "react-router-dom";
 import { useCompany } from "../context/CompanyContext";
 import UpgradeValueCards from "../components/UpgradeValueCards";
-import { Camera, CheckCheckIcon, Lock, Plus, Share2, Signature, Timer, CheckIcon } from "lucide-react";
+import { Camera, CheckCheckIcon, Lock, Plus, Share2, Signature, Timer, CheckIcon, SlidersHorizontal } from "lucide-react";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 
@@ -88,11 +88,14 @@ const LiveTimer = ({ startTime }) => {
 };
 
 function Bookings() {
+  const TABLET_BREAKPOINT = 1024;
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+  const [isCompactView, setIsCompactView] = useState(() => window.innerWidth <= TABLET_BREAKPOINT);
+  const [showFilters, setShowFilters] = useState(() => window.innerWidth > TABLET_BREAKPOINT);
 
   // Inside Bookings function
   const { planLimits, usageStats, company, refreshCompany } = useCompany();
@@ -127,6 +130,19 @@ function Bookings() {
       previews.forEach(url => URL.revokeObjectURL(url));
     };
   }, [previews]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const compact = window.innerWidth <= TABLET_BREAKPOINT;
+      setIsCompactView(compact);
+      if (!compact) {
+        setShowFilters(true);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // 2. Add the mirror functions from IndemnityForm
   const handlePhotoChange = (e) => {
@@ -375,11 +391,13 @@ function Bookings() {
       {/* background card container for
       the heading with a gradient background for the banner
       , must be fullscreen*/}
-      <div className="card mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-0 shadow-sm">
-        <div className="flex-between mb-6">
-          <h1>Appointment Dashboard</h1>
-          {/* put space between buttons */}
-          <div className="flex-between gap-4">
+      <div className="card-banner mb-6">
+        <div className="page-banner">
+          <div className="page-banner-copy">
+            <h1>Appointment Dashboard</h1>
+            <p>Track appointments, manage statuses, and keep your daily workflow moving.</p>
+          </div>
+          <div className="page-banner-actions">
             {isBookingLimitReached && (
               <span className="limit-warning-text">
                 <Lock size={14} aria-hidden="true" /> Monthly limit reached ({monthlyUsage}/{monthlyLimit})
@@ -407,16 +425,33 @@ function Bookings() {
 
       <UpgradeValueCards currentPlan={company?.plan} />
 
+      {isCompactView && (
+        <div className="bookings-filters-toggle-wrap mb-4">
+          <button
+            type="button"
+            className="btn btn-secondary filters-toggle-btn"
+            onClick={() => setShowFilters(prev => !prev)}
+            aria-expanded={showFilters}
+          >
+            <SlidersHorizontal size={14} aria-hidden="true" />
+            {showFilters ? "Hide Filters" : "Show Filters"}
+          </button>
+        </div>
+      )}
+
       {/* hide filters behind button on mobile screens to save space */}
       {/* Search, Status Filter, and Date Range Filter */}
+      {(!isCompactView || showFilters) && (
       <div className="search-filter-container mb-4">
-        <div className="search-filter-top-row">
+        <div className={`search-filter-top-row ${isCompactView ? "search-filter-top-row-compact" : ""}`}>
+        {!isCompactView && (
         <input 
           type="text"
           placeholder="Search customer or plate..."
           className="search-input search-input-bookings"
           value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
         />
+        )}
 
         {/* Date Range Filters */}
         <select 
@@ -479,6 +514,20 @@ function Bookings() {
           ))}
         </div>
       </div>
+      )}
+
+      {isCompactView && (
+        <div className="search-wrapper bookings-search-wrapper mb-4">
+          <input
+            type="text"
+            placeholder="Search customer or plate..."
+            className="search-input bookings-search-input"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <span className="search-icon">🔍</span>
+        </div>
+      )}
 
       <div className="card bookings-table-container">
         <table className="table-standard">

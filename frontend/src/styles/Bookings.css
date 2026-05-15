@@ -6,6 +6,15 @@
   color: #0f172a !important;
 }
 
+/* ===== Banner Card ===== */
+.banner-card {
+  background: linear-gradient(180deg, rgb(119, 197, 250), rgb(224, 242, 254));
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  border: 10px solid #e2e8f0;
+}
+
 /* ===== Table Container ===== */
 .bookings-table-container {
   background: #ffffff !important;
@@ -119,11 +128,28 @@
   padding: 0.9rem;
 }
 
+.bookings-filters-toggle-wrap {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.filters-toggle-btn {
+  min-width: 165px;
+}
+
+.bookings-search-wrapper {
+  display: none;
+}
+
 .search-filter-top-row {
   display: grid;
   grid-template-columns: minmax(280px, 1fr) 220px;
   gap: 0.7rem;
   align-items: center;
+}
+
+.search-filter-top-row-compact {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .search-input-bookings,
@@ -563,6 +589,47 @@
 
 /* ===== Mobile Card Layout ===== */
 @media (max-width: 768px) {
+  .bookings-filters-toggle-wrap {
+    width: 100%;
+  }
+
+  .bookings-search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  .bookings-search-input {
+    width: 100%;
+    padding: 12px 16px 12px 45px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    font-size: 0.95rem;
+    color: #0f172a !important;
+    transition: all 0.2s ease;
+  }
+
+  .bookings-search-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .bookings-search-wrapper .search-icon {
+    position: absolute;
+    left: 16px;
+    font-size: 1.1rem;
+    pointer-events: none;
+    filter: grayscale(1);
+    opacity: 0.5;
+  }
+
+  .filters-toggle-btn {
+    width: 100%;
+  }
+
   .grid-2-col {
     grid-template-columns: 1fr;
   }
@@ -721,6 +788,45 @@
     text-align: center;
     white-space: nowrap;
     padding: 0.55rem 0.4rem;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .bookings-search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  .bookings-search-input {
+    width: 100%;
+    padding: 12px 16px 12px 45px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    font-size: 0.95rem;
+    color: #0f172a !important;
+    transition: all 0.2s ease;
+  }
+
+  .bookings-search-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .bookings-search-wrapper .search-icon {
+    position: absolute;
+    left: 16px;
+    font-size: 1.1rem;
+    pointer-events: none;
+    filter: grayscale(1);
+    opacity: 0.5;
+  }
+
+  .filters-toggle-btn {
+    min-width: 200px;
   }
 }
 

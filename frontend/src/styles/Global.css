@@ -126,6 +126,74 @@ body.mobile-nav-open {
   color: #eaf3ff;
 }
 
+.card-banner {
+  /* bg-gradient-to-r from-blue-500 to-sky-400 bg-clip-text text-transparent */
+  /* rgb(43, 127, 255) */
+  /* rgb(0, 188, 255) */
+  background: radial-gradient(circle at 0% 0%, rgb(43, 127, 255, 0.6) 10%, rgb(0, 188, 255, 0.6) 40%, #eff6ff 60%, #f8fafc 100%);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--card-shadow);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  backdrop-filter: blur(8px);
+  color: #eaf3ff;
+}
+
+.card-banner h1,
+.card-banner h2,
+.card-banner h3,
+.card-banner h4,
+.card-banner p,
+.card-banner span,
+.card-banner strong,
+.card-banner small {
+  color: #0f172a;
+}
+
+.banner-header h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.banner-header p {
+  color: #000000cc !important;
+  margin-top: 4px;
+}
+
+.page-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.page-banner-copy {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 1rem;
+}
+
+.page-banner-copy h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.page-banner-copy p {
+  color: #000000cc !important;
+  margin-top: 4px;
+}
+
+.page-banner-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .card h1,
 .card h2,
 .card h3,
@@ -343,6 +411,7 @@ body.mobile-nav-open {
 @media (max-width: 1024px) {
   .page-body {
     padding: 1.5rem;
+    padding-bottom: calc(8rem + env(safe-area-inset-bottom));
   }
 }
 
@@ -367,6 +436,34 @@ body.mobile-nav-open {
 
   .page-body {
     padding: 1rem;
+    padding-bottom: calc(8rem + env(safe-area-inset-bottom));
+  }
+
+  /* Mobile-specific adjustments */
+  .card-banner {
+    background: radial-gradient(circle at 10% 10%, rgb(43, 127, 255, 0.4) 10%, rgb(0, 188, 255, 0.4) 40%, #eff6ff 80%, #f8fafc 100%);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--card-shadow);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    backdrop-filter: blur(8px);
+    color: #eaf3ff;
+  }
+
+  .page-banner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-banner-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .page-banner-actions .btn,
+  .page-banner-actions > * {
+    width: 100%;
   }
 
   .modal-card {

@@ -43,7 +43,12 @@ function Profile() {
 
   return (
     <div className="page-container">
-      <h1>My Profile</h1>
+      <div className="page-banner">
+        <div className="page-banner-copy">
+          <h1>My Profile</h1>
+          <p>View and update your account information and security settings.</p>
+        </div>
+      </div>
       {msg && <div className="badge badge-info mb-4 block text-center">{msg}</div>}
       
       <div className="grid cols-2 gap-6">

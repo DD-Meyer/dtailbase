@@ -144,34 +144,37 @@ function TeamManagement() {
 
   return (
     <div className="page-container">
-      <div className="flex-between mb-6">
-        <span className="text-sm text-gray-600">
-          <h1>Team Management</h1>
-          <p className="text-sm text-gray-600">Manage your company's team members and their roles.</p>
-          <p className="text-sm text-gray-600">Current Plan: <strong>{currentPlan}</strong></p>
-          <p className="text-sm text-gray-600">Users: {team.length} / {planLimits ? planLimits.max_users : "Unlimited"}</p>
-        </span>
-        
+      <div className="card-banner mb-6">
+        <div className="page-banner">
+          <div className="page-banner-copy">
+            <h1 className="text-2xl font-bold">Team Management</h1>
+            <p>Manage your company's team members and their roles.</p>
+            <p>Current Plan: <strong>{currentPlan}</strong></p>
+            <p>Users: {team.length} / {planLimits ? planLimits.max_users : "Unlimited"}</p>
+          </div>
 
-        {/* Show upgrade prompt if on Starter plan and at user limit */}
-        {planLimits && team.length >= planLimits.max_users ? (
-          <div className="plan-status-banner">
-            <p>You are on the <strong>{currentPlan}</strong> plan.</p>
-            
-            {nextPlan ? (
-              <p className="text-xs">
-                Need more than {planLimits.max_users} users? 
-                <span className="text-blue-500 cursor-pointer"> Upgrade to {nextPlan}</span>
-              </p>
+          <div className="page-banner-actions">
+            {/* Show upgrade prompt if on Starter plan and at user limit */}
+            {planLimits && team.length >= planLimits.max_users ? (
+              <div className="plan-status-banner">
+                <p>You are on the <strong>{currentPlan}</strong> plan.</p>
+                
+                {nextPlan ? (
+                  <p className="text-xs">
+                    Need more than {planLimits.max_users} users? 
+                    <span className="text-blue-500 cursor-pointer"> Upgrade to {nextPlan}</span>
+                  </p>
+                ) : (
+                  <p className="text-xs text-green-600">You are on our highest tier plan!</p>
+                )}
+              </div>
             ) : (
-              <p className="text-xs text-green-600">You are on our highest tier plan!</p>
+              <button className="btn btn-primary" onClick={() => setShowAddForm(!showAddForm)}>
+                {showAddForm ? "Cancel" : "Add Member"}
+              </button>
             )}
           </div>
-        ) : (
-          <button className="btn btn-primary" onClick={() => setShowAddForm(!showAddForm)}>
-            {showAddForm ? "Cancel" : "Add Member"}
-          </button>
-        )}
+        </div>
       </div>
       
 
@@ -210,13 +213,13 @@ function TeamManagement() {
         </form>
       )}
 
+      <UpgradeValueCards currentPlan={currentPlan} />
+
       {/* Search bar for filtering team members */}
       <input 
-        type="text" placeholder="Search team members..." className="search-input"
+        type="text" placeholder="Search team members..." className="search-input mb-4"
         value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
       />
-
-      <UpgradeValueCards currentPlan={currentPlan} />
 
       {/* If no members match the search query, show a friendly message */}
       {filteredTeam.length === 0 && <p className="text-center text-gray-500">No team members found.</p>}
