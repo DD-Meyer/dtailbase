@@ -17,6 +17,7 @@ import api from "../axios_instance";
 import "../styles/BookingDetails.css";
 import { formatShortRef } from "../utils/formatters";
 import { showToast } from "../utils/uiFeedback";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
 export default function BookingDetail() {
   const { id } = useParams();
@@ -95,11 +96,11 @@ export default function BookingDetail() {
   return (
     <div className="page-container">
       <div className="booking-header-action-btns flex-between mb-4">
-        <button className="btn-secondary mb-4" onClick={() => navigate(-1)}>← Back to Dashboard</button>
+        <button className="btn-secondary mb-4" onClick={() => navigate(-1)}><ArrowLeftIcon className="h-6 w-5"/></button>
 
         {/* DOWNLOAD BUTTON - More resilient logic */}
         {indemnity ? (
-          <div className="flex-between" style={{ gap: '10px' }}>
+          <div className="action-buttons-grid flex-between" style={{ gap: '10px' }}>
             <button
               className="btn-secondary"
               onClick={handleViewSignedForm}
@@ -123,7 +124,7 @@ export default function BookingDetail() {
 
       {/* Inside BookingDetails.jsx */}
       {indemnity && indemnity.latitude && (
-        <div className="booking-header-action-btns flex-between gap-2 mt-4">
+        <div className="action-buttons-grid flex-between gap-2 mt-4">
           <button 
             className="btn-map"
             onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${indemnity.latitude},${indemnity.longitude}`, '_blank')}

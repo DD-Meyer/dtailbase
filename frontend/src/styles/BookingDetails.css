@@ -134,23 +134,30 @@
 
   /* buttons aligned in rows next to each other, smaller size buttons*/
   .booking-header-action-btns {
+    display: flex;
     flex-direction: row;
-    gap: 12px;
+    gap: 8px;
+  }
+
+  .action-buttons-grid {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
   }
 
   .btn-map {
     padding: 8px 12px;
-    font-size: 0.5rem;
+    font-size: 0.6rem;
   }
 
   .btn-secondary {
     padding: 6px 12px;
-    font-size: 0.5rem;
+    font-size: 0.6rem;
   }
 
   .btn-primary {
     padding: 8px 16px;
-    font-size: 0.5rem;
+    font-size: 0.7rem;
   }
 
   .indemnity-text-modal {
