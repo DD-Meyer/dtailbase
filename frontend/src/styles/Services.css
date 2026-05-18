@@ -25,6 +25,13 @@
   min-width: 180px;
 }
 
+.services-feature-highlight {
+  margin-top: 0.55rem;
+  color: #0b1b2f !important;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
 .services-table-container {
   overflow-x: auto;
   overflow-y: hidden;

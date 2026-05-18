@@ -3,12 +3,17 @@ from warnings import filters
 import json
 import os
 import logging
+import csv
+import io
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import urlopen
 
 from django.conf import settings
+from django.http import HttpResponse
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError as DjangoValidationError
 
 logger = logging.getLogger(__name__)
 from django.forms import IntegerField
@@ -35,6 +40,7 @@ from django.db.models.deletion import ProtectedError
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 from core.location_verification import extract_document_text, verify_location_document
+from core.storage_policy import enforce_company_storage_limit
 
 
 class ChangePasswordView(APIView):
@@ -106,6 +112,16 @@ class CompanyLocationVerificationView(APIView):
         max_size_bytes = 10 * 1024 * 1024
         if uploaded_document.size > max_size_bytes:
             return Response({"error": "Document too large. Maximum allowed size is 10MB."}, status=400)
+
+        try:
+            replacing = [company.location_verification_document] if company.location_verification_document else []
+            enforce_company_storage_limit(
+                company,
+                incoming_bytes=int(uploaded_document.size or 0),
+                replacing_file_fields=replacing,
+            )
+        except ValidationError as exc:
+            return Response(exc.detail, status=400)
 
         extracted_text, extraction_error = extract_document_text(uploaded_document)
         match_result = verify_location_document(
@@ -579,6 +595,147 @@ class CustomerDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+
+class CustomerCsvTemplateAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="customers_template.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(["firstname", "lastname", "email", "phone"])
+        writer.writerow(["Alex", "Meyer", "alex@example.com", "+27110000000"])
+        writer.writerow(["Jamie", "Stone", "jamie@example.com", "+27110000001"])
+
+        return response
+
+
+class CustomerCsvImportAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request):
+        company = request.user.company
+        plan_limits = PLAN_CONFIG.get(company.plan, PLAN_CONFIG["STARTER"])
+        if company.plan not in {"PRO", "ENTERPRISE"}:
+            return Response(
+                {"error": "CSV customer upload is available on Pro and Enterprise plans only."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        uploaded_file = request.FILES.get("file")
+        if not uploaded_file:
+            return Response({"error": "Please attach a CSV file in the 'file' field."}, status=400)
+
+        filename = (uploaded_file.name or "").lower()
+        if not filename.endswith(".csv"):
+            return Response({"error": "Only .csv files are supported."}, status=400)
+
+        try:
+            decoded = uploaded_file.read().decode("utf-8-sig")
+        except UnicodeDecodeError:
+            return Response({"error": "CSV must be UTF-8 encoded."}, status=400)
+
+        reader = csv.DictReader(io.StringIO(decoded))
+        if not reader.fieldnames:
+            return Response({"error": "CSV header row is missing."}, status=400)
+
+        normalized_header_map = {field.strip().lower(): field for field in reader.fieldnames if field}
+        required_columns = ["firstname", "lastname", "email", "phone"]
+        missing_columns = [column for column in required_columns if column not in normalized_header_map]
+        if missing_columns:
+            return Response(
+                {"error": f"Missing required column(s): {', '.join(missing_columns)}."},
+                status=400,
+            )
+
+        max_customers = plan_limits.get("max_customers", 1000)
+        current_count = Customer.objects.filter(company=company).count()
+        has_limit = max_customers is not None
+        remaining_slots = None if not has_limit else max(0, max_customers - current_count)
+
+        existing_emails = {
+            (email or "").strip().lower()
+            for email in Customer.objects.filter(company=company).values_list("email", flat=True)
+        }
+        batch_emails = set()
+
+        created_count = 0
+        duplicate_count = 0
+        skipped_due_limit = 0
+        total_rows = 0
+        failed_rows = []
+
+        for line_number, row in enumerate(reader, start=2):
+            if not row or not any((value or "").strip() for value in row.values()):
+                continue
+
+            total_rows += 1
+            first_name = (row.get(normalized_header_map["firstname"]) or "").strip()
+            last_name = (row.get(normalized_header_map["lastname"]) or "").strip()
+            email = (row.get(normalized_header_map["email"]) or "").strip()
+            phone = (row.get(normalized_header_map["phone"]) or "").strip()
+            row_snapshot = {
+                "firstname": first_name,
+                "lastname": last_name,
+                "email": email,
+                "phone": phone,
+            }
+
+            if not first_name or not last_name or not email or not phone:
+                failed_rows.append({
+                    "line": line_number,
+                    "reason": "Missing required value(s).",
+                    **row_snapshot,
+                })
+                continue
+
+            try:
+                validate_email(email)
+            except DjangoValidationError:
+                failed_rows.append({
+                    "line": line_number,
+                    "reason": "Invalid email format.",
+                    **row_snapshot,
+                })
+                continue
+
+            email_key = email.lower()
+            if email_key in existing_emails or email_key in batch_emails:
+                duplicate_count += 1
+                continue
+
+            if has_limit and remaining_slots is not None and remaining_slots <= 0:
+                skipped_due_limit += 1
+                continue
+
+            Customer.objects.create(
+                company=company,
+                firstname=first_name,
+                lastname=last_name,
+                email=email,
+                phone=phone,
+            )
+
+            created_count += 1
+            batch_emails.add(email_key)
+            if has_limit and remaining_slots is not None:
+                remaining_slots -= 1
+
+        return Response(
+            {
+                "message": "CSV import processed.",
+                "created": created_count,
+                "duplicates": duplicate_count,
+                "skipped_due_limit": skipped_due_limit,
+                "failed_rows": failed_rows[:20],
+                "failed_row_count": len(failed_rows),
+                "total_rows": total_rows,
+            },
+            status=200,
+        )
 
 class CustomerListAPIView(generics.ListCreateAPIView):
     serializer_class = CustomerSerializer

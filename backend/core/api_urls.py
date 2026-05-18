@@ -29,6 +29,8 @@ urlpatterns = [
     path('auth/set-password/', ChangePasswordView.as_view(), name='set-password'),
 
     path("customers/<uuid:customer_id>/vehicles/", CustomerVehicleListAPIView.as_view()),
+    path("customers/template-csv/", CustomerCsvTemplateAPIView.as_view(), name="customers-template-csv"),
+    path("customers/import-csv/", CustomerCsvImportAPIView.as_view(), name="customers-import-csv"),
     path("customers/<uuid:customer_id>/", CustomerDetailAPIView.as_view(), name="customer-detail"),
     path("customers/", CustomerListAPIView.as_view(), name="customers-list-create"),
     path("bookings/", BookingListCreateAPIView.as_view()),

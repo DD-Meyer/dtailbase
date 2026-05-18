@@ -41,6 +41,13 @@ class Service(models.Model):
     duration_minutes = models.PositiveIntegerField()
     base_price = models.DecimalField(max_digits=10, decimal_places=2)
     requires_indemnity = models.BooleanField(default=True)
+    service_indemnity_template = models.ForeignKey(
+        "indemnity.IndemnityTemplate",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="services",
+    )
     is_active = models.BooleanField(default=True)
 
     def __str__(self):

@@ -108,12 +108,34 @@
   color: #f3f8ff;
 }
 
+select.input-field {
+  appearance: none;
+  -webkit-appearance: none;
+  background: #ffffff;
+  color: #0b1b2f !important;
+  -webkit-text-fill-color: #0b1b2f !important;
+  opacity: 1;
+}
+
 .input-field:focus {
   background: rgba(10, 20, 34, 0.9);
   color: #f3f8ff;
   border-color: #0066ff;
   box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.1);
   outline: none;
+}
+
+select.input-field:focus,
+select.input-field:active {
+  background: #ffffff;
+  color: #0b1b2f !important;
+  -webkit-text-fill-color: #0b1b2f !important;
+}
+
+select.input-field:hover,
+select.input-field:visited {
+  color: #0b1b2f !important;
+  -webkit-text-fill-color: #0b1b2f !important;
 }
 
 /* Ensure select dropdown options never render white text on white background */
@@ -131,9 +153,10 @@ select.input-field:disabled {
   border-radius: 12px;
   background: #fcfcfd;
   overflow: hidden;
+  touch-action: none;
 }
 
-.sig-canvas { width: 100%; height: 200px; cursor: crosshair; }
+.sig-canvas { width: 100%; height: 200px; cursor: crosshair; touch-action: none; }
 
 .sig-canvas-actions { padding: 10px; background: #f1f5f9; text-align: right; }
 

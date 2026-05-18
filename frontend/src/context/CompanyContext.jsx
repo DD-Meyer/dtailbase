@@ -54,6 +54,8 @@ export const CompanyProvider = ({ children }) => {
     max_users: 1,
     max_images_before: 2,
     max_images_after: 2,
+    max_image_width: 1280,
+    max_image_height: 720,
     max_customers: 1000,
     indemnity_history_limit: 0, // No history saved
     buffer_timer: false,

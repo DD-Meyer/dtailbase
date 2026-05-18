@@ -5,6 +5,7 @@ import "../styles/Services.css";
 import "../styles/EditableRow.css";
 import EditableRow from "../components/EditableRow";
 import { showConfirm, showToast } from "../utils/uiFeedback";
+import { useCompany } from "../context/CompanyContext";
 
 function Services() {
   const TABLET_BREAKPOINT = 1024;
@@ -15,17 +16,41 @@ function Services() {
   const [isCompactView, setIsCompactView] = useState(() => window.innerWidth <= TABLET_BREAKPOINT);
   const [showServiceForm, setShowServiceForm] = useState(() => window.innerWidth > TABLET_BREAKPOINT);
   const [showModal, setShowModal] = useState(false);
+  const [indemnityTemplates, setIndemnityTemplates] = useState([]);
+  const { currentPlan } = useCompany();
+  const isEnterprisePlan = currentPlan === "ENTERPRISE";
+  const linkedTemplateCount = services.filter((service) => Boolean(service.service_indemnity_template)).length;
+  const linkedTemplateLimit = 20;
 
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     duration_minutes: 60,
-    base_price: "0.00"
+    base_price: "0.00",
+    service_indemnity_template: "",
   });
 
   useEffect(() => {
     fetchServices();
   }, []);
+
+  useEffect(() => {
+    if (!isEnterprisePlan) {
+      setIndemnityTemplates([]);
+      return;
+    }
+
+    const fetchIndemnityTemplates = async () => {
+      try {
+        const res = await api.get("indemnity/templates/");
+        setIndemnityTemplates(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.error("Error loading indemnity templates:", err);
+      }
+    };
+
+    fetchIndemnityTemplates();
+  }, [isEnterprisePlan]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -59,10 +84,20 @@ function Services() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (editingId) {
-        await api.patch(`services/${editingId}/`, formData);
+      const payload = {
+        ...formData,
+      };
+
+      if (isEnterprisePlan) {
+        payload.service_indemnity_template = formData.service_indemnity_template || null;
       } else {
-        await api.post("services/", formData);
+        delete payload.service_indemnity_template;
+      }
+
+      if (editingId) {
+        await api.patch(`services/${editingId}/`, payload);
+      } else {
+        await api.post("services/", payload);
       }
       resetForm();
       if (isCompactView) {
@@ -100,7 +135,8 @@ function Services() {
       name: service.name,
       description: service.description || "",
       duration_minutes: service.duration_minutes,
-      base_price: service.base_price
+      base_price: service.base_price,
+      service_indemnity_template: service.service_indemnity_template || "",
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -147,7 +183,13 @@ function Services() {
   };
 
   const resetForm = () => {
-    setFormData({ name: "", description: "", duration_minutes: 60, base_price: "0.00" });
+    setFormData({
+      name: "",
+      description: "",
+      duration_minutes: 60,
+      base_price: "0.00",
+      service_indemnity_template: "",
+    });
     setEditingId(null);
   };
 
@@ -164,7 +206,8 @@ function Services() {
       name: service.name,
       description: service.description,
       duration_minutes: service.duration_minutes,
-      base_price: service.base_price
+      base_price: service.base_price,
+      service_indemnity_template: service.service_indemnity_template || "",
     });
     setShowModal(true);
   };
@@ -178,6 +221,11 @@ function Services() {
           <div className="page-banner-copy">
             <h1 className="text-2xl font-bold">Service Management</h1>
             <p>{services.length} service packages ready for booking and pricing updates.</p>
+            <p className="services-feature-highlight">
+              {isEnterprisePlan
+                ? `Enterprise smart-linking active: ${linkedTemplateCount}/${linkedTemplateLimit} service templates linked automatically.`
+                : "Enterprise unlock: 20 Smart-Linked Service Templates with automatic legal routing per booking."}
+            </p>
           </div>
 
           <div className="page-banner-actions services-header-actions">
@@ -270,6 +318,29 @@ function Services() {
               onChange={handleInputChange}
             />
           </div>
+          <div className="form-group">
+            <label>Linked Indemnity Template</label>
+            {isEnterprisePlan ? (
+              <select
+                name="service_indemnity_template"
+                value={formData.service_indemnity_template || ""}
+                onChange={handleInputChange}
+              >
+                <option value="">Use Active Default Template</option>
+                {indemnityTemplates.map((template) => (
+                  <option key={template.id} value={template.id}>
+                    {template.title} (v{template.version})
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                value="Enterprise-only feature"
+                readOnly
+                disabled
+              />
+            )}
+          </div>
           <div className="mt-4">
             <button type="submit" className="btn btn-primary">
               {editingId ? "Update Service" : "Add Service"}
@@ -300,6 +371,7 @@ function Services() {
               <th>Description</th>
               <th>Duration (minutes)</th>
               <th>Base Price</th>
+              <th>Indemnity Template</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -311,6 +383,9 @@ function Services() {
                 <td data-label="Description">{service.description}</td>
                 <td data-label="Duration (Minutes)">{service.duration_minutes}</td>
                 <td data-label="Base Price">{service.base_price}</td>
+                <td data-label="Indemnity Template">
+                  {service.service_indemnity_template_title || "Active Default Template"}
+                </td>
                 <td data-label="Status">
                   <span className={`badge ${service.is_active ? 'badge-success' : 'badge-ghost'}`}>
                     {service.is_active ? "Active" : "Inactive"}
@@ -382,6 +457,29 @@ function Services() {
                   onChange={handleInputChange}
                   required
                 />
+              </div>
+              <div className="form-group">
+                <label>Linked Indemnity Template</label>
+                {isEnterprisePlan ? (
+                  <select
+                    name="service_indemnity_template"
+                    value={formData.service_indemnity_template || ""}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Use Active Default Template</option>
+                    {indemnityTemplates.map((template) => (
+                      <option key={template.id} value={template.id}>
+                        {template.title} (v{template.version})
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    value="Enterprise-only feature"
+                    readOnly
+                    disabled
+                  />
+                )}
               </div>
               <div className="flex gap-2 mt-4">
                 <button type="submit" className="btn btn-primary">

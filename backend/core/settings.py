@@ -286,6 +286,12 @@ if not DEBUG:
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Storage enforcement policy modes:
+# - LOCAL_ENFORCED: enforce plan storage caps using local media usage (current behavior)
+# - CLOUDFLARE_METERED: reserved for Cloudflare metering-based enforcement
+# - DISABLED: bypass storage cap enforcement
+STORAGE_POLICY_MODE = os.environ.get('STORAGE_POLICY_MODE', 'LOCAL_ENFORCED').strip().upper()
+
 ASGI_APPLICATION = 'core.asgi.application'
 
 CHANNEL_LAYERS = {

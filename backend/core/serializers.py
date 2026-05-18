@@ -15,6 +15,8 @@ from indemnity.serializers import IndemnityAgreementSerializer, VehiclePhotoSeri
 # core/serializers.py
 from indemnity.utils import generate_agreement_pdf
 from core.plan_limits import PLAN_CONFIG
+from core.image_processing import resize_image_to_plan_limit
+from core.storage_policy import enforce_company_storage_limit
 
 
 
@@ -288,9 +290,79 @@ class BookingListSerializer(serializers.ModelSerializer):
 # --- OTHER SERIALIZERS ---
 
 class ServiceSerializer(serializers.ModelSerializer):
+    service_indemnity_template = serializers.PrimaryKeyRelatedField(
+        queryset=IndemnityTemplate.objects.none(),
+        required=False,
+        allow_null=True,
+    )
+    service_indemnity_template_title = serializers.CharField(
+        source="service_indemnity_template.title",
+        read_only=True,
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get("request")
+        if request and getattr(request.user, "company", None):
+            self.fields["service_indemnity_template"].queryset = IndemnityTemplate.objects.filter(
+                company=request.user.company
+            ).order_by("-version")
+
+    def validate(self, attrs):
+        request = self.context.get("request")
+        company = getattr(getattr(request, "user", None), "company", None)
+
+        if not company:
+            return attrs
+
+        template_in_payload = "service_indemnity_template" in attrs
+        selected_template = attrs.get("service_indemnity_template")
+
+        if template_in_payload and company.plan != "ENTERPRISE":
+            raise serializers.ValidationError(
+                {"service_indemnity_template": "Service-specific indemnity linking is available on Enterprise only."}
+            )
+
+        if template_in_payload and selected_template:
+            plan_limits = PLAN_CONFIG.get(company.plan, PLAN_CONFIG['STARTER'])
+            linked_limit = plan_limits.get('max_linked_service_templates')
+            if linked_limit:
+                linked_queryset = Service.objects.filter(
+                    company=company,
+                    service_indemnity_template__isnull=False,
+                )
+                if self.instance:
+                    linked_queryset = linked_queryset.exclude(id=self.instance.id)
+
+                if linked_queryset.count() >= linked_limit:
+                    raise serializers.ValidationError(
+                        {
+                            "service_indemnity_template": (
+                                f"Enterprise supports up to {linked_limit} smart-linked service templates. "
+                                "Unlink another service or upgrade your custom capacity."
+                            )
+                        }
+                    )
+
+        if selected_template and selected_template.company_id != company.id:
+            raise serializers.ValidationError(
+                {"service_indemnity_template": "Template must belong to your company."}
+            )
+
+        return attrs
+
     class Meta:
         model = Service
-        fields = ["id", "name", "description", "duration_minutes", "base_price", "is_active"]
+        fields = [
+            "id",
+            "name",
+            "description",
+            "duration_minutes",
+            "base_price",
+            "is_active",
+            "service_indemnity_template",
+            "service_indemnity_template_title",
+        ]
 
 # core/serializers.py
 
@@ -351,6 +423,15 @@ class BookingStatusSerializer(serializers.ModelSerializer):
         # 1. Pop photos out so they don't interfere with the Booking save
         images_data = validated_data.pop('uploaded_images', [])
         new_status = validated_data.get('status')
+        plan_limits = PLAN_CONFIG.get(instance.company.plan, PLAN_CONFIG['STARTER'])
+        max_width = plan_limits.get('max_image_width', 1280)
+        max_height = plan_limits.get('max_image_height', 720)
+        resized_images_data = [
+            resize_image_to_plan_limit(image, max_width, max_height)
+            for image in images_data
+        ]
+        incoming_storage_bytes = sum(int(getattr(image, 'size', 0) or 0) for image in resized_images_data)
+        enforce_company_storage_limit(instance.company, incoming_bytes=incoming_storage_bytes)
         from django.utils import timezone
 
         # 2. Handle Status & Timestamps
@@ -365,12 +446,12 @@ class BookingStatusSerializer(serializers.ModelSerializer):
         instance.save()
 
         # 3. Handle After-Photo Saving
-        if images_data:
+        if resized_images_data:
             agreement = getattr(instance, 'booking_indemnity', None)
             if agreement:
                 # Using a transaction is good practice here
                 with transaction.atomic():
-                    for image_file in images_data:
+                    for image_file in resized_images_data:
                         VehiclePhoto.objects.create(
                             agreement=agreement,
                             image=image_file,
@@ -586,6 +667,17 @@ class CompanySerializer(serializers.ModelSerializer):
             if request:
                 return request.build_absolute_uri(obj.logo.url)
         return None
+
+    def validate(self, attrs):
+        company = self.instance
+        new_logo = attrs.get('logo')
+
+        if company and new_logo:
+            incoming_size = int(getattr(new_logo, 'size', 0) or 0)
+            replacing = [company.logo] if company.logo else []
+            enforce_company_storage_limit(company, incoming_bytes=incoming_size, replacing_file_fields=replacing)
+
+        return super().validate(attrs)
 
 class MyTokenSerializer(TokenObtainPairSerializer):
     mobile_app = serializers.BooleanField(required=False, default=False, write_only=True)

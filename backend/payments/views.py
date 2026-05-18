@@ -7,10 +7,11 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from core.models import Company
 from core.permissions import IsAccountAdmin
-from payments.geolocation import detect_user_currency
+from payments.geolocation import detect_pricing_context
 from payments.paypal_service import (
     create_paypal_subscription,
     get_subscription_plan,
+    get_effective_pricing,
     get_paypal_plan_tier,
     get_paypal_tier_from_plan_id,
     get_paypal_subscription_details,
@@ -40,27 +41,34 @@ class PlansView(APIView):
                     for k, v in plan.items()
                 }
 
-            detected_country_code, detected_currency = detect_user_currency(request)
+            pricing_context = detect_pricing_context(request)
+            detected_country_code = pricing_context.get('country_code', 'US')
+            vpn_detected = pricing_context.get('vpn_detected', False)
+            company_country_code = None
+            if request.user.is_authenticated and hasattr(request.user, 'company') and request.user.company:
+                company_country_code = (request.user.company.country_code or '').upper() or None
+
+            effective_country_code = company_country_code or detected_country_code
+            discount_eligible = effective_country_code == 'ZA' and not vpn_detected
 
             # Location detection for reporting/compliance only; all subscriptions in USD
-            if request.user.is_authenticated and hasattr(request.user, 'company') and request.user.company:
-                company = request.user.company
-                country_code = (company.country_code or detected_country_code or 'US').upper()
-            else:
-                country_code = (detected_country_code or 'US').upper()
+            country_code = (effective_country_code or 'US').upper()
 
             currency = 'USD'
-            pricing = PRICING.get('USD', {})
+            pricing = get_effective_pricing(discount_eligible=discount_eligible).get('USD', {})
 
             plans = {}
             for plan_name in PLAN_CONFIG:
-                plan_features = safe_plan(PLAN_CONFIG[plan_name])
+                plan_config = PLAN_CONFIG[plan_name]
+                display_features = plan_config.get('features', [])
+                limits = safe_plan({k: v for k, v in plan_config.items() if k != 'features'})
                 if plan_name == 'STARTER':
                     price = '0'
                 else:
                     price = pricing[plan_name]['amount']
                 plans[plan_name] = {
-                    'features': plan_features,
+                    'features': display_features,
+                    'limits': limits,
                     'price': price,
                     'currency': currency,
                 }
@@ -68,6 +76,8 @@ class PlansView(APIView):
             return Response({
                 'country_code': country_code,
                 'currency': currency,
+                'vpn_detected': vpn_detected,
+                'discount_applied': discount_eligible,
                 'pricing': pricing,
                 'plans': plans
             })
@@ -102,6 +112,12 @@ class PayPalSubscribeView(APIView):
             # USD-only billing
             logger.info(f"Creating PayPal subscription: user={user.email}, plan={plan_id}, currency=USD")
             previous_subscription_id = company.paypal_subscription_id
+            pricing_context = detect_pricing_context(request)
+            vpn_detected = pricing_context.get('vpn_detected', False)
+            company_country_code = (company.country_code or '').upper()
+            detected_country_code = pricing_context.get('country_code', 'US')
+            effective_country_code = company_country_code or detected_country_code
+            discount_eligible = effective_country_code == 'ZA' and not vpn_detected
 
             # When switching plans, defer the new subscription's start to the end of
             # the current billing period so the user isn't billed twice.
@@ -119,7 +135,7 @@ class PayPalSubscribeView(APIView):
                             f"(end of current billing period for {previous_subscription_id})"
                         )
             
-            plan_details = get_subscription_plan(plan_id)
+            plan_details = get_subscription_plan(plan_id, discount_eligible=discount_eligible)
             if not plan_details:
                 return Response({'error': f'Plan {plan_id} not available'}, status=400)
             
@@ -135,6 +151,7 @@ class PayPalSubscribeView(APIView):
                 cancel_url=cancel_url,
                 currency='USD',
                 start_time=start_time,
+                discount_eligible=discount_eligible,
             )
 
             if result.get('success'):

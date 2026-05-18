@@ -3,7 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import PublicHeader from './PublicHeader';
 import '../styles/Hero.css';
 import api from '../axios_instance';
-import { fetchPricingWithFallback, isValidPricingPayload } from '../services/pricingService';
+import {
+  DEFAULT_PRICE_FALLBACKS,
+  extractPlanFeatures,
+  fetchPricingWithFallback,
+  isValidPricingPayload,
+} from '../services/pricingService';
 
 const HERO_PLANS = [
   {
@@ -24,14 +29,15 @@ const HERO_PLANS = [
   {
     id: 'PRO',
     name: 'Professional',
-    description: 'Built for growing studios and small teams.',
+    description: 'Premium legal-grade operations for growth-focused studios.',
     features: [
       '60 Monthly Bookings',
       '10 Team Members',
       '10 Before / 10 After Photos',
-      '5-Record Indemnity History',
+      'Store up to 5 Templates (1 Active)',
+      'Manual template selection per booking',
       'Buffer Timer Enabled',
-      'Unlimited Customers',
+      'Up to 5,000 Customers',
     ],
     featured: true,
     cta: 'Start Free Trial',
@@ -40,11 +46,14 @@ const HERO_PLANS = [
   {
     id: 'ENTERPRISE',
     name: 'Enterprise',
-    description: 'Maximum performance for high-volume franchises.',
+    description: 'Enterprise-grade liability protection for high-volume bays.',
     features: [
       'Unlimited Bookings',
       '50 Team Members',
       '25 Before / 25 After Photos',
+      '20 Smart-Linked Service Templates',
+      'Automatic legal routing per booked service',
+      '100GB Premium Cloud Vault Storage',
       'Lifetime Legal History',
       'Priority Support',
       'Unlimited Customers',
@@ -55,11 +64,12 @@ const HERO_PLANS = [
   },
 ];
 
-const PRICE_FALLBACKS = { PRO: '29.00', ENTERPRISE: '149.00' };
+const PRICE_FALLBACKS = DEFAULT_PRICE_FALLBACKS.USD;
 
 const Hero = ({ isAuthenticated }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [heroPricing, setHeroPricing] = useState(null);
+  const [heroPlanFeatures, setHeroPlanFeatures] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -132,11 +142,23 @@ const Hero = ({ isAuthenticated }) => {
         if (!isValidPricingPayload(response.data)) throw new Error('Invalid pricing');
         const apiPricing = response.data?.pricing || {};
         const plansPricing = response.data?.plans || {};
+
+        setHeroPlanFeatures({
+          STARTER: extractPlanFeatures(plansPricing, 'STARTER'),
+          PRO: extractPlanFeatures(plansPricing, 'PRO'),
+          ENTERPRISE: extractPlanFeatures(plansPricing, 'ENTERPRISE'),
+        });
+
         setHeroPricing({
           PRO: { amount: String(apiPricing?.PRO?.amount || plansPricing?.PRO?.price || PRICE_FALLBACKS.PRO) },
           ENTERPRISE: { amount: String(apiPricing?.ENTERPRISE?.amount || plansPricing?.ENTERPRISE?.price || PRICE_FALLBACKS.ENTERPRISE) },
         });
       } catch {
+        setHeroPlanFeatures({
+          STARTER: extractPlanFeatures({}, 'STARTER'),
+          PRO: extractPlanFeatures({}, 'PRO'),
+          ENTERPRISE: extractPlanFeatures({}, 'ENTERPRISE'),
+        });
         setHeroPricing({ PRO: { amount: PRICE_FALLBACKS.PRO }, ENTERPRISE: { amount: PRICE_FALLBACKS.ENTERPRISE } });
       }
     };
@@ -148,6 +170,11 @@ const Hero = ({ isAuthenticated }) => {
     const amount = heroPricing?.[plan.id]?.amount;
     if (!amount) return '—';
     return amount.endsWith('.00') ? amount.slice(0, -3) : amount;
+  };
+
+  const getPlanFeatures = (plan) => {
+    const fromPricing = heroPlanFeatures?.[plan.id];
+    return Array.isArray(fromPricing) && fromPricing.length ? fromPricing : plan.features;
   };
 
   const handlePlanCta = (plan) => {
@@ -314,7 +341,7 @@ const Hero = ({ isAuthenticated }) => {
       <section className="pricing-section container animate-on-scroll">
         <div className="section-header">
           <h2 className="section-title">Scale Your <span className="highlight">Studio.</span></h2>
-          <p className="section-desc">Transparent pricing for studios at every stage. No hidden fees, cancel anytime.</p>
+          <p className="section-desc">Lightweight, high-speed architecture built exclusively for detailing bays. No lag on high-res condition logs.</p>
         </div>
         <div className="pricing-grid">
           {HERO_PLANS.map((plan) => (
@@ -331,7 +358,7 @@ const Hero = ({ isAuthenticated }) => {
               </div>
               <p className="plan-tagline">{plan.description}</p>
               <ul className="benefits">
-                {plan.features.map((feat) => (
+                {getPlanFeatures(plan).map((feat) => (
                   <li key={feat}>✓ {feat}</li>
                 ))}
               </ul>
@@ -344,7 +371,7 @@ const Hero = ({ isAuthenticated }) => {
             </div>
           ))}
         </div>
-        <p className="pricing-note">Prices in USD &nbsp;·&nbsp; Secure PayPal billing &nbsp;·&nbsp; Cancel anytime</p>
+        <p className="pricing-note">Legally-Binding Asset Vault included &nbsp;·&nbsp; Secure PayPal billing &nbsp;·&nbsp; Cancel anytime</p>
       </section>
 
       <footer className="main-footer">

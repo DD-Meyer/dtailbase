@@ -1,35 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../axios_instance";
-import { fetchPricingWithFallback, isValidPricingPayload } from "../services/pricingService";
+import {
+  DEFAULT_PRICE_FALLBACKS,
+  extractPlanFeatures,
+  fetchPricingWithFallback,
+  isValidPricingPayload,
+} from "../services/pricingService";
 import "../styles/UpgradeValueCards.css";
 
-const PLAN_CONTENT = [
-  {
-    id: "PRO",
-    title: "Professional",
-    accent: "pro",
-    subtitle: "For growing detailing studios",
-    perks: [
-      "60 monthly bookings",
-      "10 users",
-      "10 before / 10 after images",
-      "Buffer timer automation",
-    ],
-  },
-  {
-    id: "ENTERPRISE",
-    title: "Enterprise",
-    accent: "elite",
-    subtitle: "For high-volume premium operations",
-    perks: [
-      "Unlimited bookings",
-      "50 users",
-      "25 before / 25 after images",
-      "Priority support + full history",
-    ],
-  },
-];
+// PLAN_CONTENT is now fetched from backend for single-source-of-truth
+// See useEffect below
 
 // Plan tier hierarchy for upgrade filtering
 const PLAN_TIER_RANK = {
@@ -38,14 +19,12 @@ const PLAN_TIER_RANK = {
   ENTERPRISE: 3,
 };
 
-const PRICE_FALLBACKS = {
-  USD: { PRO: "29.00", ENTERPRISE: "149.00" },
-
-};
+const PRICE_FALLBACKS = DEFAULT_PRICE_FALLBACKS;
 
 function UpgradeValueCards({ currentPlan }) {
   const [isMobile, setIsMobile] = useState(() => window.matchMedia("(max-width: 768px)").matches);
   const [pricing, setPricing] = useState(null);
+  const [planContent, setPlanContent] = useState([]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 768px)");
@@ -75,22 +54,55 @@ function UpgradeValueCards({ currentPlan }) {
             ),
           },
         });
+
+        // Features and plan content
+        setPlanContent([
+          {
+            id: "PRO",
+            title: "Professional",
+            accent: "pro",
+            subtitle: "Premium legal-grade engine for scaling studios",
+            perks: extractPlanFeatures(plansPricing, "PRO"),
+          },
+          {
+            id: "ENTERPRISE",
+            title: "Enterprise",
+            accent: "elite",
+            subtitle: "Liability-first infrastructure with service-level indemnity routing",
+            perks: extractPlanFeatures(plansPricing, "ENTERPRISE"),
+          },
+        ]);
       } catch {
         // Keep safe defaults if pricing endpoint is unavailable.
         setPricing({
           PRO: { amount: PRICE_FALLBACKS.USD.PRO },
           ENTERPRISE: { amount: PRICE_FALLBACKS.USD.ENTERPRISE },
         });
+        setPlanContent([
+          {
+            id: "PRO",
+            title: "Professional",
+            accent: "pro",
+            subtitle: "Premium legal-grade engine for scaling studios",
+            perks: extractPlanFeatures({}, "PRO"),
+          },
+          {
+            id: "ENTERPRISE",
+            title: "Enterprise",
+            accent: "elite",
+            subtitle: "Liability-first infrastructure with service-level indemnity routing",
+            perks: extractPlanFeatures({}, "ENTERPRISE"),
+          },
+        ]);
       }
     };
-
     fetchPricing();
   }, []);
 
   const visiblePlans = useMemo(() => {
     // Only show plans that are higher tier than current plan
     const currentTierRank = PLAN_TIER_RANK[currentPlan] || 0;
-    const upgradeablePlans = PLAN_CONTENT.filter(
+    const upgradeablePlans = planContent.filter(
       (plan) => PLAN_TIER_RANK[plan.id] > currentTierRank
     );
 
@@ -109,7 +121,7 @@ function UpgradeValueCards({ currentPlan }) {
 
     // STARTER or undefined - show PRO
     return upgradeablePlans.filter((plan) => plan.id === "PRO");
-  }, [currentPlan, isMobile]);
+  }, [currentPlan, isMobile, planContent]);
 
   if (!visiblePlans.length) {
     return null;
@@ -131,7 +143,7 @@ function UpgradeValueCards({ currentPlan }) {
     <section className="upgrade-value-wrap">
       <div className="upgrade-value-header">
         <h2>Scale Your Studio</h2>
-        <p>Unlock higher throughput, richer records, and team expansion.</p>
+        <p>Deploy legal-grade workflows with high-speed performance built for detailing bays.</p>
       </div>
       <div className="upgrade-value-grid">
         {visiblePlans.map((plan) => {

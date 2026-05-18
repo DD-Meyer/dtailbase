@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.http import FileResponse
 from rest_framework.exceptions import PermissionDenied
 from core.plan_limits import PLAN_CONFIG
+from core.models import Booking
 from .utils import generate_agreement_pdf  # Import your utility function for PDF generation
 
 
@@ -17,7 +18,18 @@ class LatestIndemnityTemplateView(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
-        # We filter by company and active status, then grab the newest version
+        booking_id = self.request.query_params.get("booking")
+
+        if booking_id:
+            booking = Booking.objects.filter(
+                id=booking_id,
+                company=self.request.user.company,
+            ).select_related("service__service_indemnity_template").first()
+
+            if booking and booking.service and booking.service.service_indemnity_template:
+                return booking.service.service_indemnity_template
+
+        # Fallback: active company template
         return IndemnityTemplate.objects.filter(
             company=self.request.user.company,
             is_active=True
@@ -112,9 +124,16 @@ class IndemnityTemplateListCreateView(generics.ListCreateAPIView):
         # (since they can't have history)
         company = self.request.user.company
         plan_limits = PLAN_CONFIG.get(company.plan, PLAN_CONFIG['STARTER'])
-        if plan_limits.get('indemnity_history_limit', 0) == 0:
-            if IndemnityTemplate.objects.filter(company=company).count() >= 1:
-                raise PermissionDenied("Starter plan is limited to one active template. Upgrade to manage multiple versions.")
+        history_limit = plan_limits.get('indemnity_history_limit', 0)
+        template_count = IndemnityTemplate.objects.filter(company=company).count()
+
+        if history_limit == 0 and template_count >= 1:
+            raise PermissionDenied("Starter plan is limited to one active template. Upgrade to manage multiple versions.")
+
+        if history_limit not in (0, float('inf')) and template_count >= history_limit:
+            raise PermissionDenied(
+                f"Your {company.plan} plan supports up to {history_limit} indemnity templates."
+            )
         
         # If this new one is active, deactivate other templates for this company
         if serializer.validated_data.get('is_active', True):

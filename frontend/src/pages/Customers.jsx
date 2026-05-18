@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useRef } from "react";
 import api from "../axios_instance";
 import "../styles/Customers.css";
 import "../styles/EditableRow.css";
@@ -12,9 +12,14 @@ function Customers() {
   const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [showImportReport, setShowImportReport] = useState(false);
+  const [importReport, setImportReport] = useState(null);
   const [editId, setEditId] = useState(null); // Track if we are editing
   const [formData, setFormData] = useState({ firstname: "", lastname: "", email: "", phone: "" });
   const { planLimits, currentPlan, nextPlan } = useCompany();
+  const csvInputRef = useRef(null);
+
+  const canUseCsvUpload = currentPlan === "PRO" || currentPlan === "ENTERPRISE";
 
   const fetchCustomers = async () => {
     try {
@@ -109,6 +114,97 @@ function Customers() {
     setShowModal(false);
   };
 
+  const handleDownloadTemplate = async () => {
+    try {
+      const res = await api.get("customers/template-csv/", { responseType: "blob" });
+      const blobUrl = URL.createObjectURL(new Blob([res.data], { type: "text/csv;charset=utf-8;" }));
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.setAttribute("download", "customers_template.csv");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      showToast("Could not download the CSV template right now.", "error");
+    }
+  };
+
+  const openCsvPicker = () => {
+    if (!canUseCsvUpload) {
+      showToast("CSV upload is available on Pro and Enterprise plans only.", "error");
+      return;
+    }
+    csvInputRef.current?.click();
+  };
+
+  const handleCsvSelected = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const payload = new FormData();
+    payload.append("file", file);
+
+    try {
+      const res = await api.post("customers/import-csv/", payload, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const data = res.data || {};
+      setImportReport({
+        created: data.created || 0,
+        duplicates: data.duplicates || 0,
+        skipped_due_limit: data.skipped_due_limit || 0,
+        failed_row_count: data.failed_row_count || 0,
+        total_rows: data.total_rows || 0,
+        failed_rows: data.failed_rows || [],
+      });
+      const summary = `Imported ${data.created || 0}. Duplicates ${data.duplicates || 0}. Limit-skipped ${data.skipped_due_limit || 0}. Invalid rows ${data.failed_row_count || 0}.`;
+      showToast(summary, "success");
+      setShowImportReport(true);
+      fetchCustomers();
+    } catch (err) {
+      const apiError = err.response?.data;
+      const message = apiError?.error || apiError?.detail || "CSV import failed.";
+      showToast(message, "error");
+    } finally {
+      e.target.value = "";
+    }
+  };
+
+  const downloadImportErrorsCsv = () => {
+    if (!importReport?.failed_rows?.length) {
+      showToast("No failed rows to export.", "info");
+      return;
+    }
+
+    const escapeCsv = (value) => {
+      const stringValue = String(value ?? "");
+      return `"${stringValue.replace(/"/g, '""')}"`;
+    };
+
+    const header = ["line", "reason", "firstname", "lastname", "email", "phone"];
+    const rows = importReport.failed_rows.map((row) => [
+      row.line,
+      row.reason,
+      row.firstname || "",
+      row.lastname || "",
+      row.email || "",
+      row.phone || "",
+    ]);
+    const csv = [header, ...rows].map((row) => row.map(escapeCsv).join(",")).join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "customer_import_errors.csv");
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
   const filtered = customers.filter(c => 
     `${c.firstname} ${c.lastname}`.toLowerCase().includes(search.toLowerCase())
   );
@@ -123,6 +219,24 @@ function Customers() {
           </div>
 
           <div className="page-banner-actions">
+            <input
+              ref={csvInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              style={{ display: "none" }}
+              onChange={handleCsvSelected}
+            />
+            <button className="btn btn-secondary" onClick={handleDownloadTemplate}>
+              Download CSV Template
+            </button>
+            <button
+              className={`btn ${canUseCsvUpload ? "btn-secondary" : "btn-disabled opacity-50"}`}
+              onClick={openCsvPicker}
+              disabled={!canUseCsvUpload}
+              title={canUseCsvUpload ? "Upload customers via CSV" : "Pro and Enterprise only"}
+            >
+              Import CSV
+            </button>
             <button 
               className={`btn ${isLimitReached ? 'btn-disabled opacity-50' : 'btn-primary'}`} 
               onClick={handleAddNew}
@@ -240,6 +354,56 @@ function Customers() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showImportReport && importReport && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>CSV Import Report</h2>
+
+            <div className="import-report-summary">
+              <p><strong>Total Rows:</strong> {importReport.total_rows}</p>
+              <p><strong>Created:</strong> {importReport.created}</p>
+              <p><strong>Duplicates:</strong> {importReport.duplicates}</p>
+              <p><strong>Skipped (Plan Limit):</strong> {importReport.skipped_due_limit}</p>
+              <p><strong>Invalid Rows:</strong> {importReport.failed_row_count}</p>
+            </div>
+
+            {importReport.failed_rows.length > 0 ? (
+              <div className="import-report-failures">
+                <h3>Invalid Row Details</h3>
+                <ul>
+                  {importReport.failed_rows.map((row) => (
+                    <li key={`${row.line}-${row.reason}`}>
+                      <strong>Line {row.line}:</strong> {row.reason}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p>No invalid rows were found.</p>
+            )}
+
+            <div className="flex gap-2 mt-4">
+              {importReport.failed_rows.length > 0 && (
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={downloadImportErrorsCsv}
+                >
+                  Download Error CSV
+                </button>
+              )}
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => setShowImportReport(false)}
+              >
+                Close Report
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -92,10 +92,18 @@ function IndemnitySettings() {
       setTimeout(() => setMsg(""), 3000);
     } catch (err) {
       // Check if backend sent a specific error message
+      const errorData = err.response?.data;
+      const normalizeFieldError = (value) => {
+        if (Array.isArray(value)) return value[0];
+        return value;
+      };
+
       const errorDetail =
-        err.response?.data?.template_pdf ||
-        err.response?.data?.version ||
-        err.response?.data?.detail ||
+        normalizeFieldError(errorData?.template_pdf) ||
+        normalizeFieldError(errorData?.version) ||
+        normalizeFieldError(errorData?.body_html) ||
+        normalizeFieldError(errorData?.detail) ||
+        normalizeFieldError(errorData?.error) ||
         "Error saving template.";
       setMsg(errorDetail);
     }

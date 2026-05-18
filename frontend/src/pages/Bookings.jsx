@@ -8,6 +8,7 @@ import UpgradeValueCards from "../components/UpgradeValueCards";
 import PlanUsageBanner from "../components/PlanUsageBanner";
 import { Camera, CheckCheckIcon, Lock, Plus, Share2, Signature, Timer, CheckIcon, SlidersHorizontal } from "lucide-react";
 import { showConfirm } from "../utils/uiFeedback";
+import { resizeImagesToPlanLimit } from "../utils/imageResize";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 
@@ -123,6 +124,8 @@ function Bookings() {
 
   // At the top of your Bookings function
   const maxAfterPhotos = planLimits?.max_images_after ?? 2;
+  const maxImageWidth = planLimits?.max_image_width ?? 1280;
+  const maxImageHeight = planLimits?.max_image_height ?? 720;
 
   const [afterPhotos, setAfterPhotos] = useState([]); 
   const [previews, setPreviews] = useState([]);
@@ -147,7 +150,7 @@ function Bookings() {
   }, []);
 
   // 2. Add the mirror functions from IndemnityForm
-  const handlePhotoChange = (e) => {
+  const handlePhotoChange = async (e) => {
     const files = Array.from(e.target.files);
     
     // Calculate how many more photos are allowed
@@ -165,9 +168,21 @@ function Bookings() {
       triggerToast(`Only the first ${remainingSlots} photos were added due to plan limits.`, "info");
     }
 
-    setAfterPhotos((prev) => [...prev, ...allowedFiles]);
-    const newPreviews = allowedFiles.map((file) => URL.createObjectURL(file));
-    setPreviews((prev) => [...prev, ...newPreviews]);
+    try {
+      const resizedFiles = await resizeImagesToPlanLimit(
+        allowedFiles,
+        maxImageWidth,
+        maxImageHeight
+      );
+      setAfterPhotos((prev) => [...prev, ...resizedFiles]);
+      const newPreviews = resizedFiles.map((file) => URL.createObjectURL(file));
+      setPreviews((prev) => [...prev, ...newPreviews]);
+    } catch (resizeError) {
+      console.error("Image resize failed:", resizeError);
+      triggerToast("Could not process one or more images. Please try again.", "error");
+    } finally {
+      e.target.value = "";
+    }
   };
 
   const removePhoto = (index) => {
@@ -268,7 +283,13 @@ function Bookings() {
       closeModal();
     } catch (err) {
       console.error("Upload error details:", err.response?.data || err.message);
-      triggerToast("Failed to upload photos", "error");
+      const apiError = err.response?.data;
+      const errorMessage =
+        apiError?.uploaded_images?.[0] ||
+        apiError?.detail ||
+        apiError?.error ||
+        "Failed to upload photos";
+      triggerToast(errorMessage, "error");
     } finally {
       setIsUploading(false);
     }
@@ -342,6 +363,8 @@ function Bookings() {
                 {company?.plan ? company.plan.charAt(0) + company.plan.slice(1).toLowerCase() : 'Plan'} Limit: {afterPhotos.length} / {maxAfterPhotos}
               </span>
             </div>
+
+            <p className="text-muted">Resolution cap: up to {maxImageWidth}x{maxImageHeight} per photo.</p>
 
             <p className="text-muted">Upload "After" photos to finish the job.</p>
             

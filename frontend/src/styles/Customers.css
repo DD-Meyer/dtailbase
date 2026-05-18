@@ -170,6 +170,37 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+.import-report-summary {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.import-report-summary p {
+  margin: 0.2rem 0;
+  color: #0f172a;
+}
+
+.import-report-failures h3 {
+  margin: 0 0 0.5rem;
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+.import-report-failures ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.import-report-failures li {
+  margin-bottom: 0.4rem;
+  color: #334155;
+}
+
 /* --- 5. ANIMATIONS --- */
 @keyframes modalFade {
   from { opacity: 0; transform: scale(0.95); }

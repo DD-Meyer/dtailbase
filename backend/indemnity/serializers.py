@@ -8,6 +8,8 @@ from .models import *
 from core.models import *
 from drf_extra_fields.fields import Base64ImageField
 from core.plan_limits import PLAN_CONFIG
+from core.image_processing import resize_image_to_plan_limit
+from core.storage_policy import enforce_company_storage_limit
 from geopy.geocoders import Nominatim
 from pypdf import PdfReader
 # indemnity/serializers.py
@@ -15,6 +17,7 @@ from .utils import generate_agreement_pdf
 
 
 def extract_pdf_text(uploaded_pdf):
+    uploaded_pdf.seek(0)
     pdf = PdfReader(uploaded_pdf)
     pages = []
     for page in pdf.pages:
@@ -95,6 +98,10 @@ class IndemnityTemplateSerializer(serializers.ModelSerializer):
         if not filename.lower().endswith('.pdf'):
             raise serializers.ValidationError("Please upload a PDF file.")
 
+        incoming_size = int(getattr(value, 'size', 0) or 0)
+        replacing = [self.instance.template_pdf] if getattr(self, 'instance', None) and self.instance.template_pdf else []
+        enforce_company_storage_limit(company, incoming_bytes=incoming_size, replacing_file_fields=replacing)
+
         return value
 
     def validate(self, attrs):
@@ -102,9 +109,16 @@ class IndemnityTemplateSerializer(serializers.ModelSerializer):
         uploaded_pdf = attrs.get("template_pdf")
         body_html = (attrs.get("body_html") or "").strip()
         title = (attrs.get("title") or "").strip()
+        company = getattr(getattr(self.context.get("request"), "user", None), "company", None)
 
         if uploaded_pdf:
-            extracted_text = extract_pdf_text(uploaded_pdf)
+            try:
+                extracted_text = extract_pdf_text(uploaded_pdf)
+            except Exception:
+                raise serializers.ValidationError({
+                    "template_pdf": "We could not read this PDF. Please upload a valid searchable PDF or type the indemnity text manually."
+                })
+
             if not extracted_text:
                 raise serializers.ValidationError({
                     "template_pdf": "The uploaded PDF did not contain selectable text. Please upload a searchable PDF or type the indemnity text manually."
@@ -117,7 +131,6 @@ class IndemnityTemplateSerializer(serializers.ModelSerializer):
                 attrs["title"] = derive_title_from_pdf(uploaded_pdf)
 
             if not attrs.get("version"):
-                company = getattr(getattr(self.context.get("request"), "user", None), "company", None)
                 if company:
                     latest_version = (
                         IndemnityTemplate.objects.filter(company=company)
@@ -128,6 +141,16 @@ class IndemnityTemplateSerializer(serializers.ModelSerializer):
                     attrs["version"] = (latest_version or 0) + 1
                 elif instance:
                     attrs["version"] = instance.version
+
+        selected_version = attrs.get("version") or (instance.version if instance else None)
+        if company and selected_version:
+            existing = IndemnityTemplate.objects.filter(company=company, version=selected_version)
+            if instance:
+                existing = existing.exclude(id=instance.id)
+            if existing.exists():
+                raise serializers.ValidationError({
+                    "version": f"Version {selected_version} already exists. Please choose a new version number."
+                })
 
         if not (attrs.get("body_html") or (instance and instance.body_html)):
             raise serializers.ValidationError({
@@ -223,6 +246,19 @@ class IndemnityAgreementSerializer(serializers.ModelSerializer):
                 "uploaded_images": f"Your {company.plan} plan allows a maximum of {plan_limits['max_images_before']} 'Before' photos."
             })
 
+        # Resolution lock by plan: downscale oversized images while preserving aspect ratio.
+        max_width = plan_limits.get('max_image_width', 1280)
+        max_height = plan_limits.get('max_image_height', 720)
+        resized_images_data = [
+            resize_image_to_plan_limit(image, max_width, max_height)
+            for image in images_data
+        ]
+
+        signature_image = validated_data.get('signature_image')
+        incoming_storage_bytes = int(getattr(signature_image, 'size', 0) or 0)
+        incoming_storage_bytes += sum(int(getattr(image, 'size', 0) or 0) for image in resized_images_data)
+        enforce_company_storage_limit(company, incoming_bytes=incoming_storage_bytes)
+
         # SIGNING IS ALLOWED FOR ALL PLANS
         # Plan limits (indemnity_history_limit) only control what records are visible in list views
         # They do NOT block the creation or signing of new indemnity agreements
@@ -253,7 +289,7 @@ class IndemnityAgreementSerializer(serializers.ModelSerializer):
             agreement = IndemnityAgreement.objects.create(**validated_data)
             
             # Save binary files as 'BEFORE' photos
-            for image in images_data:
+            for image in resized_images_data:
                 VehiclePhoto.objects.create(
                     agreement=agreement,
                     image=image,

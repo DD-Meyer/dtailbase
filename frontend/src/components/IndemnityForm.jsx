@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import "../styles/Indemnity.css";
 import { formatShortRef } from "../utils/formatters";
 import { useCompany } from "../context/CompanyContext";
+import { resizeImagesToPlanLimit } from "../utils/imageResize";
 
 function IndemnityForm() {
   const { bookingId } = useParams();
@@ -23,6 +24,8 @@ function IndemnityForm() {
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
   // Inside IndemnityForm component
   const maxBeforePhotos = planLimits?.max_images_before ?? 2; // Default to 2 if not loaded yet
+  const maxImageWidth = planLimits?.max_image_width ?? 1280;
+  const maxImageHeight = planLimits?.max_image_height ?? 720;
 
   // Add preview state at the top of Bookings component
   const [beforePhotos, setBeforePhotos] = useState([]);
@@ -35,7 +38,7 @@ function IndemnityForm() {
         // We only need these two now! Company is already in Context.
         const [bookingRes, templateRes] = await Promise.all([
           api.get(`bookings/${bookingId}/`),
-          api.get("indemnity/template/latest/")
+          api.get("indemnity/template/latest/", { params: { booking: bookingId } })
         ]);
 
         setBookingData(bookingRes.data);
@@ -62,7 +65,7 @@ function IndemnityForm() {
   //   setPreviews((prev) => [...prev, ...newPreviews]);
   // };
 
-  const handlePhotoChange = (e) => {
+  const handlePhotoChange = async (e) => {
     const files = Array.from(e.target.files);
     
     // Calculate how many more photos are allowed
@@ -80,9 +83,21 @@ function IndemnityForm() {
       triggerToast(`Only the first ${remainingSlots} photos were added due to plan limits.`, "info");
     }
 
-    setBeforePhotos((prev) => [...prev, ...allowedFiles]);
-    const newPreviews = allowedFiles.map((file) => URL.createObjectURL(file));
-    setPreviews((prev) => [...prev, ...newPreviews]);
+    try {
+      const resizedFiles = await resizeImagesToPlanLimit(
+        allowedFiles,
+        maxImageWidth,
+        maxImageHeight
+      );
+      setBeforePhotos((prev) => [...prev, ...resizedFiles]);
+      const newPreviews = resizedFiles.map((file) => URL.createObjectURL(file));
+      setPreviews((prev) => [...prev, ...newPreviews]);
+    } catch (resizeError) {
+      console.error("Image resize failed:", resizeError);
+      triggerToast("Could not process one or more images. Please try again.", "error");
+    } finally {
+      e.target.value = "";
+    }
   };
 
   const removePhoto = (index) => {
@@ -284,6 +299,7 @@ function IndemnityForm() {
                   : "Plan"} limit: {maxBeforePhotos})
               </span>
             </p>
+            <p className="limit-hint">Resolution cap: up to {maxImageWidth}x{maxImageHeight} per photo.</p>
             <div className="photo-grid">
               {previews.map((url, index) => (
                 <div key={index} className="photo-preview-item">

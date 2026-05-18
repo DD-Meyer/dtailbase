@@ -5,7 +5,12 @@ import { useCompany } from '../context/CompanyContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { showToast } from '../utils/uiFeedback';
-import { fetchPricingWithFallback, isValidPricingPayload } from '../services/pricingService';
+import {
+  DEFAULT_PRICE_FALLBACKS,
+  extractPlanFeatures,
+  fetchPricingWithFallback,
+  isValidPricingPayload,
+} from '../services/pricingService';
 
 const PLAN_ORDER = {
   STARTER: 0,
@@ -13,9 +18,7 @@ const PLAN_ORDER = {
   ENTERPRISE: 2,
 };
 
-const PRICE_FALLBACKS = {
-  USD: { PRO: '29.00', ENTERPRISE: '149.00' },
-};
+const PRICE_FALLBACKS = DEFAULT_PRICE_FALLBACKS;
 
 const detectBrowserCurrency = () => {
   return 'USD';
@@ -25,6 +28,7 @@ const Plans = () => {
   const [loading, setLoading] = useState(false);
   const [currency, setCurrency] = useState(detectBrowserCurrency());
   const [pricing, setPricing] = useState(null);
+  const [plansData, setPlansData] = useState({});
   const [error, setError] = useState(null);
   const [actionMessage, setActionMessage] = useState('');
   const [actionError, setActionError] = useState('');
@@ -103,28 +107,29 @@ const Plans = () => {
 
         const detectedCurrency = (response.data?.currency || 'USD').toUpperCase();
         const priceData = response.data?.pricing;
-        const plansData = response.data?.plans;
+        const fetchedPlansData = response.data?.plans || {};
         const fallbackCurrencyPricing = PRICE_FALLBACKS[detectedCurrency] || PRICE_FALLBACKS.USD;
 
         const normalizedPricing = {
           PRO: {
             amount:
               priceData?.PRO?.amount ||
-              plansData?.PRO?.price ||
+              fetchedPlansData?.PRO?.price ||
               fallbackCurrencyPricing.PRO,
-            currency: plansData?.PRO?.currency || detectedCurrency,
+            currency: fetchedPlansData?.PRO?.currency || detectedCurrency,
           },
           ENTERPRISE: {
             amount:
               priceData?.ENTERPRISE?.amount ||
-              plansData?.ENTERPRISE?.price ||
+              fetchedPlansData?.ENTERPRISE?.price ||
               fallbackCurrencyPricing.ENTERPRISE,
-            currency: plansData?.ENTERPRISE?.currency || detectedCurrency,
+            currency: fetchedPlansData?.ENTERPRISE?.currency || detectedCurrency,
           },
         };
 
         setCurrency(detectedCurrency);
         setPricing(normalizedPricing);
+        setPlansData(fetchedPlansData);
         setError(null);
       } catch (err) {
         console.error('Error fetching pricing:', err);
@@ -143,6 +148,7 @@ const Plans = () => {
             currency: fallbackCurrency,
           },
         });
+        setPlansData({});
         setError(null);
       } finally {
         setLoading(false);
@@ -156,48 +162,29 @@ const Plans = () => {
     return curr === 'ZAR' ? 'R' : '$';
   };
 
+  // Features are now fetched from backend for single-source-of-truth
   const plans = [
     {
       id: 'STARTER',
       name: 'Starter',
       description: 'Essential tools for solo detailers.',
-      features: [
-        '10 Monthly Bookings',
-        '1 User Account',
-        '2 Before / 2 After Photos',
-        'Basic Digital Waivers',
-        'Up to 1,000 Customers',
-      ],
+      features: extractPlanFeatures(plansData, 'STARTER'),
       featured: false,
       cta: 'Current Plan',
     },
     {
       id: 'PRO',
       name: 'Professional',
-      description: 'Built for growing studios and small teams.',
-      features: [
-        '60 Monthly Bookings',
-        '10 Team Members',
-        '10 Before / 10 After Photos',
-        '5-Record Indemnity History',
-        'Buffer Timer Enabled',
-        'Unlimited Customers',
-      ],
+      description: 'Premium legal-grade operations for growth-focused studios.',
+      features: extractPlanFeatures(plansData, 'PRO'),
       featured: true,
       cta: 'Upgrade to Pro',
     },
     {
       id: 'ENTERPRISE',
       name: 'Enterprise',
-      description: 'Maximum performance for high-volume franchises.',
-      features: [
-        'Unlimited Bookings',
-        '50 Team Members',
-        '25 Before / 25 After Photos',
-        'Lifetime Legal History',
-        'Priority Bay Support',
-        'Unlimited Customers',
-      ],
+      description: 'Enterprise-grade liability protection with service-specific indemnity routing for high-volume bays.',
+      features: extractPlanFeatures(plansData, 'ENTERPRISE'),
       featured: false,
       cta: 'Go Elite',
     },
