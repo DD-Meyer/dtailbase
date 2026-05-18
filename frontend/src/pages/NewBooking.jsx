@@ -4,6 +4,7 @@ import SignatureCanvas from "react-signature-canvas";
 import api from "../axios_instance";
 import "../styles/NewBooking.css";
 import { useCompany } from "../context/CompanyContext";
+import { showToast } from "../utils/uiFeedback";
 
 const STEPS = [
   { id: 1, label: "Customer" },
@@ -95,15 +96,22 @@ const NewBooking = () => {
   };
 
   const nextStep = () => {
-    if (step === 1 && (!formData.customer || !formData.vehicle)) return alert("Select customer and vehicle.");
-    if (step === 2 && (!formData.booking_time)) return alert("Please select an available time slot.");
+    if (step === 1 && (!formData.customer || !formData.vehicle)) {
+      showToast("Select customer and vehicle.", "error");
+      return;
+    }
+    if (step === 2 && (!formData.booking_time)) {
+      showToast("Please select an available time slot.", "error");
+      return;
+    }
     setStep(step + 1);
   };
 
   const handleSubmit = async () => {
     // 1. Validation check
     if (!sigPad.current || sigPad.current.isEmpty()) {
-      return alert("Signature required to authorize this booking.");
+      showToast("Signature required to authorize this booking.", "error");
+      return;
     }
 
     setSubmitting(true);
@@ -136,7 +144,7 @@ const NewBooking = () => {
     } catch (err) {
       console.error("FULL ERROR:", err);
       if (planLimits) {
-        alert(`You have reached your plan limit: ${planLimits.monthly_bookings} bookings per month.`);
+        showToast(`You have reached your plan limit: ${planLimits.monthly_bookings} bookings per month.`, "error");
       }
     } finally {
       setSubmitting(false);

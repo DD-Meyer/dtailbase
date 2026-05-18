@@ -7,6 +7,8 @@ from rest_framework import status
 import hashlib
 from rest_framework.permissions import IsAuthenticated
 from django.http import FileResponse
+from rest_framework.exceptions import PermissionDenied
+from core.plan_limits import PLAN_CONFIG
 from .utils import generate_agreement_pdf  # Import your utility function for PDF generation
 
 

@@ -1,6 +1,9 @@
 from rest_framework import permissions
+import logging
 
 from accounts.models import Company
+
+logger = logging.getLogger(__name__)
 
 class IsCompanyUser(permissions.BasePermission):
     """
@@ -61,10 +64,21 @@ class CanUpdateBookingStatus(permissions.BasePermission):
 class IsAccountAdmin(permissions.BasePermission):
     """
     Permission to allow access only to users with the 'OWNER' role.
+    🔒 STRICT: Only OWNER role can access payment/company settings.
+    STAFF users are explicitly denied from upgrade/payment endpoints.
     """
     def has_permission(self, request, view):
-        return bool(
-            request.user and 
-            request.user.is_authenticated and 
-            request.user.role == 'OWNER'  # Changed from 'ADMIN' to 'OWNER'
-        )
+        # Must be authenticated
+        if not (request.user and request.user.is_authenticated):
+            return False
+        
+        # CRITICAL: Must be OWNER role - STAFF is NOT allowed
+        if request.user.role != 'OWNER':
+            # Log denied attempts for audit
+            logger.warning(
+                f"SECURITY: {request.user.role} user {request.user.email} "
+                f"attempted to access {view.__class__.__name__} endpoint"
+            )
+            return False
+        
+        return True

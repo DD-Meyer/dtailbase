@@ -5,7 +5,9 @@ import "../styles/Bookings.css";
 import { useNavigate } from "react-router-dom";
 import { useCompany } from "../context/CompanyContext";
 import UpgradeValueCards from "../components/UpgradeValueCards";
+import PlanUsageBanner from "../components/PlanUsageBanner";
 import { Camera, CheckCheckIcon, Lock, Plus, Share2, Signature, Timer, CheckIcon, SlidersHorizontal } from "lucide-react";
+import { showConfirm } from "../utils/uiFeedback";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "";
 
@@ -98,7 +100,7 @@ function Bookings() {
   const [showFilters, setShowFilters] = useState(() => window.innerWidth > TABLET_BREAKPOINT);
 
   // Inside Bookings function
-  const { planLimits, usageStats, company, refreshCompany } = useCompany();
+  const { planLimits, usageStats, company, nextPlan, refreshCompany } = useCompany();
 
   // 1. Get the current count from usageStats (matching your context)
   const monthlyUsage = usageStats?.monthly_bookings || 0;
@@ -424,6 +426,17 @@ function Bookings() {
       </div>
 
       <UpgradeValueCards currentPlan={company?.plan} />
+      <PlanUsageBanner
+        metrics={[
+          {
+            label: "Bookings this month",
+            used: monthlyUsage,
+            total: planLimits?.monthly_bookings ?? 10,
+          },
+        ]}
+        currentPlan={company?.plan}
+        nextPlan={nextPlan}
+      />
 
       {isCompactView && (
         <div className="bookings-filters-toggle-wrap mb-4">
@@ -649,19 +662,25 @@ function Bookings() {
                     {!['IN_PROGRESS', 'COMPLETED'].includes(b.status) ? (
                       <button 
                         className="text-btn-danger" 
-                        onClick={(e) => {
+                        onClick={async (e) => {
                           e.stopPropagation();
-                          if (window.confirm("Are you sure you want to delete this booking?")) {
-                            api.delete(`bookings/${b.id}/`)
-                              .then(() => {
-                                triggerToast("Booking deleted successfully", "success");
-                                fetchBookings();
-                              })
-                              .catch((err) => {
-                                const errorMsg = err.response?.data?.error || "Delete failed";
-                                triggerToast(errorMsg, "error");
-                              });
-                          }
+                          const confirmed = await showConfirm({
+                            title: "Delete booking",
+                            message: "Are you sure you want to delete this booking?",
+                            confirmText: "Delete",
+                            danger: true,
+                          });
+                          if (!confirmed) return;
+
+                          api.delete(`bookings/${b.id}/`)
+                            .then(() => {
+                              triggerToast("Booking deleted successfully", "success");
+                              fetchBookings();
+                            })
+                            .catch((err) => {
+                              const errorMsg = err.response?.data?.error || "Delete failed";
+                              triggerToast(errorMsg, "error");
+                            });
                         }}
                       >
                         Delete

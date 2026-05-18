@@ -13,6 +13,7 @@ class IndemnityTemplate(models.Model):
     body_html = models.TextField()
     version = models.PositiveIntegerField()
     is_active = models.BooleanField(default=True)
+    template_pdf = models.FileField(upload_to="indemnity_templates/", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -62,6 +63,9 @@ class IndemnityAgreement(models.Model):
     signature_image = models.ImageField(upload_to="signatures/", null=True, blank=True)
     pdf_file = models.FileField(upload_to="indemnity_pdfs/", null=True, blank=True)
     document_hash = models.CharField(max_length=64, null=True, blank=True)
+    signed_body_html = models.TextField(blank=True, default="")
+    signed_template_title = models.CharField(max_length=255, blank=True, default="")
+    signed_template_version = models.PositiveIntegerField(null=True, blank=True)
 
     def __str__(self):
         return f"Indemnity for booking {self.booking_id}"

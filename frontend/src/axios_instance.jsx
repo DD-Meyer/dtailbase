@@ -1,5 +1,5 @@
 import axios from "axios";
-import { clearAuthStorage, getAccessToken } from "./utils/authStorage";
+import { clearAuthStorage, getAccessToken, getRefreshToken, setAccessToken } from "./utils/authStorage";
 
 const configuredApiUrl = (import.meta.env.VITE_API_URL || "").trim();
 
@@ -10,6 +10,54 @@ const api = axios.create({
   baseURL: configuredApiUrl || "/api",
   withCredentials: true,
 });
+
+const refreshApi = axios.create({
+  baseURL: configuredApiUrl || "/api",
+  withCredentials: true,
+});
+
+let isRefreshing = false;
+let refreshSubscribers = [];
+
+const isAuthRequest = (url = "") => {
+  const normalizedUrl = String(url).replace(/^\/+/, "");
+  return (
+    normalizedUrl.startsWith("token/") ||
+    normalizedUrl.startsWith("auth/google-login/")
+  );
+};
+
+const onRefreshed = (newAccessToken) => {
+  refreshSubscribers.forEach((callback) => callback(newAccessToken));
+  refreshSubscribers = [];
+};
+
+const subscribeTokenRefresh = (callback) => {
+  refreshSubscribers.push(callback);
+};
+
+const refreshAccessToken = async () => {
+  const refreshToken = getRefreshToken();
+
+  if (!refreshToken) {
+    throw new Error("Missing refresh token");
+  }
+
+  const response = await refreshApi.post("token/refresh/", { refresh: refreshToken });
+  const newAccessToken = response?.data?.access;
+
+  if (!newAccessToken) {
+    throw new Error("Token refresh response missing access token");
+  }
+
+  setAccessToken(newAccessToken);
+  return newAccessToken;
+};
+
+const forceLogout = () => {
+  clearAuthStorage();
+  window.location.href = "/login";
+};
 
 // REQUEST: Attach the token to every call
 api.interceptors.request.use(
@@ -41,24 +89,57 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// RESPONSE: Watch for session expiration (401 errors)
 api.interceptors.response.use(
-  (response) => response, // If the request is successful, do nothing
-  (error) => {
-    // Check if the error is a 401 (Unauthorized)
-    // To this:
-    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      console.warn("Session expired or unauthorized. Logging out...");
-      
-      // 1. Clear all auth storage so AuthContext fails auth on reload
-      clearAuthStorage();
+  (response) => response,
+  async (error) => {
+    const originalRequest = error?.config;
+    const status = error?.response?.status;
 
-      // 2. Force a redirect to login
-      // We use window.location.href because this file is outside the 
-      // React Component tree and cannot use useNavigate()
-      window.location.href = "/login";
+    if (!originalRequest || status !== 401) {
+      return Promise.reject(error);
     }
-    return Promise.reject(error);
+
+    if (isAuthRequest(originalRequest.url)) {
+      return Promise.reject(error);
+    }
+
+    if (originalRequest._retry) {
+      forceLogout();
+      return Promise.reject(error);
+    }
+
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        subscribeTokenRefresh((newAccessToken) => {
+          if (!newAccessToken) {
+            reject(error);
+            return;
+          }
+
+          originalRequest.headers = originalRequest.headers || {};
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          resolve(api(originalRequest));
+        });
+      });
+    }
+
+    originalRequest._retry = true;
+    isRefreshing = true;
+
+    try {
+      const newAccessToken = await refreshAccessToken();
+      onRefreshed(newAccessToken);
+
+      originalRequest.headers = originalRequest.headers || {};
+      originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+      return api(originalRequest);
+    } catch (refreshError) {
+      onRefreshed(null);
+      forceLogout();
+      return Promise.reject(refreshError);
+    } finally {
+      isRefreshing = false;
+    }
   }
 );
 

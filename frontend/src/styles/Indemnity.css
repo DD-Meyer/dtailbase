@@ -4,9 +4,9 @@
   max-width: 800px;
   margin: 2rem auto;
   background: white;
-  padding: 2.5rem;
-  border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  padding: 2.4rem;
+  border-radius: 18px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
   border: 1px solid var(--border-color);
 }
 
@@ -27,17 +27,17 @@
 
 /* --- 2. TERMS & CONDITIONS VIEWPORT --- */
 .template-body-html {
-  background: #f8fafc;
-  padding: 1.5rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #fdfefe 100%);
+  padding: 1.25rem;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  max-height: 300px;
+  border-radius: 14px;
+  max-height: min(52vh, 360px);
   overflow-y: auto;
   margin: 1.5rem 0;
   font-size: 0.9rem;
   line-height: 1.6;
   color: #334155;
-  /* Custom scrollbar for a cleaner look */
+  scrollbar-width: thin;
 }
 
 .template-body-html::-webkit-scrollbar {
@@ -217,7 +217,7 @@
   .indemnity-card {
     margin: 1rem;
     padding: 1.25rem;
-    border-radius: 12px;
+    border-radius: 16px;
   }
 
   .indemnity-card h1 {
@@ -225,8 +225,8 @@
   }
 
   .template-body-html {
-    max-height: 240px;
-    padding: 1rem;
+    max-height: 46vh;
+    padding: 0.95rem;
   }
 
   .photo-grid {

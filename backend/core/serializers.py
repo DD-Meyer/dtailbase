@@ -290,7 +290,7 @@ class BookingListSerializer(serializers.ModelSerializer):
 class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
-        fields = ["id", "name", "description", "duration_minutes", "base_price"]
+        fields = ["id", "name", "description", "duration_minutes", "base_price", "is_active"]
 
 # core/serializers.py
 
@@ -500,6 +500,19 @@ class UserSerializer(serializers.ModelSerializer):
                 return User.objects.create_user(**validated_data)
 
     def update(self, instance, validated_data):
+        request = self.context.get('request')
+
+        # Safety lock: an owner cannot demote their own account to staff.
+        if (
+            request
+            and request.user == instance
+            and instance.role == 'OWNER'
+            and validated_data.get('role') == 'STAFF'
+        ):
+            raise serializers.ValidationError({
+                'role': 'Owner safety lock: You cannot change your own account role to Staff.'
+            })
+
         password = validated_data.pop('password', None)
         # Standard update for other fields
         for attr, value in validated_data.items():
@@ -528,7 +541,7 @@ class CompanySerializer(serializers.ModelSerializer):
                   'location_verification_score', 'location_verification_notes', 'location_verified_at',
                   'location_verification_document']
         read_only_fields = [
-            'id', 'created_at',
+            'id', 'created_at', 'plan',  # 🔒 CRITICAL: plan is now read-only - changes only via PayPal webhooks
             'requested_country_code', 'requested_currency', 'location_verification_status',
             'location_verification_score', 'location_verification_notes', 'location_verified_at',
             'location_verification_document'
@@ -575,6 +588,9 @@ class CompanySerializer(serializers.ModelSerializer):
         return None
 
 class MyTokenSerializer(TokenObtainPairSerializer):
+    mobile_app = serializers.BooleanField(required=False, default=False, write_only=True)
+    remember_me = serializers.BooleanField(required=False, default=True, write_only=True)
+
     @staticmethod
     def build_user_payload(user):
         return {
@@ -589,6 +605,16 @@ class MyTokenSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         data = super().validate(attrs)
+
+        mobile_app = bool(attrs.get("mobile_app", False))
+        remember_me = bool(attrs.get("remember_me", True))
+
+        if mobile_app and remember_me:
+            refresh = self.get_token(self.user)
+            refresh.set_exp(lifetime=timedelta(days=45))
+            data["refresh"] = str(refresh)
+            data["access"] = str(refresh.access_token)
+
         data['user'] = self.build_user_payload(self.user)
         return data
 

@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import "../styles/Login.css"
+import { showToast } from "../utils/uiFeedback";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -21,6 +22,22 @@ function Login() {
   const googleButtonRef = useRef(null);
   const didRenderGoogleButtonRef = useRef(false);
   const googleClientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID || "").trim();
+
+  const detectInstalledMobileApp = () => {
+    const userAgent = (typeof navigator !== "undefined" ? navigator.userAgent : "") || "";
+    const isMobileDevice = /android|iphone|ipad|ipod|mobile/i.test(userAgent);
+    const isStandaloneDisplay = typeof window !== "undefined" && (
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.matchMedia("(display-mode: fullscreen)").matches ||
+      window.matchMedia("(display-mode: minimal-ui)").matches
+    );
+    const isIosStandalone = typeof window !== "undefined" && window.navigator?.standalone === true;
+    const isAndroidTwa = typeof document !== "undefined" && document.referrer.startsWith("android-app://");
+
+    return isMobileDevice && (isStandaloneDisplay || isIosStandalone || isAndroidTwa);
+  };
+
+  const useMobilePersistence = detectInstalledMobileApp();
 
   useEffect(() => {
     let isMounted = true;
@@ -91,6 +108,8 @@ function Login() {
             try {
               const authResponse = await api.post("auth/google-login/", {
                 credential: response.credential,
+                mobile_app: useMobilePersistence,
+                remember_me: rememberMe,
               });
 
               completeLogin(authResponse.data);
@@ -150,7 +169,9 @@ function Login() {
     try {
       const res = await api.post("token/", { 
         email: email, 
-        password: password 
+        password: password,
+        mobile_app: useMobilePersistence,
+        remember_me: rememberMe,
       }); 
       
       completeLogin(res.data);
@@ -160,9 +181,9 @@ function Login() {
       
       // Check if the server is actually reachable
       if (!err.response) {
-        alert("Server is offline or CORS issue.");
+          showToast("Server is offline or CORS issue.", "error");
       } else {
-        alert(err.response.data.detail || "Invalid Email or Password");
+          showToast(err.response.data.detail || "Invalid Email or Password", "error");
       }
     } finally {
       setIsLoading(false);

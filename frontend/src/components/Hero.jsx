@@ -1,10 +1,66 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import PublicHeader from './PublicHeader';
 import '../styles/Hero.css';
+import api from '../axios_instance';
+import { fetchPricingWithFallback, isValidPricingPayload } from '../services/pricingService';
+
+const HERO_PLANS = [
+  {
+    id: 'STARTER',
+    name: 'Starter',
+    description: 'Perfect for solo detailers just getting started.',
+    features: [
+      '10 Monthly Bookings',
+      '1 User Account',
+      '2 Before / 2 After Photos',
+      'Basic Digital Waivers',
+      'Up to 1,000 Customers',
+    ],
+    featured: false,
+    cta: 'Get Started Free',
+    isFree: true,
+  },
+  {
+    id: 'PRO',
+    name: 'Professional',
+    description: 'Built for growing studios and small teams.',
+    features: [
+      '60 Monthly Bookings',
+      '10 Team Members',
+      '10 Before / 10 After Photos',
+      '5-Record Indemnity History',
+      'Buffer Timer Enabled',
+      'Unlimited Customers',
+    ],
+    featured: true,
+    cta: 'Start Free Trial',
+    isFree: false,
+  },
+  {
+    id: 'ENTERPRISE',
+    name: 'Enterprise',
+    description: 'Maximum performance for high-volume franchises.',
+    features: [
+      'Unlimited Bookings',
+      '50 Team Members',
+      '25 Before / 25 After Photos',
+      'Lifetime Legal History',
+      'Priority Support',
+      'Unlimited Customers',
+    ],
+    featured: false,
+    cta: 'Go Elite',
+    isFree: false,
+  },
+];
+
+const PRICE_FALLBACKS = { PRO: '29.00', ENTERPRISE: '149.00' };
 
 const Hero = ({ isAuthenticated }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [heroPricing, setHeroPricing] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
 
@@ -69,6 +125,47 @@ const Hero = ({ isAuthenticated }) => {
     };
   }, [isMenuOpen]);
 
+  useEffect(() => {
+    const loadPricing = async () => {
+      try {
+        const response = await fetchPricingWithFallback(api, 'Hero');
+        if (!isValidPricingPayload(response.data)) throw new Error('Invalid pricing');
+        const apiPricing = response.data?.pricing || {};
+        const plansPricing = response.data?.plans || {};
+        setHeroPricing({
+          PRO: { amount: String(apiPricing?.PRO?.amount || plansPricing?.PRO?.price || PRICE_FALLBACKS.PRO) },
+          ENTERPRISE: { amount: String(apiPricing?.ENTERPRISE?.amount || plansPricing?.ENTERPRISE?.price || PRICE_FALLBACKS.ENTERPRISE) },
+        });
+      } catch {
+        setHeroPricing({ PRO: { amount: PRICE_FALLBACKS.PRO }, ENTERPRISE: { amount: PRICE_FALLBACKS.ENTERPRISE } });
+      }
+    };
+    loadPricing();
+  }, []);
+
+  const getPlanPrice = (plan) => {
+    if (plan.isFree) return '0';
+    const amount = heroPricing?.[plan.id]?.amount;
+    if (!amount) return '—';
+    return amount.endsWith('.00') ? amount.slice(0, -3) : amount;
+  };
+
+  const handlePlanCta = (plan) => {
+    if (plan.isFree) {
+      navigate('/register');
+      return;
+    }
+    navigate('/login', {
+      state: {
+        fromPlanCta: true,
+        selectedPlan: plan.name,
+        selectedPlanId: plan.id,
+        ctaType: 'upgrade',
+        redirectTo: `/payments?plan=${plan.id}`,
+      },
+    });
+  };
+
   return (
     <div className="landing-page">
       <div className="orbital-system">
@@ -108,18 +205,18 @@ const Hero = ({ isAuthenticated }) => {
 
       <section className="stats-bar container animate-on-scroll">
         <div className="stat-card">
-          <span className="stat-num">50k+</span>
-          <span className="stat-label">Vehicles Logged</span>
+          <span className="stat-num">~14hrs</span>
+          <span className="stat-label">Admin Reclaimed Monthly</span>
         </div>
         <div className="stat-divider"></div>
         <div className="stat-card">
-          <span className="stat-num">0%</span>
-          <span className="stat-label">Ghost Claims Lost</span>
+          <span className="stat-num">1&nbsp;Hub</span>
+          <span className="stat-label">Bookings, Photos &amp; Legal</span>
         </div>
         <div className="stat-divider"></div>
         <div className="stat-card">
-          <span className="stat-num">14hr</span>
-          <span className="stat-label">Admin Time Saved /Mo</span>
+          <span className="stat-num">Always&nbsp;On</span>
+          <span className="stat-label">Globally Hosted &amp; Secure</span>
         </div>
       </section>
 
@@ -150,6 +247,31 @@ const Hero = ({ isAuthenticated }) => {
             <h3>Staff Command</h3>
             <p>Assign bays, track technician efficiency, and manage payroll through a single interface.</p>
           </div>
+        </div>
+      </section>
+
+      <section className="gallery-section container">
+        <div className="section-header animate-on-scroll">
+          <h2 className="section-title">See It In <span className="highlight">Action.</span></h2>
+          <p className="section-desc">A glimpse inside the Dtailbase ecosystem — from intake to invoice.</p>
+        </div>
+        <div className="gallery-grid">
+          {[
+            { label: 'Dashboard Overview' },
+            { label: 'Booking Intake Form' },
+            { label: 'Digital Waiver Signing' },
+            { label: 'Before & After Photo Vault' },
+            { label: 'Team Management Panel' },
+            { label: 'Payment & Subscription Hub' },
+          ].map((item) => (
+            <div className="gallery-card animate-on-scroll" key={item.label}>
+              <div className="gallery-img-placeholder">
+                {/* PASTE YOUR IMAGE URL HERE — replace the img src below and uncomment */}
+                {/* <img src="YOUR_IMAGE_URL_HERE" alt={item.label} /> */}
+              </div>
+              <p className="gallery-card-label">{item.label}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -191,50 +313,38 @@ const Hero = ({ isAuthenticated }) => {
 
       <section className="pricing-section container animate-on-scroll">
         <div className="section-header">
-          <h2 className="section-title">Scale Your Studio</h2>
-          <p>Transparent pricing for growing operations.</p>
+          <h2 className="section-title">Scale Your <span className="highlight">Studio.</span></h2>
+          <p className="section-desc">Transparent pricing for studios at every stage. No hidden fees, cancel anytime.</p>
         </div>
         <div className="pricing-grid">
-          {/* TIER 1: FREE */}
-          <div className="pricing-card animate-on-scroll">
-            <span className="tier">Starter</span>
-            <div className="price">R0<span>/mo</span></div>
-            <ul className="benefits">
-              <li>✓ 1 User / Solo Detailer</li>
-              <li>✓ 5 Digital Waivers / mo</li>
-              <li>✓ Basic Vehicle Logs</li>
-              <li>✓ Community Support</li>
-            </ul>
-            <Link to="/register" className="btn-outline">Get Started Free</Link>
-          </div>
-
-          {/* TIER 2: PRO (The Sweet Spot) */}
-          <div className="pricing-card featured animate-on-scroll">
-            <div className="popular-tag">Most Popular</div>
-            <span className="tier">Professional</span>
-            <div className="price">R499<span>/mo</span></div>
-            <ul className="benefits">
-              <li>✓ 3 Technician Seats</li>
-              <li>✓ Unlimited Waivers</li>
-              <li>✓ HD Photo Vault (10GB)</li>
-              <li>✓ Custom PDF Invoicing</li>
-            </ul>
-            <Link to="/register" className="btn-main">Start Free Trial</Link>
-          </div>
-
-          {/* TIER 3: STUDIO */}
-          <div className="pricing-card animate-on-scroll">
-            <span className="tier">Enterprise</span>
-            <div className="price">R1250<span>/mo</span></div>
-            <ul className="benefits">
-              <li>✓ Unlimited Technicians</li>
-              <li>✓ 4K Condition Monitoring</li>
-              <li>✓ Multi-Bay Management</li>
-              <li>✓ Priority Local Support</li>
-            </ul>
-            <Link to="/register" className="btn-outline">Go Elite</Link>
-          </div>
+          {HERO_PLANS.map((plan) => (
+            <div
+              key={plan.id}
+              className={`pricing-card animate-on-scroll${plan.featured ? ' featured' : ''}`}
+            >
+              {plan.featured && <div className="popular-tag">Most Popular</div>}
+              <span className="tier">{plan.name}</span>
+              <div className="price">
+                <span className="price-currency">$</span>
+                {getPlanPrice(plan)}
+                <span>/mo</span>
+              </div>
+              <p className="plan-tagline">{plan.description}</p>
+              <ul className="benefits">
+                {plan.features.map((feat) => (
+                  <li key={feat}>✓ {feat}</li>
+                ))}
+              </ul>
+              <button
+                className={plan.featured ? 'btn-main' : 'btn-outline'}
+                onClick={() => handlePlanCta(plan)}
+              >
+                {plan.cta}
+              </button>
+            </div>
+          ))}
         </div>
+        <p className="pricing-note">Prices in USD &nbsp;·&nbsp; Secure PayPal billing &nbsp;·&nbsp; Cancel anytime</p>
       </section>
 
       <footer className="main-footer">

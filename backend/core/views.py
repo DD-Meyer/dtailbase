@@ -2,12 +2,15 @@ from multiprocessing.sharedctypes import Value
 from warnings import filters
 import json
 import os
+import logging
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import urlopen
 
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 from django.forms import IntegerField
 from rest_framework import generics, permissions, status
 from django.shortcuts import get_object_or_404
@@ -27,6 +30,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import action
 from django.db.models import Case, When, Value, IntegerField
 from django.utils import timezone
+from django.db.models.deletion import ProtectedError
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -204,6 +208,14 @@ class CompanyAccountLifecycleView(APIView):
 class GoogleLoginView(APIView):
     permission_classes = [AllowAny]
 
+    @staticmethod
+    def _to_bool(value):
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            return value.strip().lower() in {"1", "true", "yes", "on"}
+        return bool(value)
+
     def post(self, request):
         credential = request.data.get("credential")
         if not credential:
@@ -238,6 +250,12 @@ class GoogleLoginView(APIView):
             )
 
         refresh = RefreshToken.for_user(user)
+
+        mobile_app = self._to_bool(request.data.get("mobile_app", False))
+        remember_me = self._to_bool(request.data.get("remember_me", True))
+        if mobile_app and remember_me:
+            refresh.set_exp(lifetime=timedelta(days=45))
+
         return Response(
             {
                 "refresh": str(refresh),
@@ -477,12 +495,17 @@ class ServiceListCreateAPIView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        include_inactive = str(self.request.query_params.get("include_inactive", "")).lower() in {"1", "true", "yes"}
+
         if self.request.user.is_superuser:
-            return Service.objects.filter(is_active=True)
-        return Service.objects.filter(
-            company=self.request.user.company,
-            is_active=True
-        )
+            queryset = Service.objects.all()
+        else:
+            queryset = Service.objects.filter(company=self.request.user.company)
+
+        if include_inactive:
+            return queryset
+
+        return queryset.filter(is_active=True)
 
     def perform_create(self, serializer):
         serializer.save(company=self.request.user.company)
@@ -507,21 +530,19 @@ class ServiceRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView)
         has_bookings = Booking.objects.filter(service=service).exists()
 
         if has_bookings:
+            if service.is_active:
+                service.is_active = False
+                service.save(update_fields=["is_active"])
             return Response(
                 {
-                    "error": "This service has existing bookings and cannot be deleted. It has been deactivated instead."
+                    "message": "This service has existing bookings and cannot be deleted. It has been deactivated instead.",
+                    "is_active": False,
+                    "deactivated": True,
                 },
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_200_OK
             )
 
-        # Soft delete logic
-        service.is_active = False
-        service.save()
-
-        return Response(
-            {"message": "Service deactivated successfully"},
-            status=status.HTTP_200_OK  # Changed from 204 to 200 so message is visible
-        )
+        return super().destroy(request, *args, **kwargs)
     
 class CustomerDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CustomerSerializer
@@ -531,6 +552,33 @@ class CustomerDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         # Only customers belonging to the logged-in company
         return Customer.objects.filter(company=self.request.user.company)
+
+    def destroy(self, request, *args, **kwargs):
+        customer = self.get_object()
+
+        reasons = []
+        if customer.bookings.exists():
+            reasons.append("existing bookings")
+        if customer.customer_indemnity_agreements.exists():
+            reasons.append("signed indemnity records")
+
+        if reasons:
+            return Response(
+                {
+                    "error": f"Cannot delete this customer because it has {', '.join(reasons)}. Remove or archive dependent records first."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ProtectedError:
+            return Response(
+                {
+                    "error": "Cannot delete this customer because related records still reference it."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 class CustomerListAPIView(generics.ListCreateAPIView):
     serializer_class = CustomerSerializer
@@ -573,6 +621,27 @@ class VehicleRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView)
 
     def get_serializer_context(self):
         return {"request": self.request}
+
+    def destroy(self, request, *args, **kwargs):
+        vehicle = self.get_object()
+
+        if vehicle.bookings.exists():
+            return Response(
+                {
+                    "error": "Cannot delete this vehicle because it is linked to existing bookings."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except ProtectedError:
+            return Response(
+                {
+                    "error": "Cannot delete this vehicle because related records still reference it."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 
@@ -702,7 +771,6 @@ class CompanyTeamListView(generics.ListCreateAPIView):
     def get_queryset(self):
         user = self.request.user
         company = user.company
-        plan_limit = PLAN_CONFIG.get(company.plan, {}).get('max_users', 1)
 
         # 1. Get the IDs of the users we want to include
         # Always include the current user
@@ -726,7 +794,7 @@ class CompanyTeamListView(generics.ListCreateAPIView):
                 default=Value(3),
                 output_field=IntegerField(),
             )
-        ).order_by('role_priority', '-created_at')[:plan_limit]
+        ).order_by('role_priority', '-created_at')
 
     def perform_create(self, serializer):
         company = self.request.user.company
@@ -741,7 +809,14 @@ class CompanyTeamListView(generics.ListCreateAPIView):
                 "plan_limit": f"Your {company.plan} plan is limited to {max_users} users. Please upgrade to Pro to add more team members."
             })
 
-        serializer.save(company=company)
+        new_user = serializer.save(company=company)
+        
+        # 📋 AUDIT LOG: Team member added
+        logger.info(
+            f"AUDIT: Team member added - Company: {company.id}, "
+            f"Added by: {self.request.user.email}, "
+            f"New user: {new_user.email}, Role: {new_user.role}"
+        )
 
 class CompanyUserDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
@@ -757,11 +832,30 @@ class CompanyUserDetailView(generics.RetrieveUpdateDestroyAPIView):
         # Prevent self-deletion
         if instance == self.request.user:
             raise ValidationError("You cannot delete your own account from the team management page.")
-        instance.delete()
-
-        # cannot deactivate the last owner
-        if instance.role == 'OWNER' and not User.objects.filter(company=instance.company, role='OWNER', is_active=True).exists():
-            raise ValidationError("You cannot delete the last active Owner of this company.")
+        
+        # Check if trying to delete the last owner
+        if instance.role == 'OWNER':
+            other_owners = User.objects.filter(
+                company=instance.company, 
+                role='OWNER', 
+                is_active=True
+            ).exclude(id=instance.id).count()
+            
+            if other_owners == 0:
+                raise ValidationError("You cannot delete the last active Owner of this company. Please assign ownership to another user first.")
+        
+        try:
+            # 📋 AUDIT LOG: Team member removed
+            logger.info(
+                f"AUDIT: Team member removed - Company: {instance.company.id}, "
+                f"Removed by: {self.request.user.email}, "
+                f"Removed user: {instance.email}, Role: {instance.role}"
+            )
+            
+            instance.delete()
+        except Exception as e:
+            logger.error(f"Error deleting user {instance.email}: {str(e)}", exc_info=True)
+            raise ValidationError(f"Failed to delete user: {str(e)}")
         
     
 

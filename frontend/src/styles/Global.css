@@ -266,6 +266,61 @@ body.mobile-nav-open {
 .btn-delete { color: #ef4444; }
 .btn-delete:hover { background: #fee2e2; }
 
+/* Shared action button styles (used across Team/Customers/Services/Vehicles) */
+.team-action-btn {
+  min-height: 30px;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+.team-action-edit {
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border-color: #bfdbfe !important;
+}
+
+.team-action-edit:hover {
+  background: #dbeafe !important;
+  border-color: #93c5fd !important;
+}
+
+.team-action-deactivate {
+  background: #fff1f2 !important;
+  color: #be123c !important;
+  border-color: #fecdd3 !important;
+}
+
+.team-action-deactivate:hover {
+  background: #ffe4e6 !important;
+  border-color: #fda4af !important;
+}
+
+.team-action-reactivate {
+  background: #ecfdf3 !important;
+  color: #047857 !important;
+  border-color: #a7f3d0 !important;
+}
+
+.team-action-reactivate:hover {
+  background: #d1fae5 !important;
+  border-color: #6ee7b7 !important;
+}
+
+.team-action-delete {
+  background: #fee2e2 !important;
+  color: #b91c1c !important;
+  border-color: #fca5a5 !important;
+}
+
+.team-action-delete:hover {
+  background: #fecaca !important;
+  border-color: #f87171 !important;
+}
+
 /* Tables */
 .table-standard {
   width: 100%;
@@ -509,6 +564,12 @@ body.mobile-nav-open {
     bottom: max(94px, env(safe-area-inset-bottom));
     padding: 5px 10px;
     font-size: 0.5rem;
+  }
+
+  .team-action-btn {
+      width: 100%;
+      min-height: 40px;
+      margin-top: 3%;
   }
 }
 

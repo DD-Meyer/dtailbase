@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import api from '../axios_instance';
+import { showToast } from '../utils/uiFeedback';
 import '../styles/PayPalSubscribeButton.css';
 
 const PayPalSubscribeButton = ({
@@ -35,8 +36,22 @@ const PayPalSubscribeButton = ({
       return response.data.subscription_id || null;
     } catch (err) {
       console.error('Subscription creation error:', err);
-      const errorMsg = err.response?.data?.error || err.message || 'Failed to process subscription';
+      
+      let errorMsg = 'Failed to process subscription';
+      
+      // Check for specific error codes and reasons
+      if (err.response?.status === 403) {
+        errorMsg = 'Only account owners can upgrade plans. Please contact your account owner to upgrade.';
+      } else if (err.response?.data?.detail) {
+        errorMsg = err.response.data.detail;
+      } else if (err.response?.data?.error) {
+        errorMsg = err.response.data.error;
+      } else if (err.message) {
+        errorMsg = err.message;
+      }
+      
       setError(errorMsg);
+      showToast(errorMsg, 'error');
       if (onError) onError(errorMsg);
       return null;
     } finally {

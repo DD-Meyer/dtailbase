@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import api from "../axios_instance";
 import "../styles/NewBooking.css"; // Reuse your existing wizard styles
+import { showToast } from "../utils/uiFeedback";
 
 const STEPS = [
   { id: 1, label: "Your Info" },
@@ -85,10 +86,14 @@ const PublicBooking = () => {
   };
 
   const nextStep = () => {
-    if (step === 1 && (!formData.customer_firstname || !formData.customer_email)) 
-        return alert("Please provide your contact details.");
-    if (step === 2 && !formData.booking_time) 
-        return alert("Please select an available time slot.");
+    if (step === 1 && (!formData.customer_firstname || !formData.customer_email)) {
+      showToast("Please provide your contact details.", "error");
+      return;
+    }
+    if (step === 2 && !formData.booking_time) {
+      showToast("Please select an available time slot.", "error");
+      return;
+    }
     setStep(step + 1);
   };
 
@@ -99,7 +104,7 @@ const PublicBooking = () => {
       setSuccess(true);
       window.scrollTo(0, 0);
     } catch (err) {
-      alert(err.response?.data?.plan_limit || "Booking failed. Slot may have been taken.");
+      showToast(err.response?.data?.plan_limit || "Booking failed. Slot may have been taken.", "error");
     } finally {
       setSubmitting(false);
     }

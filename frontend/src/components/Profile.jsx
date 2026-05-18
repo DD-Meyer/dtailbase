@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import api from "../axios_instance";
 import "../styles/Profile.css";
+import { showToast } from "../utils/uiFeedback";
 
 function Profile() {
   const [userData, setUserData] = useState({ 
@@ -34,7 +35,7 @@ function Profile() {
     e.preventDefault();
     try {
       await api.post("auth/set-password/", passwordData);
-      alert("Password updated!");
+      showToast("Password updated!", "success");
       setPasswordData({ old_password: "", new_password: "" });
     } catch (err) {
       setMsg(err.response?.data?.error || "Failed to change password.");

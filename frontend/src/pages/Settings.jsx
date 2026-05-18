@@ -20,6 +20,7 @@ import {
   Power,
 } from "lucide-react";
 import { countryOptions, getCountryLabel } from "../utils/countries";
+import { showConfirm, showPrompt } from "../utils/uiFeedback";
 
 function Settings() {
   const [company, setCompany] = useState(null);
@@ -202,7 +203,13 @@ function Settings() {
   ];
 
   const handleDeactivateAccount = async () => {
-    if (!window.confirm("Deactivate this account? This will disable all users immediately.")) {
+    const confirmed = await showConfirm({
+      title: "Deactivate account",
+      message: "Deactivate this account? This will disable all users immediately.",
+      confirmText: "Deactivate",
+      danger: true,
+    });
+    if (!confirmed) {
       return;
     }
 
@@ -219,7 +226,13 @@ function Settings() {
   };
 
   const handleDeleteAccount = async () => {
-    const confirmation = window.prompt(`Type your company name exactly to delete: ${company.name}`);
+    const confirmation = await showPrompt({
+      title: "Delete account",
+      message: `Type your company name exactly to delete: ${company.name}`,
+      placeholder: "Company name",
+      confirmText: "Delete",
+      danger: true,
+    });
     if (!confirmation) {
       return;
     }
@@ -240,7 +253,13 @@ function Settings() {
   };
 
   const handleCancelSubscription = async () => {
-    if (!window.confirm("Cancel your subscription and downgrade to Starter?")) {
+    const confirmed = await showConfirm({
+      title: "Cancel subscription",
+      message: "Cancel your subscription and downgrade to Starter?",
+      confirmText: "Cancel Subscription",
+      danger: true,
+    });
+    if (!confirmed) {
       return;
     }
 
@@ -615,7 +634,7 @@ function Settings() {
 
                   <label className="upload-field">
                     <FileText size={15} aria-hidden="true" />
-                    <span>{verificationDocument ? verificationDocument.name : "Upload bank confirmation / proof document"}</span>
+                    {verificationDocument ? verificationDocument.name : "Upload bank confirmation / proof document"}
                     <input
                       type="file"
                       accept=".pdf,.txt,.csv,.doc,.docx"

@@ -4,6 +4,23 @@ import "../styles/TeamManagement.css";
 import { AuthContext } from "../context/AuthContext";
 import { useCompany } from "../context/CompanyContext";
 import UpgradeValueCards from "./UpgradeValueCards";
+import PlanUsageBanner from "./PlanUsageBanner";
+import { showConfirm, showToast } from "../utils/uiFeedback";
+
+const MIN_PASSWORD_LENGTH = 8;
+const PASSWORD_GUIDANCE =
+  "Use at least 8 characters with uppercase, lowercase, a number, and a symbol. Example: Dtail!482A";
+
+const generateTemporaryPassword = () => {
+  const prefix = "D7t!";
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+  const randomBytes = new Uint8Array(10);
+
+  window.crypto.getRandomValues(randomBytes);
+
+  const randomPart = Array.from(randomBytes, (byte) => alphabet[byte % alphabet.length]).join("");
+  return `${prefix}${randomPart}`;
+};
 
 function TeamManagement() {
   const { user } = useContext(AuthContext);
@@ -12,6 +29,9 @@ function TeamManagement() {
   const [msg, setMsg] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [createdMemberName, setCreatedMemberName] = useState("");
+  const [createdMemberPassword, setCreatedMemberPassword] = useState("");
 
   const [formData, setFormData] = useState({ 
     first_name: "", 
@@ -41,6 +61,23 @@ function TeamManagement() {
 
   const handleUpdateMember = async (memberId) => {
     try {
+        const member = team.find((m) => m.id === memberId);
+        const isSelfOwnerDemotion =
+          member?.email === user.email &&
+          member?.role === "OWNER" &&
+          editData.role === "STAFF";
+
+        const nextPassword = (editData.password || "").trim();
+        if (nextPassword && nextPassword.length < MIN_PASSWORD_LENGTH) {
+          showToast(PASSWORD_GUIDANCE, "error");
+          return;
+        }
+
+        if (isSelfOwnerDemotion) {
+          setMsg("Owner safety lock: You cannot change your own account role to Staff.");
+          return;
+        }
+
         const payload = {
         first_name: editData.first_name,
         last_name: editData.last_name,
@@ -49,8 +86,8 @@ function TeamManagement() {
         };
 
         // If the owner typed a value into the password reset field
-        if (editData.password && editData.password.trim() !== "") {
-        payload.password = editData.password;
+        if (nextPassword !== "") {
+        payload.password = nextPassword;
         }
 
         await api.patch(`company/team/${memberId}/`, payload);
@@ -62,8 +99,23 @@ function TeamManagement() {
         // Clear the message after 3 seconds
         setTimeout(() => setMsg(""), 3000);
     } catch (err) {
-        console.log("Error:", err.response?.data);
-        setMsg("Update failed. Check console.");
+        const serverError = err.response?.data;
+        const passwordError = Array.isArray(serverError?.password)
+          ? serverError.password[0]
+          : serverError?.password;
+
+        if (passwordError) {
+          showToast(PASSWORD_GUIDANCE, "error");
+          return;
+        }
+
+        const errorMsg =
+          serverError?.detail ||
+          serverError?.error ||
+          err.message ||
+          "Update failed. Check console.";
+        showToast(errorMsg, "error");
+        console.log("Error:", serverError);
     }
     };
 
@@ -71,11 +123,12 @@ function TeamManagement() {
       e.preventDefault();
 
       if (!formData.first_name.trim() || !formData.last_name.trim()) {
-          alert("First Name and Last Name are strictly required.");
+        showToast("First Name and Last Name are strictly required.", "error");
           return;
       }
 
       try {
+          const temporaryPassword = generateTemporaryPassword();
           // Construct a clean payload
           const payload = { 
               first_name: formData.first_name,
@@ -83,7 +136,7 @@ function TeamManagement() {
               email: formData.email,
               username: formData.email, // Standard practice to use email as username
               role: formData.role,
-              password: "TempPassword123", // Backend handles the user creation
+              password: temporaryPassword,
               is_active: true
               // NOTICE: No 'company' or 'company_id' here. 
               // The backend will inject it from the Admin's session.
@@ -93,35 +146,69 @@ function TeamManagement() {
           setShowAddForm(false);
           fetchTeam();
           setFormData({ first_name: "", last_name: "", email: "", role: "STAFF" });
+          setCreatedMemberName(`${payload.first_name} ${payload.last_name}`.trim());
+          setCreatedMemberPassword(temporaryPassword);
+          setShowPasswordModal(true);
+          showToast("Team member added successfully!", "success");
       } catch (err) {
         // For debugging, log the full error response
         const serverError = err.response?.data;
+        let errorMsg = "Failed to add member.";
 
         if (planLimits && team.length >= planLimits.max_users) {
-          setMsg(`Plan limit reached: Your current plan allows a maximum of ${planLimits.max_users} users. Please upgrade to add more team members.`);
-        } else if (serverError.email) {
-          setMsg(`Email error: ${serverError.email.join(" ")}`);
-        } else {
-          setMsg("Failed to add member. Check console for details.");
+          errorMsg = `Plan limit reached: Your current plan allows a maximum of ${planLimits.max_users} users. Please upgrade to add more team members.`;
+        } else if (Array.isArray(serverError?.password) && serverError.password.length > 0) {
+          errorMsg = PASSWORD_GUIDANCE;
+        } else if (serverError?.detail) {
+          errorMsg = serverError.detail;
+        } else if (serverError?.email) {
+          errorMsg = `Email error: ${serverError.email.join(" ")}`;
+        } else if (err.message) {
+          errorMsg = err.message;
         }
+        
+        setMsg(errorMsg);
+        showToast(errorMsg, "error");
       }
   };
 
+  const closePasswordModal = () => {
+    setShowPasswordModal(false);
+    setCreatedMemberName("");
+    setCreatedMemberPassword("");
+  };
+
   const handleDeleteMember = async (memberId) => {
-      if (!window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) return;
+      const confirmed = await showConfirm({
+        title: "Delete team member",
+        message: "Are you sure you want to delete this user? This action cannot be undone.",
+        confirmText: "Delete",
+        danger: true,
+      });
+      if (!confirmed) return;
       try {
           await api.delete(`company/team/${memberId}/`);
-          setMsg("Member deleted successfully.");
+          showToast("Team member deleted successfully.", "success");
           fetchTeam();
-          setTimeout(() => setMsg(""), 3000);
       } catch (err) {
-          setMsg("Failed to delete member.");
+          const errorMsg = err.response?.data?.detail || 
+                          err.response?.data?.error || 
+                          err.message || 
+                          "Failed to delete member.";
+          showToast(errorMsg, "error");
+          console.error("Delete error:", err);
       }
   };
 
   const handleToggleStatus = async (member) => {
       const action = member.is_active ? "deactivate" : "reactivate";
-      if (!window.confirm(`Are you sure you want to ${action} this user?`)) return;
+      const confirmed = await showConfirm({
+        title: `${action.charAt(0).toUpperCase() + action.slice(1)} member`,
+        message: `Are you sure you want to ${action} this user?`,
+        confirmText: action === "deactivate" ? "Deactivate" : "Reactivate",
+        danger: action === "deactivate",
+      });
+      if (!confirmed) return;
 
       try {
           // We send the opposite of their current status
@@ -129,11 +216,14 @@ function TeamManagement() {
           is_active: !member.is_active 
           });
           
-          setMsg(`User ${action}d successfully.`);
+          showToast(`User ${action}d successfully.`, "success");
           fetchTeam();
-          setTimeout(() => setMsg(""), 3000);
       } catch (err) {
-          setMsg("Failed to update status.");
+          const errorMsg = err.response?.data?.detail || 
+                          err.response?.data?.error || 
+                          err.message || 
+                          `Failed to ${action} user.`;
+          showToast(errorMsg, "error");
       }
   };
 
@@ -149,33 +239,27 @@ function TeamManagement() {
           <div className="page-banner-copy">
             <h1 className="text-2xl font-bold">Team Management</h1>
             <p>Manage your company's team members and their roles.</p>
-            <p>Current Plan: <strong>{currentPlan}</strong></p>
-            <p>Users: {team.length} / {planLimits ? planLimits.max_users : "Unlimited"}</p>
           </div>
 
           <div className="page-banner-actions">
-            {/* Show upgrade prompt if on Starter plan and at user limit */}
-            {planLimits && team.length >= planLimits.max_users ? (
-              <div className="plan-status-banner">
-                <p>You are on the <strong>{currentPlan}</strong> plan.</p>
-                
-                {nextPlan ? (
-                  <p className="text-xs">
-                    Need more than {planLimits.max_users} users? 
-                    <span className="text-blue-500 cursor-pointer"> Upgrade to {nextPlan}</span>
-                  </p>
-                ) : (
-                  <p className="text-xs text-green-600">You are on our highest tier plan!</p>
-                )}
-              </div>
-            ) : (
-              <button className="btn btn-primary" onClick={() => setShowAddForm(!showAddForm)}>
-                {showAddForm ? "Cancel" : "Add Member"}
-              </button>
-            )}
+            <button className="btn btn-primary" onClick={() => setShowAddForm(!showAddForm)}>
+              {showAddForm ? "Cancel" : "Add Member"}
+            </button>
           </div>
         </div>
       </div>
+
+      <PlanUsageBanner
+        metrics={[
+          {
+            label: "Team members",
+            used: team.length,
+            total: planLimits?.max_users ?? null,
+          },
+        ]}
+        currentPlan={currentPlan}
+        nextPlan={nextPlan}
+      />
       
 
       {showAddForm && (
@@ -210,6 +294,9 @@ function TeamManagement() {
             <option value="STAFF">Technician / Staff</option>
           </select>
           <button className="btn btn-success" type="submit">Save Member</button>
+          <p className="text-sm text-muted" style={{ gridColumn: "1 / -1" }}>
+            New team members receive a temporary strong password automatically. You will see it once after saving.
+          </p>
         </form>
       )}
 
@@ -247,12 +334,24 @@ function TeamManagement() {
                           <input className="input-sm" value={editData.first_name} onChange={e => setEditData({...editData, first_name: e.target.value})} />
                           <input className="input-sm" value={editData.last_name} onChange={e => setEditData({...editData, last_name: e.target.value})} />
                         </div>
-                        <input type="password" placeholder="Reset Password (optional)" className="input-sm text-xs" onChange={e => setEditData({...editData, password: e.target.value})}/>
+                        <input
+                          type="password"
+                          placeholder="Reset Password (optional, min 8 chars)"
+                          className="input-sm text-xs"
+                          onChange={e => setEditData({...editData, password: e.target.value})}
+                        />
+                        <span className="text-xs text-muted">{PASSWORD_GUIDANCE}</span>
                       </div>
                     </td>,
                     <td key="edit-email">{member.email}</td>,
                     <td key="edit-role">
-                      <select className="input-sm" value={editData.role} onChange={e => setEditData({...editData, role: e.target.value})}>
+                      <select
+                        className="input-sm"
+                        value={editData.role}
+                        onChange={e => setEditData({...editData, role: e.target.value})}
+                        disabled={member.email === user.email && member.role === "OWNER"}
+                        title={member.email === user.email && member.role === "OWNER" ? "You cannot change your own Owner role" : "Change role"}
+                      >
                         <option value="OWNER">Owner</option>
                         <option value="STAFF">Staff</option>
                       </select>
@@ -274,14 +373,14 @@ function TeamManagement() {
                         {member.is_active ? "Active" : "Inactive"}
                       </span>
                     </td>,
-                    <td key="view-actions" className="flex gap-2">
-                      <button className="btn btn-outline btn-xs" onClick={() => {setEditingId(member.id); setEditData(member); }}>
+                    <td key="view-actions" className="team-action-group">
+                      <button className="btn btn-xs team-action-btn team-action-edit" onClick={() => {setEditingId(member.id); setEditData(member); }}>
                         Edit
                       </button>
                       {/* Only show activate/deactivate button if this is not the logged-in user */}
                       {member.email !== user.email && (
                         <button 
-                          className={`btn btn-${member.is_active ? 'danger' : 'success'} btn-xs`}
+                          className={`btn btn-xs team-action-btn ${member.is_active ? 'team-action-deactivate' : 'team-action-reactivate'}`}
                           onClick={() => handleToggleStatus(member)}
                         >
                           {member.is_active ? "Deactivate" : "Reactivate"}
@@ -293,7 +392,7 @@ function TeamManagement() {
                       )}
                       {/*delete account button only for owner and not for themselves*/}
                       {user.role === "OWNER" && member.email !== user.email && (
-                        <button className="btn btn-danger btn-xs" onClick={() => handleDeleteMember(member.id)}>
+                        <button className="btn btn-xs team-action-btn team-action-delete" onClick={() => handleDeleteMember(member.id)}>
                           Delete
                         </button>
                       )}
@@ -305,6 +404,42 @@ function TeamManagement() {
           </tbody>
         </table>
       </div>
+
+      {showPasswordModal && (
+        <div className="modal-backdrop" onClick={closePasswordModal}>
+          <div className="modal-card" onClick={(event) => event.stopPropagation()}>
+            <h2 className="text-xl font-bold mb-2">Team member created</h2>
+            <p className="text-sm text-muted mb-4">
+              Save this temporary password now. It will not be shown again for this creation.
+            </p>
+
+            <div className="card p-4 mb-4" style={{ background: "#f8fafc" }}>
+              <p className="text-sm text-muted mb-1">Member</p>
+              <p className="font-semibold mb-3">{createdMemberName || "New team member"}</p>
+              <p className="text-sm text-muted mb-1">Temporary password</p>
+              <p className="font-mono text-base break-all">{createdMemberPassword}</p>
+            </div>
+
+            <p className="text-sm text-muted mb-4">{PASSWORD_GUIDANCE}</p>
+
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={() => {
+                  navigator.clipboard?.writeText(createdMemberPassword);
+                  showToast("Temporary password copied to clipboard.", "success");
+                }}
+              >
+                Copy Password
+              </button>
+              <button type="button" className="btn btn-primary" onClick={closePasswordModal}>
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

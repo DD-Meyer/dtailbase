@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import api from "../axios_instance";
 import { Plus, X } from "lucide-react";
 import "../styles/Vehicles.css";
+import "../styles/EditableRow.css";
+import EditableRow from "../components/EditableRow";
+import { showConfirm } from "../utils/uiFeedback";
 
 function Vehicles() {
   const TABLET_BREAKPOINT = 1024;
@@ -61,7 +64,6 @@ function Vehicles() {
         setShowVehicleForm(false);
       }
       
-      // REMOVED alert() - Toast now triggers instantly
       triggerToast("Vehicle registered successfully!", "success");
     } catch (err) {
       const serverErrors = err.response?.data;
@@ -77,40 +79,49 @@ function Vehicles() {
   };
 
   const handleDeleteVehicle = async (id) => {
-    if (window.confirm("Delete this vehicle?")) {
-      try {
-        await api.delete(`vehicles/${id}/`);
-        setVehicles(prev => prev.filter(v => v.id !== id));
-        triggerToast("Vehicle deleted", "success");
-      } catch (err) { 
-        triggerToast("Delete failed. Vehicle might be linked to a booking.", "error"); 
-      }
+    const confirmed = await showConfirm({
+      title: "Delete vehicle",
+      message: "Delete this vehicle?",
+      confirmText: "Delete",
+      danger: true,
+    });
+
+    if (!confirmed) return;
+
+    try {
+      await api.delete(`vehicles/${id}/`);
+      setVehicles(prev => prev.filter(v => v.id !== id));
+      triggerToast("Vehicle deleted", "success");
+    } catch (err) { 
+      triggerToast(err.response?.data?.error || "Delete failed. Vehicle might be linked to a booking.", "error"); 
     }
   };
 
   const [editingVehicle, setEditingVehicle] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [formData, setFormData] = useState({ customer: "", make: "", model: "", year: "", registration: "" });
 
-// 1. Fill the form with existing data
-const startEdit = (v) => {
-  setEditingVehicle(v.id);
-  setShowVehicleForm(true);
-  setNewVehicle({
-    customer: v.customer.id, // Ensure we send the ID
-    make: v.make,
-    model: v.model,
-    year: v.year,
-    registration: v.registration
-  });
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-};
+  // 1. Fill the form with existing data
+  const startEdit = (v) => {
+    setEditingVehicle(v.id);
+    setFormData({
+      customer: v.customer.id, // Ensure we send the ID
+      make: v.make,
+      model: v.model,
+      year: v.year,
+      registration: v.registration
+    });
+    setShowModal(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // 2. Handle the actual update
   const handleUpdateVehicle = async (e) => {
     e.preventDefault();
     try {
       const res = await api.put(`vehicles/${editingVehicle}/`, {
-        ...newVehicle,
-        year: parseInt(newVehicle.year, 10)
+        ...formData,
+        year: parseInt(formData.year, 10)
       });
       
       // Update the list locally
@@ -118,16 +129,31 @@ const startEdit = (v) => {
       
       // Reset state
       setEditingVehicle(null);
-      setNewVehicle({ customer: "", make: "", model: "", year: "", registration: "" });
+      setShowModal(false);
+      setFormData({ customer: "", make: "", model: "", year: "", registration: "" });
       triggerToast("Vehicle updated!", "success");
     } catch (err) {
       triggerToast("Update failed", "error");
     }
   };
 
-  // 3. Clear edit mode
+  const handleSaveVehicle = async (updatedVehicle) => {
+    try {
+      if (updatedVehicle.id) {
+        await api.put(`vehicles/${updatedVehicle.id}/`, updatedVehicle);
+      } else {
+        await api.post("vehicles/", updatedVehicle);
+      }
+      fetchVehicles();
+      setEditingVehicle(null);
+    } catch (err) {
+      triggerToast("Error saving vehicle. Please check your data.", "error");
+    }
+  };
+
   const cancelEdit = () => {
     setEditingVehicle(null);
+    setShowModal(false);
     setNewVehicle({ customer: "", make: "", model: "", year: "", registration: "" });
     if (isCompactView) {
       setShowVehicleForm(false);
@@ -143,6 +169,19 @@ const startEdit = (v) => {
 
     return ownerName.includes(query) || vehicleDetails.includes(query) || registration.includes(query);
   });
+
+  const handleEdit = (vehicle) => {
+    setEditingVehicle(vehicle.id);
+    setFormData({
+      customer: vehicle.customer.id,
+      make: vehicle.make,
+      model: vehicle.model,
+      year: vehicle.year,
+      registration: vehicle.registration,
+    });
+    setShowModal(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div className="page-container">
@@ -269,30 +308,114 @@ const startEdit = (v) => {
       )}
 
       <div className="card vehicles-table-container">
-        <table className="table-standard">
+        <table className="table-standard vehicles-table">
           <thead>
             <tr>
               <th>Owner</th>
-              <th>Vehicle</th>
-              <th>Reg Number</th>
+              <th>Make</th>
+              <th>Model</th>
+              <th>Year</th>
+              <th>Registration</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredVehicles.map(v => (
-              <tr key={v.id}>
-                <td data-label="Owner">{v.customer?.firstname} {v.customer?.lastname}</td>
-                <td data-label="Vehicle">{v.year} {v.make} {v.model}</td>
-                <td data-label="Reg Number"><strong>{v.registration}</strong></td>
+            {filteredVehicles.map((vehicle) => (
+              <tr key={vehicle.id}>
+                <td data-label="Owner">{vehicle.customer?.firstname} {vehicle.customer?.lastname}</td>
+                <td data-label="Make">{vehicle.make}</td>
+                <td data-label="Model">{vehicle.model}</td>
+                <td data-label="Year">{vehicle.year}</td>
+                <td data-label="Registration">{vehicle.registration}</td>
                 <td data-label="Actions">
-                  <button className="text-btn-primary mr-2" onClick={() => startEdit(v)}>Edit</button>
-                  <button className="text-btn-danger" onClick={() => handleDeleteVehicle(v.id)}>Delete</button>
+                  <div className="vehicle-action-group">
+                    <button className="btn btn-xs team-action-btn team-action-edit" onClick={() => handleEdit(vehicle)}>
+                      Edit
+                    </button>
+                    <button className="btn btn-xs team-action-btn team-action-delete" onClick={() => handleDeleteVehicle(vehicle.id)}>
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Edit Vehicle</h2>
+            <form onSubmit={handleUpdateVehicle}>
+              <div className="form-group">
+                <label>Customer</label>
+                <select
+                  name="customer"
+                  value={formData.customer}
+                  onChange={(e) => setFormData({ ...formData, customer: e.target.value })}
+                  required
+                >
+                  <option value="">-- Select Owner --</option>
+                  {customers.map((customer) => (
+                    <option key={customer.id} value={customer.id}>
+                      {customer.firstname} {customer.lastname}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Make</label>
+                <input
+                  type="text"
+                  name="make"
+                  value={formData.make}
+                  onChange={(e) => setFormData({ ...formData, make: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Model</label>
+                <input
+                  type="text"
+                  name="model"
+                  value={formData.model}
+                  onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Year</label>
+                <input
+                  type="number"
+                  name="year"
+                  value={formData.year}
+                  onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Registration</label>
+                <input
+                  type="text"
+                  name="registration"
+                  value={formData.registration}
+                  onChange={(e) => setFormData({ ...formData, registration: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="flex gap-2 mt-4">
+                <button type="submit" className="btn btn-primary">
+                  Update Vehicle
+                </button>
+                <button type="button" className="btn btn-secondary" onClick={cancelEdit}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

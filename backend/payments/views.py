@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from core.models import Company
+from core.permissions import IsAccountAdmin
 from payments.geolocation import detect_user_currency
 from payments.paypal_service import (
     create_paypal_subscription,
@@ -80,7 +81,7 @@ class PayPalSubscribeView(APIView):
     Initiate a PayPal subscription.
     Called when user clicks the upgrade button.
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAccountAdmin]
 
     def post(self, request):
         try:
@@ -172,7 +173,7 @@ class PayPalSubscribeView(APIView):
 
 class PayPalCancelSubscriptionView(APIView):
     """Cancel the active PayPal subscription to allow downgrade actions."""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAccountAdmin]
 
     def post(self, request):
         try:
@@ -193,10 +194,19 @@ class PayPalCancelSubscriptionView(APIView):
                 )
 
             # Apply immediate local downgrade state while webhook reconciliation completes.
+            old_plan = company.plan
             company.is_subscription_active = False
             company.plan = 'STARTER'
             company.paypal_subscription_id = ''
             company.save(update_fields=['is_subscription_active', 'plan', 'paypal_subscription_id'])
+            
+            # 📋 AUDIT LOG: Subscription cancelled
+            logger.info(
+                f"AUDIT: Subscription cancelled - Company: {company.id}, "
+                f"Cancelled by: {user.email}, "
+                f"Plan downgrade: {old_plan} → STARTER, "
+                f"Subscription ID: {subscription_id}"
+            )
 
             return Response({
                 'success': True,
@@ -435,8 +445,14 @@ class PayPalWebhookView(APIView):
                 plan_tier, _ = get_paypal_plan_tier(subscription_id)
 
             if plan_tier and company.plan != plan_tier:
+                old_plan = company.plan
                 company.plan = plan_tier
                 update_fields.append('plan')
+                # 📋 AUDIT LOG: Plan upgraded via webhook
+                logger.info(
+                    f"AUDIT: Plan upgraded via PayPal webhook - Company: {company.id}, "
+                    f"Plan: {old_plan} → {plan_tier}, Event: {event_type}"
+                )
 
             should_activate = event_type == 'BILLING.SUBSCRIPTION.ACTIVATED' or resource_status == 'ACTIVE'
             if should_activate and not company.is_subscription_active:
@@ -477,8 +493,14 @@ class PayPalWebhookView(APIView):
             if subscription_id:
                 plan_tier, _ = get_paypal_plan_tier(subscription_id)
                 if plan_tier and company.plan != plan_tier:
+                    old_plan = company.plan
                     company.plan = plan_tier
                     update_fields.append('plan')
+                    # 📋 AUDIT LOG: Plan updated via payment webhook
+                    logger.info(
+                        f"AUDIT: Plan updated via PayPal payment - Company: {company.id}, "
+                        f"Plan: {old_plan} → {plan_tier}"
+                    )
 
             if update_fields:
                 company.save(update_fields=update_fields)
@@ -515,11 +537,17 @@ class PayPalWebhookView(APIView):
                     company.paypal_subscription_id = subscription_id
                     update_fields.append('paypal_subscription_id')
 
+                old_plan = company.plan
                 company.is_subscription_active = False
                 company.plan = 'STARTER'  # Downgrade to starter
                 update_fields.extend(['is_subscription_active', 'plan'])
                 company.save(update_fields=update_fields)
-                logger.info(f"Subscription cancelled for company {company.id}")
+                
+                # 📋 AUDIT LOG: Subscription cancelled via webhook
+                logger.info(
+                    f"AUDIT: Subscription cancelled via webhook - Company: {company.id}, "
+                    f"Plan downgrade: {old_plan} → STARTER"
+                )
             return Response(status=200)
         
         except Exception as e:
@@ -535,7 +563,7 @@ class PayPalConfirmView(APIView):
     """
     Confirm PayPal subscription after customer returns from approval flow.
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAccountAdmin]
 
     def post(self, request):
         subscription_id = request.data.get('subscription_id')
@@ -570,10 +598,19 @@ class PayPalConfirmView(APIView):
             plan_tier, subscription_status = get_paypal_plan_tier(subscription_id)
             if plan_tier and subscription_status == 'ACTIVE':
                 # Save the subscription_id that PayPal has
+                old_plan = company.plan
                 company.paypal_subscription_id = subscription_id
                 company.plan = plan_tier
                 company.is_subscription_active = True
                 company.save(update_fields=['paypal_subscription_id', 'plan', 'is_subscription_active'])
+                
+                # 📋 AUDIT LOG: Subscription confirmed after completion
+                logger.info(
+                    f"AUDIT: Subscription confirmed - Company: {company.id}, "
+                    f"Plan: {old_plan} → {plan_tier}, Subscription ID: {subscription_id}, "
+                    f"Confirmed by: {user.email}"
+                )
+                
                 return Response(
                     {
                         'success': True,
@@ -624,8 +661,14 @@ class PayPalConfirmView(APIView):
 
         update_fields = []
         if company.plan != plan_tier:
+            old_plan = company.plan
             company.plan = plan_tier
             update_fields.append('plan')
+            # 📋 AUDIT LOG: Plan confirmed via PayPal
+            logger.info(
+                f"AUDIT: Plan confirmed via PayPal - Company: {company.id}, "
+                f"Plan: {old_plan} → {plan_tier}, Confirmed by: {user.email}"
+            )
 
         if not company.is_subscription_active:
             company.is_subscription_active = True

@@ -1,17 +1,19 @@
 import { useEffect, useState, useContext } from "react";
 import api from "../axios_instance";
 import "../styles/Customers.css";
+import "../styles/EditableRow.css";
 import { useCompany } from "../context/CompanyContext";
+import EditableRow from "../components/EditableRow";
 import UpgradeValueCards from "../components/UpgradeValueCards";
+import PlanUsageBanner from "../components/PlanUsageBanner";
+import { showConfirm, showToast } from "../utils/uiFeedback";
 
 function Customers() {
-  const TABLET_BREAKPOINT = 1024;
   const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState(null); // Track if we are editing
   const [formData, setFormData] = useState({ firstname: "", lastname: "", email: "", phone: "" });
-  const [isCompactView, setIsCompactView] = useState(() => window.innerWidth <= TABLET_BREAKPOINT);
   const { planLimits, currentPlan, nextPlan } = useCompany();
 
   const fetchCustomers = async () => {
@@ -25,15 +27,6 @@ function Customers() {
 
   useEffect(() => { fetchCustomers(); }, []);
 
-  useEffect(() => {
-    const handleResize = () => {
-      setIsCompactView(window.innerWidth <= TABLET_BREAKPOINT);
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
   const isUnlimited = planLimits.max_customers === null || 
                       planLimits.max_customers === undefined || 
                       planLimits.max_customers === Infinity;
@@ -43,7 +36,7 @@ function Customers() {
 
   const handleAddNew = () => {
     if (isLimitReached) {
-      alert(`Customer limit reached for your current plan (${currentPlan}). Please upgrade to add more.`);
+      showToast(`Customer limit reached for your current plan (${currentPlan}). Please upgrade to add more.`, "error");
       return;
     }
     setEditId(null);
@@ -51,14 +44,13 @@ function Customers() {
     setShowModal(true);
   };
 
-  // Open modal for editing existing
   const handleEdit = (customer) => {
     setEditId(customer.id);
     setFormData({
       firstname: customer.firstname,
       lastname: customer.lastname,
       email: customer.email || "",
-      phone: customer.phone || ""
+      phone: customer.phone || "",
     });
     setShowModal(true);
   };
@@ -76,15 +68,45 @@ function Customers() {
       setShowModal(false);
       fetchCustomers();
     } catch (err) {
-      alert("Error saving customer. Please check your data.");
+      showToast("Error saving customer. Please check your data.", "error");
     }
   };
 
   const deleteCustomer = async (id) => {
-    if (window.confirm("Delete this customer and all their records?")) {
+    const confirmed = await showConfirm({
+      title: "Delete customer",
+      message: "Delete this customer and all their records?",
+      confirmText: "Delete",
+      danger: true,
+    });
+    if (!confirmed) return;
+
+    try {
       await api.delete(`customers/${id}/`);
       fetchCustomers();
+      showToast("Customer deleted", "success");
+    } catch (err) {
+      showToast(err.response?.data?.error || "Unable to delete customer.", "error");
     }
+  };
+
+  const handleSaveCustomer = async (updatedCustomer) => {
+    try {
+      if (updatedCustomer.id) {
+        await api.put(`customers/${updatedCustomer.id}/`, updatedCustomer);
+      } else {
+        await api.post("customers/", updatedCustomer);
+      }
+      fetchCustomers();
+      setEditId(null);
+    } catch (err) {
+      showToast("Error saving customer. Please check your data.", "error");
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditId(null);
+    setShowModal(false);
   };
 
   const filtered = customers.filter(c => 
@@ -97,17 +119,7 @@ function Customers() {
         <div className="page-banner">
           <div className="page-banner-copy">
           <h1 className="text-2xl font-bold">Customers</h1>
-          <p className="text-sm text-gray-50">
-            {/* 3. Improved Display Logic */}
-            {customers.length} total customers out of {isUnlimited ? "unlimited" : planLimits.max_customers}.
-            
-            {!isUnlimited && (
-              <>
-                {" "}Plan limit: {planLimits.max_customers}.{" "}
-                {nextPlan && `Upgrade to ${nextPlan} for more.`}
-              </>
-            )}
-          </p>
+          <p className="text-sm text-gray-50">Manage your customer records.</p>
           </div>
 
           <div className="page-banner-actions">
@@ -123,21 +135,21 @@ function Customers() {
         </div>
       </div>
 
-      
-
       <UpgradeValueCards currentPlan={currentPlan} />
 
-      {!isCompactView && (
-        <input 
-          className="search-input mb-4" 
-          placeholder="Search customers..." 
-          value={search}
-          onChange={(e) => setSearch(e.target.value)} 
-        />
-      )}
-
-      {isCompactView && (
-        <div className="search-wrapper customers-search-wrapper mb-4">
+      <div className="customers-usage-search-stack">
+      <PlanUsageBanner
+        metrics={[
+          {
+            label: "Customers",
+            used: customers.length,
+            total: isUnlimited ? null : planLimits.max_customers,
+          },
+        ]}
+        currentPlan={currentPlan}
+        nextPlan={nextPlan}
+      />
+        <div className="customers-search-wrapper mb-4">
           <input 
             type="text"
             className="search-input customers-search-input"
@@ -147,28 +159,34 @@ function Customers() {
           />
           <span className="search-icon">🔍</span>
         </div>
-      )}
+      </div>
 
       <div className="card customers-table-container">
-        <table className="table-standard">
+        <table className="table-standard customers-table">
           <thead>
             <tr>
-              <th>Name</th>
+              <th>First Name</th>
+              <th>Last Name</th>
               <th>Email</th>
               <th>Phone</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map(c => (
-              <tr key={c.id}>
-                <td data-label="Name">{c.firstname} {c.lastname}</td>
-                <td data-label="Email">{c.email}</td>
-                <td data-label="Phone">{c.phone}</td>
+            {filtered.map((customer) => (
+              <tr key={customer.id}>
+                <td data-label="First Name">{customer.firstname}</td>
+                <td data-label="Last Name">{customer.lastname}</td>
+                <td data-label="Email">{customer.email}</td>
+                <td data-label="Phone">{customer.phone}</td>
                 <td data-label="Actions">
-                  <div className="flex gap-2">
-                    <button className="text-btn" onClick={() => handleEdit(c)}>Edit</button>
-                    <button className="text-btn-danger" onClick={() => deleteCustomer(c.id)}>Delete</button>
+                  <div>
+                    <button className="btn btn-xs team-action-btn team-action-edit" onClick={() => handleEdit(customer)}>
+                      Edit
+                    </button>
+                    <button className="btn btn-xs team-action-btn team-action-delete" onClick={() => deleteCustomer(customer.id)}>
+                      Delete
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -217,7 +235,7 @@ function Customers() {
                 <button type="submit" className="btn btn-primary">
                   {editId ? "Update Customer" : "Save Customer"}
                 </button>
-                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
+                <button type="button" className="btn btn-secondary" onClick={cancelEdit}>
                   Cancel
                 </button>
               </div>

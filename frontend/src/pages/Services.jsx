@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import api from "../axios_instance";
 import { Plus, X } from "lucide-react";
 import "../styles/Services.css";
+import "../styles/EditableRow.css";
+import EditableRow from "../components/EditableRow";
+import { showConfirm, showToast } from "../utils/uiFeedback";
 
 function Services() {
   const TABLET_BREAKPOINT = 1024;
@@ -11,6 +14,7 @@ function Services() {
   const [loading, setLoading] = useState(true);
   const [isCompactView, setIsCompactView] = useState(() => window.innerWidth <= TABLET_BREAKPOINT);
   const [showServiceForm, setShowServiceForm] = useState(() => window.innerWidth > TABLET_BREAKPOINT);
+  const [showModal, setShowModal] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -38,7 +42,7 @@ function Services() {
 
   const fetchServices = async () => {
     try {
-      const res = await api.get("services/");
+      const res = await api.get("services/?include_inactive=1");
       setServices(res.data);
       setLoading(false);
     } catch (err) {
@@ -56,7 +60,7 @@ function Services() {
     e.preventDefault();
     try {
       if (editingId) {
-        await api.put(`services/${editingId}/`, formData);
+        await api.patch(`services/${editingId}/`, formData);
       } else {
         await api.post("services/", formData);
       }
@@ -66,8 +70,27 @@ function Services() {
       }
       fetchServices();
     } catch (err) {
-      alert("Error saving service: " + (err.response?.data?.error || "Check console"));
+      showToast("Error saving service: " + (err.response?.data?.error || "Check console"), "error");
     }
+  };
+
+  const handleSaveService = async (updatedService) => {
+    try {
+      if (updatedService.id) {
+        await api.patch(`services/${updatedService.id}/`, updatedService);
+      } else {
+        await api.post("services/", updatedService);
+      }
+      fetchServices();
+      setEditingId(null);
+    } catch (err) {
+      showToast("Error saving service. Please check your data.", "error");
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setShowModal(false);
   };
 
   const startEdit = (service) => {
@@ -83,14 +106,43 @@ function Services() {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure? Services with booking history will be deactivated instead of deleted.")) {
-      try {
-        const res = await api.delete(`services/${id}/`);
-        if (res.data?.message) alert(res.data.message);
-        fetchServices();
-      } catch (err) {
-        alert(err.response?.data?.error || "Delete error");
-      }
+    const confirmed = await showConfirm({
+      title: "Delete service",
+      message: "Are you sure? Services with booking history will be deactivated instead of deleted.",
+      confirmText: "Delete",
+      danger: true,
+    });
+
+    if (!confirmed) return;
+
+    try {
+      const res = await api.delete(`services/${id}/`);
+      showToast(res.data?.message || "Service deleted successfully.", res.data?.deactivated ? "info" : "success");
+      fetchServices();
+    } catch (err) {
+      showToast(err.response?.data?.error || "Delete error", "error");
+    }
+  };
+
+  const handleToggleActive = async (service) => {
+    const nextActiveState = !service.is_active;
+    const action = nextActiveState ? "reactivate" : "deactivate";
+
+    const confirmed = await showConfirm({
+      title: `${action.charAt(0).toUpperCase() + action.slice(1)} service`,
+      message: `Are you sure you want to ${action} this service?`,
+      confirmText: nextActiveState ? "Reactivate" : "Deactivate",
+      danger: !nextActiveState,
+    });
+
+    if (!confirmed) return;
+
+    try {
+      await api.patch(`services/${service.id}/`, { is_active: nextActiveState });
+      showToast(`Service ${nextActiveState ? "reactivated" : "deactivated"} successfully.`, "success");
+      fetchServices();
+    } catch (err) {
+      showToast(err.response?.data?.error || `Unable to ${action} service.`, "error");
     }
   };
 
@@ -105,6 +157,17 @@ function Services() {
   );
 
   const shouldShowServiceForm = !isCompactView || showServiceForm || editingId !== null;
+
+  const handleEdit = (service) => {
+    setEditingId(service.id);
+    setFormData({
+      name: service.name,
+      description: service.description,
+      duration_minutes: service.duration_minutes,
+      base_price: service.base_price
+    });
+    setShowModal(true);
+  };
 
   if (loading) return <div className="page-container">Loading Services...</div>;
 
@@ -230,40 +293,108 @@ function Services() {
 
       {/* Services Table */}
       <div className="card services-table-container">
-        <table className="table-standard">
+        <table className="table-standard services-table">
           <thead>
             <tr>
-              <th>Service Details</th>
-              <th>Duration</th>
-              <th>Price</th>
-              <th className="text-right">Actions</th>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Duration (minutes)</th>
+              <th>Base Price</th>
+              <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredServices.length > 0 ? (
-              filteredServices.map((s) => (
-                <tr key={s.id}>
-                  <td data-label="Service Details">
-                    <strong>{s.name}</strong>
-                    <br />
-                    <small className="text-muted">{s.description || "No description provided"}</small>
-                  </td>
-                  <td data-label="Duration">{s.duration_minutes} mins</td>
-                  <td data-label="Price" className="font-bold">${s.base_price}</td>
-                  <td data-label="Actions" className="text-right">
-                    <button onClick={() => startEdit(s)} className="text-btn mr-4">Edit</button>
-                    <button onClick={() => handleDelete(s.id)} className="text-btn-danger">Delete</button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="4" className="text-center p-8">No services found.</td>
+            {filteredServices.map((service) => (
+              <tr key={service.id}>
+                <td data-label="Name">{service.name}</td>
+                <td data-label="Description">{service.description}</td>
+                <td data-label="Duration (Minutes)">{service.duration_minutes}</td>
+                <td data-label="Base Price">{service.base_price}</td>
+                <td data-label="Status">
+                  <span className={`badge ${service.is_active ? 'badge-success' : 'badge-ghost'}`}>
+                    {service.is_active ? "Active" : "Inactive"}
+                  </span>
+                </td>
+                <td data-label="Actions">
+                  <div className="service-action-group">
+                    <button className="btn btn-xs team-action-btn team-action-edit" onClick={() => handleEdit(service)}>
+                      Edit
+                    </button>
+                    <button
+                      className={`btn btn-xs team-action-btn ${service.is_active ? 'team-action-deactivate' : 'team-action-reactivate'}`}
+                      onClick={() => handleToggleActive(service)}
+                    >
+                      {service.is_active ? "Deactivate" : "Reactivate"}
+                    </button>
+                    <button className="btn btn-xs team-action-btn team-action-delete" onClick={() => handleDelete(service.id)}>
+                      Delete
+                    </button>
+                  </div>
+                </td>
               </tr>
-            )}
+            ))}
           </tbody>
         </table>
       </div>
+
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Edit Service</h2>
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label>Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Description</label>
+                <input
+                  type="text"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="form-group">
+                <label>Duration (Minutes)</label>
+                <input
+                  type="number"
+                  name="duration_minutes"
+                  value={formData.duration_minutes}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Base Price ($)</label>
+                <input
+                  type="number"
+                  name="base_price"
+                  step="0.01"
+                  value={formData.base_price}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="flex gap-2 mt-4">
+                <button type="submit" className="btn btn-primary">
+                  Update Service
+                </button>
+                <button type="button" className="btn btn-secondary" onClick={cancelEdit}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

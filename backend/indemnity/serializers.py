@@ -1,15 +1,55 @@
 import hashlib
+from html import escape
+from pathlib import Path
 from rest_framework import serializers
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from .models import *
 from core.models import *
-from core.serializers import *
 from drf_extra_fields.fields import Base64ImageField
 from core.plan_limits import PLAN_CONFIG
 from geopy.geocoders import Nominatim
+from pypdf import PdfReader
 # indemnity/serializers.py
 from .utils import generate_agreement_pdf
+
+
+def extract_pdf_text(uploaded_pdf):
+    pdf = PdfReader(uploaded_pdf)
+    pages = []
+    for page in pdf.pages:
+        text = page.extract_text() or ""
+        if text.strip():
+            pages.append(text)
+
+    return "\n".join(pages).strip()
+
+
+def text_to_html(text):
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    if not lines:
+        return ""
+
+    paragraphs = []
+    current_block = []
+    for line in lines:
+        if len(line) <= 90 and not current_block:
+            current_block.append(line)
+        elif len(line) <= 90 and current_block:
+            paragraphs.append(" ".join(current_block))
+            current_block = [line]
+        else:
+            current_block.append(line)
+
+    if current_block:
+        paragraphs.append(" ".join(current_block))
+
+    return "".join(f"<p>{escape(paragraph)}</p>" for paragraph in paragraphs)
+
+
+def derive_title_from_pdf(uploaded_pdf):
+    filename = Path(getattr(uploaded_pdf, "name", "")).stem.replace("_", " ").replace("-", " ").strip()
+    return filename.title() if filename else "Indemnity Template"
 
 class VehiclePhotoSerializer(serializers.ModelSerializer):
     # Keep as standard ImageField so it works for both internal saves and GETs
@@ -21,10 +61,14 @@ class VehiclePhotoSerializer(serializers.ModelSerializer):
 
 class IndemnityTemplateSerializer(serializers.ModelSerializer):
     can_edit = serializers.SerializerMethodField()
+    template_pdf = serializers.FileField(required=False, allow_null=True)
+    title = serializers.CharField(required=False, allow_blank=True)
+    body_html = serializers.CharField(required=False, allow_blank=True)
+    version = serializers.IntegerField(required=False)
 
     class Meta:
         model = IndemnityTemplate
-        fields = ["id", "title", "body_html", "version", "is_active", "created_at", "can_edit"]
+        fields = ["id", "title", "body_html", "version", "is_active", "template_pdf", "created_at", "can_edit"]
     
     def get_can_edit(self, obj):
         request = self.context.get('request')
@@ -36,6 +80,62 @@ class IndemnityTemplateSerializer(serializers.ModelSerializer):
         # If history limit is 0, they can't edit existing records
         return plan_limits.get('indemnity_history_limit', 0) != 0
 
+    def validate_template_pdf(self, value):
+        if not value:
+            return value
+
+        request = self.context.get('request')
+        company = getattr(getattr(request, 'user', None), 'company', None)
+        if company and company.plan == 'STARTER':
+            raise serializers.ValidationError(
+                "PDF template uploads are available on Pro and Enterprise plans only."
+            )
+
+        filename = getattr(value, 'name', '') or ''
+        if not filename.lower().endswith('.pdf'):
+            raise serializers.ValidationError("Please upload a PDF file.")
+
+        return value
+
+    def validate(self, attrs):
+        instance = getattr(self, "instance", None)
+        uploaded_pdf = attrs.get("template_pdf")
+        body_html = (attrs.get("body_html") or "").strip()
+        title = (attrs.get("title") or "").strip()
+
+        if uploaded_pdf:
+            extracted_text = extract_pdf_text(uploaded_pdf)
+            if not extracted_text:
+                raise serializers.ValidationError({
+                    "template_pdf": "The uploaded PDF did not contain selectable text. Please upload a searchable PDF or type the indemnity text manually."
+                })
+
+            if not body_html:
+                attrs["body_html"] = text_to_html(extracted_text)
+
+            if not title:
+                attrs["title"] = derive_title_from_pdf(uploaded_pdf)
+
+            if not attrs.get("version"):
+                company = getattr(getattr(self.context.get("request"), "user", None), "company", None)
+                if company:
+                    latest_version = (
+                        IndemnityTemplate.objects.filter(company=company)
+                        .order_by("-version")
+                        .values_list("version", flat=True)
+                        .first()
+                    )
+                    attrs["version"] = (latest_version or 0) + 1
+                elif instance:
+                    attrs["version"] = instance.version
+
+        if not (attrs.get("body_html") or (instance and instance.body_html)):
+            raise serializers.ValidationError({
+                "body_html": "Either type the indemnity text or upload a PDF that contains the indemnity content."
+            })
+
+        return attrs
+
 # indemnity/serializers.py
 
 class IndemnityAgreementSerializer(serializers.ModelSerializer):
@@ -43,6 +143,13 @@ class IndemnityAgreementSerializer(serializers.ModelSerializer):
     signature_image = serializers.ImageField(required=True)
     photos = VehiclePhotoSerializer(source='condition_photos', many=True, read_only=True)
     pdf_file = serializers.FileField(read_only=True)
+    signed_body_html = serializers.CharField(read_only=True)
+    signed_template_title = serializers.CharField(read_only=True)
+    signed_template_version = serializers.IntegerField(read_only=True)
+    template_body_html = serializers.SerializerMethodField()
+
+    def get_template_body_html(self, obj):
+        return getattr(obj.template, 'body_html', '') if obj.template else ''
 
     # List of binary files (Before photos)
     uploaded_images = serializers.ListField(
@@ -56,9 +163,13 @@ class IndemnityAgreementSerializer(serializers.ModelSerializer):
         fields = [
             "id", "booking", "template", "customer", "signed_at", 
             "signer_ip", "signer_user_agent", "signature_image", 
-            "photos", "uploaded_images", "document_hash", "pdf_file", "latitude", "longitude", "signing_address"
+            "photos", "uploaded_images", "document_hash", "pdf_file", "latitude", "longitude", "signing_address",
+            "signed_body_html", "signed_template_title", "signed_template_version", "template_body_html"
         ]
-        read_only_fields = ["id", "customer", "signed_at", "document_hash", "signer_ip", "signer_user_agent", "latitude", "longitude", "signing_address"]
+        read_only_fields = [
+            "id", "customer", "signed_at", "document_hash", "signer_ip", "signer_user_agent", "latitude", "longitude",
+            "signing_address", "signed_body_html", "signed_template_title", "signed_template_version"
+        ]
 
     def validate(self, data):
         uploaded_images = data.get('uploaded_images', [])
@@ -126,6 +237,10 @@ class IndemnityAgreementSerializer(serializers.ModelSerializer):
         validated_data['signer_ip'] = ip
         validated_data['signer_user_agent'] = user_agent
         validated_data['customer'] = booking.customer
+        # Freeze the exact signed legal text so future template edits never change historical records.
+        validated_data['signed_body_html'] = template.body_html or ''
+        validated_data['signed_template_title'] = template.title or ''
+        validated_data['signed_template_version'] = template.version
         
         # Hash for digital integrity
         hash_source = f"{template.body_html}-{booking.id}"

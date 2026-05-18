@@ -154,6 +154,8 @@
   background-color: #ffffff !important;
 }
 
+
+
 /* --- BUTTON VISIBILITY FIXES --- */
 
 /* 1. General Button Reset (Ensures no white text leakage) */
@@ -261,6 +263,59 @@
     border: 1px solid #86efac !important;
 }
 
+.team-action-btn {
+  min-height: 30px;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  margin-left: 3%;
+}
+
+.team-action-edit {
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border-color: #bfdbfe !important;
+}
+
+.team-action-edit:hover {
+  background: #dbeafe !important;
+  border-color: #93c5fd !important;
+}
+
+.team-action-deactivate {
+  background: #fff1f2 !important;
+  color: #be123c !important;
+  border-color: #fecdd3 !important;
+}
+
+.team-action-deactivate:hover {
+  background: #ffe4e6 !important;
+  border-color: #fda4af !important;
+}
+
+.team-action-reactivate {
+  background: #ecfdf3 !important;
+  color: #047857 !important;
+  border-color: #a7f3d0 !important;
+}
+
+.team-action-reactivate:hover {
+  background: #d1fae5 !important;
+  border-color: #6ee7b7 !important;
+}
+
+.team-action-delete {
+  background: #fee2e2 !important;
+  color: #b91c1c !important;
+  border-color: #fca5a5 !important;
+}
+
+.team-action-delete:hover {
+  background: #fecaca !important;
+  border-color: #f87171 !important;
+}
+
 /* Fix Inputs (typed text visibility) */
 .page-container input, 
 .page-container select {
@@ -271,4 +326,164 @@
 
 .page-container input::placeholder {
     color: #94a3b8 !important;
+}
+
+
+/* MOBILE ONLY STYLES */
+@media (max-width: 768px) {
+  .team-management-page, 
+  .main-content, 
+  .page-body {
+    background-color: #f8fafc !important;
+    color: #1e293b !important; /* Forces dark text globally for this page */
+  }
+
+  /* Fix Headings and Labels that are likely inheriting 'white' */
+  .team-management-page h1, 
+  .team-management-page h2, 
+  .team-management-page h3,
+  .form-group label {
+    color: #0f172a !important;
+  }
+
+  /* Ensure inputs themselves have dark text and light backgrounds */
+  .grid-form input,
+  .grid-form select {
+    background: #ffffff !important;
+    color: #1e293b !important;
+    border: 1px solid #cbd5e1;
+  }
+
+  /* Fix the button visibility on mobile */
+  .team-management-page button,
+  .team-management-page .btn {
+    color: #1e293b; /* Default dark text */
+  }
+
+  .btn-warning {
+    background: #fffbeb !important; /* Very light yellow background */
+    border: 1px solid #f59e0b !important;
+    color: #b45309 !important; /* Deep amber text for contrast */
+    font-weight: 600;
+  }
+
+  .btn-warning:hover {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+    box-shadow: 0 2px 4px rgba(180, 83, 9, 0.1);
+  }
+
+  .btn-ghost.deactivate, 
+  .btn-outline.deactivate {
+    background: #fff1f2 !important; /* Light red wash */
+    color: #e11d48 !important;      /* Sharp red text */
+    border: 1px solid #fecdd3 !important;
+  }
+
+  .btn-ghost.deactivate:hover, 
+  .btn-outline.deactivate:hover {
+    background: #ffe4e6 !important;
+    border-color: #fb7185 !important;
+    color: #be123c !important;
+  }
+
+  .btn-outline {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #475569 !important; /* Slate grey text */
+  }
+
+  .btn-outline:hover {
+    background: #f8fafc !important;
+    border-color: #94a3b8 !important;
+    color: #1e293b !important;
+  }
+
+  /* .team-action-btn {
+    min-height: 30px;
+    font-weight: 700;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    opacity: 1 !important;
+    filter: none !important;
+  } */
+
+  .team-action-group {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .team-action-btn {
+    width: 100%;
+    min-height: 40px;
+    margin-top: 3%;
+    margin-left: 0%;
+  }
+
+  /* Fix Inputs (typed text visibility) */
+  .page-container input,
+  .page-container select {
+    background-color: #ffffff !important;
+    color: #1e293b !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+
+  .page-container input::placeholder {
+    color: #94a3b8 !important;
+  }
+
+  /* Ensure the button spans appropriately if the grid wraps */
+  .grid-form .btn-success {
+    height: 44px;
+    width: 100%;
+  }
+
+  /* Fix the table responsiveness */
+
+  /* Fix the action buttons in the table */
+  .team-action-edit {
+    background: #eff6ff !important;
+    color: #1d4ed8 !important;
+    border-color: #bfdbfe !important;
+  }
+
+  .team-action-edit:hover {
+    background: #dbeafe !important;
+    border-color: #93c5fd !important;
+  }
+
+  .team-action-deactivate {
+    background: #fff1f2 !important;
+    color: #be123c !important;
+    border-color: #fecdd3 !important;
+  }
+
+  .team-action-deactivate:hover {
+    background: #ffe4e6 !important;
+    border-color: #fda4af !important;
+  }
+
+  .team-action-reactivate {
+    background: #ecfdf3 !important;
+    color: #047857 !important;
+    border-color: #a7f3d0 !important;
+  }
+
+  .team-action-reactivate:hover {
+    background: #d1fae5 !important;
+    border-color: #6ee7b7 !important;
+  }
+
+  .team-action-delete {
+    background: #fee2e2 !important;
+    color: #b91c1c !important;
+    border-color: #fca5a5 !important;
+  }
+
+  .team-action-delete:hover {
+    background: #fecaca !important;
+    border-color: #f87171 !important;
+  }
+
 }

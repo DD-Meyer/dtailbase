@@ -1,0 +1,229 @@
+/* ===== PlanUsageBanner ===== */
+
+/* --- Dark theme (default — used in Bookings, Customers, Team) --- */
+.plan-usage-banner {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(123, 154, 196, 0.2);
+  border-radius: 10px;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+/* --- Light theme (IndemnitySettings) --- */
+.plan-usage-banner--light {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+}
+
+/* --- Metrics container --- */
+.plan-usage-metrics {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+
+/* --- Individual metric --- */
+.usage-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 120px;
+  flex: 1;
+  max-width: 200px;
+}
+
+.usage-metric--at-limit .usage-label {
+  color: #f87171;
+}
+
+.plan-usage-banner--light .usage-metric--at-limit .usage-label {
+  color: #dc2626 !important;
+}
+
+/* --- Label / fraction row --- */
+.usage-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.usage-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #8ba1bf;
+  white-space: nowrap;
+}
+
+.plan-usage-banner--light .usage-label {
+  color: #64748b !important;
+}
+
+.usage-fraction {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #ebf2ff;
+  white-space: nowrap;
+}
+
+.plan-usage-banner--light .usage-fraction {
+  color: #1e293b !important;
+}
+
+.usage-unlimited {
+  color: #46ffb3 !important;
+  font-size: 0.72rem;
+}
+
+.plan-usage-banner--light .usage-unlimited {
+  color: #059669 !important;
+}
+
+.usage-at-limit {
+  color: #f87171 !important;
+}
+
+.usage-near-limit {
+  color: #fbbf24 !important;
+}
+
+/* --- Progress track & bar --- */
+.usage-progress-track {
+  height: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.plan-usage-banner--light .usage-progress-track {
+  background: #e2e8f0;
+}
+
+.usage-progress-bar {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+
+.progress-bar--ok {
+  background: #46ffb3;
+}
+
+.progress-bar--warn {
+  background: #fbbf24;
+}
+
+.progress-bar--danger {
+  background: #f87171;
+}
+
+.progress-bar--unlimited {
+  background: linear-gradient(90deg, #46ffb3, #23b4ff);
+  opacity: 0.6;
+}
+
+/* --- Upgrade CTA button --- */
+.plan-usage-upgrade-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.4rem 1rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #23b4ff, #0f8ed4);
+  color: #fff !important;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+
+.plan-usage-upgrade-btn:hover {
+  opacity: 0.88;
+}
+
+/* Light theme upgrade button */
+.plan-usage-banner--light .plan-usage-upgrade-btn {
+  background: linear-gradient(135deg, #0f8ed4, #0369a1);
+}
+
+/* --- Top tier label --- */
+.plan-usage-top-tier {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #46ffb3;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Feature availability badge */
+.usage-feature-available {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #46ffb3;
+}
+
+.usage-feature-locked {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #f87171;
+}
+
+.plan-usage-banner--light .usage-feature-available {
+  color: #16a34a;
+}
+
+.plan-usage-banner--light .usage-feature-locked {
+  color: #dc2626;
+}
+
+.plan-usage-banner--light .plan-usage-top-tier {
+  color: #059669 !important;
+}
+
+/* --- Responsive --- */
+@media (max-width: 640px) {
+  .plan-usage-banner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .plan-usage-banner--light {
+    padding: 0.85rem;
+  }
+
+  .plan-usage-banner--light .plan-usage-metrics {
+    gap: 0.6rem;
+  }
+
+  .plan-usage-banner--light .usage-metric {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .plan-usage-banner--light .usage-header-row {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+
+  .plan-usage-banner--light .usage-label {
+    white-space: normal;
+    line-height: 1.25;
+  }
+
+  .plan-usage-upgrade-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

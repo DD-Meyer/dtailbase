@@ -8,6 +8,22 @@ import { countryOptions, getCountryLabel } from "../utils/countries";
 const getCurrencyForCountry = (countryCode) => (countryCode === "ZA" ? "ZAR" : "USD");
 
 function Register() {
+  const detectInstalledMobileApp = () => {
+    const userAgent = (typeof navigator !== "undefined" ? navigator.userAgent : "") || "";
+    const isMobileDevice = /android|iphone|ipad|ipod|mobile/i.test(userAgent);
+    const isStandaloneDisplay = typeof window !== "undefined" && (
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.matchMedia("(display-mode: fullscreen)").matches ||
+      window.matchMedia("(display-mode: minimal-ui)").matches
+    );
+    const isIosStandalone = typeof window !== "undefined" && window.navigator?.standalone === true;
+    const isAndroidTwa = typeof document !== "undefined" && document.referrer.startsWith("android-app://");
+
+    return isMobileDevice && (isStandaloneDisplay || isIosStandalone || isAndroidTwa);
+  };
+
+  const useMobilePersistence = detectInstalledMobileApp();
+
   const [detectedCountryCode, setDetectedCountryCode] = useState("US");
   const [formData, setFormData] = useState({
     company_name: "",
@@ -107,6 +123,8 @@ function Register() {
         const loginRes = await api.post("token/", {
           email: formData.email,
           password: formData.password,
+          mobile_app: useMobilePersistence,
+          remember_me: true,
         });
 
         login(loginRes.data.access, loginRes.data.refresh, loginRes.data.user);

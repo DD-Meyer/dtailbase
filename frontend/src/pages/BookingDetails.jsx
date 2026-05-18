@@ -16,11 +16,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../axios_instance";
 import "../styles/BookingDetails.css";
 import { formatShortRef } from "../utils/formatters";
+import { showToast } from "../utils/uiFeedback";
 
 export default function BookingDetail() {
   const { id } = useParams();
   const [booking, setBooking] = useState(null);
   const [isDownloading, setIsDownloading] = useState(false); // Track download state
+  const [showIndemnityText, setShowIndemnityText] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -54,16 +56,27 @@ export default function BookingDetail() {
       link.remove();
     } catch (err) {
       console.error("Download failed", err);
-      alert("Could not download PDF. Check if it's generated.");
+      showToast("Could not download PDF. Check if it's generated.", "error");
     } finally {
       setIsDownloading(false);
     }
+  };
+
+  const handleViewSignedForm = () => {
+    const signedHtml = booking?.indemnity_data?.signed_body_html;
+    const fallbackTemplateHtml = booking?.indemnity_data?.template_body_html;
+    if (!signedHtml && !fallbackTemplateHtml) {
+      showToast("Signed indemnity text is not available on this record yet.", "error");
+      return;
+    }
+    setShowIndemnityText(true);
   };
 
   if (!booking) return <div className="page-container">Loading details...</div>;
 
   // --- LOGIC: Handle nested Indemnity & Photos ---
   const indemnity = booking.indemnity_data;
+  const signedIndemnityHtml = indemnity?.signed_body_html || indemnity?.template_body_html || '';
   const photos = indemnity?.photos || [];
   const toAbsoluteUrl = (url) => {
     if (!url) return "";
@@ -81,25 +94,36 @@ export default function BookingDetail() {
 
   return (
     <div className="page-container">
-      <button className="btn-secondary mb-4" onClick={() => navigate(-1)}>← Back to Dashboard</button>
+      <div className="booking-header-action-btns flex-between mb-4">
+        <button className="btn-secondary mb-4" onClick={() => navigate(-1)}>← Back to Dashboard</button>
 
-      {/* DOWNLOAD BUTTON - More resilient logic */}
-      {indemnity ? (
-        <button 
-          className="btn-primary" 
-          onClick={handleDownloadPDF}
-          disabled={isDownloading || !indemnity.pdf_file}
-        >
-          {isDownloading ? "Downloading..." : 
-          !indemnity.pdf_file ? "📄 PDF Generating..." : "📄 Download Signed PDF"}
-        </button>
-      ) : (
-        <span className="text-muted small">Indemnity not yet signed</span>
-      )}
+        {/* DOWNLOAD BUTTON - More resilient logic */}
+        {indemnity ? (
+          <div className="flex-between" style={{ gap: '10px' }}>
+            <button
+              className="btn-secondary"
+              onClick={handleViewSignedForm}
+              disabled={!indemnity.pdf_file}
+            >
+              {!indemnity.pdf_file ? "📄 Form Processing..." : "👁 View Signed Form"}
+            </button>
+            <button 
+              className="btn-primary" 
+              onClick={handleDownloadPDF}
+              disabled={isDownloading || !indemnity.pdf_file}
+            >
+              {isDownloading ? "Downloading..." : 
+              !indemnity.pdf_file ? "📄 PDF Generating..." : "📄 Download Signed PDF"}
+            </button>
+          </div>
+        ) : (
+          <span className="text-muted small">Indemnity not yet signed</span>
+        )}
+      </div>
 
       {/* Inside BookingDetails.jsx */}
       {indemnity && indemnity.latitude && (
-        <div className="flex gap-2 mt-4">
+        <div className="booking-header-action-btns flex-between gap-2 mt-4">
           <button 
             className="btn-map"
             onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${indemnity.latitude},${indemnity.longitude}`, '_blank')}
@@ -112,7 +136,7 @@ export default function BookingDetail() {
               className="btn-secondary small"
               onClick={() => {
                 navigator.clipboard.writeText(indemnity.signing_address);
-                alert("Address copied to clipboard!");
+                showToast("Address copied to clipboard!", "success");
               }}
             >
               📋 Copy Address
@@ -189,10 +213,10 @@ export default function BookingDetail() {
         <h3>Customer Indemnity Signature</h3>
         {indemnity?.signature_image ? (
             <>
-            <img src={toAbsoluteUrl(indemnity.signature_image)} alt="Customer Sig" style={{ maxWidth: '300px', background: '#fff', border: '1px solid #ddd' }} />
+            <img src={toAbsoluteUrl(indemnity.signature_image)} alt="Customer Sig" style={{ maxWidth: '100%', background: '#fff', border: '1px solid #ddd' }} />
                 <p className="text-muted small mt-2">
                     Signed on: {new Date(indemnity.signed_at).toLocaleString()}<br/>
-                    IP Address: {indemnity.signer_ip}
+                    IP Address: {indemnity.signer_ip}<br/>
 
                     {/* DISPLAY THE PHYSICAL ADDRESS HERE */}
                     {indemnity.signing_address && (
@@ -206,6 +230,35 @@ export default function BookingDetail() {
             <p className="text-danger">Awaiting customer signature.</p>
         )}
       </div>
+
+      {showIndemnityText && (
+        <div className="indemnity-text-modal-overlay" onClick={() => setShowIndemnityText(false)}>
+          <div className="indemnity-text-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="indemnity-text-modal-header">
+              <h3>Signed Indemnity Text</h3>
+              <button className="btn-secondary" onClick={() => setShowIndemnityText(false)}>Close</button>
+            </div>
+
+            {indemnity?.signed_template_title && (
+              <p className="text-muted small mb-3">
+                Template: {indemnity.signed_template_title}
+                {indemnity?.signed_template_version ? ` (v${indemnity.signed_template_version})` : ''}
+              </p>
+            )}
+
+            {!indemnity?.signed_body_html && (
+              <p className="text-muted small mb-3">
+                Legacy agreement: showing current template text because snapshot text was not stored at signing time.
+              </p>
+            )}
+
+            <div
+              className="indemnity-text-content"
+              dangerouslySetInnerHTML={{ __html: signedIndemnityHtml }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

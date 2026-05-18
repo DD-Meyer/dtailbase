@@ -125,6 +125,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: 0;
 }
 
 .input-group label {
@@ -135,6 +136,9 @@
 
 .input-group input, 
 .input-group textarea {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 12px;
   border: 1.5px solid #cbd5e1;
   border-radius: 8px;
@@ -238,6 +242,14 @@
   line-height: 1.5;
 }
 
+.settings-panel .upgrade-value-wrap {
+  margin: 0 0 1.25rem;
+}
+
+.settings-panel .upgrade-value-header p {
+  margin-bottom: 0.85rem;
+}
+
 .btn-billing-manage {
   display: inline-flex;
   align-items: center;
@@ -265,9 +277,13 @@
 .location-change-form {
   display: grid;
   gap: 12px;
+  min-width: 0;
 }
 
 .country-select {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   min-height: 42px;
   border: 1.5px solid #cbd5e1;
   border-radius: 8px;
@@ -275,6 +291,10 @@
 }
 
 .upload-field {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
   min-height: 44px;
   border: 1.5px dashed #94a3b8;
   border-radius: 10px;
@@ -288,6 +308,13 @@
 
 .upload-field input {
   display: none;
+}
+
+.upload-field span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .verification-status {
@@ -477,6 +504,27 @@ td { font-size: 0.9rem; }
 @media (max-width: 768px) {
   .settings-wrapper {
     padding: 16px;
+    overflow-x: hidden;
+  }
+
+  .settings-panel .upgrade-value-wrap {
+    margin: 0 0 1rem;
+    padding: 0.75rem;
+    border-radius: 14px;
+  }
+
+  .settings-panel .upgrade-value-grid {
+    gap: 0.55rem;
+  }
+
+  .settings-panel .upgrade-value-card {
+    padding: 0.62rem 0.72rem;
+    border-radius: 12px;
+    gap: 0.7rem;
+  }
+
+  .settings-panel .upgrade-value-header p {
+    margin: 0.2rem 0 0.65rem;
   }
 
   .settings-header h1 {
@@ -485,6 +533,7 @@ td { font-size: 0.9rem; }
 
   .settings-card {
     padding: 18px;
+    overflow-x: hidden;
   }
 
   .form-grid {
@@ -504,5 +553,26 @@ td { font-size: 0.9rem; }
     width: 100%;
     min-height: 44px;
     padding: 12px 16px;
+  }
+
+  .settings-card table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .settings-card thead,
+  .settings-card tbody,
+  .settings-card tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .settings-card th,
+  .settings-card td {
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 }

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { getAvailability, createBooking } from "../api";
+import { showToast } from "../utils/uiFeedback";
 
 export default function BookingForm() {
   const [date, setDate] = useState("");
@@ -8,14 +9,20 @@ export default function BookingForm() {
   const [slot, setSlot] = useState("");
 
   const loadAvailability = async () => {
-    if (!date) return alert("Pick a date first");
+    if (!date) {
+      showToast("Pick a date first", "error");
+      return;
+    }
 
     const res = await getAvailability(date);
     setServices(res.data.services);
   };
 
   const submitBooking = async () => {
-    if (!serviceId || !slot) return alert("Missing fields");
+    if (!serviceId || !slot) {
+      showToast("Missing fields", "error");
+      return;
+    }
 
     const [start, end] = slot.split("-");
 
@@ -29,7 +36,7 @@ export default function BookingForm() {
       notes: "",
     });
 
-    alert("Booking created");
+    showToast("Booking created", "success");
   };
 
   const selectedService = services.find(

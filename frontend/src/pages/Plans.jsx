@@ -4,6 +4,7 @@ import api from '../axios_instance';
 import { useCompany } from '../context/CompanyContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { showToast } from '../utils/uiFeedback';
 import { fetchPricingWithFallback, isValidPricingPayload } from '../services/pricingService';
 
 const PLAN_ORDER = {
@@ -67,12 +68,25 @@ const Plans = () => {
       });
 
       await refreshCompany();
-      setActionMessage(
-        response.data?.message ||
-          'Subscription cancelled. Your account is now on Starter.'
-      );
+      const successMsg = response.data?.message || 'Subscription cancelled. Your account is now on Starter.';
+      setActionMessage(successMsg);
+      showToast(successMsg, 'success');
     } catch (err) {
-      setActionError(err.response?.data?.error || 'Unable to process downgrade right now.');
+      // Handle different error types
+      let errorMsg = 'Unable to process downgrade right now.';
+      
+      if (err.response?.status === 403) {
+        errorMsg = 'Only account owners can cancel subscriptions. Please contact your account owner.';
+      } else if (err.response?.data?.detail) {
+        errorMsg = err.response.data.detail;
+      } else if (err.response?.data?.error) {
+        errorMsg = err.response.data.error;
+      } else if (err.response?.data?.message) {
+        errorMsg = err.response.data.message;
+      }
+      
+      setActionError(errorMsg);
+      showToast(errorMsg, 'error');
     } finally {
       setDowngradingPlanId('');
     }

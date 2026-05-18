@@ -1,3 +1,5 @@
+import { showToast } from "../utils/uiFeedback";
+
 const handlePayment = async (bookingId, price) => {
   try {
     const res = await api.post("payments/initiate/", { 
@@ -21,7 +23,7 @@ const handlePayment = async (bookingId, price) => {
     document.body.appendChild(form);
     form.submit();
   } catch (err) {
-    alert("Payment initialization failed.");
+    showToast("Payment initialization failed.", "error");
   }
 };
 
