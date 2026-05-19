@@ -116,6 +116,17 @@ class Booking(models.Model):
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    LOCATION_CHOICES = (
+        ('ONSITE', 'On-site at Company'),
+        ('MOBILE', 'Mobile at Customer Location'),
+    )
+    location_type = models.CharField(
+        max_length=10,
+        choices=LOCATION_CHOICES,
+        default='ONSITE'
+    )
+    customer_address = models.TextField(blank=True, default='')
+
     # models.py
 
     def change_status(self, new_status):

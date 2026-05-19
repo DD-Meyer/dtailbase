@@ -229,18 +229,52 @@
 @media (max-width: 768px) {
   .public-header-logo {
     font-size: 1.1rem;
+    max-width: 42vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .public-nav {
     padding: 10px 16px;
+    gap: 8px;
   }
 
   .nav-auth-persistent {
     gap: 8px;
     justify-content: center;
+    flex-wrap: nowrap;
   }
 
   .btn-login-text {
     font-size: 0.82rem;
+  }
+
+  .btn-join-now,
+  .btn-dashboard-sm {
+    white-space: nowrap;
+    padding: 7px 10px;
+    font-size: 0.72rem;
+  }
+
+  .hamburger {
+    width: 38px;
+    height: 38px;
+  }
+}
+
+@media (max-width: 480px) {
+  .public-nav {
+    padding: 10px 12px;
+  }
+
+  .public-header-logo {
+    max-width: 36vw;
+    font-size: 1rem;
+  }
+
+  .btn-join-now,
+  .btn-dashboard-sm {
+    padding: 6px 9px;
+    font-size: 0.68rem;
   }
 }

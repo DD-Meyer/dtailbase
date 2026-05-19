@@ -18,6 +18,7 @@ import "../styles/BookingDetails.css";
 import { formatShortRef } from "../utils/formatters";
 import { showToast } from "../utils/uiFeedback";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { CircleAlertIcon, ClipboardCheckIcon, FormIcon, LocateIcon, EyeIcon } from "lucide-react";
 
 export default function BookingDetail() {
   const { id } = useParams();
@@ -95,18 +96,18 @@ export default function BookingDetail() {
 
   return (
     <div className="page-container">
-      <div className="booking-header-action-btns flex-between mb-4">
-        <button className="btn-secondary mb-4" onClick={() => navigate(-1)}><ArrowLeftIcon className="h-6 w-5"/></button>
+      <div className="booking-header-action-btns">
+        <button className="btn-secondary" onClick={() => navigate(-1)}><ArrowLeftIcon className="h-6 w-5"/></button>
 
         {/* DOWNLOAD BUTTON - More resilient logic */}
         {indemnity ? (
-          <div className="action-buttons-grid flex-between" style={{ gap: '10px' }}>
+          <div className="action-buttons-grid" style={{ gap: '10px' }}>
             <button
               className="btn-secondary"
               onClick={handleViewSignedForm}
               disabled={!indemnity.pdf_file}
             >
-              {!indemnity.pdf_file ? "📄 Form Processing..." : "👁 View Signed Form"}
+              {!indemnity.pdf_file ? <><CircleAlertIcon className="h-5 w-5 mr-2"/> Form Processing...</> : <><EyeIcon className="h-5 w-5 mr-2"/> View Signed Form</>}
             </button>
             <button 
               className="btn-primary" 
@@ -114,7 +115,7 @@ export default function BookingDetail() {
               disabled={isDownloading || !indemnity.pdf_file}
             >
               {isDownloading ? "Downloading..." : 
-              !indemnity.pdf_file ? "📄 PDF Generating..." : "📄 Download Signed PDF"}
+              !indemnity.pdf_file ? <><CircleAlertIcon className="h-5 w-5 mr-2"/> PDF Generating...</> : <><FormIcon className="h-5 w-5 mr-2"/> Download Signed PDF</>}
             </button>
           </div>
         ) : (
@@ -129,7 +130,7 @@ export default function BookingDetail() {
             className="btn-map"
             onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${indemnity.latitude},${indemnity.longitude}`, '_blank')}
           >
-            📍 View Signing Location
+            <LocateIcon className="h-5 w-5 mr-2"/> View Signing Location
           </button>
           
           {indemnity.signing_address && (
@@ -140,7 +141,7 @@ export default function BookingDetail() {
                 showToast("Address copied to clipboard!", "success");
               }}
             >
-              📋 Copy Address
+              <ClipboardCheckIcon className="h-5 w-5 mr-2 inline"/> Copy Address
             </button>
           )}
         </div>
@@ -161,6 +162,10 @@ export default function BookingDetail() {
           <p><strong>Phone:</strong> {booking.customer?.phone}</p>
           <p><strong>Vehicle:</strong> {booking.vehicle?.make} {booking.vehicle?.model}</p>
           <p><strong>Service:</strong> {booking.service_name}</p>
+          <p><strong>Location Type:</strong> {booking.location_type === 'MOBILE' ? '🚗 Mobile – Go to Customer' : '🏢 On-site at Company'}</p>
+          {booking.location_type === 'MOBILE' && booking.customer_address && (
+            <p><strong>Customer Address:</strong> {booking.customer_address}</p>
+          )}
         </div>
 
         {/* Timestamps & Authorization */}

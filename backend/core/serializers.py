@@ -113,6 +113,7 @@ class BookingDetailSerializer(serializers.ModelSerializer):
         fields = [
             "id", "company", "status", "booking_date", "booking_time", "booking_end_time",
             "started_at", "completed_at", "notes", "admin_signature", "is_authorized",
+            "location_type", "customer_address",
             "customer", "vehicle", "service_name", "total_price", 
             "indemnity_data"
         ]
@@ -234,12 +235,19 @@ class BookingCreateSerializer(serializers.ModelSerializer):
         model = Booking
         fields = [
             "customer", "vehicle", "service", "booking_date",
-            "booking_time", "notes", "admin_signature", "is_authorized"
+            "booking_time", "notes", "admin_signature", "is_authorized",
+            "location_type", "customer_address"
         ]
 
     def validate(self, data):
         request = self.context.get("request")
         plan_limits = PLAN_CONFIG.get(request.user.company.plan, PLAN_CONFIG['STARTER']) if request and hasattr(request.user, 'company') else PLAN_CONFIG['STARTER']
+
+        if data.get("location_type") == "MOBILE" and not (data.get("customer_address") or "").strip():
+            raise serializers.ValidationError({
+                "customer_address": "Customer address is required for mobile bookings."
+            })
+
         if request and hasattr(request.user, 'company'):
             company = request.user.company
             
@@ -273,7 +281,8 @@ class BookingListSerializer(serializers.ModelSerializer):
             "vehicle", "vehicle_details", "service_name", 
             "booking_date", "booking_time", "booking_end_time",
             "status", "total_price", "notes", "started_at",
-            "completed_at", "is_signed", "admin_signature", "is_authorized", "created_at" # Added signatures here
+            "completed_at", "is_signed", "admin_signature", "is_authorized", "created_at",
+            "location_type", "customer_address"
         ]
 
     def get_vehicle_details(self, obj):
@@ -533,10 +542,7 @@ class UserSerializer(serializers.ModelSerializer):
         from django.db import transaction
 
         company_name = validated_data.pop('company_name', None)
-        selected_country_code = (validated_data.pop('country_code', '') or 'US').upper()
-        selected_currency = (validated_data.pop('currency', '') or '').upper()
         request = self.context.get('request')
-        # Check if an authenticated Admin/Owner is performing the action
         admin_user = request.user if request and request.user.is_authenticated else None
 
         with transaction.atomic():
@@ -544,20 +550,39 @@ class UserSerializer(serializers.ModelSerializer):
             if not admin_user:
                 if not company_name:
                     raise serializers.ValidationError({"company_name": "Company name is required for registration."})
-                
-                # 🛡️ PREVENT DUPLICATES: Check if company name already exists (case-insensitive)
                 if Company.objects.filter(name__iexact=company_name).exists():
                     raise serializers.ValidationError({"company_name": "A company with this name is already registered."})
 
-                normalized_currency = 'ZAR' if selected_country_code == 'ZA' else 'USD'
-                if selected_currency in {'USD', 'ZAR'}:
-                    normalized_currency = selected_currency
+                # Auto-detect location: prefer device geo, fallback to IP
+                selected_country_code = 'US'
+                selected_currency = 'USD'
+                if request:
+                    device_lat = request.data.get('device_latitude')
+                    device_lon = request.data.get('device_longitude')
+                    geo_country = None
+                    if device_lat and device_lon:
+                        try:
+                            from geopy.geocoders import Nominatim
+                            geolocator = Nominatim(user_agent="dtailbase_registration")
+                            location = geolocator.reverse(f"{device_lat}, {device_lon}", language="en", zoom=5, exactly_one=True)
+                            geo_country = ((location.raw or {}).get("address", {}) or {}).get("country_code", "").upper()
+                        except Exception:
+                            pass
+                    if geo_country and len(geo_country) == 2:
+                        selected_country_code = geo_country
+                        selected_currency = 'USD'
+                    else:
+                        from payments.geolocation import detect_pricing_context
+                        pricing_context = detect_pricing_context(request)
+                        ip_country = (pricing_context.get("country_code") or "US").upper()
+                        selected_country_code = ip_country
+                        selected_currency = 'USD'
 
                 new_company = Company.objects.create(
                     name=company_name,
                     plan='STARTER',
                     country_code=selected_country_code,
-                    currency=normalized_currency,
+                    currency=selected_currency,
                 )
                 validated_data['company'] = new_company
                 validated_data['role'] = 'OWNER'
@@ -568,15 +593,12 @@ class UserSerializer(serializers.ModelSerializer):
                 company = admin_user.company
                 plan_limits = PLAN_CONFIG.get(company.plan, PLAN_CONFIG['STARTER'])
                 max_users = plan_limits.get('max_users', 1)
-                
                 current_user_count = User.objects.filter(company=company).count()
                 if current_user_count >= max_users:
                     raise serializers.ValidationError({
                         "plan_limit": f"Your {company.plan} plan allows a maximum of {max_users} team members. Please upgrade."
                     })
-                    
                 validated_data['company'] = company
-                # Ensure the admin can't accidentally create another OWNER if they aren't supposed to
                 validated_data.setdefault('role', 'STAFF') 
                 return User.objects.create_user(**validated_data)
 
@@ -722,6 +744,7 @@ class PublicBookingSerializer(serializers.ModelSerializer):
     customer_firstname = serializers.CharField(write_only=True)
     customer_lastname = serializers.CharField(write_only=True)
     customer_email = serializers.EmailField(write_only=True)
+    customer_phone = serializers.CharField(write_only=True, required=False, allow_blank=True)
     
     # Vehicle Fields
     vehicle_make = serializers.CharField(write_only=True)
@@ -731,9 +754,9 @@ class PublicBookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = [
-            'customer_firstname', 'customer_lastname', 'customer_email',
+            'customer_firstname', 'customer_lastname', 'customer_email', 'customer_phone',
             'vehicle_make', 'vehicle_model', 'vehicle_registration',
-            'booking_date', 'booking_time', 'service'
+            'booking_date', 'booking_time', 'service', 'location_type', 'customer_address'
         ]
 
     def create(self, validated_data):
@@ -741,6 +764,7 @@ class PublicBookingSerializer(serializers.ModelSerializer):
         fname = validated_data.pop('customer_firstname')
         lname = validated_data.pop('customer_lastname')
         email = validated_data.pop('customer_email')
+        phone = validated_data.pop('customer_phone', '')
         
         v_make = validated_data.pop('vehicle_make')
         v_model = validated_data.pop('vehicle_model')
@@ -748,12 +772,21 @@ class PublicBookingSerializer(serializers.ModelSerializer):
         
         company = validated_data.pop('company') # Passed from view.perform_create
 
+        if validated_data.get('location_type') == 'MOBILE' and not (validated_data.get('customer_address') or '').strip():
+            raise serializers.ValidationError({
+                'customer_address': 'Customer address is required for mobile bookings.'
+            })
+
         # 2. Find or Create Customer
         customer, _ = Customer.objects.get_or_create(
             email=email,
             company=company,
-            defaults={'firstname': fname, 'lastname': lname}
+            defaults={'firstname': fname, 'lastname': lname, 'phone': phone}
         )
+        # Update phone if provided
+        if phone:
+            customer.phone = phone
+            customer.save()
 
         # 3. Create the Vehicle for this customer
         # Use get_or_create to avoid duplicates if they book again
@@ -776,10 +809,35 @@ class PublicBookingSerializer(serializers.ModelSerializer):
         )
         
         # 5. Final Create
-        return Booking.objects.create(
+        booking = Booking.objects.create(
             company=company,
             customer=customer,
             vehicle=vehicle,
             is_authorized=False, # Public bookings need admin review
             **validated_data
         )
+        # post_save signal is automatically triggered on booking creation
+        # Email notifications will be sent by the signal handler
+        
+        return booking
+
+
+class PublicBookingConfirmationSerializer(serializers.ModelSerializer):
+    """Response serializer showing confirmation details to customer after booking"""
+    customer = CustomerSerializer(read_only=True)
+    vehicle = VehicleSerializer(read_only=True)
+    service_name = serializers.CharField(source='service.name', read_only=True)
+    service_duration = serializers.IntegerField(source='service.duration_minutes', read_only=True)
+    company_name = serializers.CharField(source='company.name', read_only=True)
+    company_phone = serializers.CharField(source='company.phone', read_only=True)
+    company_address = serializers.CharField(source='company.address', read_only=True)
+
+    class Meta:
+        model = Booking
+        fields = [
+            'id', 'customer', 'vehicle', 'service_name', 'service_duration',
+            'booking_date', 'booking_time', 'booking_end_time', 'status',
+            'company_name', 'company_phone', 'company_address', 'created_at',
+            'location_type', 'customer_address'
+        ]
+        read_only_fields = fields

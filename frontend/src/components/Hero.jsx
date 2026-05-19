@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PublicHeader from './PublicHeader';
+import LiveChat from './LiveChat';
 import '../styles/Hero.css';
 import api from '../axios_instance';
 import {
@@ -70,6 +71,7 @@ const Hero = ({ isAuthenticated }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [heroPricing, setHeroPricing] = useState(null);
   const [heroPlanFeatures, setHeroPlanFeatures] = useState({});
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -284,17 +286,16 @@ const Hero = ({ isAuthenticated }) => {
         </div>
         <div className="gallery-grid">
           {[
-            { label: 'Dashboard Overview' },
-            { label: 'Booking Intake Form' },
-            { label: 'Digital Waiver Signing' },
-            { label: 'Before & After Photo Vault' },
-            { label: 'Team Management Panel' },
-            { label: 'Payment & Subscription Hub' },
+            { label: 'Dashboard Overview', image: '/landing/images/Dashboard-1.png' },
+            { label: 'Booking Intake Form', image: '/landing/images/Booking-Intake-Form-1.png' },
+            { label: 'Digital Waiver Signing', image: '/landing/images/Digital-Waiver-Signing-1.png' },
+            { label: 'Before & After Photo Vault', image: '/landing/images/Before-&-After-Photo-Vault-1.png' },
+            { label: 'Team Management Panel', image: '/landing/images/Team-Management-Panel-1.png' },
+            { label: 'Payment & Subscription Hub', image: '/landing/images/Payment-&-Subscription-Hub-1.png' },
           ].map((item) => (
             <div className="gallery-card animate-on-scroll" key={item.label}>
               <div className="gallery-img-placeholder">
-                {/* PASTE YOUR IMAGE URL HERE — replace the img src below and uncomment */}
-                {/* <img src="YOUR_IMAGE_URL_HERE" alt={item.label} /> */}
+                <img src={item.image} alt={item.label} />
               </div>
               <p className="gallery-card-label">{item.label}</p>
             </div>
@@ -306,17 +307,19 @@ const Hero = ({ isAuthenticated }) => {
         <div className="story-row animate-on-scroll">
           <div className="story-text">
             <span className="step-num">01</span>
-            <h3>Eliminate The Clipboard</h3>
-            <p>Paper trails are where businesses go to die. Our mobile-first intake captures VINs and high-res photos in seconds.</p>
+            <h3>Digitize Your Front Desk</h3>
+            <p>Replace paper forms with a clean digital workflow for bookings, intake details, signatures, and photo evidence.</p>
             <ul className="story-list">
-              <li>✓ Automated VIN Decoding</li>
-              <li>✓ Live Status Updates for Clients</li>
-              <li>✓ Instant Cloud Sync</li>
+              <li>✓ Digital booking and intake records</li>
+              <li>✓ Before and after photo capture</li>
+              <li>✓ Signed indemnity forms stored per booking</li>
             </ul>
           </div>
           <div className="glass-mockup">
             <div className="mock-ui-label">Live Intake Dashboard</div>
-            <div className="mock-ui-content"></div>
+            <div className="mock-ui-content h-250 w-250">
+              <video loop muted autoPlay playsInline src="/landing/videos/live-intake-form-video.mp4" />
+            </div>
           </div>
         </div>
 
@@ -333,7 +336,9 @@ const Hero = ({ isAuthenticated }) => {
           </div>
           <div className="glass-mockup">
             <div className="mock-ui-label">Legal Vault</div>
-            <div className="mock-ui-content"></div>
+            <div className="mock-ui-content origin-center h-250 w-250">
+              <video loop muted autoPlay playsInline src="/landing/videos/legal-vault-video.mp4" />
+            </div>
           </div>
         </div>
       </section>
@@ -428,13 +433,32 @@ const Hero = ({ isAuthenticated }) => {
           </div>
         </div>
       </footer>
+      
+      {/* Chat Window */}
+      <LiveChat 
+        companySlug="dtailbase" 
+        isOpen={isChatOpen} 
+        onClose={() => setIsChatOpen(false)} 
+      />
+      
+      {/* Chat Button */}
+      <button 
+        className="floating-chat-btn"
+        onClick={() => setIsChatOpen(!isChatOpen)}
+        title="Chat with us"
+      >
+        <span className="chat-btn-icon">💬</span>
+      </button>
+      
+      {/* WhatsApp Button */}
       <a 
         href={`https://wa.me/27769778522?text=Hi!%20I'm%20on%20the%20landing%20page%20and%20would%20like%20to%20see%20a%20Live%20Demo.`} 
         className="floating-whatsapp"
         target="_blank"
         rel="noopener noreferrer"
+        title="Message us on WhatsApp"
       >
-        <span className="wa-float-icon">💬</span>
+        <span className="wa-float-icon">📱</span>
       </a>
     </div>
   );

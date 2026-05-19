@@ -32,6 +32,8 @@ import Legal from "./pages/Legal";
 import Contact from "./pages/Contact";
 import ContentPage from "./pages/ContentPage";
 import PublicBooking from "./pages/PublicBooking";
+import BookingConfirmation from "./pages/BookingConfirmation";
+import PublicBookings from "./pages/PublicBookings";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Payments from "./pages/Payments";
 import ShareBooking from "./pages/ShareBooking";
@@ -132,7 +134,7 @@ function AppContent() {
   };
 
   // 1. Identify ALL public-facing "Marketing" pages
-  const publicRoutes = ["/", "/hero", "/about", "/products", "/plans", "/payments", "/contact", "/legal", "/community", "/features", "/security", "/our-Story", "/support", "/help-center", "/tutorials", "/public-booking/:companySlug", "/payment-success"];
+  const publicRoutes = ["/", "/hero", "/about", "/products", "/plans", "/payments", "/contact", "/legal", "/community", "/features", "/security", "/our-Story", "/support", "/help-center", "/tutorials", "/public-booking/:companySlug", "/payment-success", "/book/:companySlug", "/booking-confirmation/:companySlug", "/public/bookings/:companySlug"];
   const isLandingPage = publicRoutes.includes(location.pathname);
   const websiteOnlyRoutes = ["/", "/hero", "/about", "/products", "/contact", "/legal", "/community", "/features", "/security", "/our-story", "/support", "/help-center", "/tutorials"];
   const isWebsiteOnlyRoute = websiteOnlyRoutes.includes(location.pathname.toLowerCase());
@@ -255,6 +257,8 @@ function AppContent() {
           <Routes>
             {/* Public Routes */}
             <Route path="/book/:companySlug" element={<PublicBooking />} />
+            <Route path="/booking-confirmation/:companySlug" element={<BookingConfirmation />} />
+            <Route path="/public/bookings/:companySlug" element={<PublicBookings />} />
             
             {/* Landing Page is now the root */}
             <Route path="/" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Hero isAuthenticated={isAuthenticated} />} />
@@ -313,18 +317,9 @@ function AppContent() {
 
 
 function App() {
-  const browserLocale = typeof navigator !== "undefined" ? (navigator.language || "") : "";
-  const browserTimezone = typeof Intl !== "undefined"
-    ? (Intl.DateTimeFormat().resolvedOptions().timeZone || "")
-    : "";
-  const defaultCurrency =
-    browserTimezone === "Africa/Johannesburg" || browserLocale.toUpperCase().endsWith("-ZA")
-      ? "ZAR"
-      : "USD";
-
   const paypalInitialOptions = {
     'client-id': import.meta.env.VITE_PAYPAL_CLIENT_ID || 'test',
-    currency: defaultCurrency,
+    currency: 'USD',
     intent: 'subscription',
     vault: true,
   };

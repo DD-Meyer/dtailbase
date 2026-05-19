@@ -431,7 +431,7 @@
   font-size: 0.68rem;
 }
 
-.badge {
+.badge-signed {
   font-size: 0.72rem;
   padding: 0.2rem 0.45rem;
   border-radius: 999px;
@@ -443,6 +443,18 @@
   padding: 0.38rem 0.7rem;
   font-size: 0.72rem;
   border-radius: 6px;
+}
+
+.btn-sign-start {
+  padding: 0.3rem 0.55rem;
+  font-size: 0.68rem;
+  line-height: 1.1;
+  gap: 0.3rem;
+  white-space: nowrap;
+}
+
+.btn-sign-start svg {
+  flex-shrink: 0;
 }
 
 .plus-icon {
@@ -635,6 +647,12 @@
     max-width: 100%;
     box-sizing: border-box;
     text-align: center;
+  }
+
+  .td-indemnity .btn-sign-start {
+    width: auto !important;
+    max-width: 100% !important;
+    justify-self: start;
   }
 
   .photo-grid {
@@ -928,6 +946,17 @@
   }
 }
 
+@media (min-width: 1025px) {
+  .td-indemnity .btn-sign-start {
+    padding: 0.24rem 0.46rem;
+    font-size: 0.64rem;
+    line-height: 1;
+    gap: 0.24rem;
+    width: fit-content;
+    max-width: none;
+  }
+}
+
 @media (max-width: 480px) {
   .bookings-table-container {
     padding: 0.5rem;
@@ -954,6 +983,11 @@
   .text-btn-danger,
   .pulse-timer {
     font-size: 0.7rem;
+  }
+
+  .btn-sign-start {
+    padding: 0.26rem 0.48rem;
+    font-size: 0.64rem;
   }
 
   .admin-sig-img {

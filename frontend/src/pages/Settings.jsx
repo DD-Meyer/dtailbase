@@ -157,9 +157,31 @@ function Settings() {
       return;
     }
 
+    // Request device geolocation
+    let deviceLatitude = null;
+    let deviceLongitude = null;
+    try {
+      const coords = await new Promise((resolve, reject) => {
+        if (!navigator.geolocation) return resolve(null);
+        navigator.geolocation.getCurrentPosition(
+          (pos) => resolve(pos.coords),
+          (err) => resolve(null),
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+      });
+      if (coords) {
+        deviceLatitude = coords.latitude;
+        deviceLongitude = coords.longitude;
+      }
+    } catch {}
+
     const formData = new FormData();
     formData.append("country_code", requestedCountryCode);
     formData.append("verification_document", verificationDocument);
+    if (deviceLatitude !== null && deviceLatitude !== undefined && deviceLongitude !== null && deviceLongitude !== undefined) {
+      formData.append("device_latitude", deviceLatitude);
+      formData.append("device_longitude", deviceLongitude);
+    }
 
     setIsSubmittingLocationChange(true);
     try {
@@ -172,7 +194,7 @@ function Settings() {
         country_code: res.data.country_code,
         currency: res.data.currency,
         requested_country_code: requestedCountryCode,
-        requested_currency: requestedCountryCode === "ZA" ? "ZAR" : "USD",
+        requested_currency: "USD",
         location_verification_status: res.data.status,
         location_verification_score: res.data.score,
         location_verification_notes: res.data.message,
@@ -200,6 +222,8 @@ function Settings() {
     { key: "company", label: "Company Name" },
     { key: "country", label: "Selected Country" },
     { key: "address", label: "Business Address" },
+    { key: "device_location", label: "Device Geolocation" },
+    { key: "ip_location", label: "IP Geolocation" },
   ];
 
   const handleDeactivateAccount = async () => {
@@ -614,7 +638,7 @@ function Settings() {
 
               <div className="input-group">
                 <label><BadgeDollarSign size={14} aria-hidden="true" /> Billing Currency</label>
-                <input className="input-readonly" value={company?.currency || "USD"} readOnly />
+                <input className="input-readonly" value="USD" readOnly />
               </div>
 
               <div className="input-group full-width">
@@ -667,12 +691,14 @@ function Settings() {
                   <div className="verification-checklist">
                     {verificationChecklistItems.map((item) => {
                       const check = verificationChecks[item.key];
-                      const isPass = Boolean(check?.verified);
                       const reason = check?.reason || "No evidence result returned.";
+                      const isPass = Boolean(check?.verified);
+                      const badgeLabel = isPass ? "PASS" : "FAIL";
+                      const badgeClass = isPass ? "pass" : "fail";
                       return (
                         <div key={item.key} className="verification-check-item">
-                          <span className={`check-badge ${isPass ? "pass" : "fail"}`}>
-                            {isPass ? "PASS" : "FAIL"}
+                          <span className={`check-badge ${badgeClass}`}>
+                            {badgeLabel}
                           </span>
                           <div className="check-content">
                             <strong>{item.label}</strong>

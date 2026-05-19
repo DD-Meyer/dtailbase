@@ -310,7 +310,7 @@ function IndemnityForm() {
               {/* Button only shows if under the dynamic limit */}
               {beforePhotos.length < maxBeforePhotos && (
                 <label className="add-photo-box">
-                  <input type="file" multiple accept="image/*" capture="environment" onChange={handlePhotoChange} />
+                  <input type="file" className="add-photo-input" multiple accept="image/*" capture="environment" onChange={handlePhotoChange} />
                   <span className="plus-icon">+</span>
                   <span className="label-text">Add Photo</span>
                 </label>

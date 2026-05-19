@@ -64,6 +64,40 @@
   filter: brightness(1.05);
 }
 
+  .booking-header-action-btns {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+
+.booking-header-action-btns > .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  min-height: 40px;
+}
+
+.booking-header-action-btns > .btn-secondary svg {
+  display: block;
+}
+
+.booking-header-action-btns .action-buttons-grid {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.booking-header-action-btns .action-buttons-grid .btn-secondary,
+.booking-header-action-btns .action-buttons-grid .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+}
+
 .indemnity-text-modal-overlay {
   position: fixed;
   inset: 0;
@@ -136,7 +170,8 @@
   .booking-header-action-btns {
     display: flex;
     flex-direction: row;
-    gap: 8px;
+    justify-content: center;
+    align-items: center;
   }
 
   .action-buttons-grid {
@@ -158,6 +193,12 @@
   .btn-primary {
     padding: 8px 16px;
     font-size: 0.7rem;
+  }
+
+  .booking-header-action-btns > .btn-secondary,
+  .booking-header-action-btns .action-buttons-grid .btn-secondary,
+  .booking-header-action-btns .action-buttons-grid .btn-primary {
+    min-height: 34px;
   }
 
   .indemnity-text-modal {

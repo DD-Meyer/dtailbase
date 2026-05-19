@@ -230,12 +230,20 @@ select.input-field:disabled {
   margin-bottom: 100px;
 }
 
+/* on desktop the buttons should show in a row */
 /* Time Slot Grid */
 .time-slot-wrapper {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-  gap: 10px;
+  margin-top: 20px;
 }
+
+.time-slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+}
+
+
+
 
 .slot-chip {
   min-height: 52px;
@@ -268,6 +276,38 @@ select.input-field:disabled {
   color: #64748b;
   font-size: 0.85rem;
   padding: 10px;
+}
+
+/* ===== Location Type Toggle ===== */
+.location-type-toggle {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.location-btn {
+  flex: 1;
+  min-width: 140px;
+  padding: 10px 16px;
+  border: 2px solid #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.location-btn:hover {
+  border-color: #0b82c7;
+  color: #0b82c7;
+}
+
+.location-btn.active {
+  background: linear-gradient(120deg, #0b82c7, #23b4ff);
+  border-color: #23b4ff;
+  color: white;
+  box-shadow: 0 4px 12px rgba(35, 180, 255, 0.25);
 }
 
 /* ===== Tablet Styles (<= 1024px) ===== */
@@ -368,6 +408,7 @@ select.input-field:disabled {
     grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
     gap: 6px;
   }
+  
 
   .slot-chip {
     min-height: 40px;

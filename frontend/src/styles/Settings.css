@@ -359,7 +359,9 @@
 
 .check-badge {
   min-width: 48px;
+  flex: 0 0 auto;
   text-align: center;
+  white-space: nowrap;
   font-size: 0.72rem;
   font-weight: 800;
   padding: 4px 6px;
@@ -574,5 +576,14 @@ td { font-size: 0.9rem; }
   .settings-card td {
     overflow-wrap: anywhere;
     word-break: break-word;
+  }
+
+  .check-badge {
+    min-width: 44px;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-size: 0.64rem;
+    padding: 3px 5px;
+    line-height: 1.05;
   }
 }

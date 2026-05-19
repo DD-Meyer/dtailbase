@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import api from "../axios_instance";
 import "../styles/NewBooking.css"; // Reuse your existing wizard styles
 import { showToast } from "../utils/uiFeedback";
@@ -12,12 +12,12 @@ const STEPS = [
 
 const PublicBooking = () => {
   const { companySlug } = useParams();
+  const navigate = useNavigate();
   const [company, setCompany] = useState(null);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(true);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   const [services, setServices] = useState([]);
   const [availableSlots, setAvailableSlots] = useState([]);
@@ -27,6 +27,7 @@ const PublicBooking = () => {
     customer_firstname: "",
     customer_lastname: "",
     customer_email: "",
+    customer_phone: "",
 
     // vehicle info
     vehicle_make: "",
@@ -37,6 +38,8 @@ const PublicBooking = () => {
     service: "",
     booking_date: "",
     booking_time: "",
+    location_type: "ONSITE",
+    customer_address: "",
     });
 
   // 1. Load Public Company & Services
@@ -90,8 +93,16 @@ const PublicBooking = () => {
       showToast("Please provide your contact details.", "error");
       return;
     }
-    if (step === 2 && !formData.booking_time) {
-      showToast("Please select an available time slot.", "error");
+    if (step === 1 && (!formData.vehicle_make || !formData.vehicle_model || !formData.vehicle_registration)) {
+      showToast("Please provide complete vehicle information.", "error");
+      return;
+    }
+    if (step === 1 && formData.location_type === "MOBILE" && !formData.customer_address.trim()) {
+      showToast("Please enter your address for the mobile service.", "error");
+      return;
+    }
+    if (step === 2 && (!formData.service || !formData.booking_date || !formData.booking_time)) {
+      showToast("Please select a service, date, and time slot.", "error");
       return;
     }
     setStep(step + 1);
@@ -100,9 +111,11 @@ const PublicBooking = () => {
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      await api.post(`public/book/${companySlug}/`, formData);
-      setSuccess(true);
-      window.scrollTo(0, 0);
+      const response = await api.post(`public/book/${companySlug}/`, formData);
+      // Redirect to confirmation page with booking details
+      navigate(`/booking-confirmation/${companySlug}`, {
+        state: { booking: response.data }
+      });
     } catch (err) {
       showToast(err.response?.data?.plan_limit || "Booking failed. Slot may have been taken.", "error");
     } finally {
@@ -111,14 +124,6 @@ const PublicBooking = () => {
   };
 
   if (loading) return <div className="page-container">Loading business profile...</div>;
-  
-  if (success) return (
-    <div className="public-wrapper animate-fade" style={{padding: '50px 20px', textAlign: 'center'}}>
-        <h1>🎉 Appointment Requested!</h1>
-        <p>Thank you. <strong>{company.name}</strong> will be in touch shortly.</p>
-        <button className="btn btn-next" onClick={() => window.location.reload()}>Book Another</button>
-    </div>
-  );
 
   const progressWidth = `${((step - 1) / (STEPS.length - 1)) * 100}%`;
 
@@ -155,6 +160,10 @@ const PublicBooking = () => {
                 <label className="input-label">Email Address</label>
                 <input className="input-field" type="email" name="customer_email" value={formData.customer_email} onChange={handleInputChange} placeholder="john@example.com" />
             </div>
+            <div className="form-group">
+                <label className="input-label">Phone Number (Optional)</label>
+                <input className="input-field" type="tel" name="customer_phone" value={formData.customer_phone} onChange={handleInputChange} placeholder="+1 (555) 000-0000" />
+            </div>
 
             <h2 className="section-title mt-6">Vehicle Information</h2>
             <div className="input-grid">
@@ -174,6 +183,40 @@ const PublicBooking = () => {
                     onChange={e => setFormData({...formData, vehicle_registration: e.target.value})} 
                 />
             </div>
+
+            <h2 className="section-title mt-6">Service Location</h2>
+            <div className="form-group mb-4">
+              <label className="input-label">Booking Type</label>
+              <div className="location-type-toggle">
+                <button
+                  type="button"
+                  className={`location-btn ${formData.location_type === 'ONSITE' ? 'active' : ''}`}
+                  onClick={() => setFormData(prev => ({ ...prev, location_type: 'ONSITE', customer_address: '' }))}
+                >
+                  🏢 On-site at Company
+                </button>
+                <button
+                  type="button"
+                  className={`location-btn ${formData.location_type === 'MOBILE' ? 'active' : ''}`}
+                  onClick={() => setFormData(prev => ({ ...prev, location_type: 'MOBILE' }))}
+                >
+                  🚗 Mobile (We come to you)
+                </button>
+              </div>
+            </div>
+            {formData.location_type === 'MOBILE' && (
+              <div className="form-group">
+                <label className="input-label">Your Address <span className="text-danger">*</span></label>
+                <input
+                  className="input-field"
+                  name="customer_address"
+                  value={formData.customer_address}
+                  onChange={handleInputChange}
+                  placeholder="e.g. 123 Main Street, City, Postal Code"
+                  required
+                />
+              </div>
+            )}
           </div>
         )}
         
@@ -221,6 +264,10 @@ const PublicBooking = () => {
                <p><strong>Customer:</strong> {formData.customer_firstname} {formData.customer_lastname}</p>
                <p><strong>Service:</strong> {services.find(s => s.id == formData.service)?.name}</p>
                <p><strong>Appointment:</strong> {formData.booking_date} at {formData.booking_time}</p>
+               <p><strong>Location:</strong> {formData.location_type === 'MOBILE' ? '🚗 Mobile – We come to you' : '🏢 On-site at Company'}</p>
+               {formData.location_type === 'MOBILE' && formData.customer_address && (
+                 <p><strong>Address:</strong> {formData.customer_address}</p>
+               )}
             </div>
             <p className="text-muted small">By confirming, you agree to receive an email confirmation of your request.</p>
           </div>

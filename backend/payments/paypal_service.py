@@ -37,25 +37,8 @@ PRICING = {
     }
 }
 
-# South Africa special pricing (shown/charged only when ZA + no VPN/proxy)
-DISCOUNT_PRICING_ZA = {
-    'USD': {
-        'PRO': {
-            'amount': '99.00',
-            'currency': 'USD',
-            'description': 'Dtailbase Professional Liability Engine (ZA Special)'
-        },
-        'ENTERPRISE': {
-            'amount': '229.00',
-            'currency': 'USD',
-            'description': 'Dtailbase Enterprise Asset Vault (ZA Special)'
-        }
-    }
-}
-
-
-def get_effective_pricing(discount_eligible=False):
-    return DISCOUNT_PRICING_ZA if discount_eligible else PRICING
+def get_effective_pricing():
+    return PRICING
 
 
 def get_paypal_access_token():
@@ -96,7 +79,7 @@ def get_paypal_access_token():
         return None
 
 
-def get_subscription_plan(plan_id, currency=None, discount_eligible=False):
+def get_subscription_plan(plan_id, currency=None):
     """
     Get pricing details for a subscription plan (USD only).
     
@@ -107,7 +90,7 @@ def get_subscription_plan(plan_id, currency=None, discount_eligible=False):
     Returns:
         dict with plan details or None if not found
     """
-    pricing_table = get_effective_pricing(discount_eligible)
+    pricing_table = get_effective_pricing()
 
     if plan_id not in pricing_table.get('USD', {}):
         logger.error(f"Invalid plan: {plan_id}")
@@ -116,7 +99,7 @@ def get_subscription_plan(plan_id, currency=None, discount_eligible=False):
     return pricing_table['USD'][plan_id]
 
 
-def create_paypal_subscription(user_email, plan_id, return_url, cancel_url, currency='USD', existing_subscription_id=None, start_time=None, discount_eligible=False):
+def create_paypal_subscription(user_email, plan_id, return_url, cancel_url, currency='USD', existing_subscription_id=None, start_time=None):
     """
     Create a PayPal subscription for a user using Subscriptions API (USD only).
     
@@ -136,7 +119,7 @@ def create_paypal_subscription(user_email, plan_id, return_url, cancel_url, curr
     if not access_token:
         return {'success': False, 'error': 'Failed to authenticate with PayPal'}
     
-    plan_details = get_subscription_plan(plan_id, currency, discount_eligible=discount_eligible)
+    plan_details = get_subscription_plan(plan_id, currency)
     if not plan_details:
         return {'success': False, 'error': f'Invalid plan: {plan_id}/{currency}'}
     

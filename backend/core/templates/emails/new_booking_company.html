@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #f8f9fa; padding: 20px; border-radius: 5px; }
+        .content { padding: 20px 0; }
+        .booking-details { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .detail-row { padding: 8px 0; border-bottom: 1px solid #eee; }
+        .detail-label { font-weight: bold; color: #666; }
+        .cta-button { display: inline-block; padding: 12px 30px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 15px 0; }
+        .footer { font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 20px; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>New Booking Request</h1>
+            <p>A customer has submitted a new booking request.</p>
+        </div>
+        
+        <div class="content">
+            <h2>Customer Details</h2>
+            <div class="booking-details">
+                <div class="detail-row">
+                    <span class="detail-label">Name:</span> {{ customer_name }}
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Email:</span> {{ customer_email }}
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Phone:</span> {{ customer_phone }}
+                </div>
+            </div>
+            
+            <h2>Booking Details</h2>
+            <div class="booking-details">
+                <div class="detail-row">
+                    <span class="detail-label">Service:</span> {{ service }}
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Vehicle:</span> {{ vehicle }} ({{ vehicle_registration }})
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Date:</span> {{ booking_date }}
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Time:</span> {{ booking_time }}
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Booking ID:</span> {{ booking_id }}
+                </div>
+            </div>
+            
+            <p>Please review this booking in your dashboard and confirm or reschedule as needed.</p>
+            
+            <a href="{{ dashboard_url }}" class="cta-button">View Booking</a>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated message from {{ company_name }}. Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -142,6 +142,7 @@
 }
 
 .add-photo-box {
+  position: relative;
   aspect-ratio: 1;
   border: 2px dashed #cbd5e1;
   border-radius: 12px;
@@ -153,6 +154,15 @@
   background: #fdfdfd;
   color: #64748b;
   transition: all 0.2s ease;
+}
+
+.add-photo-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
 }
 
 .add-photo-box:hover {
@@ -230,15 +240,27 @@
   }
 
   .photo-grid {
-    grid-template-columns: repeat(2, minmax(92px, 108px));
-    justify-content: flex-start;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
     gap: 10px;
   }
 
   .photo-preview-item,
   .add-photo-box {
     width: 100%;
-    max-width: 108px;
+    aspect-ratio: 1 / 1;
+    align-self: start;
+    min-height: 0;
+    max-width: none;
+  }
+
+  .add-photo-box {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+
+  .add-photo-box .add-photo-input {
+    font-size: 0.9rem;
   }
 
   .sigCanvas {
@@ -253,13 +275,16 @@
 
 @media (max-width: 420px) {
   .photo-grid {
-    grid-template-columns: repeat(2, minmax(84px, 96px));
-    justify-content: flex-start;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
     gap: 8px;
   }
 
   .photo-preview-item,
   .add-photo-box {
-    max-width: 96px;
+    aspect-ratio: 1 / 1;
+    align-self: start;
+    min-height: 0;
+    max-width: none;
   }
 }

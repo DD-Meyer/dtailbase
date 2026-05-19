@@ -20,6 +20,7 @@ urlpatterns = [
     path("public/services/", ServicePublicListView.as_view(), name="public-services-list"),
     path("public/availability/<str:date>/<uuid:service_id>/", PublicAvailabilityView.as_view(), name="public-availability"),
     path("public/book/<slug:company_slug>/", PublicBookingCreateView.as_view(), name="public-booking-create"),
+    path("public/bookings/<slug:company_slug>/", PublicCustomerBookingsView.as_view(), name="public-customer-bookings"),
 
     path("auth/users/me/", UserMeView.as_view(), name="user-me"),
     path("auth/google-config/", GoogleAuthConfigView.as_view(), name="google-config"),

@@ -174,6 +174,13 @@ body {
   padding: 6px 14px; border-radius: 4px; font-weight: 800;
 }
 
+.mock-ui-content {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+}
+
 /* --- 7. BENTO & PRICING --- */
 .section-header { text-align: center; margin-bottom: 60px; }
 .section-header h2 { font-size: 3.5rem; font-weight: 900; margin-bottom: 15px; }
@@ -588,6 +595,31 @@ body {
   filter: brightness(1.1);
 }
 
+/* Floating Chat Button */
+.floating-chat-btn {
+  position: fixed;
+  bottom: 95px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+  z-index: 9998;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.floating-chat-btn:hover {
+  transform: scale(1.1) rotate(-5deg);
+  box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+}
+
 .floating-whatsapp {
   position: fixed;
   bottom: 20px;
@@ -690,6 +722,14 @@ body {
 }
 
 @media (max-width: 768px) {
+  .floating-chat-btn {
+    bottom: 85px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+  
   .floating-whatsapp {
     bottom: 20px;
     right: 20px;
@@ -871,9 +911,289 @@ body {
 
 @media (max-width: 768px) {
   .gallery-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 28px;
   }
   .gallery-section {
-    padding: 60px 0;
+    padding: 46px 0;
+  }
+
+  .gallery-card {
+    border-radius: 14px;
+  }
+
+  .gallery-card-label {
+    padding: 10px 10px;
+    font-size: 0.72rem;
+    line-height: 1.35;
+    min-height: 48px;
+  }
+
+  .gallery-img-placeholder {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+/* Mobile-only landing page stabilization (no desktop impact) */
+@media (max-width: 768px) {
+  .landing-page {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .landing-page h1 {
+    font-size: clamp(1.9rem, 8vw, 2.5rem);
+    line-height: 1.12;
+  }
+
+  .landing-page h2 {
+    font-size: clamp(1.55rem, 6.5vw, 2rem);
+    line-height: 1.18;
+  }
+
+  .landing-page h3 {
+    font-size: clamp(1.2rem, 5.6vw, 1.6rem);
+    line-height: 1.22;
+  }
+
+  .landing-page p,
+  .landing-page li,
+  .landing-page .section-desc,
+  .landing-page .plan-tagline,
+  .landing-page .gallery-card-label,
+  .landing-page .stat-label,
+  .landing-page .pricing-note {
+    font-size: 0.84rem;
+    line-height: 1.55;
+  }
+
+  .landing-page .btn-main,
+  .landing-page .btn-outline,
+  .landing-page .btn-primary-plan,
+  .landing-page .btn-secondary-plan,
+  .landing-page .btn-login,
+  .landing-page .btn-get-started {
+    font-size: 0.82rem;
+    padding: 10px 14px;
+    min-height: 40px;
+  }
+
+  .hero-container {
+    padding: 104px 16px 52px;
+  }
+
+  .hero-title {
+    font-size: clamp(2rem, 11vw, 2.8rem);
+    line-height: 1.08;
+  }
+
+  .hero-subtitle {
+    font-size: 0.88rem;
+    line-height: 1.65;
+    max-width: 100%;
+  }
+
+  .process-story {
+    padding: 56px 0;
+  }
+
+  .story-row,
+  .story-row.reverse {
+    margin-bottom: 36px;
+    gap: 14px;
+    align-items: stretch;
+    flex-direction: row;
+  }
+
+  .story-row.reverse {
+    flex-direction: row-reverse;
+  }
+
+  .story-text {
+    flex: 1.15;
+    padding: 0 2px;
+  }
+
+  .step-num {
+    font-size: 0.88rem;
+    margin-bottom: 8px;
+  }
+
+  .story-text h3 {
+    font-size: clamp(1.3rem, 5.8vw, 1.7rem);
+    margin-bottom: 10px;
+    line-height: 1.2;
+  }
+
+  .story-text p,
+  .story-list li {
+    font-size: 0.8rem;
+    line-height: 1.55;
+  }
+
+  .story-list {
+    margin-top: 10px;
+  }
+
+  .story-list li {
+    margin-bottom: 6px;
+  }
+
+  .glass-mockup {
+    flex: 1;
+    width: 48%;
+    height: 220px;
+    border-radius: 16px;
+    padding: 8px;
+  }
+
+  .story-row .mock-ui-content {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .story-row .mock-ui-content video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+
+  .mock-ui-label {
+    top: 10px;
+    left: 10px;
+    padding: 5px 9px;
+    font-size: 0.58rem;
+    letter-spacing: 0.4px;
+  }
+
+  .pricing-note {
+    line-height: 1.5;
+    padding: 0 6px;
+  }
+
+  .stats-bar {
+    padding: 20px 14px;
+    gap: 20px;
+  }
+
+  .stat-card {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .feature-card,
+  .pricing-card {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .gallery-card {
+    border-radius: 12px;
+  }
+
+  .gallery-card-label {
+    padding: 8px;
+  }
+
+  .section-header {
+    margin-bottom: 30px;
+  }
+
+  .section-header h2,
+  .section-title {
+    font-size: clamp(1.5rem, 6.5vw, 1.95rem);
+  }
+
+  .main-footer {
+    padding: 56px 0 90px;
+  }
+
+  .floating-whatsapp {
+    right: 16px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 480px) {
+  .landing-page h1 {
+    font-size: clamp(1.65rem, 8.8vw, 2.1rem);
+  }
+
+  .landing-page h2 {
+    font-size: clamp(1.35rem, 7vw, 1.7rem);
+  }
+
+  .landing-page h3,
+  .story-text h3 {
+    font-size: 1.12rem;
+  }
+
+  .landing-page p,
+  .landing-page li,
+  .landing-page .section-desc,
+  .landing-page .plan-tagline,
+  .landing-page .gallery-card-label,
+  .landing-page .stat-label,
+  .landing-page .pricing-note,
+  .story-text p,
+  .story-list li {
+    font-size: 0.76rem;
+    line-height: 1.5;
+  }
+
+  .landing-page .btn-main,
+  .landing-page .btn-outline,
+  .landing-page .btn-primary-plan,
+  .landing-page .btn-secondary-plan,
+  .landing-page .btn-login,
+  .landing-page .btn-get-started {
+    font-size: 0.76rem;
+    padding: 9px 12px;
+    min-height: 38px;
+  }
+
+  .feature-card,
+  .pricing-card {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .stats-bar {
+    padding: 16px 10px;
+    gap: 14px;
+  }
+
+  .stat-card {
+    padding: 10px;
+  }
+
+  .glass-mockup {
+    width: 50%;
+    padding: 6px;
+  }
+
+  .gallery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .gallery-card-label {
+    font-size: 0.66rem;
+    padding: 8px 8px;
+    min-height: 42px;
+  }
+
+  .hero-title {
+    font-size: clamp(1.85rem, 10vw, 2.4rem);
+  }
+
+  .hero-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .glass-mockup {
+    height: 200px;
   }
 }

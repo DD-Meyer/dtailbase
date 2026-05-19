@@ -49,13 +49,9 @@ class PlansView(APIView):
                 company_country_code = (request.user.company.country_code or '').upper() or None
 
             effective_country_code = company_country_code or detected_country_code
-            discount_eligible = effective_country_code == 'ZA' and not vpn_detected
-
-            # Location detection for reporting/compliance only; all subscriptions in USD
             country_code = (effective_country_code or 'US').upper()
-
             currency = 'USD'
-            pricing = get_effective_pricing(discount_eligible=discount_eligible).get('USD', {})
+            pricing = get_effective_pricing().get('USD', {})
 
             plans = {}
             for plan_name in PLAN_CONFIG:
@@ -77,7 +73,6 @@ class PlansView(APIView):
                 'country_code': country_code,
                 'currency': currency,
                 'vpn_detected': vpn_detected,
-                'discount_applied': discount_eligible,
                 'pricing': pricing,
                 'plans': plans
             })
@@ -112,12 +107,6 @@ class PayPalSubscribeView(APIView):
             # USD-only billing
             logger.info(f"Creating PayPal subscription: user={user.email}, plan={plan_id}, currency=USD")
             previous_subscription_id = company.paypal_subscription_id
-            pricing_context = detect_pricing_context(request)
-            vpn_detected = pricing_context.get('vpn_detected', False)
-            company_country_code = (company.country_code or '').upper()
-            detected_country_code = pricing_context.get('country_code', 'US')
-            effective_country_code = company_country_code or detected_country_code
-            discount_eligible = effective_country_code == 'ZA' and not vpn_detected
 
             # When switching plans, defer the new subscription's start to the end of
             # the current billing period so the user isn't billed twice.
@@ -135,7 +124,7 @@ class PayPalSubscribeView(APIView):
                             f"(end of current billing period for {previous_subscription_id})"
                         )
             
-            plan_details = get_subscription_plan(plan_id, discount_eligible=discount_eligible)
+            plan_details = get_subscription_plan(plan_id)
             if not plan_details:
                 return Response({'error': f'Plan {plan_id} not available'}, status=400)
             
@@ -151,7 +140,6 @@ class PayPalSubscribeView(APIView):
                 cancel_url=cancel_url,
                 currency='USD',
                 start_time=start_time,
-                discount_eligible=discount_eligible,
             )
 
             if result.get('success'):

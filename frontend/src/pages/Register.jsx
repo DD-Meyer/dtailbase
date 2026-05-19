@@ -3,9 +3,7 @@ import api from "../axios_instance";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import "../styles/Login.css"; 
-import { countryOptions, getCountryLabel } from "../utils/countries";
-
-const getCurrencyForCountry = (countryCode) => (countryCode === "ZA" ? "ZAR" : "USD");
+import { getCountryLabel } from "../utils/countries";
 
 function Register() {
   const detectInstalledMobileApp = () => {
@@ -50,7 +48,7 @@ function Register() {
       const locale = navigator.language || "";
 
       if (timezone === "Africa/Johannesburg" || locale.toUpperCase().endsWith("-ZA")) {
-        return { country_code: "ZA", currency: "ZAR" };
+        return { country_code: "ZA", currency: "USD" };
       }
 
       return { country_code: "US", currency: "USD" };
@@ -69,7 +67,7 @@ function Register() {
             : detectedCountry;
 
         const normalizedCurrency =
-          normalizedCountry === "ZA" ? "ZAR" : (detectedCurrency || "USD");
+          detectedCurrency || "USD";
 
         if (isMounted) {
           setDetectedCountryCode(normalizedCountry);
@@ -113,8 +111,6 @@ function Register() {
         last_name: formData.lastName,
         username: formData.username,
         password: formData.password,
-        country_code: formData.country_code,
-        currency: formData.currency,
         role: "OWNER" 
       });
 
@@ -174,28 +170,17 @@ function Register() {
           </div>
 
           <div className="form-group">
-            <label>Country</label>
-            <select
-              value={formData.country_code}
-              onChange={(e) => {
-                const selectedCountry = e.target.value;
-                const selectedCurrency = getCurrencyForCountry(selectedCountry);
-
-                setFormData((prev) => ({
-                  ...prev,
-                  country_code: selectedCountry,
-                  currency: selectedCurrency,
-                }));
-              }}
-            >
-              {countryOptions.map((option) => (
-                <option key={option.code} value={option.code}>
-                  {option.label} ({option.code})
-                </option>
-              ))}
-            </select>
+            <label>Detected Country</label>
+            <input
+              type="text"
+              value={`${getCountryLabel(formData.country_code)} (${formData.country_code})`}
+              readOnly
+            />
             <p className="auth-meta-note">
               Detected location: {getCountryLabel(detectedCountryCode)} ({detectedCountryCode})
+            </p>
+            <p className="auth-meta-note">
+              If this is incorrect, you can change it later in Settings by uploading verification documents.
             </p>
             <p className="auth-meta-note">Billing currency: {formData.currency}</p>
           </div>

@@ -97,10 +97,11 @@ class CompanyLocationVerificationView(APIView):
         company = request.user.company
         requested_country_code = (request.data.get("country_code") or "").upper().strip()
         uploaded_document = request.FILES.get("verification_document")
+        device_latitude = request.data.get("device_latitude")
+        device_longitude = request.data.get("device_longitude")
 
         if not requested_country_code or len(requested_country_code) != 2:
             return Response({"error": "A valid 2-letter country code is required."}, status=400)
-
         if not uploaded_document:
             return Response({"error": "A verification document is required."}, status=400)
 
@@ -108,7 +109,6 @@ class CompanyLocationVerificationView(APIView):
         extension = Path(uploaded_document.name or "").suffix.lower()
         if extension not in allowed_suffixes:
             return Response({"error": "Unsupported file type. Upload PDF or text-based files."}, status=400)
-
         max_size_bytes = 10 * 1024 * 1024
         if uploaded_document.size > max_size_bytes:
             return Response({"error": "Document too large. Maximum allowed size is 10MB."}, status=400)
@@ -123,6 +123,7 @@ class CompanyLocationVerificationView(APIView):
         except ValidationError as exc:
             return Response(exc.detail, status=400)
 
+        # --- DOCUMENT-FIRST ENFORCEMENT (with always-included geo/ip checks) ---
         extracted_text, extraction_error = extract_document_text(uploaded_document)
         match_result = verify_location_document(
             company_name=company.name,
@@ -130,17 +131,120 @@ class CompanyLocationVerificationView(APIView):
             requested_country_code=requested_country_code,
             business_address=company.address or "",
         )
+        # Always run geo/ip checks for all country changes
+        geo_match = False
+        geo_country = None
+        device_check = {
+            "verified": False,
+            "reason": "Device geolocation was not provided.",
+            "detected_country_code": None,
+            "source": "device_geo",
+        }
+        if device_latitude and device_longitude:
+            try:
+                from geopy.geocoders import Nominatim
+                geolocator = Nominatim(user_agent="dtailbase_location_verification")
+                location = geolocator.reverse(f"{device_latitude}, {device_longitude}", language="en", zoom=5, exactly_one=True)
+                geo_country = ((location.raw or {}).get("address", {}) or {}).get("country_code", "").upper()
+                geo_match = geo_country == requested_country_code
+                device_check = {
+                    "verified": geo_match,
+                    "reason": (
+                        f"Device geolocation matched selected country ({requested_country_code})."
+                        if geo_match
+                        else f"Device geolocation suggests {geo_country or 'unknown'}, which does not match selected country ({requested_country_code})."
+                    ),
+                    "detected_country_code": geo_country or None,
+                    "source": "device_geo",
+                }
+            except Exception:
+                device_check = {
+                    "verified": False,
+                    "reason": "Device geolocation could not be resolved.",
+                    "detected_country_code": None,
+                    "source": "device_geo",
+                }
 
-        requested_currency = "ZAR" if requested_country_code == "ZA" else "USD"
+        ip_match = False
+        ip_country = None
+        vpn_detected = False
+        ip_check = {
+            "verified": False,
+            "reason": "IP geolocation check was not performed.",
+            "detected_country_code": None,
+            "vpn_detected": False,
+            "source": "ip_geo",
+        }
+        if not geo_match:
+            from payments.geolocation import detect_pricing_context
+            pricing_context = detect_pricing_context(request)
+            ip_country = (pricing_context.get("country_code") or "US").upper()
+            vpn_detected = bool(pricing_context.get("vpn_detected", False))
+            ip_match = ip_country == requested_country_code and not vpn_detected
+            if vpn_detected:
+                ip_reason = "IP security checks indicate VPN/proxy usage."
+            elif ip_match:
+                ip_reason = f"IP geolocation matched selected country ({requested_country_code})."
+            else:
+                ip_reason = f"IP geolocation suggests {ip_country}, which does not match selected country ({requested_country_code})."
+            ip_check = {
+                "verified": ip_match,
+                "reason": ip_reason,
+                "detected_country_code": ip_country,
+                "vpn_detected": vpn_detected,
+                "source": "ip_geo",
+            }
+        else:
+            ip_country = geo_country
+            ip_check = {
+                "verified": True,
+                "reason": "IP geolocation check passed via trusted device geolocation.",
+                "detected_country_code": ip_country or None,
+                "vpn_detected": False,
+                "source": "ip_geo",
+            }
+
+        # Compose checklist for frontend
+        checks = dict(match_result.get("checks", {}))
+        checks["device_location"] = device_check
+        checks["ip_location"] = ip_check
+
+        # --- Require all document and geo checks to PASS for any country change ---
+        doc_checks = match_result.get("checks", {})
+        doc_company_verified = doc_checks.get("company", {}).get("verified", False)
+        doc_country_verified = doc_checks.get("country", {}).get("verified", False)
+        doc_address_verified = doc_checks.get("address", {}).get("verified", False)
+
+        device_geo_verified = checks.get("device_location", {}).get("verified", False)
+        ip_geo_verified = checks.get("ip_location", {}).get("verified", False)
+
+        # Approval logic
+        all_doc_pass = doc_company_verified and doc_country_verified and doc_address_verified
+        all_geo_pass = device_geo_verified and ip_geo_verified
+        approved = all_doc_pass and all_geo_pass
+
+        # Score: count all checks
+        passing_checks = [
+            doc_checks.get("company", {}),
+            doc_checks.get("country", {}),
+            doc_checks.get("address", {}),
+            checks.get("device_location", {}),
+            checks.get("ip_location", {}),
+        ]
+        score = sum([c.get("score", 0.0) for c in passing_checks if c.get("verified")])
+        score = round(score / max(1, len(passing_checks)), 4)
+
+        requested_currency = "USD"
         company.requested_country_code = requested_country_code
         company.requested_currency = requested_currency
         company.location_verification_document = uploaded_document
-        company.location_verification_score = match_result["score"]
+        company.location_verification_score = score
         company.location_verification_notes = match_result["reason"]
-
-        if extraction_error:
-            company.location_verification_status = "REJECTED"
-            company.location_verified_at = None
+        if approved:
+            company.country_code = requested_country_code
+            company.currency = requested_currency
+            company.location_verification_status = "APPROVED"
+            company.location_verified_at = timezone.now()
             company.save(update_fields=[
                 "requested_country_code",
                 "requested_currency",
@@ -149,52 +253,44 @@ class CompanyLocationVerificationView(APIView):
                 "location_verification_notes",
                 "location_verification_status",
                 "location_verified_at",
+                "country_code",
+                "currency",
             ])
+            return Response(
+                {
+                    "verified": True,
+                    "status": "APPROVED",
+                    "score": company.location_verification_score,
+                    "message": company.location_verification_notes,
+                    "country_code": company.country_code,
+                    "currency": company.currency,
+                    "checks": checks,
+                },
+                status=200,
+            )
+        else:
+            company.location_verification_status = "REJECTED"
+            company.location_verified_at = None
+            company.save(update_fields=[
+                "requested_country_code",
+                "requested_currency",
+                "location_verification_document",
+                "location_verification_score",
+                "location_verification_status",
+                "location_verified_at",
+                "location_verification_notes",
+            ])
+            fail_reason = "All document and geo checks (company, country, address, device, IP) must PASS."
             return Response(
                 {
                     "verified": False,
                     "status": "REJECTED",
                     "score": company.location_verification_score,
-                    "message": "Document could not be parsed automatically.",
-                    "details": extraction_error,
-                    "checks": match_result.get("checks", {}),
+                    "message": fail_reason + " " + (match_result["reason"] or ""),
+                    "checks": checks,
                 },
                 status=400,
             )
-
-        if match_result["verified"]:
-            company.country_code = requested_country_code
-            company.currency = requested_currency
-            company.location_verification_status = "APPROVED"
-            company.location_verified_at = timezone.now()
-        else:
-            company.location_verification_status = "REJECTED"
-            company.location_verified_at = None
-
-        company.save(update_fields=[
-            "requested_country_code",
-            "requested_currency",
-            "location_verification_document",
-            "location_verification_score",
-            "location_verification_notes",
-            "location_verification_status",
-            "location_verified_at",
-            "country_code",
-            "currency",
-        ])
-
-        return Response(
-            {
-                "verified": company.location_verification_status == "APPROVED",
-                "status": company.location_verification_status,
-                "score": company.location_verification_score,
-                "message": company.location_verification_notes,
-                "country_code": company.country_code,
-                "currency": company.currency,
-                "checks": match_result.get("checks", {}),
-            },
-            status=200,
-        )
 
 
 class CompanyAccountLifecycleView(APIView):
@@ -816,8 +912,33 @@ class BookingStatusUpdateView(generics.UpdateAPIView):
         return {"request": self.request}
     
     def update(self, request, *args, **kwargs):
-        # This correctly catches the 'pk' from the URL and passes it to the serializer
-        return super().update(request, *args, **kwargs)
+        # Get old status before update
+        booking = self.get_object()
+        old_status = booking.status
+        
+        # Perform the update
+        response = super().update(request, *args, **kwargs)
+        
+        # Check if status changed and send notifications
+        booking.refresh_from_db()
+        new_status = booking.status
+        
+        if old_status != new_status:
+            # Send status change notifications
+            self._send_status_update_notifications(booking, old_status, new_status)
+        
+        return response
+    
+    def _send_status_update_notifications(self, booking, old_status, new_status):
+        """Send email/app notifications when booking status changes"""
+        from .signals import send_booking_status_update_email
+        from .notifications import broadcast_booking_status_update
+        
+        # Send email notification
+        send_booking_status_update_email(booking, old_status, new_status)
+        
+        # Broadcast live notification via WebSocket
+        broadcast_booking_status_update(booking)
 
 class CompanyViewSet(viewsets.ModelViewSet):
     queryset = Company.objects.all()
@@ -866,6 +987,17 @@ class CompanyViewSet(viewsets.ModelViewSet):
         company = request.user.company
         if not company:
             return Response({"detail": "User has no company assigned."}, status=404)
+
+        # Normalize legacy records: billing is USD-only for all countries.
+        fields_to_update = []
+        if (company.currency or "").upper() != "USD":
+            company.currency = "USD"
+            fields_to_update.append("currency")
+        if company.requested_currency and (company.requested_currency or "").upper() != "USD":
+            company.requested_currency = "USD"
+            fields_to_update.append("requested_currency")
+        if fields_to_update:
+            company.save(update_fields=fields_to_update)
         
         serializer = self.get_serializer(company)
         return Response(serializer.data)
@@ -1159,3 +1291,36 @@ class PublicBookingCreateView(generics.CreateAPIView):
             
         # This passes 'company' into the serializer's validated_data
         serializer.save(company=company)
+    
+    def create(self, request, *args, **kwargs):
+        """Override to return confirmation details instead of minimal response"""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        
+        # Get the created booking directly from the serializer instance
+        booking = serializer.instance
+        confirmation_serializer = PublicBookingConfirmationSerializer(booking)
+        
+        return Response(confirmation_serializer.data, status=status.HTTP_201_CREATED)
+
+
+class PublicCustomerBookingsView(generics.ListAPIView):
+    """Allow customers to view their bookings by company slug and email"""
+    serializer_class = PublicBookingConfirmationSerializer
+    permission_classes = [permissions.AllowAny]
+    
+    def get_queryset(self):
+        slug = self.kwargs.get('company_slug')
+        email = self.request.query_params.get('email')
+        
+        if not email:
+            return Booking.objects.none()
+        
+        company = get_object_or_404(Company, slug=slug)
+        
+        # Find bookings by customer email
+        return Booking.objects.filter(
+            company=company,
+            customer__email=email
+        ).order_by('-created_at')

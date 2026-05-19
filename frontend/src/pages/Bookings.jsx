@@ -6,8 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { useCompany } from "../context/CompanyContext";
 import UpgradeValueCards from "../components/UpgradeValueCards";
 import PlanUsageBanner from "../components/PlanUsageBanner";
-import { Camera, CheckCheckIcon, Lock, Plus, Share2, Signature, Timer, CheckIcon, SlidersHorizontal } from "lucide-react";
-import { showConfirm } from "../utils/uiFeedback";
+import { Camera, CheckCheckIcon, Lock, Plus, Share2, Signature, Timer, CheckIcon, SlidersHorizontal, Copy, Car, CarIcon, BuildingIcon } from "lucide-react";
+import { showConfirm, showToast } from "../utils/uiFeedback";
 import { resizeImagesToPlanLimit } from "../utils/imageResize";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "";
@@ -244,6 +244,17 @@ function Bookings() {
     }
   };
 
+  // Copy booking tracking link to clipboard
+  const handleCopyTrackingLink = () => {
+    if (!company?.slug) {
+      showToast("Company information not available.", "error");
+      return;
+    }
+    const trackingLink = `${window.location.origin}/public/bookings/${company.slug}`;
+    navigator.clipboard.writeText(trackingLink);
+    showToast("Tracking link copied to clipboard! Share it with your clients.", "success");
+  };
+
   // Final Submission with Photos
   // Final Submission with Photos
   // --- Inside Bookings.jsx ---
@@ -429,6 +440,14 @@ function Bookings() {
               </span>
             )}
 
+            <button 
+              className="btn btn-secondary" 
+              onClick={handleCopyTrackingLink}
+              title="Copy the booking tracking link to share with clients"
+            >
+              <Copy size={16} aria-hidden="true" /> Copy Tracking Link
+            </button>
+
             <button className="btn btn-secondary" onClick={() => navigate("/share-booking")}>
               <Share2 size={16} aria-hidden="true" /> Share Booking
             </button>
@@ -610,6 +629,14 @@ function Bookings() {
                 
                 <td className="td-customer" data-label="Customer">
                   <div className="customer-name-mobile">{b.customer_name} {b.customer_lastname}</div>
+                  {b.location_type === 'MOBILE' ? (
+                    <div className="text-xs mt-1">
+                      <span className="badge badge-info"><CarIcon size={14} aria-hidden="true" className="inline-block mb-1"/> Mobile</span>
+                      {b.customer_address && <div className="text-muted" style={{fontSize:'0.7rem'}}>{b.customer_address}</div>}
+                    </div>
+                  ) : (
+                    <div className="text-xs mt-1"><span className="badge badge-secondary"><BuildingIcon size={14} aria-hidden="true" className="inline-block mb-1"/> On-site</span></div>
+                  )}
                 </td>
                 
                 <td className="td-vehicle" data-label="Vehicle">
@@ -653,14 +680,14 @@ function Bookings() {
                     // Show check icon with "Signed" badge next to it inline if signed, instead of the button
                     <div className="flex items-center">
                       {/* align next to each other */}
-                      <span className="badge badge-success ml-1">
-                        <CheckIcon size={10} aria-hidden="true" className="inline-block mr-1" />
+                      <span className="badge-signed badge-success ml-1">
+                        <CheckIcon size={14} aria-hidden="true" className="inline-block mb-1" />
                         Signed
                       </span>
                     </div>
                   ) : b.status === "CONFIRMED" ? (
                     <button 
-                      className="btn btn-primary btn-sm" 
+                      className="btn btn-primary btn-sm btn-sign-start" 
                       onClick={(e) => { e.stopPropagation(); navigate(`/indemnity/sign/${b.id}`); }}
                     >
                       <Signature size={14} aria-hidden="true" /> Sign & Start

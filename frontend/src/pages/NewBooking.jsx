@@ -35,7 +35,9 @@ const NewBooking = () => {
     service: "",
     booking_date: "",
     booking_time: "",
-    notes: ""
+    notes: "",
+    location_type: "ONSITE",
+    customer_address: ""
   });
 
   // 1. Initial Load: Customers & Services
@@ -104,6 +106,10 @@ const NewBooking = () => {
       showToast("Please select an available time slot.", "error");
       return;
     }
+    if (step === 2 && formData.location_type === "MOBILE" && !formData.customer_address.trim()) {
+      showToast("Please enter the customer's address for mobile service.", "error");
+      return;
+    }
     setStep(step + 1);
   };
 
@@ -128,7 +134,9 @@ const NewBooking = () => {
         booking_time: formData.booking_time,
         notes: formData.notes || "",
         admin_signature: adminSignatureBase64,
-        is_authorized: true
+        is_authorized: true,
+        location_type: formData.location_type,
+        customer_address: formData.customer_address || ""
       };
 
       // 3. Send to API
@@ -229,6 +237,38 @@ const NewBooking = () => {
                 </div>
               )}
             </div>
+
+            <div className="form-group mt-4">
+              <label className="input-label">Service Location</label>
+              <div className="location-type-toggle">
+                <button
+                  type="button"
+                  className={`location-btn ${formData.location_type === 'ONSITE' ? 'active' : ''}`}
+                  onClick={() => setFormData(prev => ({ ...prev, location_type: 'ONSITE', customer_address: '' }))}
+                >
+                  🏢 On-site at Company
+                </button>
+                <button
+                  type="button"
+                  className={`location-btn ${formData.location_type === 'MOBILE' ? 'active' : ''}`}
+                  onClick={() => setFormData(prev => ({ ...prev, location_type: 'MOBILE' }))}
+                >
+                  🚗 Mobile (Go to Customer)
+                </button>
+              </div>
+            </div>
+            {formData.location_type === 'MOBILE' && (
+              <div className="form-group mt-3">
+                <label className="input-label">Customer Address <span className="text-danger">*</span></label>
+                <input
+                  className="input-field"
+                  name="customer_address"
+                  value={formData.customer_address}
+                  onChange={handleInputChange}
+                  placeholder="e.g. 123 Main Street, City, Postal Code"
+                />
+              </div>
+            )}
           </div>
         )}
 
@@ -239,6 +279,10 @@ const NewBooking = () => {
                <p><strong>Customer:</strong> {customers.find(c => c.id == formData.customer)?.firstname} {customers.find(c => c.id == formData.customer)?.lastname}</p>
                <p><strong>Schedule:</strong> {formData.booking_date} at {formData.booking_time}</p>
                <p><strong>Service:</strong> {services.find(s => s.id == formData.service)?.name}</p>
+               <p><strong>Location:</strong> {formData.location_type === 'MOBILE' ? '🚗 Mobile – Go to Customer' : '🏢 On-site at Company'}</p>
+               {formData.location_type === 'MOBILE' && formData.customer_address && (
+                 <p><strong>Address:</strong> {formData.customer_address}</p>
+               )}
             </div>
             <div className="sig-canvas-container">
               <SignatureCanvas ref={sigPad} penColor="black" canvasProps={{ className: "sig-canvas" }} />
