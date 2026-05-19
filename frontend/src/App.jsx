@@ -46,9 +46,8 @@ function AppContent() {
   const getInstalledState = () => {
     const standaloneDisplayMode = window.matchMedia("(display-mode: standalone)").matches;
     const iosStandalone = window.navigator.standalone === true;
-    const androidTrustedWebApp = document.referrer?.startsWith("android-app://");
 
-    return standaloneDisplayMode || iosStandalone || androidTrustedWebApp;
+    return standaloneDisplayMode || iosStandalone;
   };
 
   const [isInstalledApp, setIsInstalledApp] = useState(() => getInstalledState());
