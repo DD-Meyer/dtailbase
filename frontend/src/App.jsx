@@ -121,6 +121,44 @@ function AppContent() {
     };
   }, []);
 
+  useEffect(() => {
+    const removeLegacyInstallFab = () => {
+      document.querySelectorAll(".install-app-fab").forEach((node) => node.remove());
+
+      const legacyInstallCandidates = document.querySelectorAll(
+        ".landing-wrapper .full-page-content button, .landing-wrapper .full-page-content a, .landing-wrapper .full-page-content [role='button'], .landing-wrapper button, .landing-wrapper a, .landing-wrapper [role='button']"
+      );
+
+      legacyInstallCandidates.forEach((node) => {
+        const label = (node.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+        if (label === "install app") {
+          node.remove();
+        }
+      });
+
+      const installSingletonNodes = document.querySelectorAll(".install-button-singleton");
+      if (installSingletonNodes.length > 1) {
+        installSingletonNodes.forEach((node, index) => {
+          if (index > 0) {
+            node.remove();
+          }
+        });
+      }
+    };
+
+    removeLegacyInstallFab();
+
+    const observer = new MutationObserver(() => {
+      removeLegacyInstallFab();
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   const handleInstallClick = async () => {
     if (!deferredInstallPrompt) {
       const isIOS = /iphone|ipad|ipod/i.test(window.navigator.userAgent || "");
@@ -258,7 +296,7 @@ function AppContent() {
       <main className={isLandingPage || isAuthPage || isMinimalChromeRoute ? "full-page-content" : "main-content"}>
         {/* Header hidden on Hero and Auth pages */}
         {showDashboardChrome && (
-          <Header showInstallButton={showInstallButton && !isInstalledApp} handleInstallClick={handleInstallClick} />
+          <Header showInstallButton={showInstallButton && !isInstalledApp && !isLandingPage} handleInstallClick={handleInstallClick} />
         )}
         <div className={isLandingPage || isAuthPage || isMinimalChromeRoute ? "" : "page-body"}>
           <Routes>
@@ -324,11 +362,6 @@ function AppContent() {
           {/* Install button is now only in the header for all devices */}
         </div>
 
-        {!showDashboardChrome && showInstallButton && !isInstalledApp && (
-          <button className="install-app-fab" onClick={handleInstallClick}>
-            Install App
-          </button>
-        )}
       </main>
     </div>
   

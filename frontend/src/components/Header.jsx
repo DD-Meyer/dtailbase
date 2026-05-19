@@ -26,7 +26,7 @@ function Header({ showInstallButton, handleInstallClick }) {
           <span className="current-plan">{currentPlan}</span>
         )}
         {showInstallButton && (
-          <button className="install-app-fab header-install-btn" onClick={handleInstallClick}>
+          <button className="header-install-btn install-button-singleton" onClick={handleInstallClick}>
             Install App
           </button>
         )}

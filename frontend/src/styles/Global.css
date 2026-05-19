@@ -438,23 +438,9 @@ body.mobile-nav-open {
   background-color: #dc3545; /* Error Red */
 }
 
+/* Safety kill-switch for any stale/cached floating install button anywhere in the DOM */
 .install-app-fab {
-  display: flex;
-  right: 18px;
-  bottom: 18px;
-  z-index: 1100;
-  border: 1px solid rgba(35, 180, 255, 0.5);
-  border-radius: 999px;
-  padding: 10px 16px;
-  background: linear-gradient(135deg, #0f84c8, #1bbf92);
-  color: #f8feff;
-  font-size: 0.86rem;
-  font-weight: 700;
-  box-shadow: 0 14px 28px -18px rgba(15, 132, 200, 0.85);
-}
-
-.install-app-fab:hover {
-  filter: brightness(1.08);
+  display: none !important;
 }
 
 @keyframes slideIn {
@@ -556,14 +542,6 @@ body.mobile-nav-open {
 
   .table-standard {
     min-width: 740px;
-  }
-
-  .install-app-fab {
-    display: flex;
-    right: 12px;
-    bottom: max(94px, env(safe-area-inset-bottom));
-    padding: 5px 10px;
-    font-size: 0.5rem;
   }
 
   .team-action-btn {

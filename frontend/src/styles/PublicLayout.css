@@ -1181,6 +1181,28 @@ body {
 }
 
 @media (max-width: 768px) {
+  .about-page {
+    overflow-x: hidden;
+  }
+
+  .about-page .process-story {
+    contain: none;
+  }
+
+  .about-page .story-row,
+  .about-page .story-row.reverse {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .about-page .story-text,
+  .about-page .about-media-block,
+  .about-page .about-media-block .glass-mockup {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
   .products-grid { grid-template-columns: 1fr; }
   .about-values-grid { grid-template-columns: 1fr; }
   .products-cta-inner { padding: 44px 24px; }
