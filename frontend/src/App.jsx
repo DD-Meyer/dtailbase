@@ -53,7 +53,7 @@ function AppContent() {
 
   const [isInstalledApp, setIsInstalledApp] = useState(() => getInstalledState());
   const [deferredInstallPrompt, setDeferredInstallPrompt] = useState(null);
-  const [showInstallButton, setShowInstallButton] = useState(false);
+  const [showInstallButton, setShowInstallButton] = useState(() => !getInstalledState());
 
   const APP_ALLOWED_ROUTES = [
     "/login",
@@ -124,20 +124,27 @@ function AppContent() {
 
   const handleInstallClick = async () => {
     if (!deferredInstallPrompt) {
+      const isIOS = /iphone|ipad|ipod/i.test(window.navigator.userAgent || "");
+      const manualInstallMessage = isIOS
+        ? "To install DtailBase: tap Share in Safari, then choose 'Add to Home Screen'."
+        : "To install DtailBase: open your browser menu and choose 'Install app' or 'Add to Home Screen'.";
+      window.alert(manualInstallMessage);
       return;
     }
 
     deferredInstallPrompt.prompt();
     const result = await deferredInstallPrompt.userChoice;
     setDeferredInstallPrompt(null);
-    setShowInstallButton(false);
+    if (result?.outcome === "accepted") {
+      setShowInstallButton(false);
+    } else {
+      setShowInstallButton(true);
+    }
   };
 
   // 1. Identify ALL public-facing "Marketing" pages
   const publicRoutes = ["/", "/hero", "/about", "/products", "/plans", "/payments", "/contact", "/legal", "/community", "/features", "/security", "/our-Story", "/support", "/help-center", "/tutorials", "/public-booking/:companySlug", "/payment-success", "/book/:companySlug", "/booking-confirmation/:companySlug", "/public/bookings/:companySlug"];
   const isLandingPage = publicRoutes.includes(location.pathname);
-  const websiteOnlyRoutes = ["/", "/hero", "/about", "/products", "/contact", "/legal", "/community", "/features", "/security", "/our-story", "/support", "/help-center", "/tutorials"];
-  const isWebsiteOnlyRoute = websiteOnlyRoutes.includes(location.pathname.toLowerCase());
 
   if (isInstalledApp && !isAllowedInInstalledApp(location.pathname)) {
     return <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace />;
@@ -252,7 +259,7 @@ function AppContent() {
       <main className={isLandingPage || isAuthPage || isMinimalChromeRoute ? "full-page-content" : "main-content"}>
         {/* Header hidden on Hero and Auth pages */}
         {showDashboardChrome && (
-          <Header showInstallButton={showInstallButton && !isInstalledApp && !isWebsiteOnlyRoute} handleInstallClick={handleInstallClick} />
+          <Header showInstallButton={showInstallButton && !isInstalledApp} handleInstallClick={handleInstallClick} />
         )}
         <div className={isLandingPage || isAuthPage || isMinimalChromeRoute ? "" : "page-body"}>
           <Routes>
@@ -317,6 +324,12 @@ function AppContent() {
 
           {/* Install button is now only in the header for all devices */}
         </div>
+
+        {!showDashboardChrome && showInstallButton && !isInstalledApp && (
+          <button className="install-app-fab" onClick={handleInstallClick}>
+            Install App
+          </button>
+        )}
       </main>
     </div>
   

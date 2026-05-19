@@ -306,7 +306,7 @@ const Plans = () => {
 
               {isCurrent ? (
                 <button className="btn-upgrade btn-current" disabled>
-                  {plan.cta}
+                  Current Plan
                 </button>
               ) : isDowngradeOption ? (
                 <button
@@ -318,7 +318,7 @@ const Plans = () => {
                 </button>
               ) : !isAuthenticated ? (
                 <button className="btn-upgrade" onClick={() => handleAuthRequired(plan)}>
-                  {plan.id === 'STARTER' ? 'Try Now' : 'Get Now'}
+                  {plan.id === 'STARTER' ? 'Get Started Free' : plan.id === 'PRO' ? 'Get Pro' : 'Get Enterprise'}
                 </button>
               ) : (
                 <button className="btn-upgrade" onClick={() => openPaymentPage(plan.id)}>

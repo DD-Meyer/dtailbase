@@ -3,12 +3,20 @@ import { Link, useNavigate } from 'react-router-dom';
 import PublicHeader from './PublicHeader';
 import '../styles/Hero.css';
 import api from '../axios_instance';
+import { showToast } from '../utils/uiFeedback';
 import {
   DEFAULT_PRICE_FALLBACKS,
   extractPlanFeatures,
   fetchPricingWithFallback,
   isValidPricingPayload,
 } from '../services/pricingService';
+import { useCompany } from '../context/CompanyContext';
+
+const PLAN_ORDER = {
+  STARTER: 0,
+  PRO: 1,
+  ENTERPRISE: 2,
+};
 
 const HERO_PLANS = [
   {
@@ -40,7 +48,7 @@ const HERO_PLANS = [
       'Up to 5,000 Customers',
     ],
     featured: true,
-    cta: 'Start Free Trial',
+    cta: 'Get Pro',
     isFree: false,
   },
   {
@@ -59,17 +67,24 @@ const HERO_PLANS = [
       'Unlimited Customers',
     ],
     featured: false,
-    cta: 'Go Elite',
+    cta: 'Get Enterprise',
     isFree: false,
   },
 ];
 
 const PRICE_FALLBACKS = DEFAULT_PRICE_FALLBACKS.USD;
+const GUEST_PLAN_CTA = {
+  STARTER: 'Get Started Free',
+  PRO: 'Get Pro',
+  ENTERPRISE: 'Get Enterprise',
+};
 
 const Hero = ({ isAuthenticated }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [heroPricing, setHeroPricing] = useState(null);
   const [heroPlanFeatures, setHeroPlanFeatures] = useState({});
+  const [downgradingPlanId, setDowngradingPlanId] = useState('');
+  const { currentPlan, refreshCompany } = useCompany();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -177,20 +192,52 @@ const Hero = ({ isAuthenticated }) => {
     return Array.isArray(fromPricing) && fromPricing.length ? fromPricing : plan.features;
   };
 
-  const handlePlanCta = (plan) => {
-    if (plan.isFree) {
-      navigate('/register');
-      return;
-    }
+  const openPaymentPage = (planId) => {
+    navigate(`/payments?plan=${planId}`);
+  };
+
+  const handleAuthRequired = (plan) => {
     navigate('/login', {
       state: {
         fromPlanCta: true,
         selectedPlan: plan.name,
         selectedPlanId: plan.id,
-        ctaType: 'upgrade',
-        redirectTo: `/payments?plan=${plan.id}`,
+        ctaType: plan.id === 'STARTER' ? 'try-now' : 'upgrade',
+        redirectTo: plan.id === 'STARTER' ? '/plans' : `/payments?plan=${plan.id}`,
       },
     });
+  };
+
+  const executeDowngrade = async (plan) => {
+    if (plan.id !== 'STARTER') {
+      openPaymentPage(plan.id);
+      return;
+    }
+
+    setDowngradingPlanId(plan.id);
+    try {
+      const response = await api.post('/payments/cancel-subscription/', {
+        target_plan: plan.id,
+      });
+
+      await refreshCompany();
+      const successMsg = response.data?.message || 'Subscription cancelled. Your account is now on Starter.';
+      showToast(successMsg, 'success');
+    } catch (err) {
+      let errorMsg = 'Unable to process downgrade right now.';
+      if (err.response?.status === 403) {
+        errorMsg = 'Only account owners can cancel subscriptions. Please contact your account owner.';
+      } else if (err.response?.data?.detail) {
+        errorMsg = err.response.data.detail;
+      } else if (err.response?.data?.error) {
+        errorMsg = err.response.data.error;
+      } else if (err.response?.data?.message) {
+        errorMsg = err.response.data.message;
+      }
+      showToast(errorMsg, 'error');
+    } finally {
+      setDowngradingPlanId('');
+    }
   };
 
   return (
@@ -347,32 +394,60 @@ const Hero = ({ isAuthenticated }) => {
           <p className="section-desc">Lightweight, high-speed architecture built exclusively for detailing bays. No lag on high-res condition logs.</p>
         </div>
         <div className="pricing-grid">
-          {HERO_PLANS.map((plan) => (
-            <div
-              key={plan.id}
-              className={`pricing-card animate-on-scroll${plan.featured ? ' featured' : ''}`}
-            >
-              {plan.featured && <div className="popular-tag">Most Popular</div>}
-              <span className="tier">{plan.name}</span>
-              <div className="price">
-                <span className="price-currency">$</span>
-                {getPlanPrice(plan)}
-                <span>/mo</span>
-              </div>
-              <p className="plan-tagline">{plan.description}</p>
-              <ul className="benefits">
-                {getPlanFeatures(plan).map((feat) => (
-                  <li key={feat}>✓ {feat}</li>
-                ))}
-              </ul>
-              <button
-                className={plan.featured ? 'btn-main' : 'btn-outline'}
-                onClick={() => handlePlanCta(plan)}
+          {HERO_PLANS.map((plan) => {
+            const isCurrent = Boolean(isAuthenticated && plan.id === currentPlan);
+            const isDowngradeOption =
+              isAuthenticated &&
+              typeof PLAN_ORDER[currentPlan] === 'number' &&
+              typeof PLAN_ORDER[plan.id] === 'number' &&
+              PLAN_ORDER[currentPlan] > 0 &&
+              PLAN_ORDER[plan.id] < PLAN_ORDER[currentPlan];
+
+            return (
+              <div
+                key={plan.id}
+                className={`pricing-card animate-on-scroll${plan.featured ? ' featured' : ''}`}
               >
-                {plan.cta}
-              </button>
-            </div>
-          ))}
+                {plan.featured && <div className="popular-tag">Most Popular</div>}
+                <span className="tier">{plan.name}</span>
+                <div className="price">
+                  <span className="price-currency">$</span>
+                  {getPlanPrice(plan)}
+                  <span>/mo</span>
+                </div>
+                <p className="plan-tagline">{plan.description}</p>
+                <ul className="benefits">
+                  {getPlanFeatures(plan).map((feat) => (
+                    <li key={feat}>✓ {feat}</li>
+                  ))}
+                </ul>
+                <button
+                  className={plan.featured ? 'btn-main' : 'btn-outline'}
+                  onClick={() => {
+                    if (isCurrent) return;
+                    if (isDowngradeOption) {
+                      executeDowngrade(plan);
+                      return;
+                    }
+                    if (!isAuthenticated) {
+                      handleAuthRequired(plan);
+                      return;
+                    }
+                    openPaymentPage(plan.id);
+                  }}
+                  disabled={isCurrent || downgradingPlanId === plan.id}
+                >
+                  {isCurrent
+                    ? 'Current Plan'
+                    : isDowngradeOption
+                      ? (downgradingPlanId === plan.id ? 'Processing...' : 'Downgrade')
+                      : !isAuthenticated
+                        ? (GUEST_PLAN_CTA[plan.id] || plan.cta)
+                        : 'Upgrade'}
+                </button>
+              </div>
+            );
+          })}
         </div>
         <p className="pricing-note">Legally-Binding Asset Vault included &nbsp;·&nbsp; Secure PayPal billing &nbsp;·&nbsp; Cancel anytime</p>
       </section>
