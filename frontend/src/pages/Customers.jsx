@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../axios_instance";
 import "../styles/Customers.css";
 import "../styles/EditableRow.css";
@@ -17,9 +18,16 @@ function Customers() {
   const [editId, setEditId] = useState(null); // Track if we are editing
   const [formData, setFormData] = useState({ firstname: "", lastname: "", email: "", phone: "" });
   const { planLimits, currentPlan, nextPlan } = useCompany();
+  const navigate = useNavigate();
   const csvInputRef = useRef(null);
 
-  const canUseCsvUpload = currentPlan === "PRO" || currentPlan === "ENTERPRISE";
+  const normalizedPlan = String(currentPlan || "").trim().toUpperCase();
+  const canUseCsvUpload =
+    normalizedPlan === "PRO" ||
+    normalizedPlan.startsWith("PRO_") ||
+    normalizedPlan === "ENTERPRISE" ||
+    normalizedPlan.startsWith("ENTERPRISE_") ||
+    normalizedPlan === "ELITE";
 
   const fetchCustomers = async () => {
     try {
@@ -131,11 +139,22 @@ function Customers() {
   };
 
   const openCsvPicker = () => {
-    if (!canUseCsvUpload) {
-      showToast("CSV upload is available on Pro and Enterprise plans only.", "error");
+    csvInputRef.current?.click();
+  };
+
+  const handleCsvAction = () => {
+    if (canUseCsvUpload) {
+      openCsvPicker();
       return;
     }
-    csvInputRef.current?.click();
+
+    navigate("/plans", {
+      state: {
+        fromPlanCta: true,
+        selectedPlanId: "PRO",
+        redirectTo: "/customers",
+      },
+    });
   };
 
   const handleCsvSelected = async (e) => {
@@ -230,12 +249,11 @@ function Customers() {
               Download CSV Template
             </button>
             <button
-              className={`btn ${canUseCsvUpload ? "btn-secondary" : "btn-disabled opacity-50"}`}
-              onClick={openCsvPicker}
-              disabled={!canUseCsvUpload}
-              title={canUseCsvUpload ? "Upload customers via CSV" : "Pro and Enterprise only"}
+              className={`btn ${canUseCsvUpload ? "btn-secondary" : "btn-primary"}`}
+              onClick={handleCsvAction}
+              title={canUseCsvUpload ? "Upload customers via CSV" : "Upgrade to Pro or Enterprise to unlock CSV import"}
             >
-              Import CSV
+              {canUseCsvUpload ? "Import CSV" : "Upgrade for CSV Import"}
             </button>
             <button 
               className={`btn ${isLimitReached ? 'btn-disabled opacity-50' : 'btn-primary'}`} 
