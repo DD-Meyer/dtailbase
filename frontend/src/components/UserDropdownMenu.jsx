@@ -2,6 +2,7 @@ import { useState, useContext, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeftCircleIcon,
+  BadgeHelp,
   ChevronDown,
   ChevronUp,
   CreditCard,
@@ -103,6 +104,13 @@ function UserDropdownMenu() {
                   </Link>
                 </li>
               </>
+            )}
+            {(user?.is_superuser || user?.is_staff) && (
+              <li>
+                <Link to="/admin/support" onClick={() => setIsDropdownOpen(false)}>
+                  <span className="dropdown-link-inline"><BadgeHelp size={16} /> Support Inbox</span>
+                </Link>
+              </li>
             )}
             <hr />
             <li>

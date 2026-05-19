@@ -480,6 +480,8 @@ class BookingStatusSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8, required=True)
     company_id = serializers.ReadOnlyField(source='company.id')
+    is_superuser = serializers.BooleanField(read_only=True)
+    is_staff = serializers.BooleanField(read_only=True)
 
     # This declaration is correct
     company_name = serializers.CharField(write_only=True, required=False)
@@ -498,9 +500,10 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'email', 'username', 'first_name', 'last_name', 
             'password', 'role', 'is_active', 'company_id', 
-            'plan', 'usage_count', 'company_name', 'country_code', 'currency'
+            'plan', 'usage_count', 'company_name', 'country_code', 'currency',
+            'is_superuser', 'is_staff'
         ]
-        read_only_fields = ['id', 'company_id', 'plan', 'usage_count']
+        read_only_fields = ['id', 'company_id', 'plan', 'usage_count', 'is_superuser', 'is_staff']
     
     def get_usage_count(self, obj):
         if obj.company:
@@ -711,6 +714,8 @@ class MyTokenSerializer(TokenObtainPairSerializer):
             'email': user.email,
             'role': user.role,
             'username': user.username,
+            'is_superuser': user.is_superuser,
+            'is_staff': user.is_staff,
             'company_id': user.company.id if user.company else None,
             # Adding plan and usage to the token response for frontend convenience
             'plan': user.company.plan if user.company else 'STARTER',

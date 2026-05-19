@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PublicHeader from './PublicHeader';
-import LiveChat from './LiveChat';
 import '../styles/Hero.css';
 import api from '../axios_instance';
 import {
@@ -71,7 +70,6 @@ const Hero = ({ isAuthenticated }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [heroPricing, setHeroPricing] = useState(null);
   const [heroPlanFeatures, setHeroPlanFeatures] = useState({});
-  const [isChatOpen, setIsChatOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -224,7 +222,7 @@ const Hero = ({ isAuthenticated }) => {
             </p>
             <div className="hero-cta">
               <Link to="/register" className="btn-main pulse">Deploy Your Studio</Link>
-              <button className="btn-outline">
+              <button className="btn-outline hero-watch-cta">
                 <span className="play-icon">▶</span> Watch The System
               </button>
             </div>
@@ -433,22 +431,6 @@ const Hero = ({ isAuthenticated }) => {
           </div>
         </div>
       </footer>
-      
-      {/* Chat Window */}
-      <LiveChat 
-        companySlug="dtailbase" 
-        isOpen={isChatOpen} 
-        onClose={() => setIsChatOpen(false)} 
-      />
-      
-      {/* Chat Button */}
-      <button 
-        className="floating-chat-btn"
-        onClick={() => setIsChatOpen(!isChatOpen)}
-        title="Chat with us"
-      >
-        <span className="chat-btn-icon">💬</span>
-      </button>
       
       {/* WhatsApp Button */}
       <a 

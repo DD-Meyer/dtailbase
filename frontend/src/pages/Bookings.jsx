@@ -103,6 +103,10 @@ function Bookings() {
   // Inside Bookings function
   const { planLimits, usageStats, company, nextPlan, refreshCompany } = useCompany();
 
+  const isUnlimited = planLimits.monthly_bookings === null || 
+                    planLimits.max_customers === undefined || 
+                    planLimits.max_customers === Infinity;
+
   // 1. Get the current count from usageStats (matching your context)
   const monthlyUsage = usageStats?.monthly_bookings || 0;
 
@@ -473,7 +477,7 @@ function Bookings() {
           {
             label: "Bookings this month",
             used: monthlyUsage,
-            total: planLimits?.monthly_bookings ?? 10,
+            total: isUnlimited ? null : monthlyLimit,
           },
         ]}
         currentPlan={company?.plan}

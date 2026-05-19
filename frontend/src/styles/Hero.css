@@ -689,11 +689,23 @@ body {
 /* ===== Mobile Styles (<= 768px) ===== */
 @media (max-width: 768px) {
   .stats-bar {
-    flex-direction: column;
-    gap: 40px;
-    margin-top: 40px;
-    width: 90%;
+    gap: 12px;
+    margin-top: 18px;
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding: 14px 16px;
   }
+
+  .stats-bar .stat-card {
+    min-width: 72%;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+
   .stat-divider {
     display: none;
   }
@@ -722,14 +734,6 @@ body {
 }
 
 @media (max-width: 768px) {
-  .floating-chat-btn {
-    bottom: 85px;
-    right: 20px;
-    width: 50px;
-    height: 50px;
-    font-size: 20px;
-  }
-  
   .floating-whatsapp {
     bottom: 20px;
     right: 20px;
@@ -742,6 +746,10 @@ body {
   .hero-cta {
     flex-direction: column;
     gap: 12px;
+  }
+
+  .hero-watch-cta {
+    display: none;
   }
 
   .hero-cta .btn-main,
@@ -980,7 +988,8 @@ body {
   }
 
   .hero-container {
-    padding: 104px 16px 52px;
+    min-height: auto;
+    padding: 90px 16px 32px;
   }
 
   .hero-title {
@@ -994,6 +1003,12 @@ body {
     max-width: 100%;
   }
 
+  .new-badge {
+    margin-bottom: 18px;
+    padding: 7px 14px;
+    font-size: 0.76rem;
+  }
+
   .process-story {
     padding: 56px 0;
   }
@@ -1003,11 +1018,7 @@ body {
     margin-bottom: 36px;
     gap: 14px;
     align-items: stretch;
-    flex-direction: row;
-  }
-
-  .story-row.reverse {
-    flex-direction: row-reverse;
+    flex-direction: column;
   }
 
   .story-text {
@@ -1041,8 +1052,8 @@ body {
   }
 
   .glass-mockup {
-    flex: 1;
-    width: 48%;
+    flex: initial;
+    width: 100%;
     height: 220px;
     border-radius: 16px;
     padding: 8px;
@@ -1071,11 +1082,6 @@ body {
   .pricing-note {
     line-height: 1.5;
     padding: 0 6px;
-  }
-
-  .stats-bar {
-    padding: 20px 14px;
-    gap: 20px;
   }
 
   .stat-card {
@@ -1117,11 +1123,22 @@ body {
 }
 
 @media (max-width: 480px) {
-  .landing-page h1 {
-    font-size: clamp(1.65rem, 8.8vw, 2.1rem);
+  .gallery-grid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 82vw;
+    grid-template-columns: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 12px;
+    margin-top: 28px;
+    padding: 0 4px 6px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
   }
 
-  .landing-page h2 {
+  .gallery-grid .gallery-card {
+    scroll-snap-align: start;
     font-size: clamp(1.35rem, 7vw, 1.7rem);
   }
 

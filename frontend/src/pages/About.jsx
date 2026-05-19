@@ -1,6 +1,6 @@
 const About = () => {
   return (
-    <div className="landing-page">
+    <div className="landing-page about-page">
       {/* HERO */}
       <section className="products-hero animate-on-scroll">
         <div className="about-intro-badge">🏢 Our Story</div>
@@ -18,7 +18,6 @@ const About = () => {
         <div className="story-row animate-on-scroll">
           <div className="story-text">
             <span className="step-num">THE FOUNDER</span>
-            <h3>Daryn Meyer</h3>
             <p style={{ color: 'var(--text-dim)', lineHeight: '1.85', marginBottom: '20px' }}>
               Before Dtailbase existed, Daryn was in the detail bay himself — hands-on, client-facing,
               and doing the actual work. Running a detailing business taught him something fast:
@@ -37,17 +36,19 @@ const About = () => {
               workflow.
             </p>
           </div>
-          <div className="glass-mockup">
-            <div className="mock-ui-label">FOUNDER / DARYN MEYER</div>
-            {/* PASTE FOUNDER IMAGE URL HERE */}
-            {/* <img src="YOUR_IMAGE_URL" alt="Daryn Meyer" style={{width:'100%',height:'100%',objectFit:'cover'}} /> */}
+          <div className="about-media-block">
+            <h3 className="about-media-heading">Daryn Meyer</h3>
+            <div className="glass-mockup">
+              <div className="mock-ui-label">FOUNDER / DARYN MEYER</div>
+              {/* PASTE FOUNDER IMAGE URL HERE */}
+              {/* <img src="YOUR_IMAGE_URL" alt="Daryn Meyer" style={{width:'100%',height:'100%',objectFit:'cover'}} /> */}
+            </div>
           </div>
         </div>
 
         <div className="story-row reverse animate-on-scroll">
           <div className="story-text">
             <span className="step-num">THE PAIN POINT</span>
-            <h3>The Problem No One Was Solving</h3>
             <p style={{ color: 'var(--text-dim)', lineHeight: '1.85', marginBottom: '20px' }}>
               Detailing is a skilled trade. But running a detailing business means wearing five hats
               at once — technician, scheduler, salesperson, accountant, and admin. Without the right
@@ -65,17 +66,19 @@ const About = () => {
               A focused, powerful tool built for the realities of running a modern detailing studio.
             </p>
           </div>
-          <div className="glass-mockup">
-            <div className="mock-ui-label">THE PROBLEM / BEFORE DTAILBASE</div>
-            {/* PASTE IMAGE URL HERE */}
-            {/* <img src="YOUR_IMAGE_URL" alt="Before Dtailbase" style={{width:'100%',height:'100%',objectFit:'cover'}} /> */}
+          <div className="about-media-block">
+            <h3 className="about-media-heading">The Problem No One Was Solving</h3>
+            <div className="glass-mockup">
+              <div className="mock-ui-label">THE PROBLEM / BEFORE DTAILBASE</div>
+              {/* PASTE IMAGE URL HERE */}
+              {/* <img src="YOUR_IMAGE_URL" alt="Before Dtailbase" style={{width:'100%',height:'100%',objectFit:'cover'}} /> */}
+            </div>
           </div>
         </div>
 
         <div className="story-row animate-on-scroll">
           <div className="story-text">
             <span className="step-num">THE SOLUTION</span>
-            <h3>One System. Every Function.</h3>
             <p style={{ color: 'var(--text-dim)', lineHeight: '1.85', marginBottom: '20px' }}>
               Dtailbase gives detailing studios a single, unified platform to handle bookings,
               legal documentation, photo evidence, team management, and business tracking.
@@ -88,10 +91,13 @@ const About = () => {
               to prove your business is growing.
             </p>
           </div>
-          <div className="glass-mockup">
-            <div className="mock-ui-label">THE SOLUTION / DTAILBASE DASHBOARD</div>
-            {/* PASTE IMAGE URL HERE */}
-            {/* <img src="YOUR_IMAGE_URL" alt="Dtailbase Dashboard" style={{width:'100%',height:'100%',objectFit:'cover'}} /> */}
+          <div className="about-media-block">
+            <h3 className="about-media-heading">One System. Every Function.</h3>
+            <div className="glass-mockup">
+              <div className="mock-ui-label">THE SOLUTION / DTAILBASE DASHBOARD</div>
+              {/* PASTE IMAGE URL HERE */}
+              {/* <img src="YOUR_IMAGE_URL" alt="Dtailbase Dashboard" style={{width:'100%',height:'100%',objectFit:'cover'}} /> */}
+            </div>
           </div>
         </div>
       </section>

@@ -1,6 +1,12 @@
 # core/urls.py
 from django.urls import path, include
 from .views import *
+from .support_views import (
+    AdminSupportInboxView,
+    SupportTicketDetailUpdateView,
+    SupportTicketListCreateView,
+    SupportTicketMessageListCreateView,
+)
 from rest_framework.routers import DefaultRouter
 from indemnity.views import *
 
@@ -25,6 +31,10 @@ urlpatterns = [
     path("auth/users/me/", UserMeView.as_view(), name="user-me"),
     path("auth/google-config/", GoogleAuthConfigView.as_view(), name="google-config"),
     path("auth/google-login/", GoogleLoginView.as_view(), name="google-login"),
+    path("support/tickets/", SupportTicketListCreateView.as_view(), name="support-ticket-list-create"),
+    path("support/tickets/<uuid:ticket_id>/", SupportTicketDetailUpdateView.as_view(), name="support-ticket-detail-update"),
+    path("support/tickets/<uuid:ticket_id>/messages/", SupportTicketMessageListCreateView.as_view(), name="support-ticket-message-list-create"),
+    path("support/admin/inbox/", AdminSupportInboxView.as_view(), name="support-admin-inbox"),
     path("availability/<str:date>/", AvailabilityAPIView.as_view()),
 
     path('auth/set-password/', ChangePasswordView.as_view(), name='set-password'),

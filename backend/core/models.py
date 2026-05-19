@@ -196,3 +196,68 @@ class VehiclePhoto(models.Model):
 
     def __str__(self):
         return f"{self.photo_type} - {self.agreement.booking.id}"
+
+
+class SupportTicket(models.Model):
+    STATUS_CHOICES = (
+        ("OPEN", "Open"),
+        ("IN_PROGRESS", "In Progress"),
+        ("RESOLVED", "Resolved"),
+        ("CLOSED", "Closed"),
+    )
+
+    SUPPORT_LANE_CHOICES = (
+        ("PRIORITY", "Priority"),
+        ("STANDARD", "Standard"),
+    )
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        related_name="support_tickets",
+    )
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_support_tickets",
+    )
+    subject = models.CharField(max_length=255)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="OPEN")
+    support_lane = models.CharField(max_length=20, choices=SUPPORT_LANE_CHOICES, default="STANDARD")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if self.company and self.company.plan == "ENTERPRISE":
+            self.support_lane = "PRIORITY"
+        else:
+            self.support_lane = "STANDARD"
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.company.name} - {self.subject}"
+
+
+class SupportTicketMessage(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    ticket = models.ForeignKey(
+        SupportTicket,
+        on_delete=models.CASCADE,
+        related_name="messages",
+    )
+    sender = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="support_messages",
+    )
+    message = models.TextField()
+    is_admin_reply = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Message for ticket {self.ticket_id}"

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PublicLayout from '../components/PublicLayout';
 
 const LEGAL_SECTIONS = [
@@ -157,9 +157,44 @@ const LEGAL_SECTIONS = [
 ];
 
 const Legal = () => {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+  const [openSections, setOpenSections] = useState({});
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobile) {
+      const expanded = LEGAL_SECTIONS.reduce((acc, section) => {
+        acc[section.id] = true;
+        return acc;
+      }, {});
+      setOpenSections(expanded);
+      return;
+    }
+
+    setOpenSections((prev) => {
+      if (Object.keys(prev).length) {
+        return prev;
+      }
+      return { [LEGAL_SECTIONS[0].id]: true };
+    });
+  }, [isMobile]);
+
+  const toggleSection = (sectionId) => {
+    if (!isMobile) return;
+    setOpenSections((prev) => ({
+      ...prev,
+      [sectionId]: !prev[sectionId],
+    }));
+  };
+
   return (
     <div className="landing-page">
-      <section className="products-hero animate-on-scroll">
+      <section className="products-hero animate-on-scroll is-visible">
         <div className="about-intro-badge">⚖️ Legal Framework</div>
         <h1 className="hero-title">
           Your Legal <span className="highlight">Fortress.</span>
@@ -172,40 +207,52 @@ const Legal = () => {
 
       <section className="legal-section container">
         {LEGAL_SECTIONS.map((section) => (
-          <div key={section.id} className="legal-card animate-on-scroll">
+          <div key={section.id} className={`legal-card animate-on-scroll is-visible${openSections[section.id] ? ' is-open' : ''}`}>
             <div className="legal-card-header">
               <span className="legal-card-icon">{section.icon}</span>
               <div>
                 <span className="legal-card-label">{section.label}</span>
                 <h3>{section.title}</h3>
               </div>
+              {isMobile && (
+                <button
+                  type="button"
+                  className="legal-toggle-btn"
+                  onClick={() => toggleSection(section.id)}
+                  aria-expanded={Boolean(openSections[section.id])}
+                >
+                  {openSections[section.id] ? 'Hide' : 'Show'}
+                </button>
+              )}
             </div>
 
-            {section.body.map((para, i) => (
-              <p key={i}>{para}</p>
-            ))}
-
-            <ul className="legal-highlights">
-              {section.highlights.map((h) => (
-                <li key={h}>
-                  <span className="check-mark">✓</span>
-                  {h}
-                </li>
+            <div className={`legal-card-content${openSections[section.id] ? ' open' : ''}`}>
+              {section.body.map((para, i) => (
+                <p key={i}>{para}</p>
               ))}
-            </ul>
 
-            {section.screenshotLabel && (
-              <div className="screenshot-slot">
-                {/* PASTE YOUR APP SCREENSHOT URL BELOW — uncomment the img tag */}
-                {/* <img src="YOUR_SCREENSHOT_URL_HERE" alt={section.screenshotLabel} /> */}
-                <span className="screenshot-slot-label">{section.screenshotLabel}</span>
-                <span className="screenshot-slot-note">{section.screenshotNote}</span>
-              </div>
-            )}
+              <ul className="legal-highlights">
+                {section.highlights.map((h) => (
+                  <li key={h}>
+                    <span className="check-mark">✓</span>
+                    {h}
+                  </li>
+                ))}
+              </ul>
+
+              {section.screenshotLabel && (
+                <div className="screenshot-slot">
+                  {/* PASTE YOUR APP SCREENSHOT URL BELOW — uncomment the img tag */}
+                  {/* <img src="YOUR_SCREENSHOT_URL_HERE" alt={section.screenshotLabel} /> */}
+                  <span className="screenshot-slot-label">{section.screenshotLabel}</span>
+                  <span className="screenshot-slot-note">{section.screenshotNote}</span>
+                </div>
+              )}
+            </div>
           </div>
         ))}
 
-        <div className="legal-cta-box animate-on-scroll">
+        <div className="legal-cta-box animate-on-scroll is-visible">
           <h3>Need a Custom Data Processing Agreement?</h3>
           <p>
             For enterprise clients or businesses operating under specific compliance requirements,

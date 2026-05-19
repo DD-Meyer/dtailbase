@@ -96,6 +96,7 @@ function Services() {
 
       if (editingId) {
         await api.patch(`services/${editingId}/`, payload);
+        closeModal();
       } else {
         await api.post("services/", payload);
       }
@@ -108,6 +109,11 @@ function Services() {
       showToast("Error saving service: " + (err.response?.data?.error || "Check console"), "error");
     }
   };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingId(null);
+  }
 
   const handleSaveService = async (updatedService) => {
     try {

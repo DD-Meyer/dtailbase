@@ -37,19 +37,18 @@ import PublicBookings from "./pages/PublicBookings";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Payments from "./pages/Payments";
 import ShareBooking from "./pages/ShareBooking";
+import SupportAdminInbox from "./pages/SupportAdminInbox";
 
 
 function AppContent() {
   const { isAuthenticated, user } = useContext(AuthContext); 
   const location = useLocation();
   const getInstalledState = () => {
-    const displayModeMatch = window.matchMedia("(display-mode: standalone)").matches
-      || window.matchMedia("(display-mode: fullscreen)").matches
-      || window.matchMedia("(display-mode: minimal-ui)").matches;
+    const standaloneDisplayMode = window.matchMedia("(display-mode: standalone)").matches;
     const iosStandalone = window.navigator.standalone === true;
-    const androidTrustedWebApp = document.referrer.startsWith("android-app://");
+    const androidTrustedWebApp = document.referrer?.startsWith("android-app://");
 
-    return displayModeMatch || iosStandalone || androidTrustedWebApp;
+    return standaloneDisplayMode || iosStandalone || androidTrustedWebApp;
   };
 
   const [isInstalledApp, setIsInstalledApp] = useState(() => getInstalledState());
@@ -73,6 +72,7 @@ function AppContent() {
     "/plans",
     "/payments",
     "/payment-success",
+    "/admin/support",
   ];
 
   const APP_ALLOWED_PREFIXES = ["/bookings/", "/indemnity/sign/"];
@@ -91,9 +91,7 @@ function AppContent() {
     const syncInstalledState = () => {
       const installed = getInstalledState();
       setIsInstalledApp(installed);
-      if (installed) {
-        setShowInstallButton(false);
-      }
+      setShowInstallButton(!installed);
     };
 
     const onBeforeInstallPrompt = (event) => {
@@ -112,11 +110,13 @@ function AppContent() {
 
     syncInstalledState();
     mediaQuery.addEventListener("change", syncInstalledState);
+    window.addEventListener("pageshow", syncInstalledState);
     window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
     window.addEventListener("appinstalled", onInstalled);
 
     return () => {
       mediaQuery.removeEventListener("change", syncInstalledState);
+      window.removeEventListener("pageshow", syncInstalledState);
       window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
       window.removeEventListener("appinstalled", onInstalled);
     };
@@ -145,6 +145,7 @@ function AppContent() {
 
   const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
   const isMinimalChromeRoute = location.pathname === "/share-booking";
+  const isPlatformAdmin = Boolean(user?.is_superuser || user?.is_staff);
   
   // 2. Sidebar/Header only show if Authenticated AND not on any public/auth pages
   const showDashboardChrome = isAuthenticated && !isLandingPage && !isAuthPage && !isMinimalChromeRoute;
@@ -301,6 +302,14 @@ function AppContent() {
             {/* Admin Only */}
             <Route path="/team" element={(isAuthenticated && user?.role === 'OWNER') ? <TeamManagement /> : <Navigate to="/bookings" />} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route
+              path="/admin/support"
+              element={
+                <ProtectedRoute>
+                  {isPlatformAdmin ? <SupportAdminInbox /> : <Navigate to="/bookings" replace />}
+                </ProtectedRoute>
+              }
+            />
             
             {/* Catch-all redirect */}
             <Route path="*" element={<Navigate to="/" replace />} />
