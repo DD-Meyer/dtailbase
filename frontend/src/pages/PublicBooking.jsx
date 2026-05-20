@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../axios_instance";
 import "../styles/NewBooking.css"; // Reuse your existing wizard styles
 import { showToast } from "../utils/uiFeedback";
+import { Building2Icon, TruckIcon } from "lucide-react";
 
 const STEPS = [
   { id: 1, label: "Your Info" },
@@ -189,18 +190,21 @@ const PublicBooking = () => {
               <label className="input-label">Booking Type</label>
               <div className="location-type-toggle">
                 <button
+                  // style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
                   type="button"
-                  className={`location-btn ${formData.location_type === 'ONSITE' ? 'active' : ''}`}
+                  className={`location-btn flex items-center gap-2 ${formData.location_type === 'ONSITE' ? 'active' : ''}`}
                   onClick={() => setFormData(prev => ({ ...prev, location_type: 'ONSITE', customer_address: '' }))}
                 >
-                  🏢 On-site at Company
+                  {/* icon must be inline with text, it is not inline*/}
+                  <Building2Icon size={14} aria-hidden="true" /> On-site at Company
                 </button>
                 <button
                   type="button"
-                  className={`location-btn ${formData.location_type === 'MOBILE' ? 'active' : ''}`}
+                  className={`location-btn flex items-center gap-2 ${formData.location_type === 'MOBILE' ? 'active' : ''}`}
                   onClick={() => setFormData(prev => ({ ...prev, location_type: 'MOBILE' }))}
                 >
-                  🚗 Mobile (We come to you)
+                  {/* icon must be inline with text, it is not inline*/}
+                  <TruckIcon size={14} aria-hidden="true" />  Mobile (We come to you)
                 </button>
               </div>
             </div>
@@ -264,7 +268,7 @@ const PublicBooking = () => {
                <p><strong>Customer:</strong> {formData.customer_firstname} {formData.customer_lastname}</p>
                <p><strong>Service:</strong> {services.find(s => s.id == formData.service)?.name}</p>
                <p><strong>Appointment:</strong> {formData.booking_date} at {formData.booking_time}</p>
-               <p><strong>Location:</strong> {formData.location_type === 'MOBILE' ? '🚗 Mobile – We come to you' : '🏢 On-site at Company'}</p>
+               <p className="flex items-center gap-2"><strong>Location:</strong> {formData.location_type === 'MOBILE' ? <><TruckIcon size={14} aria-hidden="true" /> Mobile - We come to you</> : <><Building2Icon size={14} aria-hidden="true" /> On-site at Company</>}</p>
                {formData.location_type === 'MOBILE' && formData.customer_address && (
                  <p><strong>Address:</strong> {formData.customer_address}</p>
                )}

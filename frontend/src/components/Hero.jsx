@@ -476,7 +476,6 @@ const Hero = ({ isAuthenticated }) => {
                 <span className="wa-icon">WhatsApp</span>Direct Message
               </a>
             </div>
-            <span className="newsletter-note">Average response time: 15 mins</span>
           </div>
           
           <div className="footer-links-grid">

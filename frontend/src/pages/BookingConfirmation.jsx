@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/BookingConfirmation.css';
+import { Hourglass, MapPin, PinIcon } from 'lucide-react';
 
 export default function BookingConfirmation() {
   const { companySlug } = useParams();
@@ -99,21 +100,21 @@ export default function BookingConfirmation() {
             </p>
             {booking.location_type === 'MOBILE' ? (
               <div>
-                <p className="detail-info">📍 <strong>Mobile Service</strong> – We will come to you</p>
+                <p className="detail-info flex items-center gap-2"><MapPin color='red' size={18} aria-hidden="true" /> <strong>Mobile Service</strong> – We will come to you</p>
                 {booking.customer_address && (
                   <p className="detail-info">Address: {booking.customer_address}</p>
                 )}
               </div>
             ) : (
               booking.company_address && (
-                <p className="detail-info">📍 Location: {booking.company_address}</p>
+                <p className="detail-info flex items-center gap-2"><MapPin color='red' size={18} aria-hidden="true" /> Location: {booking.company_address}</p>
               )
             )}
           </div>
 
           <div className="status-box">
             <p className="status-label">Status</p>
-            <p className="status-pending">⏳ Pending Confirmation</p>
+            <p className="status-pending flex items-center gap-2"><Hourglass size={20} aria-hidden="true" /> Pending Confirmation</p>
             <p className="status-note">We'll review your booking and send you a confirmation email shortly.</p>
           </div>
         </div>
