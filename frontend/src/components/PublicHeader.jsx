@@ -3,7 +3,7 @@ import UserDropdownMenu from "./UserDropdownMenu";
 import "../styles/PublicHeader.css";
 
 function PublicHeader({ isAuthenticated, isMenuOpen, setIsMenuOpen }) {
-  const navLinks = [
+  const baseLinks = [
     { to: "/", label: "Home" },
     { to: "/about", label: "About" },
     { to: "/products", label: "Products" },
@@ -11,6 +11,11 @@ function PublicHeader({ isAuthenticated, isMenuOpen, setIsMenuOpen }) {
     { to: "/legal", label: "Legal" },
     { to: "/contact", label: "Contact" },
   ];
+  // Hide Plans link from the public nav for authenticated users — they manage
+  // plan changes from Settings → Billing or the dedicated upgrade banners.
+  const navLinks = isAuthenticated
+    ? baseLinks.filter((item) => item.to !== "/plans")
+    : baseLinks;
 
   return (
     <nav className="public-nav">

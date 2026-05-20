@@ -4,6 +4,7 @@ from .views import *
 from .support_views import (
     AdminSupportInboxView,
     AdminSupportOverviewView,
+    SupportTicketClaimView,
     SupportTicketDetailUpdateView,
     SupportTicketListCreateView,
     SupportTicketMessageListCreateView,
@@ -35,6 +36,7 @@ urlpatterns = [
     path("support/tickets/", SupportTicketListCreateView.as_view(), name="support-ticket-list-create"),
     path("support/tickets/<uuid:ticket_id>/", SupportTicketDetailUpdateView.as_view(), name="support-ticket-detail-update"),
     path("support/tickets/<uuid:ticket_id>/messages/", SupportTicketMessageListCreateView.as_view(), name="support-ticket-message-list-create"),
+    path("support/tickets/<uuid:ticket_id>/claim/", SupportTicketClaimView.as_view(), name="support-ticket-claim"),
     path("support/admin/inbox/", AdminSupportInboxView.as_view(), name="support-admin-inbox"),
     path("support/admin/overview/", AdminSupportOverviewView.as_view(), name="support-admin-overview"),
     path("availability/<str:date>/", AvailabilityAPIView.as_view()),

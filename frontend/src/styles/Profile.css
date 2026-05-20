@@ -16,7 +16,7 @@
 
 
 /* --- 2. CARD & FORM STYLING --- */
-.card {
+.page-container .card {
   background: white !important;
   padding: 2rem;
   border-radius: 12px;
@@ -24,28 +24,28 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
-.flex-col {
+.page-container .flex-col {
   display: flex;
   flex-direction: column;
 }
 
-.gap-3 { gap: 0.75rem; }
-.gap-6 { gap: 1.5rem; }
+.page-container .gap-3 { gap: 0.75rem; }
+.page-container .gap-6 { gap: 1.5rem; }
 
 /* --- 3. TYPOGRAPHY & LABELS --- */
-h3 {
+.page-container h3 {
   font-size: 1.25rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
   color: #1e293b;
 }
 
-.text-sm { font-size: 0.875rem; }
-.text-xs { font-size: 0.75rem; }
-.text-gray-500 { color: #64748b !important; }
-.font-bold { font-weight: 700; }
+.page-container .text-sm { font-size: 0.875rem; }
+.page-container .text-xs { font-size: 0.75rem; }
+.page-container .text-gray-500 { color: #64748b !important; }
+.page-container .font-bold { font-weight: 700; }
 
-label {
+.page-container label {
   margin-top: 0.5rem;
   color: #475569 !important;
   text-transform: uppercase;
@@ -53,7 +53,7 @@ label {
 }
 
 /* --- 4. INPUTS & BUTTONS --- */
-input {
+.page-container input {
   width: 100%;
   padding: 12px;
   border: 1px solid #e2e8f0 !important;
@@ -64,14 +64,14 @@ input {
   transition: all 0.2s;
 }
 
-input:focus {
+.page-container input:focus {
   outline: none;
   background-color: #ffffff !important;
   border-color: #3b82f6 !important;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.btn-danger {
+.page-container .btn-danger {
   background: #ef4444;
   color: white !important;
   border: none;
@@ -82,12 +82,12 @@ input:focus {
   transition: background 0.2s;
 }
 
-.btn-danger:hover {
+.page-container .btn-danger:hover {
   background: #dc2626;
 }
 
 /* --- 5. FEEDBACK BADGES --- */
-.badge-info {
+.page-container .badge-info {
   background: #eff6ff;
   color: #1e4ed8 !important;
   border: 1px solid #dbeafe;
@@ -96,10 +96,10 @@ input:focus {
   font-weight: 600;
 }
 
-.block { display: block; }
-.text-center { text-align: center; }
-.mt-2 { margin-top: 0.5rem; }
-.mb-4 { margin-bottom: 1rem; }
+.page-container .block { display: block; }
+.page-container .text-center { text-align: center; }
+.page-container .mt-2 { margin-top: 0.5rem; }
+.page-container .mb-4 { margin-bottom: 1rem; }
 
 /* ===== Mobile Styles (<= 768px) ===== */
 @media (max-width: 768px) {

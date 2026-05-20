@@ -57,6 +57,9 @@ class SupportTicketAdminListSerializer(serializers.ModelSerializer):
     company_name = serializers.ReadOnlyField(source="company.name")
     company_plan = serializers.ReadOnlyField(source="company.plan")
     latest_message = serializers.SerializerMethodField()
+    assigned_to_email = serializers.ReadOnlyField(source="assigned_to.email")
+    assigned_to_username = serializers.ReadOnlyField(source="assigned_to.username")
+    assigned_to_id = serializers.ReadOnlyField(source="assigned_to.id")
 
     class Meta:
         model = SupportTicket
@@ -71,6 +74,9 @@ class SupportTicketAdminListSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "latest_message",
+            "assigned_to_id",
+            "assigned_to_email",
+            "assigned_to_username",
         ]
 
     def get_latest_message(self, obj):

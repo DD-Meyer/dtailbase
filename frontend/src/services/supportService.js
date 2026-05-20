@@ -34,3 +34,13 @@ export const fetchAdminSupportOverview = async () => {
   const response = await api.get("support/admin/overview/");
   return response.data;
 };
+
+export const claimSupportTicket = async (ticketId) => {
+  const response = await api.post(`support/tickets/${ticketId}/claim/`);
+  return response.data;
+};
+
+export const releaseSupportTicket = async (ticketId) => {
+  const response = await api.delete(`support/tickets/${ticketId}/claim/`);
+  return response.data;
+};

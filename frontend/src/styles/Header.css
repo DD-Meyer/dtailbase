@@ -126,6 +126,7 @@
 }
 
 .avatar {
+  position: relative;
   width: 36px;
   height: 36px;
   background: linear-gradient(145deg, #23b4ff, #32f0ca);
@@ -135,6 +136,25 @@
   align-items: center;
   justify-content: center;
   font-weight: 700;
+}
+
+.avatar-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.95);
 }
 
 .user-info {

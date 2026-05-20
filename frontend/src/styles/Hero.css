@@ -41,7 +41,7 @@ body {
 /* --- 2. ORBITAL SYSTEM (FIXED BACKGROUND) --- */
 .orbital-system {
   position: fixed;
-  top: 0; left: 0; width: 100vw; height: 100vh;
+  top: 0; left: 0; width: 100vw; height: 100dvh;
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
@@ -75,6 +75,7 @@ body {
 /* --- 4. HERO SECTION --- */
 .hero-container {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex; align-items: center; justify-content: center;
   text-align: center; position: relative;
   padding: 160px 20px 100px 20px;
@@ -732,15 +733,18 @@ body {
     justify-content: flex-start;
     overflow-x: auto;
     overflow-y: hidden;
-    scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
     padding: 14px 16px;
   }
+
+  .stats-bar::-webkit-scrollbar { display: none; }
 
   .stats-bar .stat-card {
     min-width: 72%;
     flex: 0 0 auto;
-    scroll-snap-align: start;
   }
 
   .stat-num {
@@ -965,8 +969,11 @@ body {
     margin-top: 40px;
     overflow-x: auto;
     overflow-y: hidden;
-    scroll-snap-type: x mandatory;
+    touch-action: pan-x;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
   }
+  .gallery-grid::-webkit-scrollbar { display: none; }
 }
 
 @media (max-width: 768px) {
@@ -977,7 +984,9 @@ body {
     margin-top: 28px;
     overflow-x: auto;
     overflow-y: hidden;
-    scroll-snap-type: x mandatory;
+    touch-action: pan-x;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
   }
   .gallery-section {
     padding: 46px 0;
@@ -1005,7 +1014,13 @@ body {
 @media (max-width: 768px) {
   .landing-page {
     width: 100%;
-    overflow-x: hidden;
+    /* Use `clip` not `hidden` so we don't accidentally turn this into a
+       vertical scroll container (spec forces overflow-y to `auto` when
+       overflow-x is `hidden` and overflow-y is `visible`). */
+    overflow-x: clip;
+    overflow-y: visible;
+    /* Guarantee page is taller than the largest possible viewport (URL bar hidden). */
+    min-height: calc(100lvh + 400px);
   }
 
   .landing-page h1 {
@@ -1068,20 +1083,24 @@ body {
   }
 
   .process-story {
-    padding: 56px 0;
+    padding: 32px 0;
+  }
+
+  .process-story .story-row:last-child {
+    margin-bottom: 0;
   }
 
   .story-row,
   .story-row.reverse {
-    margin-bottom: 36px;
-    gap: 14px;
-    align-items: stretch;
     flex-direction: column;
+    gap: 18px;
+    min-height: auto;
+    margin-bottom: 40px;
   }
 
   .story-text {
     flex: 1.15;
-    padding: 0 2px;
+    padding: 0 1rem;
   }
 
   .step-num {
@@ -1112,7 +1131,8 @@ body {
   .glass-mockup {
     flex: initial;
     width: 100%;
-    height: 220px;
+    height: auto;
+    aspect-ratio: 16 / 10;
     border-radius: 16px;
     padding: 8px;
   }
@@ -1191,12 +1211,13 @@ body {
     gap: 12px;
     margin-top: 28px;
     padding: 0 4px 6px;
-    scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
   }
 
   .gallery-grid .gallery-card {
-    scroll-snap-align: start;
     font-size: clamp(1.35rem, 7vw, 1.7rem);
   }
 
@@ -1245,7 +1266,7 @@ body {
   }
 
   .glass-mockup {
-    width: 50%;
+    width: 100%;
     padding: 6px;
   }
 
@@ -1269,6 +1290,7 @@ body {
   }
 
   .glass-mockup {
-    height: 200px;
+    height: auto;
+    aspect-ratio: 16 / 10;
   }
 }

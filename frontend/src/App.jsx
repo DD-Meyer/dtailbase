@@ -8,6 +8,7 @@ import MenuMobile from "./components/MenuMobile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicLayout from "./components/PublicLayout";
 import { CompanyProvider } from './context/CompanyContext';
+import { SupportNotificationProvider } from './context/SupportNotificationContext';
 
 // Pages
 import Login from "./pages/Login";
@@ -38,11 +39,18 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import Payments from "./pages/Payments";
 import ShareBooking from "./pages/ShareBooking";
 import SupportAdminInbox from "./pages/SupportAdminInbox";
+import MySupport from "./pages/MySupport";
 
 
 function AppContent() {
   const { isAuthenticated, user } = useContext(AuthContext); 
   const location = useLocation();
+
+  // Scroll to top on every route change so new pages always start at the top
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [location.pathname]);
+
   const getInstalledState = () => {
     const standaloneDisplayMode = window.matchMedia("(display-mode: standalone)").matches;
     const iosStandalone = window.navigator.standalone === true;
@@ -361,7 +369,7 @@ function AppContent() {
               path="/support"
               element={
                 <ProtectedRoute>
-                  {isPlatformAdmin ? <SupportAdminInbox /> : <Navigate to="/bookings" replace />}
+                  {isPlatformAdmin ? <SupportAdminInbox /> : <MySupport />}
                 </ProtectedRoute>
               }
             />
@@ -401,9 +409,11 @@ function App() {
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
         <CompanyProvider>
-          <PayPalScriptProvider options={paypalInitialOptions}>
-            <AppContent />
-          </PayPalScriptProvider>
+          <SupportNotificationProvider>
+            <PayPalScriptProvider options={paypalInitialOptions}>
+              <AppContent />
+            </PayPalScriptProvider>
+          </SupportNotificationProvider>
         </CompanyProvider>
       </AuthProvider>
     </BrowserRouter>

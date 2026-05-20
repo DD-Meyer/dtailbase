@@ -7,7 +7,8 @@ from rest_framework.views import APIView
 
 from accounts.models import Company
 
-from .models import Booking, SupportTicket, SupportTicketMessage
+from .models import SupportTicket, SupportTicketMessage
+from .notifications import broadcast_support_message, broadcast_support_ticket_created
 from .support_serializers import (
     SupportTicketAdminListSerializer,
     SupportTicketMessageSerializer,
@@ -44,13 +45,19 @@ class SupportTicketListCreateView(APIView):
         )
 
         initial_message = (request.data.get("message") or "").strip()
+        message_row = None
         if initial_message:
-            SupportTicketMessage.objects.create(
+            message_row = SupportTicketMessage.objects.create(
                 ticket=ticket,
                 sender=request.user,
                 message=initial_message,
                 is_admin_reply=False,
             )
+
+        # Live notify both parties
+        broadcast_support_ticket_created(ticket, request.user)
+        if message_row is not None:
+            broadcast_support_message(ticket, message_row, request.user)
 
         return Response(SupportTicketSerializer(ticket).data, status=status.HTTP_201_CREATED)
 
@@ -97,6 +104,8 @@ class SupportTicketMessageListCreateView(APIView):
             ticket.status = "IN_PROGRESS"
             ticket.save(update_fields=["status", "updated_at"])
 
+        broadcast_support_message(ticket, message_row, request.user)
+
         return Response(SupportTicketMessageSerializer(message_row).data, status=status.HTTP_201_CREATED)
 
 
@@ -119,6 +128,53 @@ class SupportTicketDetailUpdateView(APIView):
 
         ticket.status = new_status
         ticket.save(update_fields=["status", "updated_at"])
+
+        return Response(SupportTicketAdminListSerializer(ticket).data)
+
+
+class SupportTicketClaimView(APIView):
+    """Claim or release a ticket as the attending platform admin."""
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, ticket_id):
+        if not is_platform_admin(request.user):
+            return Response({"detail": "Not authorized."}, status=status.HTTP_403_FORBIDDEN)
+
+        ticket = get_object_or_404(SupportTicket, id=ticket_id)
+
+        if ticket.assigned_to_id and ticket.assigned_to_id != request.user.id:
+            return Response(
+                {
+                    "detail": "Ticket is already being attended.",
+                    "assigned_to_email": ticket.assigned_to.email if ticket.assigned_to else None,
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
+
+        ticket.assigned_to = request.user
+        if ticket.status == "OPEN":
+            ticket.status = "IN_PROGRESS"
+            ticket.save(update_fields=["assigned_to", "status", "updated_at"])
+        else:
+            ticket.save(update_fields=["assigned_to", "updated_at"])
+
+        return Response(SupportTicketAdminListSerializer(ticket).data)
+
+    def delete(self, request, ticket_id):
+        if not is_platform_admin(request.user):
+            return Response({"detail": "Not authorized."}, status=status.HTTP_403_FORBIDDEN)
+
+        ticket = get_object_or_404(SupportTicket, id=ticket_id)
+
+        if ticket.assigned_to_id and ticket.assigned_to_id != request.user.id and not request.user.is_superuser:
+            return Response(
+                {"detail": "Only the attending admin (or a superuser) can release this ticket."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        ticket.assigned_to = None
+        ticket.save(update_fields=["assigned_to", "updated_at"])
 
         return Response(SupportTicketAdminListSerializer(ticket).data)
 
@@ -187,44 +243,103 @@ class AdminSupportOverviewView(APIView):
         if not is_platform_admin(request.user):
             return Response({"detail": "Not authorized."}, status=status.HTTP_403_FORBIDDEN)
 
-        recent_bookings = (
-            Booking.objects.select_related("company", "customer", "service")
+        notifications = []
+
+        recent_tickets = (
+            SupportTicket.objects.select_related("company", "created_by")
             .order_by("-created_at")[:12]
         )
+        for ticket in recent_tickets:
+            opener = ""
+            if ticket.created_by:
+                opener = (
+                    ticket.created_by.username
+                    or ticket.created_by.email
+                    or ""
+                )
+            subject = ticket.subject or "Support ticket"
+            message = f"New support ticket opened: {subject}"
+            if opener:
+                message += f" — by {opener}"
+            notifications.append(
+                {
+                    "type": "ticket_created",
+                    "company_name": ticket.company.name if ticket.company_id else "Unknown company",
+                    "message": message,
+                    "created_at": ticket.created_at,
+                    "ticket_id": str(ticket.id),
+                    "ticket_subject": subject,
+                    "ticket_status": ticket.status,
+                }
+            )
 
-        notifications = [
-            {
-                "type": "booking_created",
-                "company_name": booking.company.name,
-                "message": (
-                    f"New booking for {booking.customer.firstname} {booking.customer.lastname} "
-                    f"({booking.service.name})"
-                ),
-                "created_at": booking.created_at,
-            }
-            for booking in recent_bookings
-        ]
+        recent_customer_messages = (
+            SupportTicketMessage.objects.select_related("sender", "ticket", "ticket__company")
+            .filter(is_admin_reply=False)
+            .order_by("-created_at")[:12]
+        )
+        for msg in recent_customer_messages:
+            ticket = msg.ticket
+            sender_label = ""
+            if msg.sender:
+                sender_label = msg.sender.username or msg.sender.email or ""
+            snippet = (msg.message or "").strip().replace("\n", " ")
+            if len(snippet) > 140:
+                snippet = snippet[:137] + "..."
+            subject = ticket.subject or "Support ticket"
+            prefix = f"New reply on “{subject}”"
+            if sender_label:
+                prefix += f" from {sender_label}"
+            notifications.append(
+                {
+                    "type": "ticket_reply",
+                    "company_name": ticket.company.name if ticket.company_id else "Unknown company",
+                    "message": f"{prefix}: {snippet}" if snippet else prefix,
+                    "created_at": msg.created_at,
+                    "ticket_id": str(ticket.id),
+                    "ticket_subject": subject,
+                    "ticket_status": ticket.status,
+                }
+            )
+
+        notifications.sort(key=lambda row: row["created_at"], reverse=True)
+        notifications = notifications[:15]
 
         recent_messages = (
-            SupportTicketMessage.objects.select_related("sender", "ticket", "ticket__company")
-            .order_by("-created_at")[:40]
+            SupportTicketMessage.objects.select_related("sender", "ticket", "ticket__company", "ticket__assigned_to")
+            .order_by("-created_at")[:80]
         )
 
-        chat_room_feed = [
-            {
-                "id": str(message.id),
-                "ticket_id": str(message.ticket_id),
-                "ticket_subject": message.ticket.subject,
-                "company_name": message.ticket.company.name,
-                "company_plan": message.ticket.company.plan,
-                "support_lane": message.ticket.support_lane,
-                "sender_email": message.sender.email if message.sender else "Unknown",
-                "is_admin_reply": message.is_admin_reply,
-                "message": message.message,
-                "created_at": message.created_at,
+        # Group messages by ticket so each row represents a chat room rather than
+        # individual messages. Show whether another platform admin is attending.
+        rooms_by_ticket = {}
+        for message in recent_messages:
+            ticket = message.ticket
+            tid = str(ticket.id)
+            if tid in rooms_by_ticket:
+                continue
+            rooms_by_ticket[tid] = {
+                "ticket_id": tid,
+                "ticket_subject": ticket.subject,
+                "ticket_status": ticket.status,
+                "company_name": ticket.company.name,
+                "company_plan": ticket.company.plan,
+                "support_lane": ticket.support_lane,
+                "last_message": message.message,
+                "last_sender_email": message.sender.email if message.sender else "Unknown",
+                "last_is_admin_reply": message.is_admin_reply,
+                "last_message_at": message.created_at,
+                "assigned_to_id": str(ticket.assigned_to.id) if ticket.assigned_to_id else None,
+                "assigned_to_email": ticket.assigned_to.email if ticket.assigned_to_id else None,
+                "assigned_to_username": ticket.assigned_to.username if ticket.assigned_to_id else None,
+                "is_mine": bool(ticket.assigned_to_id and ticket.assigned_to_id == request.user.id),
             }
-            for message in recent_messages
-        ]
+
+        chat_room_feed = sorted(
+            rooms_by_ticket.values(),
+            key=lambda row: row["last_message_at"],
+            reverse=True,
+        )
 
         return Response(
             {

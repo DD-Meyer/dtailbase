@@ -4,15 +4,19 @@ import { AuthContext } from "../context/AuthContext";
 import { useCompany } from "../context/CompanyContext";
 import { createSupportTicket } from "../services/supportService";
 
+const PLATFORM_COMPANIES = new Set(["Platform Admin", "DtailBase"]);
+
 const Contact = () => {
-  const { isAuthenticated } = useContext(AuthContext);
+  const { isAuthenticated, user } = useContext(AuthContext);
   const { currentPlan } = useCompany();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitState, setSubmitState] = useState({ type: "", text: "" });
-  const canUseLiveChat = isAuthenticated && currentPlan === "ENTERPRISE";
+  const isPlatformAdmin =
+    !!user && (user.is_superuser || user.is_staff) && PLATFORM_COMPANIES.has(user?.company?.name);
+  const canUseLiveChat = isAuthenticated && (isPlatformAdmin || currentPlan === "ENTERPRISE");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -66,46 +70,53 @@ const Contact = () => {
 
       <section className="container max-w-md">
         <div className="feature-card animate-on-scroll" style={{ maxWidth: "680px", margin: "0 auto" }}>
-          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "16px" }}>
-            <button
-              type="button"
-              className="btn-main"
-              onClick={() => canUseLiveChat && setIsChatOpen(true)}
-              disabled={!canUseLiveChat}
-            >
-              Open Live Chat
-            </button>
-            {!isAuthenticated && (
-              <span style={{ color: "#94a3b8", fontSize: "0.9rem", alignSelf: "center" }}>
-                Live support tickets require a logged in company account.
+          {canUseLiveChat && (
+            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "16px", alignItems: "center" }}>
+              <button
+                type="button"
+                className="btn-main"
+                onClick={() => setIsChatOpen(true)}
+                style={{
+                  background: "linear-gradient(135deg, #f59e0b, #d97706)",
+                  border: "1px solid #fbbf24",
+                  boxShadow: "0 0 18px rgba(245, 158, 11, 0.45)",
+                }}
+              >
+                ⚡ Premium Instant Message
+              </button>
+              <span style={{ color: "#fbbf24", fontSize: "0.85rem" }}>
+                Instant feedback and priority support direct from our technicians.
               </span>
-            )}
-            {isAuthenticated && currentPlan !== "ENTERPRISE" && (
-              <span style={{ color: "#94a3b8", fontSize: "0.9rem", alignSelf: "center" }}>
-                Live chat is reserved for Enterprise plans as priority support.
-              </span>
-            )}
-          </div>
+            </div>
+          )}
+          {isAuthenticated && !canUseLiveChat && (
+            <div style={{ marginBottom: "16px", color: "#94a3b8", fontSize: "0.9rem" }}>
+              Submit a support ticket below — our team responds in order of receipt. Live chat is a Premium Enterprise perk.
+            </div>
+          )}
+          {!isAuthenticated && (
+            <div style={{ marginBottom: "16px", color: "#94a3b8", fontSize: "0.9rem" }}>
+              Log in with your company account to submit a support ticket.
+            </div>
+          )}
 
           <form className="orbital-form" onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label>Ticket Subject</label>
+            <div style={{ marginBottom: "1rem" }}>
+              <label style={{ color: "#f8fafc", fontWeight: 600, fontSize: "0.95rem", display: "block", marginBottom: "8px" }}>Ticket Subject</label>
               <input
                 type="text"
                 placeholder="Example: Billing issue after plan upgrade"
-                className="nav-item"
-                style={{ width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid var(--border-color)", padding: "12px", color: "white" }}
+                style={{ width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid var(--border-color)", borderRadius: "8px", padding: "12px", color: "#ffffff" }}
                 value={subject}
                 onChange={(event) => setSubject(event.target.value)}
               />
             </div>
-            <div className="form-group mt-4">
-              <label>Message</label>
+            <div style={{ marginTop: "1rem" }}>
+              <label style={{ color: "#f8fafc", fontWeight: 600, fontSize: "0.95rem", display: "block", marginBottom: "8px" }}>Message</label>
               <textarea
                 placeholder="Tell us what you need and include any urgency details..."
                 rows="4"
-                className="nav-item"
-                style={{ width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid var(--border-color)", padding: "12px", color: "white" }}
+                style={{ width: "100%", background: "rgba(255,255,255,0.05)", border: "1px solid var(--border-color)", borderRadius: "8px", padding: "12px", color: "#ffffff" }}
                 value={message}
                 onChange={(event) => setMessage(event.target.value)}
               ></textarea>
@@ -127,7 +138,9 @@ const Contact = () => {
         </div>
       </section>
 
-      <LiveChat companySlug="dtailbase" isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+      {canUseLiveChat && (
+        <LiveChat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+      )}
     </div>
   );
 };

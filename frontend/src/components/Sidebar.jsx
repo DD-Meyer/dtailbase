@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
+import { useSupportNotifications } from "../context/SupportNotificationContext";
 import { CalendarDays, Car, ChevronDown, ChevronUp, ShieldCheck, Settings, UserRound, Users, UserCog, Wrench } from "lucide-react";
 import "../styles/Sidebar.css";
 
@@ -11,6 +12,7 @@ function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
   const { user } = useContext(AuthContext);
+  const { unreadCount } = useSupportNotifications();
 
   const menuItems = [
     { path: "/bookings", label: "Bookings", icon: CalendarDays },
@@ -50,28 +52,17 @@ function Sidebar() {
 
       <hr className="sidebar-divider" />
 
-
       <ul className="sidebar-links">
         {menuItems.map((item) => {
           const Icon = item.icon;
           return (
-            <li key={item.path} className={location.pathname === item.path ? "active" : ""}>
-              <Link to={item.path} title={item.label}>
-                <span className="icon"><Icon size={18} strokeWidth={2.1} aria-hidden="true" /></span>
-                {!isCollapsed && <span className="label">{item.label}</span>}
-              </Link>
-            </li>
-          );
-        })}
-        {/* Platform admin-only Support link */}
-        {(user?.is_superuser || user?.is_staff) && (
-          <li className={location.pathname === "/support" ? "active" : ""}>
-            <Link to="/support" title="Support">
-              <span className="icon"><ShieldCheck size={18} strokeWidth={2.1} aria-hidden="true" /></span>
-              {!isCollapsed && <span className="label">Support</span>}
+          <li key={item.path} className={location.pathname === item.path ? "active" : ""}>
+            <Link to={item.path} title={item.label}>
+              <span className="icon"><Icon size={18} strokeWidth={2.1} aria-hidden="true" /></span>
+              {!isCollapsed && <span className="label">{item.label}</span>}
             </Link>
           </li>
-        )}
+        )})}
       </ul>
 
       <hr className="sidebar-divider" />
@@ -130,6 +121,51 @@ function Sidebar() {
                 </Link>
               </li>
             </>
+          )}
+
+          {/* Platform admin-only Support link (company check) */}
+          {(user?.company?.name === "Platform Admin" || user?.company?.name === "DtailBase") && (user?.is_superuser || user?.is_staff) ? (
+            <li className={location.pathname === "/support" ? "active" : ""}>
+              <Link to="/support" title="Support Inbox">
+                <span className="icon icon-with-badge">
+                  <ShieldCheck size={18} strokeWidth={2.1} aria-hidden="true" />
+                  {unreadCount > 0 && (
+                    <span className="nav-badge" aria-label={`${unreadCount} new support messages`}>
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </span>
+                {!isCollapsed && (
+                  <span className="label">
+                    Support
+                    {unreadCount > 0 && (
+                      <span className="nav-badge-inline">{unreadCount > 9 ? "9+" : unreadCount}</span>
+                    )}
+                  </span>
+                )}
+              </Link>
+            </li>
+          ) : (
+            <li className={location.pathname === "/support" ? "active" : ""}>
+              <Link to="/support" title="My Support">
+                <span className="icon icon-with-badge">
+                  <ShieldCheck size={18} strokeWidth={2.1} aria-hidden="true" />
+                  {unreadCount > 0 && (
+                    <span className="nav-badge" aria-label={`${unreadCount} new support messages`}>
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </span>
+                {!isCollapsed && (
+                  <span className="label">
+                    Support
+                    {unreadCount > 0 && (
+                      <span className="nav-badge-inline">{unreadCount > 9 ? "9+" : unreadCount}</span>
+                    )}
+                  </span>
+                )}
+              </Link>
+            </li>
           )}
         </ul>
       </div>

@@ -224,6 +224,14 @@ class SupportTicket(models.Model):
         blank=True,
         related_name="created_support_tickets",
     )
+    assigned_to = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="claimed_support_tickets",
+        help_text="Platform admin currently attending this ticket/chat room.",
+    )
     subject = models.CharField(max_length=255)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="OPEN")
     support_lane = models.CharField(max_length=20, choices=SUPPORT_LANE_CHOICES, default="STANDARD")

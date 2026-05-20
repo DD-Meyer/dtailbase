@@ -480,8 +480,8 @@ class BookingStatusSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8, required=True)
     company_id = serializers.ReadOnlyField(source='company.id')
-    is_superuser = serializers.BooleanField(read_only=True)
-    is_staff = serializers.BooleanField(read_only=True)
+    is_superuser = serializers.BooleanField(required=False)
+    is_staff = serializers.BooleanField(required=False)
 
     # This declaration is correct
     company_name = serializers.CharField(write_only=True, required=False)
@@ -619,6 +619,16 @@ class UserSerializer(serializers.ModelSerializer):
                 'role': 'Owner safety lock: You cannot change your own account role to Staff.'
             })
 
+        # Only allow is_staff/is_superuser changes for superusers, not for self, and only for platform admin/dtailbase
+        platform_companies = {"Platform Admin", "DtailBase"}
+        if ("is_staff" in validated_data or "is_superuser" in validated_data):
+            if not (request and request.user.is_superuser):
+                raise serializers.ValidationError("Only superusers can change admin/superuser rights.")
+            if request.user == instance:
+                raise serializers.ValidationError("You cannot change your own admin/superuser rights.")
+            if instance.company.name not in platform_companies:
+                raise serializers.ValidationError("Admin/superuser rights can only be changed for platform users.")
+
         password = validated_data.pop('password', None)
         # Standard update for other fields
         for attr, value in validated_data.items():
@@ -627,7 +637,6 @@ class UserSerializer(serializers.ModelSerializer):
         # Only hash the password if it was actually provided
         if password:
             instance.set_password(password)
-            
         instance.save()
         return instance
     
@@ -710,6 +719,11 @@ class MyTokenSerializer(TokenObtainPairSerializer):
 
     @staticmethod
     def build_user_payload(user):
+        is_platform_admin = bool(user.is_superuser or user.is_staff)
+        raw_plan = user.company.plan if user.company else 'STARTER'
+        # Platform staff/superusers operate the DtailBase platform itself, so they
+        # effectively have ENTERPRISE-tier access regardless of their company plan.
+        effective_plan = 'ENTERPRISE' if is_platform_admin else raw_plan
         return {
             'email': user.email,
             'role': user.role,
@@ -717,8 +731,14 @@ class MyTokenSerializer(TokenObtainPairSerializer):
             'is_superuser': user.is_superuser,
             'is_staff': user.is_staff,
             'company_id': user.company.id if user.company else None,
+            # Nested company object so the frontend can check company.name (e.g. for platform admin gating)
+            'company': {
+                'id': user.company.id,
+                'name': user.company.name,
+                'plan': effective_plan,
+            } if user.company else None,
             # Adding plan and usage to the token response for frontend convenience
-            'plan': user.company.plan if user.company else 'STARTER',
+            'plan': effective_plan,
             'usage': user.company.get_monthly_booking_count() if user.company else 0
         }
 

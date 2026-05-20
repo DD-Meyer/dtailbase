@@ -1000,7 +1000,13 @@ class CompanyViewSet(viewsets.ModelViewSet):
             company.save(update_fields=fields_to_update)
         
         serializer = self.get_serializer(company)
-        return Response(serializer.data)
+        data = serializer.data
+        # Platform staff/superusers run DtailBase itself, so surface ENTERPRISE plan
+        # to the frontend regardless of the company's stored plan.
+        if request.user.is_superuser or request.user.is_staff:
+            data = dict(data)
+            data['plan'] = 'ENTERPRISE'
+        return Response(data)
     
     def perform_update(self, serializer):
         # Save the company (this updates the plan)
@@ -1154,19 +1160,24 @@ class UserMeView(APIView):
     def get(self, request):
         user = request.user
         company = user.company
-        
+
+        # Platform staff/superusers operate DtailBase itself, so they get ENTERPRISE-tier access.
+        is_platform_admin = bool(user.is_superuser or user.is_staff)
+        effective_plan = 'ENTERPRISE' if is_platform_admin else company.plan
+
         # Get limits dynamically
-        plan_data = PLAN_CONFIG.get(company.plan, PLAN_CONFIG['STARTER'])
-        
+        plan_data = PLAN_CONFIG.get(effective_plan, PLAN_CONFIG['STARTER'])
+
         data = UserSerializer(user).data
         data['company'] = {
             "id": company.id,
-            "plan": company.plan,
+            "name": company.name,
+            "plan": effective_plan,
             "current_monthly_usage": {
                 "monthly_bookings": company.get_monthly_booking_count()
             },
             # Use the config file here!
-            "usage_limits": plan_data.get('monthly_bookings'), 
+            "usage_limits": plan_data.get('monthly_bookings'),
             "user_limit": plan_data.get('max_users'),
             "buffer_timer": getattr(company, 'booking_buffer', 15),
         }

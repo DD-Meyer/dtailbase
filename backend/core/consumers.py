@@ -24,6 +24,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         if user and user.is_authenticated:
             self.user = user
             self.company_id = user.company.id if hasattr(user, 'company') else None
+            self.is_platform_admin = bool(user.is_superuser or user.is_staff)
             
             if self.company_id:
                 # Add user to company notification group
@@ -31,6 +32,13 @@ class NotificationConsumer(AsyncWebsocketConsumer):
                     f"company_{self.company_id}_notifications",
                     self.channel_name
                 )
+                # Platform admins also subscribe to a shared support feed so they
+                # receive real-time updates for any company's support activity.
+                if self.is_platform_admin:
+                    await self.channel_layer.group_add(
+                        "platform_admins_support",
+                        self.channel_name,
+                    )
                 await self.accept()
             else:
                 await self.close()
@@ -39,10 +47,15 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     
     async def disconnect(self, close_code):
         """Handle WebSocket disconnection"""
-        if self.company_id:
+        if getattr(self, 'company_id', None):
             await self.channel_layer.group_discard(
                 f"company_{self.company_id}_notifications",
                 self.channel_name
+            )
+        if getattr(self, 'is_platform_admin', False):
+            await self.channel_layer.group_discard(
+                "platform_admins_support",
+                self.channel_name,
             )
     
     async def receive(self, text_data):
@@ -93,6 +106,18 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             'message': event.get('message'),
             'level': event.get('level', 'info'),  # info, success, warning, error
         }))
+
+    async def support_message(self, event):
+        """Forward a support chat message event to the connected client."""
+        payload = {k: v for k, v in event.items() if k != 'type'}
+        payload['type'] = 'support_message'
+        await self.send(text_data=json.dumps(payload))
+
+    async def support_ticket_created(self, event):
+        """Forward a new ticket event to the connected client."""
+        payload = {k: v for k, v in event.items() if k != 'type'}
+        payload['type'] = 'support_ticket_created'
+        await self.send(text_data=json.dumps(payload))
     
     @database_sync_to_async
     def get_user_from_token(self):

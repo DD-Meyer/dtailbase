@@ -153,3 +153,75 @@ def broadcast_new_booking_alert(booking):
         )
     except Exception as e:
         print(f"Error broadcasting new booking alert: {e}")
+
+
+PLATFORM_ADMIN_SUPPORT_GROUP = "platform_admins_support"
+
+
+def broadcast_support_message(ticket, message_row, sender):
+    """Broadcast a new support ticket message to both parties (company + platform admins)."""
+    try:
+        channel_layer = get_channel_layer()
+        if channel_layer is None:
+            return
+
+        payload = {
+            'type': 'support_message',
+            'event': 'support_message',
+            'ticket_id': str(ticket.id),
+            'company_id': str(ticket.company_id),
+            'company_name': ticket.company.name,
+            'ticket_subject': ticket.subject,
+            'support_lane': ticket.support_lane,
+            'ticket_status': ticket.status,
+            'message_id': str(message_row.id),
+            'message': message_row.message,
+            'is_admin_reply': bool(message_row.is_admin_reply),
+            'sender_email': sender.email if sender else 'Unknown',
+            'created_at': message_row.created_at.isoformat() if message_row.created_at else None,
+        }
+
+        async def _send():
+            # Notify the customer's company group
+            await channel_layer.group_send(
+                f"company_{ticket.company_id}_notifications",
+                payload,
+            )
+            # Notify any connected platform admins
+            await channel_layer.group_send(PLATFORM_ADMIN_SUPPORT_GROUP, payload)
+
+        async_to_sync(_send)()
+    except Exception as e:
+        print(f"Error broadcasting support message: {e}")
+
+
+def broadcast_support_ticket_created(ticket, created_by):
+    """Broadcast that a new support ticket was opened (so admins see it instantly)."""
+    try:
+        channel_layer = get_channel_layer()
+        if channel_layer is None:
+            return
+
+        payload = {
+            'type': 'support_ticket_created',
+            'event': 'support_ticket_created',
+            'ticket_id': str(ticket.id),
+            'company_id': str(ticket.company_id),
+            'company_name': ticket.company.name,
+            'ticket_subject': ticket.subject,
+            'support_lane': ticket.support_lane,
+            'ticket_status': ticket.status,
+            'created_by_email': created_by.email if created_by else 'Unknown',
+            'created_at': ticket.created_at.isoformat() if ticket.created_at else None,
+        }
+
+        async def _send():
+            await channel_layer.group_send(
+                f"company_{ticket.company_id}_notifications",
+                payload,
+            )
+            await channel_layer.group_send(PLATFORM_ADMIN_SUPPORT_GROUP, payload)
+
+        async_to_sync(_send)()
+    except Exception as e:
+        print(f"Error broadcasting support ticket created: {e}")

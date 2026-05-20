@@ -12,12 +12,14 @@ import {
   UserRound,
 } from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
+import { useSupportNotifications } from "../context/SupportNotificationContext";
 import "../styles/Header.css";
 
 function UserDropdownMenu() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { user, logout } = useContext(AuthContext);
+  const { unreadCount } = useSupportNotifications();
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
@@ -49,6 +51,11 @@ function UserDropdownMenu() {
       >
         <div className="avatar">
           {user?.name?.charAt(0) || user?.email?.charAt(0)?.toUpperCase() || "U"}
+          {unreadCount > 0 && (
+            <span className="avatar-badge" aria-label={`${unreadCount} new support messages`}>
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
         </div>
         <div className="user-info">
           <span className="user-name">{user?.name || user?.username || "User"}</span>
@@ -105,10 +112,26 @@ function UserDropdownMenu() {
                 </li>
               </>
             )}
-            {(user?.is_superuser || user?.is_staff) && (
+            {(user?.is_superuser || user?.is_staff) ? (
               <li>
                 <Link to="/support" onClick={() => setIsDropdownOpen(false)}>
-                  <span className="dropdown-link-inline"><BadgeHelp size={16} /> Support Inbox</span>
+                  <span className="dropdown-link-inline">
+                    <BadgeHelp size={16} /> Support Inbox
+                    {unreadCount > 0 && (
+                      <span className="nav-badge-inline">{unreadCount > 9 ? "9+" : unreadCount}</span>
+                    )}
+                  </span>
+                </Link>
+              </li>
+            ) : (
+              <li>
+                <Link to="/support" onClick={() => setIsDropdownOpen(false)}>
+                  <span className="dropdown-link-inline">
+                    <BadgeHelp size={16} /> Support
+                    {unreadCount > 0 && (
+                      <span className="nav-badge-inline">{unreadCount > 9 ? "9+" : unreadCount}</span>
+                    )}
+                  </span>
                 </Link>
               </li>
             )}
