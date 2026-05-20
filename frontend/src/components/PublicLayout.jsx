@@ -3,7 +3,7 @@ import { AuthContext } from "../context/AuthContext";
 import { Link, useLocation} from 'react-router-dom';
 import PublicHeader from './PublicHeader';
 import '../styles/PublicLayout.css';
-import { CloudAlertIcon, PhoneCallIcon } from 'lucide-react';
+import { CloudAlertIcon, MessageCircle, MessageCircleCodeIcon, MessageSquare, PhoneCallIcon } from 'lucide-react';
 
 const PublicLayout = ({ children, showNav = true, showFooter = true }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -156,7 +156,7 @@ const PublicLayout = ({ children, showNav = true, showFooter = true }) => {
         target="_blank"
         rel="noopener noreferrer"
       >
-        <span className="wa-float-icon"><PhoneCallIcon /></span>
+        <span className="wa-float-icon"><MessageSquare /></span>
       </a>
       )}
     </div>

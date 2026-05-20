@@ -1,6 +1,8 @@
 import os
 import logging
 from django.core.cache import cache
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -81,6 +83,7 @@ class PlansView(APIView):
             return Response({'error': str(e)}, status=500)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class PayPalSubscribeView(APIView):
     """
     Initiate a PayPal subscription.
@@ -176,6 +179,7 @@ class PayPalSubscribeView(APIView):
             return Response({'error': error_msg}, status=500)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class PayPalCancelSubscriptionView(APIView):
     """Cancel the active PayPal subscription to allow downgrade actions."""
     permission_classes = [IsAuthenticated, IsAccountAdmin]
@@ -564,6 +568,7 @@ class PayPalWebhookView(APIView):
         return self._handle_subscription_cancelled(data)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class PayPalConfirmView(APIView):
     """
     Confirm PayPal subscription after customer returns from approval flow.

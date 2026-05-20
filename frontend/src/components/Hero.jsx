@@ -510,17 +510,6 @@ const Hero = ({ isAuthenticated }) => {
           </div>
         </div>
       </footer>
-      
-      {/* WhatsApp Button */}
-      <a 
-        href={`https://wa.me/27769778522?text=Hi!%20I'm%20on%20the%20landing%20page%20and%20would%20like%20to%20see%20a%20Live%20Demo.`} 
-        className="floating-whatsapp"
-        target="_blank"
-        rel="noopener noreferrer"
-        title="Message us on WhatsApp"
-      >
-        <span className="wa-float-icon">📱</span>
-      </a>
     </div>
   );
 };
