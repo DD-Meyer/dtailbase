@@ -50,17 +50,28 @@ function Sidebar() {
 
       <hr className="sidebar-divider" />
 
+
       <ul className="sidebar-links">
         {menuItems.map((item) => {
           const Icon = item.icon;
           return (
-          <li key={item.path} className={location.pathname === item.path ? "active" : ""}>
-            <Link to={item.path} title={item.label}>
-              <span className="icon"><Icon size={18} strokeWidth={2.1} aria-hidden="true" /></span>
-              {!isCollapsed && <span className="label">{item.label}</span>}
+            <li key={item.path} className={location.pathname === item.path ? "active" : ""}>
+              <Link to={item.path} title={item.label}>
+                <span className="icon"><Icon size={18} strokeWidth={2.1} aria-hidden="true" /></span>
+                {!isCollapsed && <span className="label">{item.label}</span>}
+              </Link>
+            </li>
+          );
+        })}
+        {/* Platform admin-only Support link */}
+        {(user?.is_superuser || user?.is_staff) && (
+          <li className={location.pathname === "/support" ? "active" : ""}>
+            <Link to="/support" title="Support">
+              <span className="icon"><ShieldCheck size={18} strokeWidth={2.1} aria-hidden="true" /></span>
+              {!isCollapsed && <span className="label">Support</span>}
             </Link>
           </li>
-        )})}
+        )}
       </ul>
 
       <hr className="sidebar-divider" />

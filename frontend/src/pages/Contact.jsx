@@ -1,15 +1,18 @@
 import { useContext, useState } from "react";
 import LiveChat from "../components/LiveChat";
 import { AuthContext } from "../context/AuthContext";
+import { useCompany } from "../context/CompanyContext";
 import { createSupportTicket } from "../services/supportService";
 
 const Contact = () => {
   const { isAuthenticated } = useContext(AuthContext);
+  const { currentPlan } = useCompany();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitState, setSubmitState] = useState({ type: "", text: "" });
+  const canUseLiveChat = isAuthenticated && currentPlan === "ENTERPRISE";
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -67,13 +70,19 @@ const Contact = () => {
             <button
               type="button"
               className="btn-main"
-              onClick={() => setIsChatOpen(true)}
+              onClick={() => canUseLiveChat && setIsChatOpen(true)}
+              disabled={!canUseLiveChat}
             >
               Open Live Chat
             </button>
             {!isAuthenticated && (
               <span style={{ color: "#94a3b8", fontSize: "0.9rem", alignSelf: "center" }}>
                 Live support tickets require a logged in company account.
+              </span>
+            )}
+            {isAuthenticated && currentPlan !== "ENTERPRISE" && (
+              <span style={{ color: "#94a3b8", fontSize: "0.9rem", alignSelf: "center" }}>
+                Live chat is reserved for Enterprise plans as priority support.
               </span>
             )}
           </div>

@@ -277,46 +277,49 @@ const Hero = ({ isAuthenticated }) => {
         </div>
       </section>
 
-      <section className="stats-bar container animate-on-scroll">
+      <section className="stats-bar container animate-on-scroll animate-slide-right-fade">
         <div className="stat-card">
           <span className="stat-num">~14hrs</span>
+          <br />
           <span className="stat-label">Admin Reclaimed Monthly</span>
         </div>
         <div className="stat-divider"></div>
         <div className="stat-card">
           <span className="stat-num">1&nbsp;Hub</span>
+          <br />
           <span className="stat-label">Bookings, Photos &amp; Legal</span>
         </div>
         <div className="stat-divider"></div>
         <div className="stat-card">
           <span className="stat-num">Always&nbsp;On</span>
+          <br />
           <span className="stat-label">Globally Hosted &amp; Secure</span>
         </div>
       </section>
 
-      <section className="features-section container">
+      <section className="features-section container animate-on-scroll slide-right-fade">
         <div className="section-header animate-on-scroll">
           <h2 className="section-title">Engineered for Perfection</h2>
           <p className="section-desc">Traditional shop management is fragmented. Dtailbase is a unified ecosystem.</p>
         </div>
         <div className="features-grid">
-          <div className="feature-card animate-on-scroll">
+          <div className="feature-card animate-on-scroll animate-slide-right-fade">
             <div className="feature-icon">📅</div>
             <h3>Smart Intake</h3>
             <p>Intelligent scheduling that accounts for vehicle size and service complexity automatically.</p>
           </div>
-          <div className="feature-card highlight-card animate-on-scroll">
+          <div className="feature-card highlight-card animate-on-scroll animate-slide-left-fade">
             <div className="feature-icon">🛡️</div>
             <h3>Bulletproof Indemnity</h3>
             <p>Legally-binding digital waivers paired with 4K condition logs. We protect your insurance premiums.</p>
             <div className="card-tag">Core Security</div>
           </div>
-          <div className="feature-card animate-on-scroll">
+          <div className="feature-card animate-on-scroll animate-slide-right-fade">
             <div className="feature-icon">📸</div>
             <h3>Photo Vault</h3>
             <p>Cloud-synced before/after galleries linked directly to customer profiles for instant recall.</p>
           </div>
-          <div className="feature-card animate-on-scroll">
+          <div className="feature-card animate-on-scroll animate-slide-left-fade">
             <div className="feature-icon">👥</div>
             <h3>Staff Command</h3>
             <p>Assign bays, track technician efficiency, and manage payroll through a single interface.</p>
@@ -329,6 +332,7 @@ const Hero = ({ isAuthenticated }) => {
           <h2 className="section-title">See It In <span className="highlight">Action.</span></h2>
           <p className="section-desc">A glimpse inside the Dtailbase ecosystem — from intake to invoice.</p>
         </div>
+        {/* auto scroll and remove bottom scroll bar */}
         <div className="gallery-grid">
           {[
             { label: 'Dashboard Overview', image: '/landing/images/Dashboard-1.png' },

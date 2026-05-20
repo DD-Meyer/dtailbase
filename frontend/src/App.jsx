@@ -71,6 +71,7 @@ function AppContent() {
     "/plans",
     "/payments",
     "/payment-success",
+    "/support",
     "/admin/support",
   ];
 
@@ -180,7 +181,7 @@ function AppContent() {
   };
 
   // 1. Identify ALL public-facing "Marketing" pages
-  const publicRoutes = ["/", "/hero", "/about", "/products", "/plans", "/payments", "/contact", "/legal", "/community", "/features", "/security", "/our-Story", "/support", "/help-center", "/tutorials", "/public-booking/:companySlug", "/payment-success", "/book/:companySlug", "/booking-confirmation/:companySlug", "/public/bookings/:companySlug"];
+  const publicRoutes = ["/", "/hero", "/about", "/products", "/plans", "/payments", "/contact", "/legal", "/community", "/features", "/security", "/our-Story", "/support-info", "/help-center", "/tutorials", "/public-booking/:companySlug", "/payment-success", "/book/:companySlug", "/booking-confirmation/:companySlug", "/public/bookings/:companySlug"];
   const isLandingPage = publicRoutes.includes(location.pathname);
 
   if (isInstalledApp && !isAllowedInInstalledApp(location.pathname)) {
@@ -310,7 +311,17 @@ function AppContent() {
             <Route path="/hero" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Navigate to="/" replace />} />
             <Route path="/about" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <PublicLayout><About /></PublicLayout>} />
             <Route path="/products" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <PublicLayout><Products /></PublicLayout>} />
-            <Route path="/plans" element={<PublicLayout><Plans /></PublicLayout>} />
+            <Route
+              path="/plans"
+              element={
+                <PublicLayout
+                  showNav={!(isInstalledApp && isAuthenticated)}
+                  showFooter={!(isInstalledApp && isAuthenticated)}
+                >
+                  <Plans showBackToDashboard={isInstalledApp && isAuthenticated} />
+                </PublicLayout>
+              }
+            />
             <Route path="/payments" element={<PublicLayout showNav={false} showFooter={false}><Payments /></PublicLayout>} />
             <Route path="/legal" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <PublicLayout><Legal /></PublicLayout>} />
             <Route path="/contact" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <PublicLayout><Contact /></PublicLayout>} />
@@ -320,7 +331,7 @@ function AppContent() {
             <Route path="/Features" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Features />} />
             <Route path="/Security" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Security />} />
             <Route path="/Our-Story" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <OurStory />} />
-            <Route path="/Support" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Support />} />
+            <Route path="/support-info" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Support />} />
             <Route path="/community" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <CommunityPage />} />
             <Route path="/tutorials" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Tutorials />} />
             <Route path="/help-center" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <HelpCenter />} />
@@ -347,10 +358,18 @@ function AppContent() {
             <Route path="/team" element={(isAuthenticated && user?.role === 'OWNER') ? <TeamManagement /> : <Navigate to="/bookings" />} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route
-              path="/admin/support"
+              path="/support"
               element={
                 <ProtectedRoute>
                   {isPlatformAdmin ? <SupportAdminInbox /> : <Navigate to="/bookings" replace />}
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/support"
+              element={
+                <ProtectedRoute>
+                  {isPlatformAdmin ? <Navigate to="/support" replace /> : <Navigate to="/bookings" replace />}
                 </ProtectedRoute>
               }
             />

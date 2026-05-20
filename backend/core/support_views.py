@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 
 from accounts.models import Company
 
-from .models import SupportTicket, SupportTicketMessage
+from .models import Booking, SupportTicket, SupportTicketMessage
 from .support_serializers import (
     SupportTicketAdminListSerializer,
     SupportTicketMessageSerializer,
@@ -176,5 +176,59 @@ class AdminSupportInboxView(APIView):
             {
                 "priority_lane": priority_lane,
                 "standard_lane": standard_lane,
+            }
+        )
+
+
+class AdminSupportOverviewView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if not is_platform_admin(request.user):
+            return Response({"detail": "Not authorized."}, status=status.HTTP_403_FORBIDDEN)
+
+        recent_bookings = (
+            Booking.objects.select_related("company", "customer", "service")
+            .order_by("-created_at")[:12]
+        )
+
+        notifications = [
+            {
+                "type": "booking_created",
+                "company_name": booking.company.name,
+                "message": (
+                    f"New booking for {booking.customer.firstname} {booking.customer.lastname} "
+                    f"({booking.service.name})"
+                ),
+                "created_at": booking.created_at,
+            }
+            for booking in recent_bookings
+        ]
+
+        recent_messages = (
+            SupportTicketMessage.objects.select_related("sender", "ticket", "ticket__company")
+            .order_by("-created_at")[:40]
+        )
+
+        chat_room_feed = [
+            {
+                "id": str(message.id),
+                "ticket_id": str(message.ticket_id),
+                "ticket_subject": message.ticket.subject,
+                "company_name": message.ticket.company.name,
+                "company_plan": message.ticket.company.plan,
+                "support_lane": message.ticket.support_lane,
+                "sender_email": message.sender.email if message.sender else "Unknown",
+                "is_admin_reply": message.is_admin_reply,
+                "message": message.message,
+                "created_at": message.created_at,
+            }
+            for message in recent_messages
+        ]
+
+        return Response(
+            {
+                "notifications": notifications,
+                "chat_room": chat_room_feed,
             }
         )

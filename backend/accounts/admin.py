@@ -12,8 +12,8 @@ class CompanyAdmin(admin.ModelAdmin):
 @admin.register(User)
 class CustomUserAdmin(BaseUserAdmin):
     # 1. Configuration for the list view
-    list_display = ('email', 'first_name', 'last_name', 'company', 'role', 'is_active')
-    list_filter = ('role', 'is_active', 'company')
+    list_display = ('email', 'first_name', 'last_name', 'company', 'role', 'is_active', 'is_staff', 'is_superuser')
+    list_filter = ('role', 'is_active', 'is_staff', 'is_superuser', 'company')
     search_fields = ('email', 'first_name', 'last_name')
     ordering = ('email',)
 
@@ -34,7 +34,7 @@ class CustomUserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'first_name', 'last_name', 'username', 'company', 'role', 'is_active', 'is_staff'),
+            'fields': ('email', 'first_name', 'last_name', 'username', 'company', 'role', 'is_active', 'is_staff', 'is_superuser'),
         }),
     )
 

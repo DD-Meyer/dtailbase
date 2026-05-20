@@ -107,7 +107,7 @@ function UserDropdownMenu() {
             )}
             {(user?.is_superuser || user?.is_staff) && (
               <li>
-                <Link to="/admin/support" onClick={() => setIsDropdownOpen(false)}>
+                <Link to="/support" onClick={() => setIsDropdownOpen(false)}>
                   <span className="dropdown-link-inline"><BadgeHelp size={16} /> Support Inbox</span>
                 </Link>
               </li>

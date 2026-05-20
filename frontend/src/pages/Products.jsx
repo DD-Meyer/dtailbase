@@ -139,7 +139,7 @@ const FEATURES = [
 
 const Products = () => {
   return (
-    <div className="landing-page">
+    <div className="landing-page products-page">
       <section className="products-hero animate-on-scroll">
         <div className="about-intro-badge">📦 Platform Modules</div>
         <h1 className="hero-title">

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import '../styles/Upgrade.css';
 import api from '../axios_instance';
 import { useCompany } from '../context/CompanyContext';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { showToast } from '../utils/uiFeedback';
 import {
@@ -24,7 +24,7 @@ const detectBrowserCurrency = () => {
   return 'USD';
 };
 
-const Plans = () => {
+const Plans = ({ showBackToDashboard = false }) => {
   const [loading, setLoading] = useState(false);
   const [currency, setCurrency] = useState(detectBrowserCurrency());
   const [pricing, setPricing] = useState(null);
@@ -37,7 +37,6 @@ const Plans = () => {
   const { company, currentPlan, planLimits, refreshCompany } = useCompany();
   const { isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
-  const location = useLocation();
 
   const openPaymentPage = (planId) => {
     navigate(`/payments?plan=${planId}`);
@@ -249,6 +248,13 @@ const Plans = () => {
       )}
 
       <div className="upgrade-header">
+        {showBackToDashboard && (
+          <div style={{ marginBottom: '12px' }}>
+            <button className="btn-upgrade btn-current" onClick={() => navigate('/bookings')}>
+              Back to Dashboard
+            </button>
+          </div>
+        )}
         <span className="badge">Studio Status: {currentPlan}</span>
         <h1>
           Engineered for <span className="highlight">Growth</span>

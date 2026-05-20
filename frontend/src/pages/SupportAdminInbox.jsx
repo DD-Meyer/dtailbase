@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import "../styles/Global.css";
 import {
   fetchAdminSupportInbox,
+  fetchAdminSupportOverview,
   fetchSupportTicketMessages,
   sendSupportTicketMessage,
   updateSupportTicketStatus,
@@ -12,6 +13,8 @@ function SupportAdminInbox() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [lanes, setLanes] = useState({ priority_lane: [], standard_lane: [] });
+  const [notifications, setNotifications] = useState([]);
+  const [chatRoomFeed, setChatRoomFeed] = useState([]);
   const [activeTicket, setActiveTicket] = useState(null);
   const [ticketMessages, setTicketMessages] = useState([]);
   const [replyText, setReplyText] = useState("");
@@ -21,13 +24,25 @@ function SupportAdminInbox() {
     try {
       setLoading(true);
       setError("");
-      const data = await fetchAdminSupportInbox();
-      setLanes(data || { priority_lane: [], standard_lane: [] });
+      const [inboxData, overviewData] = await Promise.all([
+        fetchAdminSupportInbox(),
+        fetchAdminSupportOverview(),
+      ]);
+      setLanes(inboxData || { priority_lane: [], standard_lane: [] });
+      setNotifications(Array.isArray(overviewData?.notifications) ? overviewData.notifications : []);
+      setChatRoomFeed(Array.isArray(overviewData?.chat_room) ? overviewData.chat_room : []);
     } catch (err) {
       setError(err?.response?.data?.detail || "Unable to load support inbox.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const formatDate = (rawValue) => {
+    if (!rawValue) return "";
+    const parsed = new Date(rawValue);
+    if (Number.isNaN(parsed.getTime())) return "";
+    return parsed.toLocaleString();
   };
 
   useEffect(() => {
@@ -96,11 +111,64 @@ function SupportAdminInbox() {
   return (
     <div className="page-body">
       <div className="card">
-        <h1 className="text-2xl font-bold">Support Inbox</h1>
+        <h1 className="text-2xl font-bold">Support</h1>
         <p className="text-muted mt-2">
-          Enterprise companies appear in a dedicated priority lane. Standard lane includes Pro and Starter.
+          Hidden admin-only command center. Enterprise companies appear in a dedicated priority lane.
         </p>
         {error && <p className="mt-3" style={{ color: "#fca5a5" }}>{error}</p>}
+      </div>
+
+      <div className="card" style={{ marginTop: "1rem" }}>
+        <h2 className="text-lg font-semibold">Notifications</h2>
+        {notifications.length === 0 ? (
+          <p className="text-muted mt-2">No recent notifications.</p>
+        ) : (
+          <div style={{ display: "grid", gap: "8px", marginTop: "12px" }}>
+            {notifications.map((row, index) => (
+              <div
+                key={`${row.created_at || index}-${row.company_name || "company"}`}
+                style={{
+                  border: "1px solid rgba(123, 154, 196, 0.28)",
+                  borderRadius: "8px",
+                  padding: "10px",
+                  background: "rgba(15, 26, 43, 0.45)",
+                }}
+              >
+                <strong>{row.company_name || "Company"}</strong>
+                <p style={{ marginTop: "4px" }}>{row.message}</p>
+                <small className="text-muted">{formatDate(row.created_at)}</small>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="card" style={{ marginTop: "1rem" }}>
+        <h2 className="text-lg font-semibold">Chat Room</h2>
+        {chatRoomFeed.length === 0 ? (
+          <p className="text-muted mt-2">No chat activity yet.</p>
+        ) : (
+          <div style={{ border: "1px solid rgba(123, 154, 196, 0.28)", borderRadius: "10px", padding: "12px", maxHeight: "320px", overflowY: "auto", marginTop: "12px" }}>
+            {chatRoomFeed.map((row) => (
+              <div
+                key={row.id}
+                style={{
+                  marginBottom: "8px",
+                  padding: "8px",
+                  borderRadius: "8px",
+                  background: row.support_lane === "PRIORITY" ? "rgba(56, 189, 248, 0.2)" : "rgba(148, 163, 184, 0.14)",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", gap: "8px" }}>
+                  <strong>{row.company_name}</strong>
+                  <small>{row.support_lane}</small>
+                </div>
+                <p style={{ marginTop: "4px", marginBottom: "4px" }}>{row.message}</p>
+                <small className="text-muted">{row.sender_email} • {formatDate(row.created_at)}</small>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="card" style={{ marginTop: "1rem" }}>

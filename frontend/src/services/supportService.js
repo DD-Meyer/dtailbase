@@ -29,3 +29,8 @@ export const fetchAdminSupportInbox = async () => {
   const response = await api.get("support/admin/inbox/");
   return response.data;
 };
+
+export const fetchAdminSupportOverview = async () => {
+  const response = await api.get("support/admin/overview/");
+  return response.data;
+};
