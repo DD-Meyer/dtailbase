@@ -149,10 +149,10 @@ def _evaluate_country_match(requested_country_code, normalized_doc):
 def _evaluate_address_match(business_address, normalized_doc):
     if not (business_address or "").strip():
         return {
-            "verified": True,
-            "score": 1.0,
-            "reason": "No business address configured, address match skipped",
-            "required": False,
+            "verified": False,
+            "score": 0.0,
+            "reason": "No business address configured — set your business address before verifying",
+            "required": True,
         }
 
     address_tokens = _clean_address_tokens(business_address)
@@ -193,9 +193,7 @@ def verify_location_document(company_name, document_text, requested_country_code
     country_check = _evaluate_country_match(requested_country_code, normalized_doc)
     address_check = _evaluate_address_match(business_address, normalized_doc)
 
-    checks = [company_check, country_check]
-    if address_check.get("required", False):
-        checks.append(address_check)
+    checks = [company_check, country_check, address_check]
 
     final_verified = all(check["verified"] for check in checks)
     final_score = sum(check["score"] for check in checks) / len(checks) if checks else 0.0
