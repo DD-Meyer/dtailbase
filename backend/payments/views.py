@@ -207,7 +207,18 @@ class PayPalSubscribeView(APIView):
                     else:
                         company.save(update_fields=['paypal_subscription_id'])
                 else:
-                    company.save(update_fields=['paypal_subscription_id'])
+                    # Clear any pending downgrade — user has made a new subscription
+                    # decision (e.g. reverting a downgrade before the renewal date).
+                    save_fields = ['paypal_subscription_id']
+                    if company.pending_downgrade_plan:
+                        company.pending_downgrade_plan = ''
+                        company.subscription_ends_at = None
+                        save_fields += ['pending_downgrade_plan', 'subscription_ends_at']
+                        logger.info(
+                            f"AUDIT: Pending downgrade cancelled - Company: {company.id}, "
+                            f"reverting to {plan_id}"
+                        )
+                    company.save(update_fields=save_fields)
                 logger.info(f"Stored subscription_id for company {company.id}: {subscription_id}")
                 
                 return Response({
