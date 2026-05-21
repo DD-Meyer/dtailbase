@@ -119,6 +119,9 @@ class PayPalSubscribeView(APIView):
                 if existing_details:
                     next_billing_time = (
                         existing_details.get('billing_info', {}).get('next_billing_time')
+                        # Fallback: for deferred/new subs the top-level start_time is the
+                        # first billing date; for cancelled subs it may also be present.
+                        or existing_details.get('start_time')
                     )
                     if next_billing_time:
                         start_time = next_billing_time
@@ -126,6 +129,14 @@ class PayPalSubscribeView(APIView):
                             f"Deferring new subscription start to {start_time} "
                             f"(end of current billing period for {previous_subscription_id})"
                         )
+
+            # If the previous subscription is cancelled (e.g. user re-subscribing after
+            # a pending STARTER downgrade), fall back to the stored period-end date so
+            # the new subscription doesn't bill immediately.
+            from django.utils import timezone as _tz
+            if not start_time and company.subscription_ends_at and company.subscription_ends_at > _tz.now():
+                start_time = company.subscription_ends_at.isoformat()
+                logger.info(f"Using stored billing period end as start_time: {start_time}")
             
             plan_details = get_subscription_plan(plan_id)
             if not plan_details:
@@ -264,7 +275,12 @@ class PayPalCancelSubscriptionView(APIView):
             try:
                 existing_details = get_paypal_subscription_details(subscription_id)
                 if existing_details:
-                    next_billing_raw = existing_details.get('billing_info', {}).get('next_billing_time')
+                    next_billing_raw = (
+                        existing_details.get('billing_info', {}).get('next_billing_time')
+                        # Fallback for deferred/new subs: top-level start_time is the
+                        # first (and thus next) billing date.
+                        or existing_details.get('start_time')
+                    )
                     if next_billing_raw:
                         subscription_ends_at = parse_datetime(next_billing_raw)
             except Exception as fetch_err:
