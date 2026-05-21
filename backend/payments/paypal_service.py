@@ -200,7 +200,7 @@ def create_paypal_subscription(user_email, plan_id, return_url, cancel_url, curr
             'product_id': product_id,
             'name': unique_plan_name,
             'description': plan_details['description'],
-            'type': 'SUBSCRIPTION',
+            'status': 'ACTIVE',
             'billing_cycles': [
                 {
                     'frequency': {
@@ -220,11 +220,6 @@ def create_paypal_subscription(user_email, plan_id, return_url, cancel_url, curr
             ],
             'payment_preferences': {
                 'auto_bill_outstanding': True,
-                'setup_fee': {
-                    'value': '0.00',
-                    'currency_code': currency
-                },
-                'setup_fee_failure_action': 'CONTINUE',
                 'payment_failure_threshold': 3
             }
         }
@@ -409,7 +404,7 @@ def revise_paypal_subscription(existing_subscription_id, plan_id, return_url, ca
             'product_id': product_id,
             'name': f"{plan_id}-USD-{timestamp}",
             'description': plan_details['description'],
-            'type': 'SUBSCRIPTION',
+            'status': 'ACTIVE',
             'billing_cycles': [{
                 'frequency': {'interval_unit': 'MONTH', 'interval_count': 1},
                 'tenure_type': 'REGULAR',
@@ -421,8 +416,6 @@ def revise_paypal_subscription(existing_subscription_id, plan_id, return_url, ca
             }],
             'payment_preferences': {
                 'auto_bill_outstanding': True,
-                'setup_fee': {'value': '0.00', 'currency_code': currency},
-                'setup_fee_failure_action': 'CONTINUE',
                 'payment_failure_threshold': 3
             }
         }
