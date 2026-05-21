@@ -120,15 +120,27 @@ class PayPalSubscribeView(APIView):
                     next_billing_time = (
                         existing_details.get('billing_info', {}).get('next_billing_time')
                         # Fallback: for deferred/new subs the top-level start_time is the
-                        # first billing date; for cancelled subs it may also be present.
+                        # first (and thus next) billing date.  Do NOT use start_time from
+                        # cancelled/expired subs — it is a historical date and would cause
+                        # an immediate charge on the replacement subscription.
                         or existing_details.get('start_time')
                     )
                     if next_billing_time:
-                        start_time = next_billing_time
-                        logger.info(
-                            f"Deferring new subscription start to {start_time} "
-                            f"(end of current billing period for {previous_subscription_id})"
-                        )
+                        from django.utils.dateparse import parse_datetime as _parse_nbt
+                        from django.utils import timezone as _tz_nbt
+                        _nbt_parsed = _parse_nbt(next_billing_time)
+                        if _nbt_parsed and _nbt_parsed > _tz_nbt.now():
+                            start_time = next_billing_time
+                            logger.info(
+                                f"Deferring new subscription start to {start_time} "
+                                f"(end of current billing period for {previous_subscription_id})"
+                            )
+                        else:
+                            logger.info(
+                                f"Ignoring past/expired billing time '{next_billing_time}' "
+                                f"from subscription {previous_subscription_id} — "
+                                f"will fall back to subscription_ends_at if available"
+                            )
 
             # If the previous subscription is cancelled (e.g. user re-subscribing after
             # a pending STARTER downgrade), fall back to the stored period-end date so
