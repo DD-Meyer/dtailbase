@@ -130,7 +130,36 @@ class PayPalSubscribeView(APIView):
             plan_details = get_subscription_plan(plan_id)
             if not plan_details:
                 return Response({'error': f'Plan {plan_id} not available'}, status=400)
-            
+
+            # Calculate prorated setup fee for mid-cycle upgrades.
+            # The user immediately pays (new_price - old_price) * remaining_days / 30
+            # so they get access now and the first full charge starts at the next renewal.
+            _PLAN_TIER = {'STARTER': 0, 'PRO': 1, 'ENTERPRISE': 2}
+            setup_fee = None
+            if (
+                start_time is not None
+                and _PLAN_TIER.get(plan_id, 0) > _PLAN_TIER.get(company.plan, 0)
+            ):
+                from django.utils.dateparse import parse_datetime as _parse_dt
+                from django.utils import timezone as _tz
+                next_billing_dt = _parse_dt(start_time)
+                if next_billing_dt:
+                    remaining_seconds = (next_billing_dt - _tz.now()).total_seconds()
+                    if remaining_seconds > 0:
+                        remaining_days = remaining_seconds / 86400
+                        current_plan_details = get_subscription_plan(company.plan)
+                        if current_plan_details:
+                            price_diff = float(plan_details['amount']) - float(current_plan_details['amount'])
+                            if price_diff > 0:
+                                proration = round(price_diff * remaining_days / 30, 2)
+                                if proration >= 0.01:
+                                    setup_fee = f"{proration:.2f}"
+                                    logger.info(
+                                        f"Proration: {company.plan}→{plan_id}, "
+                                        f"{remaining_days:.1f} days remaining, "
+                                        f"setup_fee={setup_fee} USD"
+                                    )
+
             # Generate return/cancel URLs
             domain = os.environ.get('PUBLIC_BASE_URL', 'https://www.dtailbase.com').rstrip('/')
             return_url = f"{domain}/payment-success?plan={plan_id}"
@@ -143,6 +172,7 @@ class PayPalSubscribeView(APIView):
                 cancel_url=cancel_url,
                 currency='USD',
                 start_time=start_time,
+                setup_fee=setup_fee,
             )
 
             if result.get('success'):
@@ -158,7 +188,6 @@ class PayPalSubscribeView(APIView):
                         )
 
                 # Detect paid-to-paid downgrades and defer the plan change.
-                _PLAN_TIER = {'STARTER': 0, 'PRO': 1, 'ENTERPRISE': 2}
                 is_downgrade = (
                     start_time is not None
                     and _PLAN_TIER.get(plan_id, 0) < _PLAN_TIER.get(company.plan, 0)
@@ -630,11 +659,22 @@ class PayPalWebhookView(APIView):
             company = self._get_company_for_event(data)
             if company:
                 subscription_id = self._extract_subscription_id(data)
-                update_fields = []
 
-                if subscription_id and company.paypal_subscription_id != subscription_id:
-                    company.paypal_subscription_id = subscription_id
-                    update_fields.append('paypal_subscription_id')
+                # If the cancelled subscription is not the company's current one, it was
+                # the old subscription replaced during a plan switch. Ignore this event —
+                # acting on it would incorrectly downgrade an already-upgraded account.
+                if (
+                    subscription_id
+                    and company.paypal_subscription_id
+                    and subscription_id != company.paypal_subscription_id
+                ):
+                    logger.info(
+                        f"Ignoring CANCELLED webhook for replaced subscription {subscription_id} "
+                        f"(company {company.id} now has {company.paypal_subscription_id})"
+                    )
+                    return Response(status=200)
+
+                update_fields = []
 
                 # If a deferred downgrade is pending and the billing period hasn't ended yet,
                 # keep the current plan active — the user paid for this period.

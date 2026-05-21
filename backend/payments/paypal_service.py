@@ -99,7 +99,7 @@ def get_subscription_plan(plan_id, currency=None):
     return pricing_table['USD'][plan_id]
 
 
-def create_paypal_subscription(user_email, plan_id, return_url, cancel_url, currency='USD', existing_subscription_id=None, start_time=None):
+def create_paypal_subscription(user_email, plan_id, return_url, cancel_url, currency='USD', existing_subscription_id=None, start_time=None, setup_fee=None):
     """
     Create a PayPal subscription for a user using Subscriptions API (USD only).
     
@@ -278,6 +278,20 @@ def create_paypal_subscription(user_email, plan_id, return_url, cancel_url, curr
         if start_time:
             subscription_payload['start_time'] = start_time
             logger.info(f"New subscription deferred to start at: {start_time}")
+
+        # Prorated upgrade charge: override the plan's setup_fee for this subscription only.
+        # This charges the price-difference for the remaining days immediately on approval.
+        if setup_fee:
+            subscription_payload['plan'] = {
+                'payment_preferences': {
+                    'setup_fee': {
+                        'value': setup_fee,
+                        'currency_code': currency
+                    },
+                    'setup_fee_failure_action': 'CANCEL'
+                }
+            }
+            logger.info(f"Prorated setup_fee={setup_fee} {currency} applied for upgrade")
 
         logger.info(f"Creating subscription with payload: {subscription_payload}")
 
