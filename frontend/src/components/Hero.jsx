@@ -84,7 +84,9 @@ const Hero = ({ isAuthenticated }) => {
   const [heroPricing, setHeroPricing] = useState(null);
   const [heroPlanFeatures, setHeroPlanFeatures] = useState({});
   const [downgradingPlanId, setDowngradingPlanId] = useState('');
-  const { currentPlan, refreshCompany } = useCompany();
+  const { company, currentPlan, refreshCompany } = useCompany();
+  const pendingDowngradePlan = (company?.pending_downgrade_plan || '').toUpperCase();
+  const hasPendingDowngrade = !!pendingDowngradePlan && !!company?.subscription_ends_at;
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -400,8 +402,10 @@ const Hero = ({ isAuthenticated }) => {
         <div className="pricing-grid">
           {HERO_PLANS.map((plan) => {
             const isCurrent = Boolean(isAuthenticated && plan.id === currentPlan);
+            const isPendingTarget = isAuthenticated && hasPendingDowngrade && plan.id === pendingDowngradePlan;
             const isDowngradeOption =
               isAuthenticated &&
+              !isPendingTarget &&
               typeof PLAN_ORDER[currentPlan] === 'number' &&
               typeof PLAN_ORDER[plan.id] === 'number' &&
               PLAN_ORDER[currentPlan] > 0 &&
@@ -428,26 +432,25 @@ const Hero = ({ isAuthenticated }) => {
                 <button
                   className={plan.featured ? 'btn-main' : 'btn-outline'}
                   onClick={() => {
-                    if (isCurrent) return;
-                    if (isDowngradeOption) {
-                      executeDowngrade(plan);
-                      return;
-                    }
-                    if (!isAuthenticated) {
-                      handleAuthRequired(plan);
-                      return;
-                    }
+                    if (isCurrent && hasPendingDowngrade) { openPaymentPage(plan.id); return; }
+                    if (isCurrent || isPendingTarget) return;
+                    if (isDowngradeOption) { executeDowngrade(plan); return; }
+                    if (!isAuthenticated) { handleAuthRequired(plan); return; }
                     openPaymentPage(plan.id);
                   }}
-                  disabled={isCurrent || downgradingPlanId === plan.id}
+                  disabled={isPendingTarget || (isCurrent && !hasPendingDowngrade) || downgradingPlanId === plan.id}
                 >
-                  {isCurrent
-                    ? 'Current Plan'
-                    : isDowngradeOption
-                      ? (downgradingPlanId === plan.id ? 'Processing...' : 'Downgrade')
-                      : !isAuthenticated
-                        ? (GUEST_PLAN_CTA[plan.id] || plan.cta)
-                        : 'Upgrade'}
+                  {isCurrent && hasPendingDowngrade
+                    ? `Keep ${plan.name}`
+                    : isCurrent
+                      ? 'Current Plan'
+                      : isPendingTarget
+                        ? 'Downgrade Scheduled'
+                        : isDowngradeOption
+                          ? (downgradingPlanId === plan.id ? 'Processing...' : 'Downgrade')
+                          : !isAuthenticated
+                            ? (GUEST_PLAN_CTA[plan.id] || plan.cta)
+                            : 'Upgrade'}
                 </button>
               </div>
             );

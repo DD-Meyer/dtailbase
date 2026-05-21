@@ -35,6 +35,8 @@ const Plans = ({ showBackToDashboard = false }) => {
   const [downgradingPlanId, setDowngradingPlanId] = useState('');
   const [downgradeModalPlan, setDowngradeModalPlan] = useState(null);
   const { company, currentPlan, planLimits, refreshCompany } = useCompany();
+  const pendingDowngradePlan = (company?.pending_downgrade_plan || '').toUpperCase();
+  const hasPendingDowngrade = !!pendingDowngradePlan && !!company?.subscription_ends_at;
   const { isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -276,8 +278,11 @@ const Plans = ({ showBackToDashboard = false }) => {
       <div className="pricing-grid">
         {plans.map((plan) => {
           const isCurrent = isAuthenticated && plan.id === currentPlan;
+          // True when a paid downgrade to this plan is already queued.
+          const isPendingTarget = isAuthenticated && hasPendingDowngrade && plan.id === pendingDowngradePlan;
           const isDowngradeOption =
             isAuthenticated &&
+            !isPendingTarget &&
             typeof PLAN_ORDER[currentPlan] === 'number' &&
             typeof PLAN_ORDER[plan.id] === 'number' &&
             PLAN_ORDER[currentPlan] > 0 &&
@@ -310,9 +315,17 @@ const Plans = ({ showBackToDashboard = false }) => {
                 ))}
               </ul>
 
-              {isCurrent ? (
+              {isCurrent && hasPendingDowngrade ? (
+                <button className="btn-upgrade" onClick={() => openPaymentPage(plan.id)}>
+                  Keep {plan.name}
+                </button>
+              ) : isCurrent ? (
                 <button className="btn-upgrade btn-current" disabled>
                   Current Plan
+                </button>
+              ) : isPendingTarget ? (
+                <button className="btn-upgrade btn-current" disabled>
+                  Downgrade Scheduled
                 </button>
               ) : isDowngradeOption ? (
                 <button

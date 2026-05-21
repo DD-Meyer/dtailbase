@@ -540,7 +540,10 @@ function Settings() {
               <p className="settings-note">Loading billing details...</p>
             ) : (
               <div className="form-grid">
-                {billingSummary?.pending_downgrade_plan && billingSummary?.subscription_ends_at && (
+                {billingSummary?.pending_downgrade_plan
+                  && billingSummary?.subscription_ends_at
+                  && billingSummary.pending_downgrade_plan.toUpperCase() !== effectivePlan
+                  && (
                   <div className="input-group full-width">
                     <p className="settings-note billing-footnote" style={{ color: '#f59e0b', borderLeft: '3px solid #f59e0b', paddingLeft: '0.75rem' }}>
                       ⏳ Your <strong>{effectivePlan}</strong> plan access continues until <strong>{formatDateTime(billingSummary.subscription_ends_at)}</strong>, then downgrades to <strong>{billingSummary.pending_downgrade_plan}</strong>.

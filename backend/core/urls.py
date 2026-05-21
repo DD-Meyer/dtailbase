@@ -36,9 +36,26 @@ urlpatterns = [
 ]
 
 # This allows Django to serve files during development
-# Serve Media Files (Add this BEFORE the catch-all)
+# Serve Media Files + Vite build assets BEFORE the catch-all.
+# In production WhiteNoise (WHITENOISE_ROOT=frontend_build) handles /assets/, /sw.js, etc.
+# In DEBUG mode WhiteNoise is disabled so we add explicit serve() patterns here instead.
 if settings.DEBUG:
+    import os
+    from django.views.static import serve as _serve
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    _fb = os.path.join(settings.BASE_DIR, 'frontend_build')
+    urlpatterns += [
+        # Vite-built bundles and hashed assets (JS/CSS/images)
+        re_path(r'^assets/(?P<path>.*)$', _serve, {'document_root': os.path.join(_fb, 'assets')}),
+        # PWA / icon assets
+        re_path(r'^icons/(?P<path>.*)$', _serve, {'document_root': os.path.join(_fb, 'icons')}),
+        # Landing page assets (if any)
+        re_path(r'^landing/(?P<path>.*)$', _serve, {'document_root': os.path.join(_fb, 'landing')}),
+        # Root-level files that WhiteNoise would serve in production
+        re_path(r'^(?P<path>sw\.js)$', _serve, {'document_root': _fb}),
+        re_path(r'^(?P<path>manifest\.webmanifest)$', _serve, {'document_root': _fb}),
+        re_path(r'^(?P<path>vite\.svg)$', _serve, {'document_root': _fb}),
+    ]
 
 # THE CATCH-ALL: Keep this at the very bottom so media/api routes match first
 urlpatterns += [

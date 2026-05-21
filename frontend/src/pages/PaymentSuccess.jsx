@@ -39,10 +39,14 @@ const PaymentSuccess = () => {
 
         if (response.data?.success) {
           await refreshCompany();
+          const isDeferred = response.data?.deferred_downgrade;
+          const targetPlan = response.data?.target_plan || response.data?.plan;
           setState({
             loading: false,
             success: true,
-            message: 'Payment successful. Your plan has been upgraded.',
+            message: isDeferred
+              ? `Downgrade scheduled. Your current plan access continues until your renewal date, then switches to ${targetPlan}.`
+              : 'Payment successful. Your plan has been updated.',
             plan: response.data.plan || null,
             subscriptionStatus: response.data.subscription_status || null,
           });

@@ -222,7 +222,14 @@ class PayPalSubscribeView(APIView):
                     if ends_at:
                         company.pending_downgrade_plan = plan_id
                         company.subscription_ends_at = ends_at
-                        company.save(update_fields=['paypal_subscription_id', 'pending_downgrade_plan', 'subscription_ends_at'])
+                        company.is_subscription_active = True
+                        # Explicitly include 'plan' and 'is_subscription_active' so that
+                        # a BILLING.SUBSCRIPTION.CANCELLED webhook for the old subscription
+                        # (which may arrive before this save) cannot corrupt these fields.
+                        company.save(update_fields=[
+                            'paypal_subscription_id', 'pending_downgrade_plan',
+                            'subscription_ends_at', 'plan', 'is_subscription_active',
+                        ])
                         logger.info(
                             f"AUDIT: Deferred plan downgrade - Company: {company.id}, "
                             f"{company.plan} → {plan_id} effective {ends_at}"
@@ -373,6 +380,15 @@ class BillingSummaryView(APIView):
             currency = (company.currency or 'USD').upper()
             plan = (company.plan or 'STARTER').upper()
 
+            # Defensive cleanup: a pending downgrade that targets the already-current
+            # plan is a no-op and causes confusing UI/state.
+            pending_plan = (company.pending_downgrade_plan or '').upper()
+            if pending_plan and pending_plan == plan:
+                company.pending_downgrade_plan = ''
+                company.subscription_ends_at = None
+                company.save(update_fields=['pending_downgrade_plan', 'subscription_ends_at'])
+                pending_plan = ''
+
             base_pricing = PRICING.get(currency, PRICING['USD'])
             plan_pricing = base_pricing.get(plan, {}) if plan != 'STARTER' else {}
             monthly_amount = '0.00' if plan == 'STARTER' else str(plan_pricing.get('amount', '0.00'))
@@ -389,7 +405,7 @@ class BillingSummaryView(APIView):
                 'last_payment': None,
                 'payment_method': None,
                 'cancel_available': bool(company.paypal_subscription_id),
-                'pending_downgrade_plan': company.pending_downgrade_plan or '',
+                'pending_downgrade_plan': pending_plan,
                 'subscription_ends_at': company.subscription_ends_at.isoformat() if company.subscription_ends_at else None,
             }
 
@@ -450,7 +466,19 @@ class BillingSummaryView(APIView):
             if payment_method:
                 summary['payment_method'] = payment_method
             else:
-                logger.warning(f"No payment method found for subscription {subscription_id}")
+                # PayPal doesn't populate payment_source until the first billing cycle.
+                # Fall back to the subscriber email so we show *something* meaningful.
+                subscriber_email = (subscription_data.get('subscriber') or {}).get('email_address')
+                if subscriber_email:
+                    payment_method = {
+                        'type': 'PAYPAL',
+                        'email': subscriber_email,
+                        'display': f"PayPal ({subscriber_email})",
+                    }
+                    summary['payment_method'] = payment_method
+                    logger.info(f"Falling back to subscriber email for payment method: {subscriber_email}")
+                else:
+                    logger.warning(f"No payment method found for subscription {subscription_id}")
 
             return Response(summary, status=200)
         except Exception as e:
@@ -591,12 +619,31 @@ class PayPalWebhookView(APIView):
             # Skip plan update when a deferred downgrade is in progress and the
             # billing period hasn't ended yet — the new subscription was created but
             # the user has already paid for the current period.
+            _TIER_ORDER = {'STARTER': 0, 'PRO': 1, 'ENTERPRISE': 2}
             is_deferred_downgrade = (
                 plan_tier
                 and company.pending_downgrade_plan == plan_tier
                 and company.subscription_ends_at
                 and company.subscription_ends_at > tz.now()
             )
+
+            # Race-condition guard: BILLING.SUBSCRIPTION.CREATED can arrive before
+            # the subscribe view has committed pending_downgrade_plan to the DB.
+            # If the webhook resource carries a future start_time AND the tier would
+            # be a downgrade, treat it as deferred so we don't flip the plan early.
+            if not is_deferred_downgrade and plan_tier:
+                resource = self._extract_resource(data)
+                sub_start_raw = resource.get('start_time') if resource else None
+                if sub_start_raw and _TIER_ORDER.get(plan_tier, 0) < _TIER_ORDER.get(company.plan, 0):
+                    from django.utils.dateparse import parse_datetime as _pdt_sub
+                    _sub_start_dt = _pdt_sub(sub_start_raw)
+                    if _sub_start_dt and _sub_start_dt > tz.now():
+                        is_deferred_downgrade = True
+                        logger.info(
+                            f"Deferred-downgrade race guard triggered for company {company.id}: "
+                            f"subscription start_time={sub_start_raw}, "
+                            f"plan {company.plan} → {plan_tier} (pending_downgrade not yet saved)"
+                        )
 
             if plan_tier and company.plan != plan_tier and not is_deferred_downgrade:
                 old_plan = company.plan
@@ -651,8 +698,18 @@ class PayPalWebhookView(APIView):
                 update_fields.append('is_subscription_active')
 
             if subscription_id:
+                from django.utils import timezone as _tz_pay
                 plan_tier, _ = get_paypal_plan_tier(subscription_id)
-                if plan_tier and company.plan != plan_tier:
+                # Don't switch to the deferred plan early — the billing period must
+                # have elapsed first.  (Normally the payment won't fire until the
+                # start_time, but this guard defends against edge cases.)
+                is_deferred_pay = (
+                    plan_tier
+                    and company.pending_downgrade_plan == plan_tier
+                    and company.subscription_ends_at
+                    and company.subscription_ends_at > _tz_pay.now()
+                )
+                if plan_tier and company.plan != plan_tier and not is_deferred_pay:
                     old_plan = company.plan
                     company.plan = plan_tier
                     update_fields.append('plan')
@@ -661,8 +718,9 @@ class PayPalWebhookView(APIView):
                         f"AUDIT: Plan updated via PayPal payment - Company: {company.id}, "
                         f"Plan: {old_plan} → {plan_tier}"
                     )
-                # Billing has started for the new plan — clear any pending downgrade tracking.
-                if company.pending_downgrade_plan:
+                # Billing has started for the new plan — clear pending downgrade tracking
+                # only once the deferred period has elapsed.
+                if company.pending_downgrade_plan and not is_deferred_pay:
                     company.pending_downgrade_plan = ''
                     company.subscription_ends_at = None
                     if 'pending_downgrade_plan' not in update_fields:
@@ -793,9 +851,19 @@ class PayPalConfirmView(APIView):
                 # Save the subscription_id that PayPal has
                 old_plan = company.plan
                 company.paypal_subscription_id = subscription_id
-                company.plan = plan_tier
                 company.is_subscription_active = True
-                company.save(update_fields=['paypal_subscription_id', 'plan', 'is_subscription_active'])
+                save_fields = ['paypal_subscription_id', 'is_subscription_active']
+                # Only update plan if this isn't a deferred downgrade.
+                from django.utils import timezone as _tz_fb_confirm
+                _is_deferred_fb = (
+                    company.pending_downgrade_plan == plan_tier
+                    and company.subscription_ends_at
+                    and company.subscription_ends_at > _tz_fb_confirm.now()
+                )
+                if not _is_deferred_fb:
+                    company.plan = plan_tier
+                    save_fields.append('plan')
+                company.save(update_fields=save_fields)
                 
                 # 📋 AUDIT LOG: Subscription confirmed after completion
                 logger.info(
@@ -833,13 +901,16 @@ class PayPalConfirmView(APIView):
 
         plan_tier, subscription_status = get_paypal_plan_tier(subscription_id)
         if not plan_tier:
+            # PayPal tier lookup failed (timeout or sandbox flakiness).
+            # Return 202 so the frontend shows a "still verifying" message.
+            # The webhook will update the plan when PayPal delivers the event.
             return Response(
                 {
                     'success': False,
-                    'subscription_status': subscription_status,
-                    'error': 'Unable to verify subscription tier'
+                    'subscription_status': subscription_status or 'UNKNOWN',
+                    'error': 'Subscription is still being verified. Your plan will update automatically — please wait a moment and refresh.',
                 },
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_202_ACCEPTED
             )
 
         if subscription_status != 'ACTIVE':
@@ -852,16 +923,32 @@ class PayPalConfirmView(APIView):
                 status=status.HTTP_202_ACCEPTED
             )
 
+        from django.utils import timezone as _tz_confirm
+        _is_deferred_confirm = (
+            company.pending_downgrade_plan == plan_tier
+            and company.subscription_ends_at
+            and company.subscription_ends_at > _tz_confirm.now()
+        )
         update_fields = []
         if company.plan != plan_tier:
-            old_plan = company.plan
-            company.plan = plan_tier
-            update_fields.append('plan')
-            # 📋 AUDIT LOG: Plan confirmed via PayPal
-            logger.info(
-                f"AUDIT: Plan confirmed via PayPal - Company: {company.id}, "
-                f"Plan: {old_plan} → {plan_tier}, Confirmed by: {user.email}"
-            )
+            # Don't apply the plan change immediately for deferred downgrades.
+            # The subscribe view already saved pending_downgrade_plan + subscription_ends_at;
+            # the plan switch happens lazily at renewal, not on approval.
+            if not _is_deferred_confirm:
+                old_plan = company.plan
+                company.plan = plan_tier
+                update_fields.append('plan')
+                # 📋 AUDIT LOG: Plan confirmed via PayPal
+                logger.info(
+                    f"AUDIT: Plan confirmed via PayPal - Company: {company.id}, "
+                    f"Plan: {old_plan} → {plan_tier}, Confirmed by: {user.email}"
+                )
+            else:
+                logger.info(
+                    f"Deferred downgrade confirmed for company {company.id}: "
+                    f"plan stays {company.plan} until {company.subscription_ends_at}, "
+                    f"then switches to {plan_tier}"
+                )
 
         if not company.is_subscription_active:
             company.is_subscription_active = True
@@ -874,7 +961,9 @@ class PayPalConfirmView(APIView):
             {
                 'success': True,
                 'plan': company.plan,
-                'subscription_status': subscription_status
+                'target_plan': plan_tier if _is_deferred_confirm else None,
+                'subscription_status': subscription_status,
+                'deferred_downgrade': _is_deferred_confirm,
             },
             status=status.HTTP_200_OK
         )

@@ -654,12 +654,14 @@ class CompanySerializer(serializers.ModelSerializer):
                   'logo', 'is_active', 'created_at', 'country_code', 'currency',
                   'requested_country_code', 'requested_currency', 'location_verification_status',
                   'location_verification_score', 'location_verification_notes', 'location_verified_at',
-                  'location_verification_document']
+                  'location_verification_document',
+                  'pending_downgrade_plan', 'subscription_ends_at']
         read_only_fields = [
             'id', 'created_at', 'plan',  # 🔒 CRITICAL: plan is now read-only - changes only via PayPal webhooks
             'requested_country_code', 'requested_currency', 'location_verification_status',
             'location_verification_score', 'location_verification_notes', 'location_verified_at',
-            'location_verification_document'
+            'location_verification_document',
+            'pending_downgrade_plan', 'subscription_ends_at',
         ]
 
     def get_usage_stats(self, obj):
