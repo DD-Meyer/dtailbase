@@ -43,6 +43,9 @@ class Company(models.Model):
     # PayPal Subscription fields
     paypal_subscription_id = models.CharField(max_length=255, blank=True, null=True)
     paypal_customer_id = models.CharField(max_length=255, blank=True, null=True)
+    # Deferred downgrade: plan that should become active after subscription_ends_at
+    pending_downgrade_plan = models.CharField(max_length=20, blank=True, default='')
+    subscription_ends_at = models.DateTimeField(null=True, blank=True)
     
     # Geolocation and Currency
     CURRENCY_CHOICES = [
@@ -77,6 +80,25 @@ class Company(models.Model):
             return self.get_monthly_booking_count() < 10
         return True # Pro and Elite are unlimited
 
+
+    def apply_pending_downgrade_if_due(self):
+        """Apply a deferred downgrade if the subscription end date has passed.
+        Saves the model if a downgrade is applied. Returns True if applied."""
+        from django.utils import timezone
+        if self.pending_downgrade_plan and self.subscription_ends_at and timezone.now() >= self.subscription_ends_at:
+            new_plan = self.pending_downgrade_plan
+            self.plan = new_plan
+            self.pending_downgrade_plan = ''
+            self.subscription_ends_at = None
+            save_fields = ['plan', 'pending_downgrade_plan', 'subscription_ends_at']
+            # For paid-to-paid downgrades the new subscription is still active.
+            # Only deactivate when downgrading all the way to STARTER (full cancellation).
+            if new_plan == 'STARTER':
+                self.is_subscription_active = False
+                save_fields.append('is_subscription_active')
+            self.save(update_fields=save_fields)
+            return True
+        return False
 
     def save(self, *args, **kwargs):
         # 1. Handle Slug Generation

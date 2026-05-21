@@ -157,8 +157,28 @@ class PayPalSubscribeView(APIView):
                             f"subscription={previous_subscription_id}, error={cancel_result.get('error')}"
                         )
 
+                # Detect paid-to-paid downgrades and defer the plan change.
+                _PLAN_TIER = {'STARTER': 0, 'PRO': 1, 'ENTERPRISE': 2}
+                is_downgrade = (
+                    start_time is not None
+                    and _PLAN_TIER.get(plan_id, 0) < _PLAN_TIER.get(company.plan, 0)
+                )
                 company.paypal_subscription_id = subscription_id
-                company.save(update_fields=['paypal_subscription_id'])
+                if is_downgrade:
+                    from django.utils.dateparse import parse_datetime
+                    ends_at = parse_datetime(start_time)
+                    if ends_at:
+                        company.pending_downgrade_plan = plan_id
+                        company.subscription_ends_at = ends_at
+                        company.save(update_fields=['paypal_subscription_id', 'pending_downgrade_plan', 'subscription_ends_at'])
+                        logger.info(
+                            f"AUDIT: Deferred plan downgrade - Company: {company.id}, "
+                            f"{company.plan} → {plan_id} effective {ends_at}"
+                        )
+                    else:
+                        company.save(update_fields=['paypal_subscription_id'])
+                else:
+                    company.save(update_fields=['paypal_subscription_id'])
                 logger.info(f"Stored subscription_id for company {company.id}: {subscription_id}")
                 
                 return Response({
@@ -181,11 +201,15 @@ class PayPalSubscribeView(APIView):
 
 @method_decorator(csrf_exempt, name='dispatch')
 class PayPalCancelSubscriptionView(APIView):
-    """Cancel the active PayPal subscription to allow downgrade actions."""
+    """Cancel the active PayPal subscription. The plan downgrade is deferred to the end
+    of the already-paid billing period so the user keeps access they paid for."""
     permission_classes = [IsAuthenticated, IsAccountAdmin]
 
     def post(self, request):
         try:
+            from django.utils.dateparse import parse_datetime
+            from django.utils import timezone
+
             user = request.user
             if not hasattr(user, 'company') or not user.company:
                 return Response({'error': 'User company not found'}, status=400)
@@ -195,6 +219,17 @@ class PayPalCancelSubscriptionView(APIView):
             if not subscription_id:
                 return Response({'error': 'No active PayPal subscription found'}, status=400)
 
+            # Fetch next billing time BEFORE cancelling so we know when access expires.
+            subscription_ends_at = None
+            try:
+                existing_details = get_paypal_subscription_details(subscription_id)
+                if existing_details:
+                    next_billing_raw = existing_details.get('billing_info', {}).get('next_billing_time')
+                    if next_billing_raw:
+                        subscription_ends_at = parse_datetime(next_billing_raw)
+            except Exception as fetch_err:
+                logger.warning(f"Could not fetch subscription end date: {fetch_err}")
+
             cancel_result = cancel_subscription(subscription_id)
             if not cancel_result.get('success'):
                 return Response(
@@ -202,26 +237,52 @@ class PayPalCancelSubscriptionView(APIView):
                     status=502
                 )
 
-            # Apply immediate local downgrade state while webhook reconciliation completes.
             old_plan = company.plan
-            company.is_subscription_active = False
-            company.plan = 'STARTER'
-            company.paypal_subscription_id = ''
-            company.save(update_fields=['is_subscription_active', 'plan', 'paypal_subscription_id'])
-            
-            # 📋 AUDIT LOG: Subscription cancelled
-            logger.info(
-                f"AUDIT: Subscription cancelled - Company: {company.id}, "
-                f"Cancelled by: {user.email}, "
-                f"Plan downgrade: {old_plan} → STARTER, "
-                f"Subscription ID: {subscription_id}"
-            )
 
-            return Response({
-                'success': True,
-                'message': cancel_result.get('message') or 'Subscription cancelled on PayPal. Any penalties due are handled by PayPal billing terms.',
-                'plan': company.plan,
-            }, status=200)
+            if subscription_ends_at and subscription_ends_at > timezone.now():
+                # Defer downgrade: user has paid for the rest of the billing period.
+                company.pending_downgrade_plan = 'STARTER'
+                company.subscription_ends_at = subscription_ends_at
+                # Keep plan and is_subscription_active unchanged until period ends.
+                company.save(update_fields=['pending_downgrade_plan', 'subscription_ends_at'])
+
+                logger.info(
+                    f"AUDIT: Subscription cancelled (deferred) - Company: {company.id}, "
+                    f"Cancelled by: {user.email}, "
+                    f"Plan downgrade: {old_plan} → STARTER scheduled at {subscription_ends_at}, "
+                    f"Subscription ID: {subscription_id}"
+                )
+
+                return Response({
+                    'success': True,
+                    'message': (
+                        f'Subscription cancelled. Your {old_plan} plan access continues until '
+                        f'{subscription_ends_at.strftime("%d %b %Y")}, then downgrades to Starter.'
+                    ),
+                    'plan': company.plan,
+                    'subscription_ends_at': subscription_ends_at.isoformat(),
+                }, status=200)
+            else:
+                # No valid end date found — apply downgrade immediately.
+                company.is_subscription_active = False
+                company.plan = 'STARTER'
+                company.paypal_subscription_id = ''
+                company.pending_downgrade_plan = ''
+                company.subscription_ends_at = None
+                company.save(update_fields=['is_subscription_active', 'plan', 'paypal_subscription_id', 'pending_downgrade_plan', 'subscription_ends_at'])
+
+                logger.info(
+                    f"AUDIT: Subscription cancelled (immediate) - Company: {company.id}, "
+                    f"Cancelled by: {user.email}, "
+                    f"Plan downgrade: {old_plan} → STARTER, "
+                    f"Subscription ID: {subscription_id}"
+                )
+
+                return Response({
+                    'success': True,
+                    'message': cancel_result.get('message') or 'Subscription cancelled. Plan downgraded to Starter.',
+                    'plan': company.plan,
+                }, status=200)
         except Exception as e:
             logger.error(f"Error in PayPalCancelSubscriptionView: {str(e)}", exc_info=True)
             return Response({'error': 'Unable to cancel subscription right now'}, status=500)
@@ -238,6 +299,9 @@ class BillingSummaryView(APIView):
                 return Response({'error': 'User company not found'}, status=400)
 
             company = user.company
+            # Lazily apply any pending downgrade whose period has now elapsed.
+            company.apply_pending_downgrade_if_due()
+
             currency = (company.currency or 'USD').upper()
             plan = (company.plan or 'STARTER').upper()
 
@@ -257,6 +321,8 @@ class BillingSummaryView(APIView):
                 'last_payment': None,
                 'payment_method': None,
                 'cancel_available': bool(company.paypal_subscription_id),
+                'pending_downgrade_plan': company.pending_downgrade_plan or '',
+                'subscription_ends_at': company.subscription_ends_at.isoformat() if company.subscription_ends_at else None,
             }
 
             subscription_id = company.paypal_subscription_id
@@ -433,6 +499,7 @@ class PayPalWebhookView(APIView):
     def _handle_subscription_created(self, data, event_type):
         """Handle subscription lifecycle create/update/activation."""
         try:
+            from django.utils import timezone as tz
             company = self._get_company_for_event(data)
             if not company:
                 logger.warning("Company not found for subscription create/update webhook")
@@ -453,15 +520,30 @@ class PayPalWebhookView(APIView):
             if not plan_tier and subscription_id:
                 plan_tier, _ = get_paypal_plan_tier(subscription_id)
 
-            if plan_tier and company.plan != plan_tier:
+            # Skip plan update when a deferred downgrade is in progress and the
+            # billing period hasn't ended yet — the new subscription was created but
+            # the user has already paid for the current period.
+            is_deferred_downgrade = (
+                plan_tier
+                and company.pending_downgrade_plan == plan_tier
+                and company.subscription_ends_at
+                and company.subscription_ends_at > tz.now()
+            )
+
+            if plan_tier and company.plan != plan_tier and not is_deferred_downgrade:
                 old_plan = company.plan
                 company.plan = plan_tier
                 update_fields.append('plan')
-                # 📋 AUDIT LOG: Plan upgraded via webhook
+                # 📋 AUDIT LOG: Plan changed via webhook
                 logger.info(
-                    f"AUDIT: Plan upgraded via PayPal webhook - Company: {company.id}, "
+                    f"AUDIT: Plan changed via PayPal webhook - Company: {company.id}, "
                     f"Plan: {old_plan} → {plan_tier}, Event: {event_type}"
                 )
+                # Clear pending downgrade tracking when the target plan is now live.
+                if company.pending_downgrade_plan == plan_tier:
+                    company.pending_downgrade_plan = ''
+                    company.subscription_ends_at = None
+                    update_fields.extend(['pending_downgrade_plan', 'subscription_ends_at'])
 
             should_activate = event_type == 'BILLING.SUBSCRIPTION.ACTIVATED' or resource_status == 'ACTIVE'
             if should_activate and not company.is_subscription_active:
@@ -473,7 +555,8 @@ class PayPalWebhookView(APIView):
 
             logger.info(
                 f"Subscription lifecycle event processed for company {company.id}: "
-                f"subscription={subscription_id}, event={event_type}, plan={company.plan}"
+                f"subscription={subscription_id}, event={event_type}, plan={company.plan}, "
+                f"deferred_downgrade_skipped={is_deferred_downgrade}"
             )
             return Response(status=200)
         
@@ -510,6 +593,12 @@ class PayPalWebhookView(APIView):
                         f"AUDIT: Plan updated via PayPal payment - Company: {company.id}, "
                         f"Plan: {old_plan} → {plan_tier}"
                     )
+                # Billing has started for the new plan — clear any pending downgrade tracking.
+                if company.pending_downgrade_plan:
+                    company.pending_downgrade_plan = ''
+                    company.subscription_ends_at = None
+                    if 'pending_downgrade_plan' not in update_fields:
+                        update_fields.extend(['pending_downgrade_plan', 'subscription_ends_at'])
 
             if update_fields:
                 company.save(update_fields=update_fields)
@@ -537,6 +626,7 @@ class PayPalWebhookView(APIView):
     def _handle_subscription_cancelled(self, data):
         """Handle subscription cancellation."""
         try:
+            from django.utils import timezone as tz
             company = self._get_company_for_event(data)
             if company:
                 subscription_id = self._extract_subscription_id(data)
@@ -546,16 +636,30 @@ class PayPalWebhookView(APIView):
                     company.paypal_subscription_id = subscription_id
                     update_fields.append('paypal_subscription_id')
 
+                # If a deferred downgrade is pending and the billing period hasn't ended yet,
+                # keep the current plan active — the user paid for this period.
+                if company.pending_downgrade_plan and company.subscription_ends_at and company.subscription_ends_at > tz.now():
+                    if update_fields:
+                        company.save(update_fields=update_fields)
+                    logger.info(
+                        f"AUDIT: Subscription cancelled webhook received for company {company.id} — "
+                        f"deferred downgrade to {company.pending_downgrade_plan} on {company.subscription_ends_at}, "
+                        f"plan kept active until then."
+                    )
+                    return Response(status=200)
+
                 old_plan = company.plan
                 company.is_subscription_active = False
-                company.plan = 'STARTER'  # Downgrade to starter
-                update_fields.extend(['is_subscription_active', 'plan'])
+                company.plan = company.pending_downgrade_plan or 'STARTER'
+                company.pending_downgrade_plan = ''
+                company.subscription_ends_at = None
+                update_fields.extend(['is_subscription_active', 'plan', 'pending_downgrade_plan', 'subscription_ends_at'])
                 company.save(update_fields=update_fields)
                 
                 # 📋 AUDIT LOG: Subscription cancelled via webhook
                 logger.info(
                     f"AUDIT: Subscription cancelled via webhook - Company: {company.id}, "
-                    f"Plan downgrade: {old_plan} → STARTER"
+                    f"Plan downgrade: {old_plan} → {company.plan}"
                 )
             return Response(status=200)
         
