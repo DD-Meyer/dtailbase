@@ -101,7 +101,7 @@ const About = () => {
               <div className="mock-ui-label">THE SOLUTION / DTAILBASE DASHBOARD</div>
               {/* PASTE IMAGE URL HERE */}
               <div style={{width:'100%',height:'100%',backgroundColor: 'var(--background-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', fontSize: '14px', padding: '20px 0px', textAlign: 'center'}}>
-                <video loop muted autoPlay playsInline src="/public/landing/videos/the-solution-1.mp4"/>
+                <video loop muted autoPlay playsInline src="/landing/videos/the-solution-1.mp4"/>
               </div>
             </div>
           </div>
