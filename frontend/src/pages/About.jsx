@@ -1,3 +1,5 @@
+import { AlignCenter } from "lucide-react";
+
 const About = () => {
   return (
     <div className="landing-page about-page">
@@ -71,7 +73,9 @@ const About = () => {
             <div className="glass-mockup">
               <div className="mock-ui-label">THE PROBLEM / BEFORE DTAILBASE</div>
               {/* PASTE IMAGE URL HERE */}
-              {/* <img src="YOUR_IMAGE_URL" alt="Before Dtailbase" style={{width:'100%',height:'100%',objectFit:'cover'}} /> */}
+              <div style={{width:'100%',height:'100%',backgroundColor: 'var(--background-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', fontSize: '14px', padding: '20px 0px', textAlign: 'center'}}>
+                {/* <img src="/public/landing/images/pain-point-1.jpg" alt="Before Dtailbase" style={{width:'100%',height:'100%',objectFit:'cover', backgroundColor: 'var(--background-dim)', borderRadius: '8px'}} /> */}
+              </div>
             </div>
           </div>
         </div>
@@ -96,7 +100,9 @@ const About = () => {
             <div className="glass-mockup">
               <div className="mock-ui-label">THE SOLUTION / DTAILBASE DASHBOARD</div>
               {/* PASTE IMAGE URL HERE */}
-              {/* <img src="YOUR_IMAGE_URL" alt="Dtailbase Dashboard" style={{width:'100%',height:'100%',objectFit:'cover'}} /> */}
+              <div style={{width:'100%',height:'100%',backgroundColor: 'var(--background-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', fontSize: '14px', padding: '20px 0px', textAlign: 'center'}}>
+                <video loop muted autoPlay playsInline src="/public/landing/videos/the-solution-1.mp4"/>
+              </div>
             </div>
           </div>
         </div>
