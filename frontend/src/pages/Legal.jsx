@@ -18,8 +18,8 @@ const LEGAL_SECTIONS = [
       'Location data stored permanently — cannot be altered',
       'Adds undeniable proof of physical presence at signing',
     ],
-    screenshotLabel: 'App Screenshot: Location Verification at Signing',
-    screenshotNote: '← Paste your screenshot URL here',
+    // screenshotLabel: 'App Screenshot: Location Verification at Signing',
+    // screenshotNote: '← Paste your screenshot URL here',
   },
   {
     id: 'signatures',
@@ -37,8 +37,8 @@ const LEGAL_SECTIONS = [
       'Signed PDFs downloadable at any time for legal use',
       'Records are permanent and cannot be retroactively edited',
     ],
-    screenshotLabel: 'App Screenshot: Signature Record & Timestamp',
-    screenshotNote: '← Paste your screenshot URL here',
+    // screenshotLabel: 'App Screenshot: Signature Record & Timestamp',
+    // screenshotNote: '← Paste your screenshot URL here',
   },
   {
     id: 'photos',
@@ -56,8 +56,8 @@ const LEGAL_SECTIONS = [
       'Multiple photo slots per booking (plan-dependent)',
       'Provides visual proof in any dispute or insurance claim',
     ],
-    screenshotLabel: 'App Screenshot: Photo Vault & Condition Log',
-    screenshotNote: '← Paste your screenshot URL here',
+    // screenshotLabel: 'App Screenshot: Photo Vault & Condition Log',
+    // screenshotNote: '← Paste your screenshot URL here',
   },
   {
     id: 'history',
@@ -75,8 +75,8 @@ const LEGAL_SECTIONS = [
       'Records cannot be deleted by users — audit-safe',
       'History accessible on Enterprise plan for the lifetime of the account',
     ],
-    screenshotLabel: 'App Screenshot: Full Service History View',
-    screenshotNote: '← Paste your screenshot URL here',
+    // screenshotLabel: 'App Screenshot: Full Service History View',
+    // screenshotNote: '← Paste your screenshot URL here',
   },
   {
     id: 'privacy',
@@ -94,8 +94,8 @@ const LEGAL_SECTIONS = [
       'POPIA-aware data handling practices',
       'Data stored on secure VPS infrastructure',
     ],
-    screenshotLabel: 'App Screenshot: Security & Encryption Settings',
-    screenshotNote: '← Paste your screenshot URL here',
+    // screenshotLabel: 'App Screenshot: Security & Encryption Settings',
+    // screenshotNote: '← Paste your screenshot URL here',
   },
   {
     id: 'ownership',
@@ -113,8 +113,8 @@ const LEGAL_SECTIONS = [
       'Data deletion available on request',
       'You retain ownership of all client-submitted information',
     ],
-    screenshotLabel: 'App Screenshot: Data Export Panel',
-    screenshotNote: '← Paste your screenshot URL here',
+    // screenshotLabel: 'App Screenshot: Data Export Panel',
+    // screenshotNote: '← Paste your screenshot URL here',
   },
   {
     id: 'terms',
@@ -132,8 +132,8 @@ const LEGAL_SECTIONS = [
       'Accounts may be terminated for misuse or abuse',
       'Terms subject to update — users notified of material changes',
     ],
-    screenshotLabel: null,
-    screenshotNote: null,
+    // screenshotLabel: null,
+    // screenshotNote: null,
   },
   {
     id: 'liability',
@@ -151,8 +151,8 @@ const LEGAL_SECTIONS = [
       'Platform liability limited to the value of the current subscription',
       'Contact our compliance team for enterprise-grade legal documentation',
     ],
-    screenshotLabel: null,
-    screenshotNote: null,
+    // screenshotLabel: null,
+    // screenshotNote: null,
   },
 ];
 
