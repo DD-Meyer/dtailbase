@@ -656,29 +656,18 @@ class PayPalWebhookView(APIView):
 
             is_activation = event_type == 'BILLING.SUBSCRIPTION.ACTIVATED' or resource_status == 'ACTIVE'
 
-            # Only change the plan when the subscription is fully activated (user
-            # approved + payment confirmed). Changing it on BILLING.SUBSCRIPTION.CREATED
-            # would update the plan before the user has actually paid — if they cancel
-            # on the PayPal approval page the plan would be wrong.
-            if is_activation and plan_tier and company.plan != plan_tier and not is_deferred_downgrade:
-                old_plan = company.plan
-                company.plan = plan_tier
-                update_fields.append('plan')
-                # 📋 AUDIT LOG: Plan changed via webhook
-                logger.info(
-                    f"AUDIT: Plan changed via PayPal webhook - Company: {company.id}, "
-                    f"Plan: {old_plan} → {plan_tier}, Event: {event_type}"
-                )
-                # Clear pending downgrade tracking when the target plan is now live.
-                if company.pending_downgrade_plan == plan_tier:
-                    company.pending_downgrade_plan = ''
-                    company.subscription_ends_at = None
-                    update_fields.extend(['pending_downgrade_plan', 'subscription_ends_at'])
+            # NOTE: Do NOT change company.plan here.
+            # BILLING.SUBSCRIPTION.ACTIVATED fires the moment the user clicks
+            # "Agree & Subscribe" on the PayPal review page — before any payment
+            # is processed. Plan changes are handled exclusively in
+            # _handle_subscription_payment (BILLING.SUBSCRIPTION.PAYMENT.COMPLETED)
+            # so the plan only updates once actual money is confirmed.
 
             # On activation, cancel the previous subscription that was held in cache
-            # (deferred from PayPalSubscribeView so cancellation only happens after
-            # the user has confirmed payment). This applies to both upgrades and
-            # deferred downgrades.
+            # (deferred from PayPalSubscribeView). We cancel it here — not at payment
+            # time — to prevent the old subscription from billing again at its next
+            # renewal (which coincides with the new subscription's start_time).
+            # This applies to both upgrades and deferred downgrades.
             if is_activation and subscription_id:
                 prev_sub_id = cache.get(f"paypal:prev_sub:{subscription_id}")
                 if prev_sub_id:
