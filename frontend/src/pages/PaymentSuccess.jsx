@@ -40,14 +40,21 @@ const PaymentSuccess = () => {
         if (response.data?.success) {
           await refreshCompany();
           const isDeferred = response.data?.deferred_downgrade;
+          const pendingPlan = response.data?.pending_plan;
           const targetPlan = response.data?.target_plan || response.data?.plan;
+          let message;
+          if (isDeferred) {
+            message = `Downgrade scheduled. Your current plan access continues until your renewal date, then switches to ${targetPlan}.`;
+          } else if (pendingPlan) {
+            message = `Subscription approved. Your ${pendingPlan} plan will activate once payment is confirmed — this usually takes just a moment. Refresh this page if your plan does not update.`;
+          } else {
+            message = 'Payment successful. Your plan has been updated.';
+          }
           setState({
             loading: false,
             success: true,
-            message: isDeferred
-              ? `Downgrade scheduled. Your current plan access continues until your renewal date, then switches to ${targetPlan}.`
-              : 'Payment successful. Your plan has been updated.',
-            plan: response.data.plan || null,
+            message,
+            plan: pendingPlan || response.data.plan || null,
             subscriptionStatus: response.data.subscription_status || null,
           });
           return;
