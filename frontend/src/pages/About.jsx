@@ -40,13 +40,12 @@ const About = () => {
           </div>
           <div className="about-media-block">
             <h3 className="about-media-heading">Daryn Meyer</h3>
-            <div className="glass-mockup">
+            {/* <div className="glass-mockup">
               <div className="mock-ui-label">FOUNDER / DARYN MEYER</div>
-              {/* PASTE FOUNDER IMAGE URL HERE */}
               <div style={{width:'100%',height:'100%',backgroundColor: 'var(--background-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', fontSize: '14px', padding: '60px 50px', textAlign: 'center'}}>
                 <img src="landing/images/dm-founder-1.jpg" alt="Daryn Meyer" style={{width:'100%',height:'100%',objectFit:'cover', objectPosition:'0% 40%', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0, 0, 255, 0.1)'}} />
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -72,13 +71,12 @@ const About = () => {
           </div>
           <div className="about-media-block">
             <h3 className="about-media-heading">The Problem No One Was Solving</h3>
-            <div className="glass-mockup">
+            {/* <div className="glass-mockup">
               <div className="mock-ui-label">THE PROBLEM / BEFORE DTAILBASE</div>
-              {/* PASTE IMAGE URL HERE */}
               <div style={{width:'100%',height:'100%',backgroundColor: 'var(--background-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-dim)', fontSize: '14px', padding: '60px 50px', textAlign: 'center'}}>
                 <img src="/landing/images/pain-point-5.jpg" alt="Before Dtailbase" style={{width:'100%',height:'100%',objectFit:'cover', objectPosition:'0% 40%', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0, 0, 255, 0.1)'}} />
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
 
