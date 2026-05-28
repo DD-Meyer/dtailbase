@@ -201,14 +201,23 @@ class PayPalSubscribeView(APIView):
             if result.get('success'):
                 subscription_id = result.get('subscription_id', '')
 
-                # Cancel the previous subscription now that the new one has been created.
+                # Do NOT cancel the previous subscription here. Cancelling before the
+                # user approves the new subscription on PayPal would leave the company
+                # with no active subscription if they cancel the checkout flow.
+                # Instead, store the old subscription ID in cache so the
+                # BILLING.SUBSCRIPTION.ACTIVATED webhook can cancel it once payment
+                # is confirmed.
                 if previous_subscription_id and previous_subscription_id != subscription_id:
-                    cancel_result = cancel_subscription(previous_subscription_id)
-                    if not cancel_result.get('success'):
-                        logger.warning(
-                            f"Previous subscription cancellation failed for company {company.id}: "
-                            f"subscription={previous_subscription_id}, error={cancel_result.get('error')}"
-                        )
+                    cache.set(
+                        f"paypal:prev_sub:{subscription_id}",
+                        previous_subscription_id,
+                        timeout=7 * 24 * 3600,  # 7 days
+                    )
+                    logger.info(
+                        f"Stored previous subscription {previous_subscription_id} in cache "
+                        f"for new subscription {subscription_id} (company {company.id}) — "
+                        f"will be cancelled on activation."
+                    )
 
                 # Detect paid-to-paid downgrades and defer the plan change.
                 is_downgrade = (
@@ -645,7 +654,13 @@ class PayPalWebhookView(APIView):
                             f"plan {company.plan} → {plan_tier} (pending_downgrade not yet saved)"
                         )
 
-            if plan_tier and company.plan != plan_tier and not is_deferred_downgrade:
+            is_activation = event_type == 'BILLING.SUBSCRIPTION.ACTIVATED' or resource_status == 'ACTIVE'
+
+            # Only change the plan when the subscription is fully activated (user
+            # approved + payment confirmed). Changing it on BILLING.SUBSCRIPTION.CREATED
+            # would update the plan before the user has actually paid — if they cancel
+            # on the PayPal approval page the plan would be wrong.
+            if is_activation and plan_tier and company.plan != plan_tier and not is_deferred_downgrade:
                 old_plan = company.plan
                 company.plan = plan_tier
                 update_fields.append('plan')
@@ -660,8 +675,27 @@ class PayPalWebhookView(APIView):
                     company.subscription_ends_at = None
                     update_fields.extend(['pending_downgrade_plan', 'subscription_ends_at'])
 
-            should_activate = event_type == 'BILLING.SUBSCRIPTION.ACTIVATED' or resource_status == 'ACTIVE'
-            if should_activate and not company.is_subscription_active:
+            # On activation, cancel the previous subscription that was held in cache
+            # (deferred from PayPalSubscribeView so cancellation only happens after
+            # the user has confirmed payment). This applies to both upgrades and
+            # deferred downgrades.
+            if is_activation and subscription_id:
+                prev_sub_id = cache.get(f"paypal:prev_sub:{subscription_id}")
+                if prev_sub_id:
+                    _cancel_result = cancel_subscription(prev_sub_id)
+                    if _cancel_result.get('success'):
+                        logger.info(
+                            f"Cancelled previous subscription {prev_sub_id} after activation "
+                            f"of {subscription_id} for company {company.id}"
+                        )
+                    else:
+                        logger.warning(
+                            f"Failed to cancel previous subscription {prev_sub_id} for "
+                            f"company {company.id}: {_cancel_result.get('error')}"
+                        )
+                    cache.delete(f"paypal:prev_sub:{subscription_id}")
+
+            if is_activation and not company.is_subscription_active:
                 company.is_subscription_active = True
                 update_fields.append('is_subscription_active')
 
@@ -757,9 +791,32 @@ class PayPalWebhookView(APIView):
             if company:
                 subscription_id = self._extract_subscription_id(data)
 
+                # If this subscription was awaiting user approval (stored in cache
+                # from PayPalSubscribeView), the user cancelled during the PayPal
+                # checkout flow before completing payment. Restore the company to
+                # its prior subscription state instead of downgrading the plan.
+                if subscription_id:
+                    prev_sub_id = cache.get(f"paypal:prev_sub:{subscription_id}")
+                    if prev_sub_id:
+                        company.paypal_subscription_id = prev_sub_id
+                        company.pending_downgrade_plan = ''
+                        company.subscription_ends_at = None
+                        company.save(update_fields=[
+                            'paypal_subscription_id', 'pending_downgrade_plan',
+                            'subscription_ends_at',
+                        ])
+                        cache.delete(f"paypal:prev_sub:{subscription_id}")
+                        logger.info(
+                            f"AUDIT: Subscription cancelled before approval - Company: {company.id}, "
+                            f"Restored prior subscription {prev_sub_id}, cleared pending downgrade. "
+                            f"Cancelled new sub: {subscription_id}"
+                        )
+                        return Response(status=200)
+
                 # If the cancelled subscription is not the company's current one, it was
-                # the old subscription replaced during a plan switch. Ignore this event —
-                # acting on it would incorrectly downgrade an already-upgraded account.
+                # the old subscription cancelled by the ACTIVATED webhook handler after a
+                # successful plan switch. Ignore this event — acting on it would
+                # incorrectly downgrade an already-upgraded account.
                 if (
                     subscription_id
                     and company.paypal_subscription_id
