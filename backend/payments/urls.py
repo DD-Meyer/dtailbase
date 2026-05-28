@@ -8,6 +8,7 @@ from .views import (
     BillingSummaryView,
     PayPalConfirmView,
     PayPalWebhookView,
+    PayPalWebhookDebugView,
     PlansView,  # Use PlansView for plan/pricing info
     PayFastCheckoutView  # Keep for backward compatibility
 )
@@ -20,6 +21,7 @@ urlpatterns = [
     path('billing-summary/', BillingSummaryView.as_view(), name='billing_summary'),
     path('confirm/', csrf_exempt(PayPalConfirmView.as_view()), name='paypal_confirm'),
     path('webhook/', csrf_exempt(PayPalWebhookView.as_view()), name='paypal_webhook'),
+    path('webhooks/debug/', PayPalWebhookDebugView.as_view(), name='paypal_webhook_debug'),
 
     # Deprecated PayFast endpoint
     path('payfast-initiate/', csrf_exempt(PayFastCheckoutView.as_view()), name='payfast_initiate'),

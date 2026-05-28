@@ -522,6 +522,35 @@ class PayPalWebhookView(APIView):
             
             event_type = (data.get('event_type') or data.get('txn_type') or '').upper()
 
+            # ── Diagnostic ring-buffer ────────────────────────────────────────────
+            # Log the full incoming event so we can audit exactly what PayPal sends
+            # at each stage of the subscription lifecycle.
+            _resource_diag = data.get('resource', {}) if isinstance(data.get('resource'), dict) else {}
+            _diag_entry = {
+                'event_type': event_type,
+                'event_id': event_id,
+                'subscription_id': (
+                    _resource_diag.get('id')
+                    or _resource_diag.get('billing_agreement_id')
+                    or ''
+                ),
+                'resource_status': (_resource_diag.get('status') or '').upper(),
+                'plan_id': _resource_diag.get('plan_id', ''),
+                'ts': str(__import__('datetime').datetime.utcnow()),
+            }
+            logger.info(
+                f"PAYPAL WEBHOOK RECEIVED | event_type={_diag_entry['event_type']} | "
+                f"subscription_id={_diag_entry['subscription_id']} | "
+                f"resource_status={_diag_entry['resource_status']} | "
+                f"plan_id={_diag_entry['plan_id']} | "
+                f"event_id={_diag_entry['event_id']}"
+            )
+            # Store up to the last 20 events in cache for the debug endpoint.
+            _recent: list = cache.get('paypal:webhook:recent', [])
+            _recent.insert(0, _diag_entry)
+            cache.set('paypal:webhook:recent', _recent[:20], timeout=7 * 24 * 3600)
+            # ─────────────────────────────────────────────────────────────────────
+
             if event_type in {
                 'BILLING.SUBSCRIPTION.CREATED',
                 'BILLING.SUBSCRIPTION.UPDATED',
@@ -884,8 +913,11 @@ class PayPalConfirmView(APIView):
         # Refresh company from database to get latest paypal_subscription_id
         company.refresh_from_db()
         stored_id = company.paypal_subscription_id or ''
-        
-        logger.info(f"Confirm subscription for company {company.id} - stored: '{stored_id}', received: '{subscription_id}'")
+
+        logger.info(
+            f"PAYPAL CONFIRM | company={company.id} | stored_sub='{stored_id}' | "
+            f"received_sub='{subscription_id}' | current_plan={company.plan}"
+        )
         
         if not stored_id:
             logger.warning(
@@ -893,6 +925,11 @@ class PayPalConfirmView(APIView):
             )
             # Still proceed to verify with PayPal in case it was created but not saved
             plan_tier, subscription_status = get_paypal_plan_tier(subscription_id)
+            logger.info(
+                f"PAYPAL CONFIRM (no stored id) | company={company.id} | "
+                f"paypal_status={subscription_status} | plan_tier={plan_tier} | "
+                f"current_db_plan={company.plan} | NOTE: plan will NOT change here"
+            )
             if plan_tier and subscription_status == 'ACTIVE':
                 from django.utils import timezone as _tz_fb_confirm
                 _is_deferred_fb = (
@@ -946,6 +983,11 @@ class PayPalConfirmView(APIView):
             )
 
         plan_tier, subscription_status = get_paypal_plan_tier(subscription_id)
+        logger.info(
+            f"PAYPAL CONFIRM | company={company.id} | "
+            f"paypal_status={subscription_status} | plan_tier={plan_tier} | "
+            f"current_db_plan={company.plan} | NOTE: plan will NOT change here"
+        )
         if not plan_tier:
             # PayPal tier lookup failed (timeout or sandbox flakiness).
             # Return 202 so the frontend shows a "still verifying" message.
@@ -1013,6 +1055,49 @@ class PayPalConfirmView(APIView):
             },
             status=status.HTTP_200_OK
         )
+
+
+class PayPalWebhookDebugView(APIView):
+    """
+    Debug-only endpoint (superuser required) that returns:
+    - The last 20 PayPal webhook events stored in cache.
+    - The company's current plan / subscription state from the DB.
+
+    GET /payments/webhooks/debug/
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if not request.user.is_superuser:
+            return Response({'error': 'Superuser access required'}, status=403)
+
+        recent_webhooks = cache.get('paypal:webhook:recent', [])
+
+        company_info = None
+        if hasattr(request.user, 'company') and request.user.company:
+            c = request.user.company
+            c.refresh_from_db()
+            company_info = {
+                'id': c.id,
+                'plan': c.plan,
+                'is_subscription_active': c.is_subscription_active,
+                'paypal_subscription_id': c.paypal_subscription_id,
+                'pending_downgrade_plan': c.pending_downgrade_plan,
+                'subscription_ends_at': (
+                    c.subscription_ends_at.isoformat() if c.subscription_ends_at else None
+                ),
+            }
+
+        return Response({
+            'company': company_info,
+            'recent_webhooks': recent_webhooks,
+            'note': (
+                'recent_webhooks shows the last ≤20 events received by /payments/webhook/. '
+                'Plan changes are ONLY triggered by BILLING.SUBSCRIPTION.PAYMENT.COMPLETED. '
+                'ACTIVATED = user approved on PayPal (no payment yet). '
+                'PAYMENT.COMPLETED = money charged by PayPal.'
+            ),
+        })
 
 
 # Keep old PayFast views for backward compatibility (deprecated)
