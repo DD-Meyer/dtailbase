@@ -1,22 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PublicHeader from './PublicHeader';
+import LiveChat from './LiveChat';
 import '../styles/Hero.css';
 import api from '../axios_instance';
-import { showToast } from '../utils/uiFeedback';
 import {
   DEFAULT_PRICE_FALLBACKS,
   extractPlanFeatures,
   fetchPricingWithFallback,
   isValidPricingPayload,
 } from '../services/pricingService';
-import { useCompany } from '../context/CompanyContext';
-
-const PLAN_ORDER = {
-  STARTER: 0,
-  PRO: 1,
-  ENTERPRISE: 2,
-};
+import { Clock1, User } from 'lucide-react';
+import { BiHorizontalCenter } from 'react-icons/bi';
 
 const HERO_PLANS = [
   {
@@ -48,7 +43,7 @@ const HERO_PLANS = [
       'Up to 5,000 Customers',
     ],
     featured: true,
-    cta: 'Get Pro',
+    cta: 'Start Free Trial',
     isFree: false,
   },
   {
@@ -67,26 +62,18 @@ const HERO_PLANS = [
       'Unlimited Customers',
     ],
     featured: false,
-    cta: 'Get Enterprise',
+    cta: 'Go Elite',
     isFree: false,
   },
 ];
 
 const PRICE_FALLBACKS = DEFAULT_PRICE_FALLBACKS.USD;
-const GUEST_PLAN_CTA = {
-  STARTER: 'Get Started Free',
-  PRO: 'Get Pro',
-  ENTERPRISE: 'Get Enterprise',
-};
 
 const Hero = ({ isAuthenticated }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [heroPricing, setHeroPricing] = useState(null);
   const [heroPlanFeatures, setHeroPlanFeatures] = useState({});
-  const [downgradingPlanId, setDowngradingPlanId] = useState('');
-  const { company, currentPlan, refreshCompany } = useCompany();
-  const pendingDowngradePlan = (company?.pending_downgrade_plan || '').toUpperCase();
-  const hasPendingDowngrade = !!pendingDowngradePlan && !!company?.subscription_ends_at;
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -194,52 +181,20 @@ const Hero = ({ isAuthenticated }) => {
     return Array.isArray(fromPricing) && fromPricing.length ? fromPricing : plan.features;
   };
 
-  const openPaymentPage = (planId) => {
-    navigate(`/payments?plan=${planId}`);
-  };
-
-  const handleAuthRequired = (plan) => {
+  const handlePlanCta = (plan) => {
+    if (plan.isFree) {
+      navigate('/register');
+      return;
+    }
     navigate('/login', {
       state: {
         fromPlanCta: true,
         selectedPlan: plan.name,
         selectedPlanId: plan.id,
-        ctaType: plan.id === 'STARTER' ? 'try-now' : 'upgrade',
-        redirectTo: plan.id === 'STARTER' ? '/plans' : `/payments?plan=${plan.id}`,
+        ctaType: 'upgrade',
+        redirectTo: `/payments?plan=${plan.id}`,
       },
     });
-  };
-
-  const executeDowngrade = async (plan) => {
-    if (plan.id !== 'STARTER') {
-      openPaymentPage(plan.id);
-      return;
-    }
-
-    setDowngradingPlanId(plan.id);
-    try {
-      const response = await api.post('/payments/cancel-subscription/', {
-        target_plan: plan.id,
-      });
-
-      await refreshCompany();
-      const successMsg = response.data?.message || 'Subscription cancelled. Your account is now on Starter.';
-      showToast(successMsg, 'success');
-    } catch (err) {
-      let errorMsg = 'Unable to process downgrade right now.';
-      if (err.response?.status === 403) {
-        errorMsg = 'Only account owners can cancel subscriptions. Please contact your account owner.';
-      } else if (err.response?.data?.detail) {
-        errorMsg = err.response.data.detail;
-      } else if (err.response?.data?.error) {
-        errorMsg = err.response.data.error;
-      } else if (err.response?.data?.message) {
-        errorMsg = err.response.data.message;
-      }
-      showToast(errorMsg, 'error');
-    } finally {
-      setDowngradingPlanId('');
-    }
   };
 
   return (
@@ -258,30 +213,30 @@ const Hero = ({ isAuthenticated }) => {
         setIsMenuOpen={setIsMenuOpen}
       />
 
-      <section className="hero-container">
+      <section className="hero-container bg-image-hero">
         <div className="hero-content">
           <div className="hero-inner animate-on-scroll">
-            <div className="new-badge">🛡️ Legal-Grade Protection Now Active</div>
+            <div className="new-badge">Legal-Grade Protection</div>
             <h1 className="hero-title">
-              Your Studio. <span className="highlight">Automated.</span>
+              Your Business. <span className="highlight">Your Way!</span>
             </h1>
             <p className="hero-subtitle">
               The intelligent operating system for elite detailers. 
               From digital intake to legally-binding signatures, manage every orbit of your business in one high-performance dashboard.
             </p>
             <div className="hero-cta">
-              <Link to="/register" className="btn-main pulse">Deploy Your Studio</Link>
-              <button className="btn-outline hero-watch-cta">
-                <span className="play-icon">▶</span> Watch The System
-              </button>
+              <Link to="/register" className="btn-main pulse">Try DtailBase Now</Link>
             </div>
           </div>
         </div>
+        <div className="hero-image animate-on-scroll">
+          <img src="/landing/images/Booking-Intake-Form-1.png" alt="Dtailbase Dashboard" />
+        </div>
       </section>
 
-      <section className="stats-bar container animate-on-scroll animate-slide-right-fade">
+      <section className="stats-bar animate-on-scroll">
         <div className="stat-card">
-          <span className="stat-num">~14hrs</span>
+          <span className="stat-num">~14hrs <Clock1 color="#2563eb" className="stat-icon inline" /></span>
           <br />
           <span className="stat-label">Admin Reclaimed Monthly</span>
         </div>
@@ -299,29 +254,65 @@ const Hero = ({ isAuthenticated }) => {
         </div>
       </section>
 
-      <section className="features-section container animate-on-scroll slide-right-fade">
+      <section className="pricing-section container animate-on-scroll">
+        <div className="section-header">
+          <h2 className="section-title">Scale Your <span className="highlight">Studio.</span></h2>
+          <p className="section-desc">Lightweight, high-speed architecture built exclusively for detailing bays. No lag on high-res condition logs.</p>
+        </div>
+        <div className="pricing-grid">
+          {HERO_PLANS.map((plan) => (
+            <div
+              key={plan.id}
+              className={`pricing-card animate-on-scroll${plan.featured ? ' featured' : ''}`}
+            >
+              {plan.featured && <div className="popular-tag">Most Popular</div>}
+              <span className="tier">{plan.name}</span>
+              <div className="price">
+                <span className="price-currency">$</span>
+                {getPlanPrice(plan)}
+                <span>/mo</span>
+              </div>
+              <p className="plan-tagline">{plan.description}</p>
+              <ul className="benefits">
+                {getPlanFeatures(plan).map((feat) => (
+                  <li className="benefit-item" key={feat}>{feat}</li>
+                ))}
+              </ul>
+              <button
+                className={plan.featured ? 'btn-main' : 'btn-outline'}
+                onClick={() => handlePlanCta(plan)}
+              >
+                {plan.cta}
+              </button>
+            </div>
+          ))}
+        </div>
+        <p className="pricing-note">Legally-Binding Asset Vault included &nbsp;·&nbsp; Secure PayPal billing &nbsp;·&nbsp; Cancel anytime</p>
+      </section>
+
+      <section className="features-section container">
         <div className="section-header animate-on-scroll">
-          <h2 className="section-title">Engineered for Perfection</h2>
-          <p className="section-desc">Traditional shop management is fragmented. Dtailbase is a unified ecosystem.</p>
+          <h2 className="section-title">No-More Endless Calendars</h2>
+          <p className="section-desc">Traditional shop management is fragmented over WhatsApp or even worse, "paper". Dtailbase is a unified ecosystem.</p>
         </div>
         <div className="features-grid">
-          <div className="feature-card animate-on-scroll animate-slide-right-fade">
+          <div className="feature-card animate-on-scroll">
             <div className="feature-icon">📅</div>
             <h3>Smart Intake</h3>
             <p>Intelligent scheduling that accounts for vehicle size and service complexity automatically.</p>
           </div>
-          <div className="feature-card highlight-card animate-on-scroll animate-slide-left-fade">
+          <div className="feature-card highlight-card animate-on-scroll">
             <div className="feature-icon">🛡️</div>
             <h3>Bulletproof Indemnity</h3>
             <p>Legally-binding digital waivers paired with 4K condition logs. We protect your insurance premiums.</p>
             <div className="card-tag">Core Security</div>
           </div>
-          <div className="feature-card animate-on-scroll animate-slide-right-fade">
+          <div className="feature-card animate-on-scroll">
             <div className="feature-icon">📸</div>
             <h3>Photo Vault</h3>
             <p>Cloud-synced before/after galleries linked directly to customer profiles for instant recall.</p>
           </div>
-          <div className="feature-card animate-on-scroll animate-slide-left-fade">
+          <div className="feature-card animate-on-scroll">
             <div className="feature-icon">👥</div>
             <h3>Staff Command</h3>
             <p>Assign bays, track technician efficiency, and manage payroll through a single interface.</p>
@@ -334,7 +325,6 @@ const Hero = ({ isAuthenticated }) => {
           <h2 className="section-title">See It In <span className="highlight">Action.</span></h2>
           <p className="section-desc">A glimpse inside the Dtailbase ecosystem — from intake to invoice.</p>
         </div>
-        {/* auto scroll and remove bottom scroll bar */}
         <div className="gallery-grid">
           {[
             { label: 'Dashboard Overview', image: '/landing/images/Dashboard-1.png' },
@@ -392,71 +382,6 @@ const Hero = ({ isAuthenticated }) => {
             </div>
           </div>
         </div>
-      </section>
-
-      <section className="pricing-section container animate-on-scroll">
-        <div className="section-header">
-          <h2 className="section-title">Scale Your <span className="highlight">Studio.</span></h2>
-          <p className="section-desc">Lightweight, high-speed architecture built exclusively for detailing bays. No lag on high-res condition logs.</p>
-        </div>
-        <div className="pricing-grid">
-          {HERO_PLANS.map((plan) => {
-            const isCurrent = Boolean(isAuthenticated && plan.id === currentPlan);
-            const isPendingTarget = isAuthenticated && hasPendingDowngrade && plan.id === pendingDowngradePlan;
-            const isDowngradeOption =
-              isAuthenticated &&
-              !isPendingTarget &&
-              typeof PLAN_ORDER[currentPlan] === 'number' &&
-              typeof PLAN_ORDER[plan.id] === 'number' &&
-              PLAN_ORDER[currentPlan] > 0 &&
-              PLAN_ORDER[plan.id] < PLAN_ORDER[currentPlan];
-
-            return (
-              <div
-                key={plan.id}
-                className={`pricing-card animate-on-scroll${plan.featured ? ' featured' : ''}`}
-              >
-                {plan.featured && <div className="popular-tag">Most Popular</div>}
-                <span className="tier">{plan.name}</span>
-                <div className="price">
-                  <span className="price-currency">$</span>
-                  {getPlanPrice(plan)}
-                  <span>/mo</span>
-                </div>
-                <p className="plan-tagline">{plan.description}</p>
-                <ul className="benefits">
-                  {getPlanFeatures(plan).map((feat) => (
-                    <li key={feat}>✓ {feat}</li>
-                  ))}
-                </ul>
-                <button
-                  className={plan.featured ? 'btn-main' : 'btn-outline'}
-                  onClick={() => {
-                    if (isCurrent && hasPendingDowngrade) { openPaymentPage(plan.id); return; }
-                    if (isCurrent || isPendingTarget) return;
-                    if (isDowngradeOption) { executeDowngrade(plan); return; }
-                    if (!isAuthenticated) { handleAuthRequired(plan); return; }
-                    openPaymentPage(plan.id);
-                  }}
-                  disabled={isPendingTarget || (isCurrent && !hasPendingDowngrade) || downgradingPlanId === plan.id}
-                >
-                  {isCurrent && hasPendingDowngrade
-                    ? `Keep ${plan.name}`
-                    : isCurrent
-                      ? 'Current Plan'
-                      : isPendingTarget
-                        ? 'Downgrade Scheduled'
-                        : isDowngradeOption
-                          ? (downgradingPlanId === plan.id ? 'Processing...' : 'Downgrade')
-                          : !isAuthenticated
-                            ? (GUEST_PLAN_CTA[plan.id] || plan.cta)
-                            : 'Upgrade'}
-                </button>
-              </div>
-            );
-          })}
-        </div>
-        <p className="pricing-note">Legally-Binding Asset Vault included &nbsp;·&nbsp; Secure PayPal billing &nbsp;·&nbsp; Cancel anytime</p>
       </section>
 
       <footer className="main-footer">

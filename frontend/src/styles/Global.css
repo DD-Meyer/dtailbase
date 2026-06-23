@@ -22,6 +22,12 @@
   box-sizing: border-box;
 }
 
+html {
+  /* 1. Force the smooth pacing globally on the master timeline container */
+  scroll-behavior: smooth;
+  scroll-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
 body {
   background-color: var(--bg-main);
   color: var(--text-main);
@@ -35,22 +41,23 @@ body.mobile-nav-open {
 }
 
 /* 2. CORE LAYOUT (DASHBOARD) */
-/* 1. Lock the viewport */
 .app-layout {
   display: flex;
-  height: 100dvh;
   min-height: 100vh;
   width: 100%;
-  overflow: hidden;
+  /* FIXED: Allow natural page overflow calculations to handle timelines smoothly */
 }
 
-/* 2. Sidebar column in desktop layout */
+/* Sidebar column in desktop layout */
 .sidebar {
   width: var(--sidebar-width);
+  /* FIXED: Set to fixed or sticky so it stays when the whole viewport wraps scrolling */
+  position: fixed;
+  top: 0;
+  left: 0;
   height: 100vh;
   flex-shrink: 0;
   background: var(--bg-sidebar);
-  position: relative;
   z-index: 20;
   border-right: 1px solid var(--border-color);
 }
@@ -59,8 +66,12 @@ body.mobile-nav-open {
 .main-content {
   flex-grow: 1;
   min-width: 0;
-  height: 100dvh;
-  overflow-y: auto;
+  /* FIXED: Shift content to make room for the fixed sidebar position */
+  margin-left: var(--sidebar-width); 
+  min-height: 100vh;
+  
+  /* FIXED: Removed height: 100dvh and overflow-y: auto */
+  /* This shifts scroll tracking back to the root HTML where your parallax and cards live */
   display: flex;
   flex-direction: column;
   background:
@@ -86,12 +97,6 @@ body.mobile-nav-open {
   width: 100%;
 }
 
-
-
-
-
-
-
 .auth-wrapper {
   width: 100%;
   min-height: 100vh;
@@ -114,6 +119,7 @@ body.mobile-nav-open {
   max-width: 1200px;
   margin: 0 auto;
 }
+
 
 .card {
   background: rgba(20, 34, 54, 0.9);

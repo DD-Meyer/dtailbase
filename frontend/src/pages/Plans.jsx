@@ -310,7 +310,7 @@ const Plans = ({ showBackToDashboard = false }) => {
               <ul className="plan-features">
                 {plan.features.map((feat, i) => (
                   <li key={i}>
-                    <span className="check">✓</span> {feat}
+                    {feat}
                   </li>
                 ))}
               </ul>
@@ -360,10 +360,10 @@ const Plans = ({ showBackToDashboard = false }) => {
       <div className="payment-info">
         <h3>Payment Information</h3>
         <ul>
-          <li>✓ Secure PayPal payments</li>
-          <li>✓ Monthly recurring billing</li>
-          <li>✓ Cancel anytime from your settings</li>
-          <li>✓ Automatic invoice delivery</li>
+          <li>Secure PayPal payments</li>
+          <li>Monthly recurring billing</li>
+          <li>Cancel anytime from your settings</li>
+          <li>Automatic invoice delivery</li>
         </ul>
       </div>
     </div>
