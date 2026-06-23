@@ -35,7 +35,7 @@ body {
 
 .container {
   max-width: 1300px;
-  margin: 0 auto;
+  margin: 20px auto;
   padding: 0 5%;
 }
 
@@ -168,7 +168,7 @@ body {
 .btn-main, .btn-outline, .btn-primary-plan, .btn-secondary-plan, .btn-login, .btn-get-started {
   display: inline-flex; align-items: center; justify-content: center;
   padding: 16px 32px; border-radius: 12px; font-weight: 700;
-  text-decoration: none !important; transition: var(--transition);
+  text-decoration: none; transition: var(--transition);
   cursor: pointer;
 }
 
@@ -182,7 +182,7 @@ body {
 .btn-outline {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-light);
-  color: white !important; /* Start white */
+  color: white; /* Start white */
   transition: var(--transition);
 }
 
@@ -801,6 +801,28 @@ body {
   .stat-divider {
     display: none;
   }
+
+  .hero-image {
+    display: none; /* Hide the hero image on smaller screens */
+  }
+
+  .stats-bar {
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 10%;
+    margin: 0;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .stats-bar .stat-card {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    justify-content: center;
+    align-items: center;
+  }
 }
 
 @media (max-width: 768px) {
@@ -1018,6 +1040,29 @@ body {
     grid-template-columns: 1fr;
   }
   .gallery-section {
-    padding: 60px 0;
+    padding: 60px 20px;
+  }
+
+  /*Infinite horizontal scroll effect on mobile - each card scrolls over the screen horizontally*/
+  .gallery-card {
+    min-width: 80%;
+    margin-right: 20px;
+  }
+  /* Scroll without user interaction */
+  .gallery-grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  }
+  /* Each card snaps to the center of the viewport */
+  .gallery-card {
+    scroll-snap-align: center;
+  }
+}
+
+@media (max-width: 720px) {
+  .process-story {
+    padding: 60px 40px;
   }
 }

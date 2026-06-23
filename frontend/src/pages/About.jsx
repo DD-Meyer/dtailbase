@@ -1,4 +1,4 @@
-import { AlignCenter } from "lucide-react";
+import { AlignCenter, BarChartIcon, BrickWallIcon, Cloud, CloudAlertIcon, DecimalsArrowLeftIcon, GlobeIcon, LockIcon } from "lucide-react";
 
 const About = () => {
   return (
@@ -11,7 +11,7 @@ const About = () => {
         </h1>
         <p className="hero-subtitle" style={{ maxWidth: '680px', margin: '0 auto' }}>
           Dtailbase wasn&apos;t created in a tech lab. It was born from the frustration of running
-          a real detailing business — and not having the right tools to manage it.
+          a real detailing business - and not having the right tools to manage it.
         </p>
       </section>
 
@@ -21,13 +21,13 @@ const About = () => {
           <div className="story-text">
             <span className="step-num">THE FOUNDER</span>
             <p style={{ color: 'var(--text-dim)', lineHeight: '1.85', marginBottom: '20px' }}>
-              Before Dtailbase existed, Daryn was in the detail bay himself — hands-on, client-facing,
+              Before Dtailbase existed, Daryn was in the detail bay himself - hands-on, client-facing,
               and doing the actual work. Running a detailing business taught him something fast:
               the tools available to detailers were built for everyone else, not for them.
             </p>
             <blockquote className="founder-quote">
               &ldquo;I was scheduling people through WhatsApp, tracking services in my head, trying to figure
-              out if I was even making a profit — all while doing a full ceramic coating in 40°C heat.
+              out if I was even making a profit - all while doing a full ceramic coating in 40°C heat.
               Something had to change.&rdquo;
             </blockquote>
             <p style={{ color: 'var(--text-dim)', lineHeight: '1.85' }}>
@@ -54,7 +54,7 @@ const About = () => {
             <span className="step-num">THE PAIN POINT</span>
             <p style={{ color: 'var(--text-dim)', lineHeight: '1.85', marginBottom: '20px' }}>
               Detailing is a skilled trade. But running a detailing business means wearing five hats
-              at once — technician, scheduler, salesperson, accountant, and admin. Without the right
+              at once - technician, scheduler, salesperson, accountant, and admin. Without the right
               system, it&apos;s easy to:
             </p>
             <ul className="story-list">
@@ -65,7 +65,7 @@ const About = () => {
               <li>✓ Manage bookings via scattered WhatsApp messages and notes</li>
             </ul>
             <p style={{ color: 'var(--text-dim)', lineHeight: '1.85', marginTop: '20px' }}>
-              Dtailbase was designed specifically to solve these problems — nothing more, nothing less.
+              Dtailbase was designed specifically to solve these problems - nothing more, nothing less.
               A focused, powerful tool built for the realities of running a modern detailing studio.
             </p>
           </div>
@@ -89,7 +89,7 @@ const About = () => {
               No more juggling multiple apps, no more clipboards, no more guessing.
             </p>
             <p style={{ color: 'var(--text-dim)', lineHeight: '1.85' }}>
-              From the moment a client books to the moment they drive away — every step is
+              From the moment a client books to the moment they drive away - every step is
               documented, timestamped, and stored securely. If something ever goes wrong,
               you have an indestructible record. If everything goes right, you have the data
               to prove your business is growing.
@@ -122,31 +122,31 @@ const About = () => {
             <div className="value-icon">🇿🇦</div>
             <h4>Netic Technologies</h4>
             <p>
-              Dtailbase is designed and developed by Netic Technologies (PTY) LTD — a South African
+              Dtailbase is designed and developed by Netic Technologies (PTY) LTD - a South African
               software development company. We build practical, focused software products for
               service-based businesses.
             </p>
           </div>
           <div className="value-card animate-on-scroll">
-            <div className="value-icon">🎯</div>
+            <div className="value-icon"><BrickWallIcon style={{ color: 'green' }} /></div>
             <h4>Built With Purpose</h4>
             <p>
               We don&apos;t build bloated enterprise platforms. Every feature in Dtailbase was
-              added because a real detailer needed it — not because it looked good in a feature list.
+              added because a real detailer needed it - not because it looked good in a feature list.
               Focused tools for focused professionals.
             </p>
           </div>
           <div className="value-card animate-on-scroll">
-            <div className="value-icon">🔒</div>
+            <div className="value-icon"><LockIcon style={{ color: 'red' }} /></div>
             <h4>Security First</h4>
             <p>
-              Legal protection isn&apos;t an afterthought — it&apos;s the foundation. Every piece
+              Legal protection isn&apos;t an afterthought - it&apos;s the foundation. Every piece
               of data in Dtailbase is encrypted, timestamped, and stored with the intent of
               standing up in any dispute or legal proceeding.
             </p>
           </div>
           <div className="value-card animate-on-scroll">
-            <div className="value-icon">📈</div>
+            <div className="value-icon"><BarChartIcon style={{ color: 'blue' }} /></div>
             <h4>Grow With You</h4>
             <p>
               Whether you&apos;re a solo detailer or running a multi-bay franchise, Dtailbase
@@ -154,19 +154,19 @@ const About = () => {
             </p>
           </div>
           <div className="value-card animate-on-scroll">
-            <div className="value-icon">🌍</div>
+            <div className="value-icon"><GlobeIcon style={{ color: 'green' }} /></div>
             <h4>Always Online</h4>
             <p>
-              Your studio data is hosted on high-performance VPS infrastructure — always accessible
+              Your studio data is hosted on high-performance VPS infrastructure - always accessible
               from any device, anywhere in the world. The system never sleeps, even when you do.
             </p>
           </div>
           <div className="value-card animate-on-scroll">
-            <div className="value-icon">💬</div>
+            <div className="value-icon"><Cloud style={{ color: 'blue' }} /></div>
             <h4>Direct Support</h4>
             <p>
               No ticket queues. No bots. If you have a problem, you can reach the team directly
-              on WhatsApp — with an average response time of 15 minutes during business hours.
+              on WhatsApp - with an average response time of 15 minutes during business hours.
             </p>
           </div>
         </div>
