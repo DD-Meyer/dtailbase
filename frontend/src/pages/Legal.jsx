@@ -1,21 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import PublicLayout from '../components/PublicLayout';
+import { MapPinCheckIcon, Scale3DIcon, CameraIcon, FolderIcon, LockIcon, UploadIcon, ClipboardIcon, Clock10Icon } from 'lucide-react';
 
 const LEGAL_SECTIONS = [
   {
     id: 'geo',
-    icon: '📍',
+    icon: <MapPinCheckIcon style={{color: 'orange'}} size={20} className='inline' />,
     label: 'PROTECTION / 01',
     title: 'Location Verification & Geofencing',
     body: [
-      "Every indemnity waiver signed through Dtailbase captures the client's GPS coordinates at the exact moment of signing. The system geofences signatures to your studio's registered physical location — meaning a waiver can only be validly completed when the client is physically present at your premises.",
-      "This creates a legally meaningful record that the client was on-site and acknowledged the document in person — something a paper form can never definitively prove.",
+      "Every indemnity waiver signed through Dtailbase captures the client's GPS coordinates at the exact moment of signing. The system geofences signatures to your studio's registered physical location - meaning a waiver can only be validly completed when the client is physically present at your premises.",
+      "This creates a legally meaningful record that the client was on-site and acknowledged the document in person - something a paper form can never definitively prove.",
     ],
     highlights: [
       'GPS coordinates logged at time of every signature',
       'Geofence radius configurable per studio',
       'Out-of-range signing attempts are flagged in the record',
-      'Location data stored permanently — cannot be altered',
+      'Location data stored permanently - cannot be altered',
       'Adds undeniable proof of physical presence at signing',
     ],
     // screenshotLabel: 'App Screenshot: Location Verification at Signing',
@@ -23,17 +24,17 @@ const LEGAL_SECTIONS = [
   },
   {
     id: 'signatures',
-    icon: '✍️',
+    icon: <Clock10Icon style={{color: 'orange'}} size={20} className='inline' />,
     label: 'PROTECTION / 02',
     title: 'Timestamped Digital Signatures',
     body: [
       "Every signature collected through Dtailbase is assigned an immutable timestamp the moment it is submitted. The record includes the exact date, time (to the second), IP address of the device used, and the version of the legal document that was signed.",
-      "This means that if a dispute arises — even years later — you can produce a complete, court-ready record showing exactly who signed, what they signed, when they signed it, and from where. Paper files get lost. Dtailbase records do not.",
+      "This means that if a dispute arises - even years later - you can produce a complete, court-ready record showing exactly who signed, what they signed, when they signed it, and from where. Paper files get lost. Dtailbase records do not.",
     ],
     highlights: [
       'Exact timestamp (date, time, second) recorded per signature',
       'IP address of signing device logged and stored',
-      'Document version control — the signed version is preserved',
+      'Document version control - the signed version is preserved',
       'Signed PDFs downloadable at any time for legal use',
       'Records are permanent and cannot be retroactively edited',
     ],
@@ -42,17 +43,17 @@ const LEGAL_SECTIONS = [
   },
   {
     id: 'photos',
-    icon: '📸',
+    icon: <CameraIcon style={{color: 'orange'}} size={20} className='inline' />,
     label: 'PROTECTION / 03',
     title: 'Photo & Visual Evidence Storage',
     body: [
       "Before a technician touches a vehicle, photos of its condition are captured and stored. After the work is done, post-service photos are added to the same booking record. Both sets of images are timestamped, cloud-stored, and permanently linked to the client, vehicle, and signed waiver.",
-      "This visual evidence is your strongest protection against 'ghost claims' — situations where a client alleges damage that existed before the service. With a before-and-after photo record, the facts speak for themselves.",
+      "This visual evidence is your strongest protection against 'ghost claims' - situations where a client alleges damage that existed before the service. With a before-and-after photo record, the facts speak for themselves.",
     ],
     highlights: [
       'Before & after photos captured per booking',
       'Timestamped and linked to client, vehicle, and waiver record',
-      'Cloud-stored — accessible from any device at any time',
+      'Cloud-stored - accessible from any device at any time',
       'Multiple photo slots per booking (plan-dependent)',
       'Provides visual proof in any dispute or insurance claim',
     ],
@@ -61,18 +62,18 @@ const LEGAL_SECTIONS = [
   },
   {
     id: 'history',
-    icon: '📂',
+    icon: <FolderIcon style={{color: 'orange'}} size={20} className='inline' />,
     label: 'PROTECTION / 04',
     title: 'Indestructible Service History',
     body: [
-      "Every booking, waiver, photo, and payment record in Dtailbase forms part of a permanent, tamper-evident service history. This history is linked to both the client and their vehicle — creating a complete audit trail for every interaction your studio has ever had.",
+      "Every booking, waiver, photo, and payment record in Dtailbase forms part of a permanent, tamper-evident service history. This history is linked to both the client and their vehicle - creating a complete audit trail for every interaction your studio has ever had.",
       "An indestructible record is your best ally in any legal or insurance dispute. It removes ambiguity, proves your process, and demonstrates a professional standard of care that protects your business, your team, and your reputation.",
     ],
     highlights: [
       'Full booking history linked per client and vehicle',
       'Signed waivers permanently associated with their booking',
       'Photo evidence tied to the exact service date and technician',
-      'Records cannot be deleted by users — audit-safe',
+      'Records cannot be deleted by users - audit-safe',
       'History accessible on Enterprise plan for the lifetime of the account',
     ],
     // screenshotLabel: 'App Screenshot: Full Service History View',
@@ -80,12 +81,12 @@ const LEGAL_SECTIONS = [
   },
   {
     id: 'privacy',
-    icon: '🔒',
+    icon: <LockIcon style={{color: 'orange'}} size={20} className='inline' />,
     label: 'LEGAL / 05',
     title: 'Data Privacy & Encryption',
     body: [
-      "All data stored in Dtailbase is encrypted using industry-standard AES-256 protocols — both at rest and in transit. Client information, signed documents, and media files are handled with the same level of security as financial institutions.",
-      "We do not sell your data. We do not share client records with third parties. Your studio's information belongs to you — and only you.",
+      "All data stored in Dtailbase is encrypted using industry-standard AES-256 protocols - both at rest and in transit. Client information, signed documents, and media files are handled with the same level of security as financial institutions.",
+      "We do not sell your data. We do not share client records with third parties. Your studio's information belongs to you - and only you.",
     ],
     highlights: [
       'AES-256 encryption for all stored data',
@@ -99,12 +100,12 @@ const LEGAL_SECTIONS = [
   },
   {
     id: 'ownership',
-    icon: '📤',
+    icon: <UploadIcon style={{color: 'orange'}} size={20} className='inline' />,
     label: 'LEGAL / 06',
     title: 'Data Ownership & Portability',
     body: [
       "You own your data. Should you ever choose to leave Dtailbase, you can export your complete client list, vehicle records, booking history, and service data in CSV format at any time. No lock-in.",
-      "We believe that the data your studio generates belongs to your business — not to us. Dtailbase is a tool you use, not a vault that traps your information.",
+      "We believe that the data your studio generates belongs to your business - not to us. Dtailbase is a tool you use, not a vault that traps your information.",
     ],
     highlights: [
       'Full data export available at any time',
@@ -118,7 +119,7 @@ const LEGAL_SECTIONS = [
   },
   {
     id: 'terms',
-    icon: '📋',
+    icon: <ClipboardIcon style={{color: 'orange'}} size={20} className='inline' />,
     label: 'LEGAL / 07',
     title: 'Terms of Service',
     body: [
@@ -130,19 +131,19 @@ const LEGAL_SECTIONS = [
       'Users responsible for accuracy of entered data',
       'Waiver template content is the studio owner\'s responsibility',
       'Accounts may be terminated for misuse or abuse',
-      'Terms subject to update — users notified of material changes',
+      'Terms subject to update - users notified of material changes',
     ],
     // screenshotLabel: null,
     // screenshotNote: null,
   },
   {
     id: 'liability',
-    icon: '⚖️',
+    icon: <Scale3DIcon style={{color: 'orange'}} size={20} />,
     label: 'LEGAL / 08',
     title: 'Limitation of Liability',
     body: [
       "Dtailbase is a management and documentation platform. While we provide the tools to create, collect, and store digital indemnity documents, the legal validity of signed waivers in any given jurisdiction remains the responsibility of the studio owner.",
-      "We strongly recommend that studio owners consult with a legal professional in their region to ensure that their indemnity template content meets local legal requirements. Dtailbase provides the infrastructure — the legal substance of your waivers is yours to manage.",
+      "We strongly recommend that studio owners consult with a legal professional in their region to ensure that their indemnity template content meets local legal requirements. Dtailbase provides the infrastructure - the legal substance of your waivers is yours to manage.",
     ],
     highlights: [
       'Dtailbase provides documentation infrastructure, not legal advice',
@@ -195,7 +196,7 @@ const Legal = () => {
   return (
     <div className="landing-page">
       <section className="products-hero animate-on-scroll is-visible">
-        <div className="about-intro-badge">⚖️ Legal Framework</div>
+        <div className="about-intro-badge"><Scale3DIcon style={{color: 'orange'}} size={20} className='inline' /> Legal Framework</div>
         <h1 className="hero-title">
           Your Legal <span className="highlight">Fortress.</span>
         </h1>
@@ -242,7 +243,7 @@ const Legal = () => {
 
               {section.screenshotLabel && (
                 <div className="screenshot-slot">
-                  {/* PASTE YOUR APP SCREENSHOT URL BELOW — uncomment the img tag */}
+                  {/* PASTE YOUR APP SCREENSHOT URL BELOW - uncomment the img tag */}
                   {/* <img src="YOUR_SCREENSHOT_URL_HERE" alt={section.screenshotLabel} /> */}
                   <span className="screenshot-slot-label">{section.screenshotLabel}</span>
                   <span className="screenshot-slot-note">{section.screenshotNote}</span>
@@ -258,7 +259,7 @@ const Legal = () => {
             For enterprise clients or businesses operating under specific compliance requirements,
             our team can provide tailored Data Processing Agreements and legal documentation support.
           </p>
-          <a href="mailto:legal@netic.co.za" className="btn-outline">
+          <a href="mailto:legal@netic.co.za" className="btn-outline text-black">
             Contact Compliance Team
           </a>
         </div>

@@ -1,10 +1,12 @@
+import { Calendar, Calendar1, CameraIcon, ShieldIcon, UsersIcon, CreditCardIcon, CarIcon, MapPinIcon, BarChartIcon, SmartphoneIcon } from "lucide-react";
+
 const FEATURES = [
   {
-    icon: '📅',
+    icon: <Calendar1 style={{ color: 'green' }} />,
     label: 'BOOKINGS / 01',
     title: 'Smart Booking & Scheduling',
     description:
-      'A fully digital booking system that puts you in control. Manage your calendar, set buffer times between appointments, and accept bookings from clients through a shareable link — no back-and-forth messages required. Every booking is logged with the vehicle, services requested, pricing, and assigned team member.',
+      'A fully digital booking system that puts you in control. Manage your calendar, set buffer times between appointments, and accept bookings from clients through a shareable link - no back-and-forth messages required. Every booking is logged with the vehicle, services requested, pricing, and assigned team member.',
     highlights: [
       'Shareable public booking links per studio',
       'Buffer timer automation between appointments',
@@ -15,27 +17,27 @@ const FEATURES = [
     highlight: false,
   },
   {
-    icon: '🛡️',
+    icon: <ShieldIcon style={{ color: 'red' }} />,
     label: 'LEGAL / 02',
     title: 'Digital Indemnity & Legal Waivers',
     description:
-      'The cornerstone of Dtailbase. Before a technician lifts a finger, a legally-binding digital waiver is signed by the client. Templates are uploaded by the studio owner and served through a secure, geo-verified signing interface. Every signed document is timestamped, IP-logged, and stored permanently — forming an indestructible legal record.',
+      'The cornerstone of Dtailbase. Before a technician lifts a finger, a legally-binding digital waiver is signed by the client. Templates are uploaded by the studio owner and served through a secure, geo-verified signing interface. Every signed document is timestamped, IP-logged, and stored permanently - forming an indestructible legal record.',
     highlights: [
       'Custom PDF waiver templates per studio',
       'Client-facing mobile-friendly signing flow',
       'GPS location verification at time of signature',
       'IP address + timestamp logging per signature',
-      'Immutable record storage — cannot be altered',
+      'Immutable record storage - cannot be altered',
       'Downloadable PDFs for legal proceedings',
     ],
     highlight: true,
   },
   {
-    icon: '📸',
+    icon: <CameraIcon style={{ color: 'orange' }} />,
     label: 'PHOTOS / 03',
     title: 'Photo Documentation Vault',
     description:
-      "Capture the vehicle's condition before and after every detail. Photos are attached directly to the booking and linked to the client's profile, creating a permanent visual record. This is your evidence in any dispute — showing exactly what the car looked like when it arrived and when it left.",
+      "Capture the vehicle's condition before and after every detail. Photos are attached directly to the booking and linked to the client's profile, creating a permanent visual record. This is your evidence in any dispute - showing exactly what the car looked like when it arrived and when it left.",
     highlights: [
       'Before & after photo categories per booking',
       'Cloud-stored and accessible at any time',
@@ -46,11 +48,11 @@ const FEATURES = [
     highlight: false,
   },
   {
-    icon: '👥',
+    icon: <UsersIcon style={{ color: 'blue' }} />,
     label: 'TEAM / 04',
     title: 'Team Management',
     description:
-      'Add and manage your team members from a single dashboard. Assign different access levels, control who can create bookings, upload photos, or manage clients. As your studio grows, your Dtailbase team grows with it — no need for multiple apps or systems.',
+      'Add and manage your team members from a single dashboard. Assign different access levels, control who can create bookings, upload photos, or manage clients. As your studio grows, your Dtailbase team grows with it - no need for multiple apps or systems.',
     highlights: [
       'Multi-user access with role-based permissions',
       'Staff assignment per booking',
@@ -61,26 +63,26 @@ const FEATURES = [
     highlight: false,
   },
   {
-    icon: '💳',
+    icon: <CreditCardIcon style={{ color: 'yellow' }} />,
     label: 'PAYMENTS / 05',
     title: 'Payment Processing & Subscriptions',
     description:
-      'Dtailbase subscriptions are managed through PayPal — one of the most trusted payment processors globally. Upgrade, downgrade, or cancel your plan directly from within the app. Automatic invoicing means no manual tracking of your software costs.',
+      'Dtailbase subscriptions are managed through PayPal - one of the most trusted payment processors globally. Upgrade, downgrade, or cancel your plan directly from within the app. Automatic invoicing means no manual tracking of your software costs.',
     highlights: [
       'Secure PayPal subscription billing',
       'Upgrade or downgrade plans at any time',
-      'Cancel anytime — no lock-in contracts',
+      'Cancel anytime - no lock-in contracts',
       'Automatic invoice delivery via email',
       'Three plan tiers to match your studio size',
     ],
     highlight: false,
   },
   {
-    icon: '🚗',
+    icon: <CarIcon style={{ color: 'blue' }} />,
     label: 'RECORDS / 06',
     title: 'Client & Vehicle Records',
     description:
-      'Build a detailed history for every client and every vehicle. Each customer profile holds their vehicles, past bookings, signed waivers, and photos — all in one place. When a repeat client books, their history is instantly accessible so you can provide a personalised experience every time.',
+      'Build a detailed history for every client and every vehicle. Each customer profile holds their vehicles, past bookings, signed waivers, and photos - all in one place. When a repeat client books, their history is instantly accessible so you can provide a personalised experience every time.',
     highlights: [
       'Full customer history and contact records',
       'Vehicle profiles with full service history',
@@ -91,11 +93,11 @@ const FEATURES = [
     highlight: false,
   },
   {
-    icon: '📍',
+    icon: <MapPinIcon style={{ color: 'red' }} />,
     label: 'SECURITY / 07',
     title: 'Location Verification',
     description:
-      "Indemnity signatures are geofenced to your studio's registered location. This means a waiver can only be signed when the client is physically present at your studio — adding an additional layer of legal validity that no paper form can offer.",
+      "Indemnity signatures are geofenced to your studio's registered location. This means a waiver can only be signed when the client is physically present at your studio - adding an additional layer of legal validity that no paper form can offer.",
     highlights: [
       'GPS coordinates captured at time of signing',
       'Geofence radius configurable per studio',
@@ -106,7 +108,7 @@ const FEATURES = [
     highlight: false,
   },
   {
-    icon: '📊',
+    icon: <BarChartIcon style={{ color: 'blue' }} />,
     label: 'ANALYTICS / 08',
     title: 'Business Overview & Analytics',
     description:
@@ -121,15 +123,15 @@ const FEATURES = [
     highlight: false,
   },
   {
-    icon: '📱',
+    icon: <SmartphoneIcon style={{ color: 'purple' }} />,
     label: 'ACCESS / 09',
     title: 'Mobile-First, Always Online',
     description:
-      'Dtailbase is built as a Progressive Web App (PWA) — meaning it works seamlessly on any device, any browser, anywhere. Add it to your home screen for a native app-like experience. Your data is hosted on high-performance VPS servers, globally accessible and always available.',
+      'Dtailbase is built as a Progressive Web App (PWA) - meaning it works seamlessly on any device, any browser, anywhere. Add it to your home screen for a native app-like experience. Your data is hosted on high-performance VPS servers, globally accessible and always available.',
     highlights: [
       'Works on any smartphone, tablet, or desktop',
-      'Add to Home Screen — no app store required',
-      'Always up to date — no manual installs',
+      'Add to Home Screen - no app store required',
+      'Always up to date - no manual installs',
       'Hosted on globally distributed VPS infrastructure',
       'Encrypted data transmission at all times',
     ],
@@ -141,13 +143,12 @@ const Products = () => {
   return (
     <div className="landing-page products-page">
       <section className="products-hero animate-on-scroll">
-        <div className="about-intro-badge">📦 Platform Modules</div>
         <h1 className="hero-title">
           Everything Your Studio <span className="highlight">Needs.</span>
         </h1>
         <p className="hero-subtitle" style={{ maxWidth: '680px', margin: '0 auto' }}>
           Nine precision-engineered modules. One unified platform. Built by a detailer who lived
-          the chaos — designed to give your studio the edge it deserves.
+          the chaos - designed to give your studio the edge it deserves.
         </p>
       </section>
 

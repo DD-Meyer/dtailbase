@@ -10,7 +10,7 @@ import {
   fetchPricingWithFallback,
   isValidPricingPayload,
 } from '../services/pricingService';
-import { Clock1, User } from 'lucide-react';
+import { Calendar1Icon, CameraIcon, Clock1, ShieldAlertIcon, UserIcon } from 'lucide-react';
 
 const HERO_PLANS = [
   {
@@ -171,7 +171,7 @@ const Hero = ({ isAuthenticated }) => {
   const getPlanPrice = (plan) => {
     if (plan.isFree) return '0';
     const amount = heroPricing?.[plan.id]?.amount;
-    if (!amount) return '—';
+    if (!amount) return '-';
     return amount.endsWith('.00') ? amount.slice(0, -3) : amount;
   };
 
@@ -296,23 +296,23 @@ const Hero = ({ isAuthenticated }) => {
         </div>
         <div className="features-grid">
           <div className="feature-card animate-on-scroll">
-            <div className="feature-icon">📅</div>
+            <div className="feature-icon"><Calendar1Icon style={{ color: 'green' }} /></div>
             <h3>Smart Intake</h3>
             <p>Intelligent scheduling that accounts for vehicle size and service complexity automatically.</p>
           </div>
           <div className="feature-card highlight-card animate-on-scroll">
-            <div className="feature-icon">🛡️</div>
+            <div className="feature-icon"><ShieldAlertIcon style={{ color: 'red' }} /></div>
             <h3>Bulletproof Indemnity</h3>
             <p>Legally-binding digital waivers paired with 4K condition logs. We protect your insurance premiums.</p>
             <div className="card-tag">Core Security</div>
           </div>
           <div className="feature-card animate-on-scroll">
-            <div className="feature-icon">📸</div>
+            <div className="feature-icon"><CameraIcon style={{ color: 'blue' }} /></div>
             <h3>Photo Vault</h3>
             <p>Cloud-synced before/after galleries linked directly to customer profiles for instant recall.</p>
           </div>
           <div className="feature-card animate-on-scroll">
-            <div className="feature-icon">👥</div>
+            <div className="feature-icon"><UserIcon style={{ color: 'purple' }} /></div>
             <h3>Staff Command</h3>
             <p>Assign bays, track technician efficiency, and manage payroll through a single interface.</p>
           </div>
@@ -322,7 +322,7 @@ const Hero = ({ isAuthenticated }) => {
       <section className="gallery-section container">
         <div className="section-header animate-on-scroll">
           <h2 className="section-title">See It In <span className="highlight">Action.</span></h2>
-          <p className="section-desc">A glimpse inside the Dtailbase ecosystem — from intake to invoice.</p>
+          <p className="section-desc">A glimpse inside the Dtailbase ecosystem - from intake to invoice.</p>
         </div>
         <div className="gallery-grid">
           {[
