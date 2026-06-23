@@ -49,6 +49,14 @@ const PaymentSuccess = () => {
             message = `Subscription approved. Your ${pendingPlan} plan will activate once payment is confirmed — this usually takes just a moment. Refresh this page if your plan does not update.`;
           } else {
             message = 'Payment successful. Your plan has been updated.';
+
+            // FIRE GOOGLE ADS CONVERSION HERE
+            if (typeof window.gtag === 'function') {
+              window.gtag('event', 'conversion', {
+                'send_to': 'AW-18202409664/Pq7WCP7roMEcEMD1yudD',
+                'transaction_id': subscriptionId // Dynamically populating to prevent duplicate counts
+              });
+            }
           }
           setState({
             loading: false,
@@ -85,11 +93,11 @@ const PaymentSuccess = () => {
   }, [subscriptionId, refreshCompany]);
 
   return (
-    <div className="upgrade-container">
-      <div className="upgrade-header mt-10">
-        <h1>{state.success ? 'Subscription Active' : 'Payment Verification'}</h1>
-        <p>{state.loading ? 'Checking with PayPal...' : state.message}</p>
-        {state.plan && <p>Your active tier: <strong>{state.plan}</strong></p>}
+      <div className="upgrade-container">
+        <div className="upgrade-header mt-10">
+          <h1>{state.success ? 'Subscription Active' : 'Payment Verification'}</h1>
+          <p>{state.loading ? 'Checking with PayPal...' : state.message}</p>
+          {state.plan && <p>Your active tier: <strong>{state.plan}</strong></p>}
         {state.subscriptionStatus && (
           <p>PayPal status: <strong>{state.subscriptionStatus}</strong></p>
         )}
