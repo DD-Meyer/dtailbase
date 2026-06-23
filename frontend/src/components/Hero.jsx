@@ -11,7 +11,6 @@ import {
   isValidPricingPayload,
 } from '../services/pricingService';
 import { Clock1, User } from 'lucide-react';
-import { BiHorizontalCenter } from 'react-icons/bi';
 
 const HERO_PLANS = [
   {

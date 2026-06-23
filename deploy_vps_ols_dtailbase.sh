@@ -16,7 +16,7 @@ if [[ -z "${APP_DIR:-}" ]]; then
     APP_DIR="/var/www/Dtailbase"
   fi
 fi
-BRANCH="${BRANCH:-staging}"
+BRANCH="${BRANCH:-main}"
 VENV_DIR="${VENV_DIR:-venv}"
 BACKEND_DIR="${APP_DIR}/backend"
 FRONTEND_DIR="${APP_DIR}/frontend"
