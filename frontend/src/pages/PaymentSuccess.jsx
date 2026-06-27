@@ -21,6 +21,14 @@ const PaymentSuccess = () => {
 
   useEffect(() => {
     const confirmSubscription = async () => {
+      // FIRE GOOGLE ADS CONVERSION HERE
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'conversion', {
+          'send_to': 'AW-18202409664/Pq7WCP7roMEcEMD1yudD',
+          'transaction_id': subscriptionId // Dynamically populating to prevent duplicate counts
+        });
+      }
+      
       if (!subscriptionId) {
         setState({
           loading: false,
@@ -58,13 +66,6 @@ const PaymentSuccess = () => {
             //   });
             // }
           }
-          // FIRE GOOGLE ADS CONVERSION HERE
-            if (typeof window.gtag === 'function') {
-              window.gtag('event', 'conversion', {
-                'send_to': 'AW-18202409664/Pq7WCP7roMEcEMD1yudD',
-                'transaction_id': subscriptionId // Dynamically populating to prevent duplicate counts
-              });
-            }
           setState({
             loading: false,
             success: true,
