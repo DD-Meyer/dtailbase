@@ -25,10 +25,10 @@ const PaymentSuccess = () => {
       if (typeof window.gtag === 'function') {
         window.gtag('event', 'conversion', {
           'send_to': 'AW-18202409664/Pq7WCP7roMEcEMD1yudD',
-          'transaction_id': subscriptionId // Dynamically populating to prevent duplicate counts
+          'transaction_id': '' // Typed for testing tag manager, but will be changed after confirmation to prevent duplicate counts
         });
       }
-      
+
       if (!subscriptionId) {
         setState({
           loading: false,
