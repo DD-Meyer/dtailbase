@@ -42,7 +42,7 @@ const HERO_PLANS = [
       'Up to 5,000 Customers',
     ],
     featured: true,
-    cta: 'Start Free Trial',
+    cta: 'Get Pro',
     isFree: false,
   },
   {
@@ -61,7 +61,7 @@ const HERO_PLANS = [
       'Unlimited Customers',
     ],
     featured: false,
-    cta: 'Go Elite',
+    cta: 'Get Enterprise',
     isFree: false,
   },
 ];
