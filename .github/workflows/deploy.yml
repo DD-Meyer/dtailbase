@@ -7,6 +7,8 @@ on:
 
 jobs:
   deploy:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Resolve SSH credentials
@@ -26,17 +28,21 @@ jobs:
         run: |
           set -euo pipefail
 
-          host="${VPS_HOST:-}"
-          [[ -n "$host" ]] || host="${SSH_HOST:-}"
-          user="${VPS_USER:-}"
-          [[ -n "$user" ]] || user="${VPS_USERNAME:-}"
-          [[ -n "$user" ]] || user="${SSH_USER:-}"
-          key="${VPS_SSH_KEY:-}"
-          [[ -n "$key" ]] || key="${SSH_PRIVATE_KEY:-}"
-          passphrase="${VPS_SSH_PASSPHRASE:-}"
-          [[ -n "$passphrase" ]] || passphrase="${SSH_KEY_PASSPHRASE:-}"
-          auth_pass="${VPS_PASSWORD:-}"
-          [[ -n "$auth_pass" ]] || auth_pass="${SSH_PASSWORD:-}"
+          pick_first_non_empty() {
+            for value in "$@"; do
+              if [[ -n "${value:-}" ]]; then
+                echo "$value"
+                return 0
+              fi
+            done
+            echo ""
+          }
+
+          host="$(pick_first_non_empty "${VPS_HOST:-}" "${SSH_HOST:-}")"
+          user="$(pick_first_non_empty "${VPS_USER:-}" "${VPS_USERNAME:-}" "${SSH_USER:-}")"
+          key="$(pick_first_non_empty "${VPS_SSH_KEY:-}" "${SSH_PRIVATE_KEY:-}")"
+          passphrase="$(pick_first_non_empty "${VPS_SSH_PASSPHRASE:-}" "${SSH_KEY_PASSPHRASE:-}")"
+          auth_pass="$(pick_first_non_empty "${VPS_PASSWORD:-}" "${SSH_PASSWORD:-}")"
 
           if [[ -z "$host" ]]; then
             echo "Missing SSH host secret. Set VPS_HOST or SSH_HOST." >&2
@@ -58,10 +64,14 @@ jobs:
               echo "key<<EOF"
               echo "$key"
               echo "EOF"
-              echo "passphrase<<EOF"
-              echo "$passphrase"
-              echo "EOF"
             } >> "$GITHUB_OUTPUT"
+            if [[ -n "$passphrase" ]]; then
+              {
+                echo "passphrase<<EOF"
+                echo "$passphrase"
+                echo "EOF"
+              } >> "$GITHUB_OUTPUT"
+            fi
           elif [[ -n "$auth_pass" ]]; then
             {
               echo "password<<EOF"
