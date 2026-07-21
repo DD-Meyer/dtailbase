@@ -149,6 +149,9 @@ fi
 log "Restarting OpenLiteSpeed"
 sudo systemctl restart lsws
 
+log "Restarting Gunicorn service for DtailBase"
+sudo systemctl restart dtailbase-gunicorn.service
+
 log "Deployment completed successfully"
 log "Quick checks:"
 log "  curl -I https://www.dtailbase.com/"
