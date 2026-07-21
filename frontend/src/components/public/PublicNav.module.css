@@ -189,12 +189,21 @@
 /* Mobile sheet */
 .sheet {
   position: fixed;
-  inset: 64px 0 0 0;
-  background: var(--color-background);
+  top: 64px;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  
+  background: var(--color-background, #ffffff);
   padding: 24px 20px 32px;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  
+  /* Add border & shadow so the dropdown stands out cleanly from the page */
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  
   animation: sheetIn var(--motion-slow) var(--ease-out);
 }
 
