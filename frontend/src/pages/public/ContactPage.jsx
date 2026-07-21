@@ -101,10 +101,10 @@ export default function ContactPage() {
                   <div>
                     <p className={styles.infoLabel}>Email</p>
                     <a
-                      href="mailto:hello@dtailbase.com"
+                      href="mailto:info@netictechnologies.com"
                       className={styles.infoValue}
                     >
-                      hello@dtailbase.com
+                      info@netictechnologies.com
                     </a>
                   </div>
                 </li>
