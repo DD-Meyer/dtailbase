@@ -12,8 +12,10 @@ jobs:
       - name: Trigger VPS Deployment Script via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
+          host: ${{ secrets.VPS_HOST || secrets.SSH_HOST }}
+          username: ${{ secrets.VPS_USER || secrets.VPS_USERNAME || secrets.SSH_USER }}
+          key: ${{ secrets.VPS_SSH_KEY || secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.VPS_SSH_PASSPHRASE || secrets.SSH_KEY_PASSPHRASE }}
+          password: ${{ secrets.VPS_PASSWORD || secrets.SSH_PASSWORD }}
           script: |
             bash /var/www/dtailbase/deploy_vps_ols_dtailbase.sh
