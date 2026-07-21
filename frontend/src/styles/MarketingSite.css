@@ -1,0 +1,1091 @@
+@import "./PublicLayout.css";
+
+/* ==========================================================================
+   DtailBase — Marketing / Public Design System
+   Generated from ui-ux-pro-max skill (see design-system/dtailbase/MASTER.md)
+   Scoped to public wrappers (.landing-wrapper, .landing-page, .marketing-home,
+   .products-page, .about-page, .auth-wrapper) — dashboard styles untouched.
+   ========================================================================== */
+
+:root {
+  /* ---- Brand palette ---- */
+  --ds-primary: #2563eb;
+  --ds-primary-strong: #1d4ed8;
+  --ds-primary-soft: #3b82f6;
+  --ds-accent: #10b981;
+  --ds-accent-strong: #059669;
+  --ds-warning: #f59e0b;
+  --ds-danger: #dc2626;
+
+  /* ---- Surfaces (dark mode primary) ---- */
+  --ds-bg-0: #06090f;
+  --ds-bg-1: #0b1220;
+  --ds-bg-2: #0f172a;
+  --ds-bg-3: #111827;
+  --ds-bg-glass: rgba(15, 23, 42, 0.62);
+  --ds-bg-glass-strong: rgba(11, 18, 32, 0.78);
+
+  /* ---- Text ---- */
+  --ds-text: #f8fafc;
+  --ds-text-soft: #cbd5e1;
+  --ds-text-muted: #94a3b8;
+  --ds-text-dim: #64748b;
+
+  /* ---- Borders ---- */
+  --ds-border: rgba(148, 163, 184, 0.14);
+  --ds-border-strong: rgba(148, 163, 184, 0.22);
+  --ds-border-accent: rgba(37, 99, 235, 0.35);
+
+  /* ---- Glow / ambient ---- */
+  --ds-glow-primary: rgba(37, 99, 235, 0.32);
+  --ds-glow-primary-soft: rgba(59, 130, 246, 0.18);
+  --ds-glow-accent: rgba(16, 185, 129, 0.28);
+
+  /* ---- Typography ---- */
+  --ds-font-sans: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* ---- Spacing scale (density 4/10 = standard) ---- */
+  --ds-space-1: 4px;
+  --ds-space-2: 8px;
+  --ds-space-3: 12px;
+  --ds-space-4: 16px;
+  --ds-space-5: 20px;
+  --ds-space-6: 24px;
+  --ds-space-8: 32px;
+  --ds-space-10: 40px;
+  --ds-space-12: 48px;
+  --ds-space-16: 64px;
+  --ds-space-20: 80px;
+  --ds-space-24: 96px;
+
+  /* ---- Rhythm tokens ---- */
+  --ds-section-y: clamp(4rem, 8vw, 7rem);
+  --ds-section-x: clamp(1.25rem, 4vw, 3.5rem);
+  --ds-nav-h: 68px;
+  --ds-radius-sm: 8px;
+  --ds-radius-md: 12px;
+  --ds-radius-lg: 20px;
+  --ds-radius-xl: 28px;
+
+  /* ---- Motion (Expo.out) ---- */
+  --ds-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --ds-ease-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ds-dur-fast: 180ms;
+  --ds-dur-base: 260ms;
+  --ds-dur-slow: 420ms;
+
+  /* ---- Elevation ---- */
+  --ds-shadow-sm: 0 4px 12px -4px rgba(0, 0, 0, 0.35);
+  --ds-shadow-md: 0 12px 32px -12px rgba(0, 0, 0, 0.55);
+  --ds-shadow-lg: 0 32px 80px -32px rgba(0, 0, 0, 0.7);
+  --ds-shadow-glow: 0 0 32px -6px var(--ds-glow-primary);
+
+  /* ---- Legacy aliases used by existing marketing/public CSS ---- */
+  --marketing-bg: var(--ds-bg-1);
+  --marketing-panel: var(--ds-bg-glass);
+  --marketing-panel-solid: var(--ds-bg-3);
+  --marketing-border: var(--ds-border-strong);
+  --marketing-text: var(--ds-text);
+  --marketing-muted: var(--ds-text-muted);
+  --marketing-accent: var(--ds-primary);
+  --marketing-accent-deep: var(--ds-primary-strong);
+  --marketing-glow: var(--ds-glow-primary-soft);
+  --marketing-section-y: var(--ds-section-y);
+  --marketing-section-x: var(--ds-section-x);
+  --marketing-nav-h: var(--ds-nav-h);
+  --marketing-ease: var(--ds-ease);
+}
+
+/* ==========================================================================
+   Public-wrapper scoped typography
+   ========================================================================== */
+.landing-wrapper,
+.landing-page,
+.marketing-home,
+.products-page,
+.about-page,
+.auth-wrapper {
+  color: var(--ds-text);
+  font-family: var(--ds-font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+.landing-wrapper,
+.landing-page,
+.marketing-home,
+.products-page,
+.about-page {
+  background: var(--ds-bg-1);
+}
+
+.landing-wrapper h1,
+.landing-page h1,
+.landing-wrapper h2,
+.landing-page h2,
+.landing-wrapper h3,
+.landing-page h3,
+.marketing-home h1,
+.marketing-home h2,
+.marketing-home h3 {
+  font-family: var(--ds-font-sans);
+  letter-spacing: -0.02em;
+  color: var(--ds-text);
+}
+
+/* ==========================================================================
+   Base marketing surface
+   ========================================================================== */
+.marketing-home {
+  position: relative;
+  min-height: 100vh;
+  background:
+    radial-gradient(900px 450px at 50% 12%, var(--ds-glow-primary), transparent 68%),
+    radial-gradient(560px 300px at 85% 18%, rgba(29, 78, 216, 0.16), transparent 70%),
+    linear-gradient(180deg, var(--ds-bg-1) 0%, var(--ds-bg-0) 100%);
+}
+
+/* ==========================================================================
+   Navigation (LandingNav) — floating pill on landing, sticky on legacy public
+   ========================================================================== */
+.marketing-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 1px solid var(--ds-border);
+  background: rgba(11, 18, 32, 0.72);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  transition: background var(--ds-dur-base) var(--ds-ease),
+    border-color var(--ds-dur-base) var(--ds-ease),
+    box-shadow var(--ds-dur-base) var(--ds-ease),
+    transform var(--ds-dur-base) var(--ds-ease);
+}
+
+.marketing-nav.is-scrolled {
+  background: rgba(6, 9, 15, 0.9);
+  border-bottom-color: var(--ds-border-accent);
+  box-shadow: 0 12px 40px -20px rgba(0, 0, 0, 0.65);
+}
+
+/* Floating pill variant — cancels the sticky/border-bottom look */
+.marketing-nav--floating {
+  position: relative;
+  border-bottom: 0 !important;
+  border-radius: 9999px;
+  background: rgba(11, 14, 20, 0.72);
+  box-shadow: 0 10px 40px -20px rgba(0, 0, 0, 0.75),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.marketing-nav--floating.is-scrolled {
+  background: rgba(6, 9, 15, 0.86);
+  border-color: rgba(148, 163, 184, 0.18) !important;
+  box-shadow: 0 18px 60px -24px rgba(0, 0, 0, 0.85),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transform: translateY(-1px);
+}
+
+/* Inside-the-pill nav link tweaks: tighter, no bottom underline (it looks
+   wrong inside a rounded pill), use pill-shaped hover pad instead. */
+.marketing-nav--floating .marketing-nav-link {
+  padding: 0.55rem 1.05rem;
+  border-radius: 9999px;
+  color: var(--ds-text-soft);
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.marketing-nav--floating .marketing-nav-link::after {
+  display: none;
+}
+
+.marketing-nav--floating .marketing-nav-link:hover,
+.marketing-nav--floating .marketing-nav-link:focus-visible,
+.marketing-nav--floating .marketing-nav-link.is-active {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+.marketing-nav-inner {
+  max-width: 80rem;
+  margin: 0 auto;
+}
+
+.marketing-logo.public-header-logo {
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.marketing-logo {
+  font-family: var(--ds-font-sans);
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-decoration: none;
+  gap: 1px;
+  transition: transform var(--ds-dur-base) var(--ds-ease);
+}
+
+.marketing-logo:hover {
+  transform: translateY(-1px);
+}
+
+.marketing-logo-dot {
+  display: inline-block;
+  transition: transform var(--ds-dur-base) var(--ds-ease),
+    filter var(--ds-dur-base) var(--ds-ease);
+}
+
+.marketing-logo:hover .marketing-logo-dot {
+  transform: translateX(2px) scale(1.14);
+  filter: drop-shadow(0 0 10px var(--ds-glow-primary));
+}
+
+.marketing-nav-link {
+  position: relative;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--ds-text-muted);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: color var(--ds-dur-fast) var(--ds-ease),
+    background-color var(--ds-dur-fast) var(--ds-ease);
+}
+
+.marketing-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--ds-primary), var(--ds-primary-soft));
+  border-radius: 999px;
+  transform: translateX(-50%);
+  transition: width var(--ds-dur-base) var(--ds-ease),
+    opacity var(--ds-dur-base) var(--ds-ease);
+  opacity: 0;
+}
+
+.marketing-nav-link:hover,
+.marketing-nav-link:focus-visible,
+.marketing-nav-link.is-active {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.04);
+  outline: none;
+}
+
+.marketing-nav-link:hover::after,
+.marketing-nav-link:focus-visible::after,
+.marketing-nav-link.is-active::after {
+  width: calc(100% - 1.8rem);
+  opacity: 1;
+}
+
+.marketing-signin {
+  padding: 0.5rem 0.85rem;
+  border-radius: 8px;
+  transition: color var(--ds-dur-fast) var(--ds-ease),
+    background-color var(--ds-dur-fast) var(--ds-ease);
+}
+
+.marketing-signin:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   Hero (LandingHero)
+   ========================================================================== */
+.marketing-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.marketing-hero-grid {
+  position: relative;
+}
+
+.marketing-hero-copy {
+  padding-inline: clamp(0rem, 1vw, 0.5rem);
+}
+
+.marketing-hero-copy .marketing-badge {
+  margin-inline: auto;
+}
+
+@media (min-width: 1024px) {
+  .marketing-hero-copy .marketing-badge {
+    margin-inline: 0;
+  }
+}
+
+.marketing-hero-copy h1,
+.marketing-section-title,
+.marketing-compare-title {
+  text-wrap: balance;
+}
+
+/* ==========================================================================
+   Cards
+   ========================================================================== */
+.marketing-signup-card,
+.marketing-demo-frame,
+.marketing-bento-card,
+.marketing-compare-shell {
+  border: 1px solid var(--ds-border);
+  background: var(--ds-bg-glass);
+  box-shadow: var(--ds-shadow-lg);
+}
+
+.marketing-signup-card {
+  position: relative;
+  width: 100%;
+  transition: transform var(--ds-dur-base) var(--ds-ease),
+    box-shadow var(--ds-dur-base) var(--ds-ease);
+}
+
+.marketing-signup-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 32px 90px -36px var(--ds-glow-primary);
+}
+
+.marketing-signup-card::before,
+.marketing-bento-card::before,
+.marketing-compare-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(37, 99, 235, 0.08),
+    transparent 44%
+  );
+  pointer-events: none;
+}
+
+.marketing-demo-frame {
+  backdrop-filter: blur(18px);
+}
+
+.marketing-demo-panel {
+  background: var(--ds-bg-0);
+}
+
+.marketing-demo-stat {
+  background: rgba(15, 23, 42, 0.56);
+  transition: transform var(--ds-dur-base) var(--ds-ease),
+    border-color var(--ds-dur-base) var(--ds-ease);
+}
+
+.marketing-demo-stat:hover {
+  transform: translateY(-3px);
+  border-color: var(--ds-border-accent);
+}
+
+.marketing-section,
+.marketing-compare {
+  position: relative;
+}
+
+.marketing-feature-card {
+  min-height: 100%;
+  transition: transform var(--ds-dur-base) var(--ds-ease),
+    border-color var(--ds-dur-base) var(--ds-ease),
+    box-shadow var(--ds-dur-base) var(--ds-ease);
+}
+
+.marketing-feature-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--ds-border-accent);
+  box-shadow: 0 32px 88px -40px var(--ds-glow-primary);
+}
+
+.marketing-bento-card {
+  transition: transform var(--ds-dur-base) var(--ds-ease),
+    border-color var(--ds-dur-base) var(--ds-ease),
+    box-shadow var(--ds-dur-base) var(--ds-ease);
+}
+
+.marketing-bento-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--ds-border-accent);
+  box-shadow: 0 32px 88px -40px var(--ds-glow-primary);
+}
+
+.marketing-compare-shell table {
+  border-collapse: collapse;
+}
+
+.marketing-compare-shell tbody tr:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.marketing-footer {
+  background: var(--ds-bg-0);
+}
+
+.products-hero,
+.products-grid,
+.products-cta,
+.legal-section,
+.process-story,
+.about-values-grid {
+  position: relative;
+  z-index: 2;
+}
+
+/* ==========================================================================
+   Reusable design-system utility classes (for new JSX)
+   ========================================================================== */
+.ds-eyebrow {
+  display: inline-block;
+  font-family: var(--ds-font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ds-primary-soft);
+}
+
+.ds-headline {
+  font-family: var(--ds-font-sans);
+  font-weight: 800;
+  font-size: clamp(2rem, 4.2vw, 3.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--ds-text);
+}
+
+.ds-lede {
+  font-size: clamp(1rem, 1.4vw, 1.15rem);
+  line-height: 1.65;
+  color: var(--ds-text-soft);
+  max-width: 62ch;
+}
+
+.ds-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: var(--ds-radius-md);
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform var(--ds-dur-base) var(--ds-ease),
+    background var(--ds-dur-base) var(--ds-ease),
+    color var(--ds-dur-base) var(--ds-ease),
+    box-shadow var(--ds-dur-base) var(--ds-ease);
+}
+
+.ds-btn:hover,
+.ds-btn:focus-visible {
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.ds-btn-primary {
+  background: var(--ds-primary);
+  color: #ffffff !important;
+  box-shadow: 0 12px 32px -12px var(--ds-glow-primary);
+}
+
+.ds-btn-primary:hover {
+  background: var(--ds-primary-strong);
+  box-shadow: 0 18px 44px -14px var(--ds-glow-primary);
+}
+
+.ds-btn-accent {
+  background: var(--ds-accent);
+  color: #ffffff !important;
+  box-shadow: 0 12px 32px -12px var(--ds-glow-accent);
+}
+
+.ds-btn-accent:hover {
+  background: var(--ds-accent-strong);
+}
+
+.ds-btn-ghost {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ds-text) !important;
+  border-color: var(--ds-border);
+}
+
+.ds-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--ds-border-strong);
+}
+
+.ds-card {
+  position: relative;
+  background: var(--ds-bg-glass);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  padding: clamp(1.25rem, 2vw, 2rem);
+  box-shadow: var(--ds-shadow-md);
+  overflow: hidden;
+}
+
+.ds-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(37, 99, 235, 0.06),
+    transparent 44%
+  );
+  pointer-events: none;
+}
+
+.ds-card-lift {
+  transition: transform var(--ds-dur-base) var(--ds-ease),
+    border-color var(--ds-dur-base) var(--ds-ease),
+    box-shadow var(--ds-dur-base) var(--ds-ease);
+}
+
+.ds-card-lift:hover {
+  transform: translateY(-4px);
+  border-color: var(--ds-border-accent);
+  box-shadow: 0 32px 88px -40px var(--ds-glow-primary);
+}
+
+.ds-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.1);
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  color: var(--ds-primary-soft);
+  font-family: var(--ds-font-sans);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.ds-chip-accent {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.28);
+  color: var(--ds-accent);
+}
+
+.ds-input {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  padding: 12px 14px;
+  color: var(--ds-text);
+  font-family: var(--ds-font-sans);
+  font-size: 0.95rem;
+  transition: border-color var(--ds-dur-fast) var(--ds-ease),
+    box-shadow var(--ds-dur-fast) var(--ds-ease);
+}
+
+.ds-input:focus {
+  outline: none;
+  border-color: var(--ds-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+.ds-label {
+  display: block;
+  color: var(--ds-text);
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+/* Ambient blob (reusable background element) */
+.ds-ambient-field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ds-ambient-blob {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+  animation: dsAmbientDrift 18s ease-in-out infinite;
+  will-change: transform;
+}
+
+.ds-ambient-blob.ds-ambient-primary {
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.55), transparent 70%);
+}
+
+.ds-ambient-blob.ds-ambient-accent {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.42), transparent 70%);
+}
+
+.ds-ambient-blob.ds-ambient-deep {
+  background: radial-gradient(circle, rgba(29, 78, 216, 0.4), transparent 70%);
+}
+
+/* ==========================================================================
+   Vibrant Supabase-inspired accents
+   Multi-color gradients, mouse-tracked spotlight, animated conic borders.
+   ========================================================================== */
+
+/* Extra palette tokens layered on top of the design system */
+:root {
+  --ds-violet: #8b5cf6;
+  --ds-rose: #f43f5e;
+  --ds-cyan: #22d3ee;
+  --ds-amber: #f59e0b;
+  --ds-gradient-vivid: linear-gradient(90deg, #22d3ee 0%, #3b82f6 30%, #8b5cf6 60%, #f43f5e 100%);
+  --ds-gradient-brand: linear-gradient(90deg, #10b981 0%, #3b82f6 50%, #8b5cf6 100%);
+  --ds-gradient-warm: linear-gradient(90deg, #f59e0b 0%, #f43f5e 100%);
+}
+
+/* Vibrant gradient text — swap in on any element */
+.ds-gradient-text,
+.landing-page .highlight-vivid,
+.landing-page .highlight-brand {
+  background: var(--ds-gradient-vivid);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  background-size: 200% 100%;
+  animation: dsGradientShift 8s ease-in-out infinite;
+}
+
+.landing-page .highlight-brand {
+  background: var(--ds-gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 100%;
+}
+
+@keyframes dsGradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Supabase-style spotlight — tracks the cursor across a card.
+   PublicLayout.jsx already writes --mouse-x / --mouse-y on hover. */
+.feature-card,
+.product-card,
+.legal-card,
+.value-card,
+.pricing-card,
+.stat-card,
+.contact-form-card,
+.marketing-bento-card,
+.marketing-feature-card {
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+  position: relative;
+  isolation: isolate;
+}
+
+.feature-card::after,
+.product-card::after,
+.legal-card::after,
+.value-card::after,
+.pricing-card::after,
+.contact-form-card::after,
+.marketing-bento-card::after,
+.marketing-feature-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 320ms var(--ds-ease);
+  background: radial-gradient(
+    420px circle at var(--mouse-x) var(--mouse-y),
+    rgba(59, 130, 246, 0.18),
+    rgba(16, 185, 129, 0.08) 30%,
+    transparent 55%
+  );
+}
+
+.feature-card:hover::after,
+.product-card:hover::after,
+.legal-card:hover::after,
+.value-card:hover::after,
+.pricing-card:hover::after,
+.contact-form-card:hover::after,
+.marketing-bento-card:hover::after,
+.marketing-feature-card:hover::after {
+  opacity: 1;
+}
+
+/* Animated conic gradient border — apply to <div class="ds-glow-frame">…</div>
+   or add class ds-glow-frame to any card wrapper */
+.ds-glow-frame {
+  position: relative;
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-bg-glass);
+  padding: 1px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.ds-glow-frame::before {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    rgba(37, 99, 235, 0.55) 12%,
+    rgba(16, 185, 129, 0.55) 24%,
+    rgba(139, 92, 246, 0.55) 36%,
+    transparent 48%,
+    transparent 100%
+  );
+  animation: dsConicSpin 6s linear infinite;
+  z-index: 0;
+}
+
+.ds-glow-frame > * {
+  position: relative;
+  z-index: 1;
+  background: var(--ds-bg-2);
+  border-radius: calc(var(--ds-radius-lg) - 1px);
+}
+
+@keyframes dsConicSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Chip variants for the extra colors */
+.ds-chip-violet {
+  background: rgba(139, 92, 246, 0.12);
+  border-color: rgba(139, 92, 246, 0.32);
+  color: #c4b5fd;
+}
+
+.ds-chip-cyan {
+  background: rgba(34, 211, 238, 0.12);
+  border-color: rgba(34, 211, 238, 0.32);
+  color: #67e8f9;
+}
+
+.ds-chip-warm {
+  background: rgba(244, 63, 94, 0.1);
+  border-color: rgba(244, 63, 94, 0.3);
+  color: #fda4af;
+}
+
+/* Glowing button variant (Supabase primary look) */
+.ds-btn-glow {
+  position: relative;
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  color: #ffffff !important;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.ds-btn-glow::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background: conic-gradient(
+    from 90deg,
+    rgba(37, 99, 235, 0.9),
+    rgba(139, 92, 246, 0.9),
+    rgba(16, 185, 129, 0.9),
+    rgba(37, 99, 235, 0.9)
+  );
+  filter: blur(14px);
+  opacity: 0.55;
+  z-index: -1;
+  animation: dsConicSpin 8s linear infinite;
+}
+
+.ds-btn-glow:hover {
+  transform: translateY(-2px);
+}
+
+.ds-btn-glow:hover::before {
+  opacity: 0.85;
+}
+
+/* Section divider — animated gradient hairline */
+.ds-divider {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(37, 99, 235, 0.6) 25%,
+    rgba(139, 92, 246, 0.6) 50%,
+    rgba(16, 185, 129, 0.6) 75%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: dsGradientShift 6s ease-in-out infinite;
+}
+
+/* Sparkle badge — for "New" / "Beta" pills */
+.ds-sparkle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(37, 99, 235, 0.16), rgba(139, 92, 246, 0.16));
+  border: 1px solid rgba(139, 92, 246, 0.32);
+  color: #c4b5fd;
+  font-family: var(--ds-font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  position: relative;
+}
+
+.ds-sparkle::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #a78bfa;
+  box-shadow: 0 0 12px 2px rgba(167, 139, 250, 0.7);
+  animation: dsSparklePulse 2s ease-in-out infinite;
+}
+
+@keyframes dsSparklePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(0.75); }
+}
+
+/* Ensure content stays above spotlight pseudo-element */
+.feature-card > *,
+.product-card > *,
+.legal-card > *,
+.value-card > *,
+.pricing-card > *,
+.stat-card > *,
+.contact-form-card > *,
+.marketing-bento-card > *,
+.marketing-feature-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ==========================================================================
+   Entry animations
+   ========================================================================== */
+@media (min-width: 1025px) {
+  .marketing-nav {
+    animation: marketingNavFloat 320ms var(--ds-ease);
+  }
+
+  .marketing-hero-copy > * {
+    opacity: 0;
+    transform: translateY(14px);
+    animation: marketingRise 620ms var(--ds-ease) forwards;
+  }
+
+  .marketing-hero-copy > *:nth-child(1) { animation-delay: 80ms; }
+  .marketing-hero-copy > *:nth-child(2) { animation-delay: 160ms; }
+  .marketing-hero-copy > *:nth-child(3) { animation-delay: 240ms; }
+  .marketing-hero-copy > *:nth-child(4) { animation-delay: 320ms; }
+
+  .marketing-hero-grid > div:last-child .marketing-signup-card {
+    opacity: 0;
+    transform: translateY(18px);
+    animation: marketingRise 720ms var(--ds-ease) 360ms forwards;
+  }
+}
+
+@keyframes marketingNavFloat {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes marketingRise {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dsAmbientDrift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-30px, 20px, 0) scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marketing-nav,
+  .marketing-hero-copy > *,
+  .marketing-hero-grid > div:last-child .marketing-signup-card,
+  .ds-ambient-blob {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .marketing-logo.public-header-logo {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .marketing-home {
+    background:
+      radial-gradient(520px 280px at 50% 10%, var(--ds-glow-primary), transparent 68%),
+      linear-gradient(180deg, var(--ds-bg-1) 0%, var(--ds-bg-0) 100%);
+  }
+
+  .marketing-logo.public-header-logo {
+    font-size: 1.1rem;
+  }
+
+  .marketing-hero-copy {
+    text-align: center;
+  }
+}
+
+
+/* ==========================================================================
+   Landing hero � floating decorative chips
+   ========================================================================== */
+.hero-float {
+  animation: heroFloat 6s ease-in-out infinite;
+  will-change: transform;
+}
+.hero-float--tl { animation-delay: 0s;   animation-duration: 7s; }
+.hero-float--tr { animation-delay: 1.2s; animation-duration: 6.4s; }
+.hero-float--bl { animation-delay: 0.6s; animation-duration: 7.2s; }
+.hero-float--br { animation-delay: 1.8s; animation-duration: 6.8s; }
+
+@keyframes heroFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-10px) rotate(0.6deg); }
+}
+
+/* ==========================================================================
+   Feature card illustrations � animate on group-hover
+   ========================================================================== */
+.feature-illus-frame {
+  position: relative;
+}
+
+.feature-illus {
+  transition: transform 500ms var(--ds-ease);
+}
+
+.marketing-bento-card:hover .feature-illus {
+  transform: scale(1.03);
+}
+
+/* Booking � slot fills right, pulse dots */
+.feature-slot-fill {
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.marketing-bento-card:hover .feature-slot-fill {
+  transform: scaleX(1);
+}
+
+.feature-pulse-1, .feature-pulse-2, .feature-pulse-3 {
+  opacity: 0.35;
+  transform-origin: center;
+}
+.marketing-bento-card:hover .feature-pulse-1 { animation: featurePulse 1.4s ease-in-out infinite; animation-delay: 0s; }
+.marketing-bento-card:hover .feature-pulse-2 { animation: featurePulse 1.4s ease-in-out infinite; animation-delay: 0.25s; }
+.marketing-bento-card:hover .feature-pulse-3 { animation: featurePulse 1.4s ease-in-out infinite; animation-delay: 0.5s; }
+
+@keyframes featurePulse {
+  0%, 100% { opacity: 0.35; r: 2.5; }
+  50%      { opacity: 1;    r: 3.5; }
+}
+
+/* Signature � path draws in */
+.feature-sig-path {
+  stroke-dasharray: 260;
+  stroke-dashoffset: 260;
+  transition: stroke-dashoffset 900ms cubic-bezier(0.65, 0, 0.35, 1);
+}
+.marketing-bento-card:hover .feature-sig-path {
+  stroke-dashoffset: 0;
+}
+
+/* Job cards � stack fans out */
+.feature-card-1, .feature-card-2, .feature-card-3 {
+  transform-origin: center bottom;
+  transition: transform 500ms var(--ds-ease);
+}
+.marketing-bento-card:hover .feature-card-1 { transform: translate(8px, -6px) rotate(4deg); }
+.marketing-bento-card:hover .feature-card-2 { transform: translate(-6px, -3px) rotate(-3deg); }
+.marketing-bento-card:hover .feature-card-3 { transform: translate(-14px, 0px) rotate(-7deg); }
+
+/* Mobile � rows slide, phone lifts */
+.feature-mobile-rows,
+.feature-mobile-chips {
+  transition: transform 550ms var(--ds-ease);
+}
+.marketing-bento-card:hover .feature-mobile-chips {
+  transform: translateX(-4px);
+}
+.feature-mobile-row-2 {
+  transition: transform 500ms var(--ds-ease), fill-opacity 500ms var(--ds-ease);
+}
+.marketing-bento-card:hover .feature-mobile-row-2 {
+  fill-opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-float,
+  .feature-illus,
+  .feature-slot-fill,
+  .feature-pulse-1, .feature-pulse-2, .feature-pulse-3,
+  .feature-sig-path,
+  .feature-card-1, .feature-card-2, .feature-card-3,
+  .feature-mobile-rows, .feature-mobile-chips, .feature-mobile-row-2 {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+  .feature-slot-fill { transform: scaleX(1) !important; }
+}
