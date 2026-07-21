@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #f8f9fa; padding: 20px; border-radius: 5px; }
+        .content { padding: 20px 0; }
+        .booking-details { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .detail-row { padding: 8px 0; border-bottom: 1px solid #eee; }
+        .detail-label { font-weight: bold; color: #666; }
+        .success-badge { background-color: #28a745; color: white; padding: 10px 15px; border-radius: 5px; display: inline-block; }
+        .cta-button { display: inline-block; padding: 12px 30px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 15px 0; }
+        .footer { font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 20px; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Booking Confirmation</h1>
+            <p class="success-badge">✓ Your booking has been submitted</p>
+        </div>
+        
+        <div class="content">
+            <p>Hi {{ customer_name }},</p>
+            
+            <p>Thank you for booking with <strong>{{ company_name }}</strong>. We've received your booking request and it's currently pending confirmation.</p>
+            
+            <h2>Booking Details</h2>
+            <div class="booking-details">
+                <div class="detail-row">
+                    <span class="detail-label">Service:</span> {{ service }}
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Vehicle:</span> {{ vehicle }}
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Date:</span> {{ booking_date }}
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Time:</span> {{ booking_time }}
+                </div>
+            </div>
+            
+            <p>We'll review your booking and send you a confirmation email shortly. In the meantime, you can:</p>
+            <ul>
+                <li>View your booking status online</li>
+                <li>Contact us at {{ company_phone }} if you need to make changes</li>
+            </ul>
+            
+            <a href="{{ track_url }}" class="cta-button">Track Your Booking</a>
+            
+            <h3>Questions?</h3>
+            <p>If you have any questions about your booking, please contact us at:</p>
+            <p>
+                Email: {{ company_email }}<br>
+                Phone: {{ company_phone }}
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>© {{ company_name }}. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

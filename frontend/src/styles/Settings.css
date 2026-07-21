@@ -1,0 +1,586 @@
+/* ===== Desktop Styles ===== */
+/* Settings Page Container */
+.settings-wrapper {
+  margin-left: 0;
+  padding: 40px;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+}
+
+.settings-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.settings-layout {
+  max-width: 1200px;
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 20px;
+}
+
+.settings-panel {
+  min-width: 0;
+}
+
+.settings-submenu {
+  height: fit-content;
+  position: sticky;
+  top: 88px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-submenu-item {
+  width: 100%;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #334155;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.settings-submenu-item:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.settings-submenu-item.active {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+/* Header Styling */
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.settings-header h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+}
+
+.plan-badge {
+  background: #e0e7ff;
+  color: #4338ca;
+  padding: 6px 16px;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Card Styling */
+.settings-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 30px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 15px;
+}
+
+/* Form Grid */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.full-width { grid-column: span 2; }
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.input-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.input-group input, 
+.input-group textarea {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.input-group input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.input-readonly {
+  background-color: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* Slider Styling */
+.buffer-range {
+  width: 100%;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 5px;
+  appearance: none;
+  margin-top: 10px;
+}
+
+.buffer-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #3b82f6;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* Save Button */
+.save-button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.btn-save {
+  background: #2563eb;
+  color: white;
+  padding: 14px 40px;
+  border-radius: 12px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.2s;
+}
+
+.btn-save:hover { background: #1d4ed8; }
+.btn-save:active { transform: scale(0.97); }
+
+.alert-success {
+  background: #ecfdf5;
+  color: #065f46;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  border-left: 5px solid #10b981;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.alert-error {
+  background: #fef2f2;
+  color: #991b1b;
+  padding: 12px 14px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  border-left: 5px solid #ef4444;
+  font-weight: 600;
+}
+
+.view-site-link {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 600;
+}
+.view-site-link:hover {
+  text-decoration: underline;
+}
+
+.settings-note {
+  margin: 0;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.settings-panel .upgrade-value-wrap {
+  margin: 0 0 1.25rem;
+}
+
+.settings-panel .upgrade-value-header p {
+  margin-bottom: 0.85rem;
+}
+
+.btn-billing-manage {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.billing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.billing-footnote {
+  margin-top: 10px;
+}
+
+.billing-fallback-note {
+  margin-top: 10px;
+  border-color: #f59e0b;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.location-change-form {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.country-select {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-height: 42px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0 10px;
+}
+
+.upload-field {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 44px;
+  border: 1.5px dashed #94a3b8;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #334155;
+  cursor: pointer;
+}
+
+.upload-field input {
+  display: none;
+}
+
+.upload-field span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.verification-status {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.verification-approved {
+  background: #ecfdf5;
+  border: 1px solid #86efac;
+  color: #166534;
+}
+
+.verification-rejected {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+}
+
+.verification-pending {
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+  color: #1d4ed8;
+}
+
+.verification-checklist {
+  display: grid;
+  gap: 10px;
+}
+
+.verification-check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid #dbe3ec;
+  border-radius: 10px;
+  padding: 10px;
+  background: #f8fafc;
+}
+
+.check-badge {
+  min-width: 48px;
+  flex: 0 0 auto;
+  text-align: center;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 6px;
+  border-radius: 999px;
+}
+
+.check-badge.pass {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+.check-badge.fail {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+.check-content strong {
+  color: #1e293b;
+  font-size: 0.88rem;
+}
+
+.check-content p {
+  margin: 3px 0 0;
+  color: #475569;
+  font-size: 0.82rem;
+}
+
+.settings-card-danger {
+  border-color: #fecaca;
+}
+
+.danger-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-danger-outline,
+.btn-danger-solid {
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-danger-outline {
+  background: #fff;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.btn-danger-solid {
+  background: #dc2626;
+  color: #fff;
+}
+
+table { border-collapse: collapse; width: 100%; }
+th { font-size: 0.75rem; border-bottom: 2px solid #f1f5f9; }
+td { font-size: 0.9rem; }
+.ml-2 { margin-left: 8px; }
+
+/* Removed global .fixed/.inset-0/.bg-opacity-50/.z-50 — collided with Tailwind utilities. */
+
+/* Styling the HTML content inside the preview */
+.prose {
+  line-height: 1.6;
+  color: #334155;
+}
+.prose h1, .prose h2 { font-weight: 700; margin-top: 1em; }
+.prose ul { list-style-type: disc; padding-left: 1.5em; }
+
+.content-textarea {
+  width: 100%;
+  min-height: 300px;
+  padding: 15px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+}
+
+.content-textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.save-button-container {
+  padding-top: 20px;
+  border-top: 1px solid #f1f5f9;
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end; /* Aligns button to the right */
+}
+
+/* Ensure the wrapper doesn't cut off content */
+.settings-wrapper {
+  overflow-y: auto;
+  padding-bottom: 100px; /* Extra space at the bottom */
+}
+
+/* ===== Tablet Styles (<= 1024px) ===== */
+@media (max-width: 1024px) {
+  .settings-wrapper {
+    padding: 24px;
+  }
+
+  .settings-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-submenu {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .settings-submenu-item {
+    flex: 1 1 180px;
+  }
+
+  .settings-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+/* ===== Mobile Styles (<= 768px) ===== */
+@media (max-width: 768px) {
+  .settings-wrapper {
+    padding: 16px;
+    overflow-x: hidden;
+  }
+
+  .settings-panel .upgrade-value-wrap {
+    margin: 0 0 1rem;
+    padding: 0.75rem;
+    border-radius: 14px;
+  }
+
+  .settings-panel .upgrade-value-grid {
+    gap: 0.55rem;
+  }
+
+  .settings-panel .upgrade-value-card {
+    padding: 0.62rem 0.72rem;
+    border-radius: 12px;
+    gap: 0.7rem;
+  }
+
+  .settings-panel .upgrade-value-header p {
+    margin: 0.2rem 0 0.65rem;
+  }
+
+  .settings-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .settings-card {
+    padding: 18px;
+    overflow-x: hidden;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .full-width {
+    grid-column: auto;
+  }
+
+  .save-button-container {
+    justify-content: stretch;
+  }
+
+  .btn-save {
+    width: 100%;
+    min-height: 44px;
+    padding: 12px 16px;
+  }
+
+  .settings-card table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .settings-card thead,
+  .settings-card tbody,
+  .settings-card tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .settings-card th,
+  .settings-card td {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .check-badge {
+    min-width: 44px;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-size: 0.64rem;
+    padding: 3px 5px;
+    line-height: 1.05;
+  }
+}

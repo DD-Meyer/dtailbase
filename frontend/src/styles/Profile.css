@@ -1,0 +1,109 @@
+/* ===== Desktop Styles ===== */
+/* --- 0. VISIBILITY & THEME ENFORCEMENT --- */
+.page-container, 
+.page-container * {
+  color: #0f172a !important; /* Force dark text for readability */
+}
+
+/* --- 1. LAYOUT GRID --- */
+.grid.cols-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+}
+
+
+
+
+/* --- 2. CARD & FORM STYLING --- */
+.page-container .card {
+  background: white !important;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.page-container .flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.page-container .gap-3 { gap: 0.75rem; }
+.page-container .gap-6 { gap: 1.5rem; }
+
+/* --- 3. TYPOGRAPHY & LABELS --- */
+.page-container h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #1e293b;
+}
+
+.page-container .text-sm { font-size: 0.875rem; }
+.page-container .text-xs { font-size: 0.75rem; }
+.page-container .text-gray-500 { color: #64748b !important; }
+.page-container .font-bold { font-weight: 700; }
+
+.page-container label {
+  margin-top: 0.5rem;
+  color: #475569 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+/* --- 4. INPUTS & BUTTONS --- */
+.page-container input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px;
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.page-container input:focus {
+  outline: none;
+  background-color: #ffffff !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.page-container .btn-danger {
+  background: #ef4444;
+  color: white !important;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.page-container .btn-danger:hover {
+  background: #dc2626;
+}
+
+/* --- 5. FEEDBACK BADGES --- */
+.page-container .badge-info {
+  background: #eff6ff;
+  color: #1e4ed8 !important;
+  border: 1px solid #dbeafe;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.page-container .block { display: block; }
+.page-container .text-center { text-align: center; }
+.page-container .mt-2 { margin-top: 0.5rem; }
+.page-container .mb-4 { margin-bottom: 1rem; }
+
+/* ===== Mobile Styles (<= 768px) ===== */
+@media (max-width: 768px) {
+  .grid.cols-2 {
+    grid-template-columns: 1fr; /* Stack on mobile */
+  }
+}

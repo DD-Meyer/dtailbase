@@ -1,0 +1,216 @@
+/* ===== Desktop Styles ===== */
+.btn-map {
+  background-color: #34a853; /* Google Green */
+  color: white;
+  padding: 10px 15px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.btn-map:hover {
+  background-color: #2d8e47;
+}
+
+.booking-details {
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: all 0.2s ease;
+}
+
+.booking-details:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #dcfce7;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  /* background: rgba(0, 0, 0, 0.1); */
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #10b981, #047857);
+  border: none;
+  color: #dcfce7;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #047857, #10b981);
+  filter: brightness(1.05);
+}
+
+  .booking-header-action-btns {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+
+.booking-header-action-btns > .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  min-height: 40px;
+}
+
+.booking-header-action-btns > .btn-secondary svg {
+  display: block;
+}
+
+.booking-header-action-btns .action-buttons-grid {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.booking-header-action-btns .action-buttons-grid .btn-secondary,
+.booking-header-action-btns .action-buttons-grid .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+}
+
+.indemnity-text-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(3px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1200;
+  padding: 20px;
+}
+
+.indemnity-text-modal {
+  width: min(900px, 100%);
+  max-height: 85vh;
+  background: rgba(215, 223, 242, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  padding: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.indemnity-text-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.indemnity-text-modal-header h3 {
+  margin: 0;
+}
+
+.indemnity-text-content {
+  margin-top: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 16px;
+  overflow-y: auto;
+  line-height: 1.7;
+  color: #dbe6f4;
+  background: rgba(102, 106, 123, 0.6);
+}
+
+.indemnity-text-content p,
+.indemnity-text-content h1,
+.indemnity-text-content h2,
+.indemnity-text-content h3,
+.indemnity-text-content li,
+.indemnity-text-content span,
+.indemnity-text-content strong {
+  color: #dbe6f4;
+}
+
+.indemnity-text-content h1,
+.indemnity-text-content h2,
+.indemnity-text-content h3,
+.indemnity-text-content h4 {
+  color: #f8fafc;
+}
+
+
+/* ===== Mobile Styles ===== */
+@media (max-width: 768px) {
+
+  /* buttons aligned in rows next to each other, smaller size buttons*/
+  .booking-header-action-btns {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .action-buttons-grid {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .btn-map {
+    padding: 8px 12px;
+    font-size: 0.6rem;
+  }
+
+  .btn-secondary {
+    padding: 6px 12px;
+    font-size: 0.6rem;
+  }
+
+  .btn-primary {
+    padding: 8px 16px;
+    font-size: 0.7rem;
+  }
+
+  .booking-header-action-btns > .btn-secondary,
+  .booking-header-action-btns .action-buttons-grid .btn-secondary,
+  .booking-header-action-btns .action-buttons-grid .btn-primary {
+    min-height: 34px;
+  }
+
+  .indemnity-text-modal {
+    padding: 14px;
+    max-height: 90vh;
+  }
+
+  .indemnity-text-modal-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+
+
+}

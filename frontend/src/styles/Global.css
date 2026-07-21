@@ -1,0 +1,571 @@
+
+/* ===== Desktop Styles ===== */
+/* 1. VARIABLES & RESET */
+:root {
+  --primary: #23b4ff;
+  --primary-hover: #0f8ed4;
+  --accent-neon: #46ffb3;
+  --bg-main: #070d17;
+  --bg-panel: #0f1a2b;
+  --bg-sidebar: #060d18;
+  --text-main: #ebf2ff;
+  --text-muted: #8ba1bf;
+  --border-color: rgba(123, 154, 196, 0.28);
+  --card-shadow: 0 20px 40px -26px rgba(3, 8, 18, 0.78);
+  --header-height: 64px;
+  --sidebar-width: 260px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  /* 1. Force the smooth pacing globally on the master timeline container */
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  font-family: 'Sora', -apple-system, system-ui, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+body.mobile-nav-open {
+  overflow: hidden;
+}
+
+/* 2. CORE LAYOUT (DASHBOARD) */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  /* FIXED: Allow natural page overflow calculations to handle timelines smoothly */
+}
+
+/* Sidebar column in desktop layout */
+.sidebar {
+  width: var(--sidebar-width);
+  /* FIXED: Set to fixed or sticky so it stays when the whole viewport wraps scrolling */
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  flex-shrink: 0;
+  background: var(--bg-sidebar);
+  z-index: 20;
+  border-right: 1px solid var(--border-color);
+}
+
+/* 3. Main content scroll container */
+.main-content {
+  flex-grow: 1;
+  min-width: 0;
+  /* FIXED: Shift content to make room for the fixed sidebar position */
+  margin-left: var(--sidebar-width); 
+  min-height: 100vh;
+  
+  /* FIXED: Removed height: 100dvh and overflow-y: auto */
+  /* This shifts scroll tracking back to the root HTML where your parallax and cards live */
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(1200px 600px at 90% -10%, rgba(35, 180, 255, 0.16), transparent 60%),
+    radial-gradient(900px 500px at -10% 10%, rgba(70, 255, 179, 0.12), transparent 60%),
+    var(--bg-main);
+}
+
+.app-layout.sidebar-collapsed .main-content {
+  margin-left: var(--sidebar-collapsed-width);
+}
+
+/* 4. Sticky header in main content */
+.main-header {
+  height: var(--header-height);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  background: rgba(8, 14, 25, 0.84);
+  backdrop-filter: blur(8px);
+  z-index: 10;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.page-body {
+  padding: 2rem;
+  width: 100%;
+}
+
+.auth-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: #f8fafc;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.auth-content {
+  width: 100%;
+  max-width: 450px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 4. REUSABLE COMPONENTS */
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+
+.card {
+  background: rgba(20, 34, 54, 0.9);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--card-shadow);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  backdrop-filter: blur(8px);
+  color: #eaf3ff;
+}
+
+.card-banner {
+  /* bg-gradient-to-r from-blue-500 to-sky-400 bg-clip-text text-transparent */
+  /* rgb(43, 127, 255) */
+  /* rgb(0, 188, 255) */
+  background: radial-gradient(circle at 0% 0%, rgb(43, 127, 255, 0.6) 10%, rgb(0, 188, 255, 0.6) 40%, #eff6ff 60%, #f8fafc 100%);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--card-shadow);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  backdrop-filter: blur(8px);
+  color: #eaf3ff;
+}
+
+.card-banner h1,
+.card-banner h2,
+.card-banner h3,
+.card-banner h4,
+.card-banner p,
+.card-banner span,
+.card-banner strong,
+.card-banner small {
+  color: #0f172a;
+}
+
+.banner-header h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.banner-header p {
+  color: #000000cc !important;
+  margin-top: 4px;
+}
+
+.page-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.page-banner-copy {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 1rem;
+}
+
+.page-banner-copy h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.page-banner-copy p {
+  color: #000000cc !important;
+  margin-top: 4px;
+}
+
+.page-banner-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.card h1,
+.card h2,
+.card h3,
+.card h4,
+.card p,
+.card label,
+.card strong,
+.card span,
+.card li,
+.card td,
+.card th,
+.card small {
+  color: #edf5ff;
+}
+
+.text-gray-500,
+.text-gray-600,
+.text-gray-700 {
+  color: #9fb7d6 !important;
+}
+
+/* Buttons */
+.btn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-hover); }
+
+.btn-secondary {
+  background: rgba(123, 154, 196, 0.18);
+  color: #d8e7ff;
+  border: 1px solid rgba(123, 154, 196, 0.32);
+}
+
+.btn-secondary:hover {
+  background: rgba(123, 154, 196, 0.26);
+}
+
+.btn-full { width: 100%; }
+
+/* Action Buttons (Table icons) */
+.action-group {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  display: flex;
+  transition: 0.2s;
+}
+
+.btn-edit { color: #3b82f6; }
+.btn-edit:hover { background: #dbeafe; }
+
+.btn-delete { color: #ef4444; }
+.btn-delete:hover { background: #fee2e2; }
+
+/* Shared action button styles (used across Team/Customers/Services/Vehicles) */
+.team-action-btn {
+  min-height: 30px;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+.team-action-edit {
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border-color: #bfdbfe !important;
+}
+
+.team-action-edit:hover {
+  background: #dbeafe !important;
+  border-color: #93c5fd !important;
+}
+
+.team-action-deactivate {
+  background: #fff1f2 !important;
+  color: #be123c !important;
+  border-color: #fecdd3 !important;
+}
+
+.team-action-deactivate:hover {
+  background: #ffe4e6 !important;
+  border-color: #fda4af !important;
+}
+
+.team-action-reactivate {
+  background: #ecfdf3 !important;
+  color: #047857 !important;
+  border-color: #a7f3d0 !important;
+}
+
+.team-action-reactivate:hover {
+  background: #d1fae5 !important;
+  border-color: #6ee7b7 !important;
+}
+
+.team-action-delete {
+  background: #fee2e2 !important;
+  color: #b91c1c !important;
+  border-color: #fca5a5 !important;
+}
+
+.team-action-delete:hover {
+  background: #fecaca !important;
+  border-color: #f87171 !important;
+}
+
+/* Tables */
+.table-standard {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-standard th {
+  text-align: left;
+  padding: 12px;
+  border-bottom: 2px solid var(--border-color);
+  color: #95afcf;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table-standard td {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
+}
+
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
+/* Modals */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 95%;
+  max-width: 550px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Form Layouts */
+.grid-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-main);
+}
+
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+/* Badges */
+.badge {
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-interior { background: #e0f2fe; color: #0369a1; }
+.badge-exterior { background: #fef3c7; color: #92400e; }
+.badge-full-detail { background: #dcfce7; color: #166534; }
+.badge-add-on { background: #f1f5f9; color: #475569; }
+
+@media (max-width: 640px) {
+  .ticket-count-badge {
+    padding: 2px 6px;
+    font-size: 0.55rem;
+    letter-spacing: 0;
+  }
+}
+
+/* Ensure the login page doesn't bring its own height */
+.login-container {
+  height: auto !important; 
+  width: 100%;
+  padding: 1rem;
+}
+
+/* Toast Notification */
+.toast-notification {
+  position: fixed;
+  top: 40px;
+  right: 20px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  animation: slideIn 0.3s ease-out;
+}
+
+.toast-notification.success {
+  background-color: #28a745; /* Success Green */
+}
+
+.toast-notification.error {
+  background-color: #dc3545; /* Error Red */
+}
+
+/* Safety kill-switch for any stale/cached floating install button anywhere in the DOM */
+.install-app-fab {
+  display: none !important;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* ===== Tablet Styles (<= 1024px) ===== */
+@media (max-width: 1024px) {
+  .page-body {
+    padding: 1.5rem;
+    padding-bottom: calc(8rem + env(safe-area-inset-bottom));
+  }
+}
+
+/* ===== Mobile Styles (<= 768px) ===== */
+@media (max-width: 768px) {
+  .app-layout {
+    width: 100vw;
+    min-width: 0;
+    flex-direction: column;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .main-content {
+    width: 100vw;
+    min-width: 0;
+    flex: 1 1 0%;
+    height: 100dvh;
+    margin-left: 0;
+  }
+
+  .page-body {
+    padding: 1rem;
+    padding-bottom: calc(8rem + env(safe-area-inset-bottom));
+  }
+
+  /* Mobile-specific adjustments */
+  .card-banner {
+    background: radial-gradient(circle at 10% 10%, rgb(43, 127, 255, 0.4) 10%, rgb(0, 188, 255, 0.4) 40%, #eff6ff 80%, #f8fafc 100%);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--card-shadow);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    backdrop-filter: blur(8px);
+    color: #eaf3ff;
+  }
+
+  .page-banner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-banner-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .page-banner-actions .btn,
+  .page-banner-actions > * {
+    width: 100%;
+  }
+
+  .modal-card {
+    padding: 1.25rem;
+    width: min(96vw, 550px);
+  }
+
+  .grid-form {
+    grid-template-columns: 1fr;
+  }
+
+  /* Improve form field usability on mobile */
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 16px;
+    padding: 12px;
+    min-height: 44px;
+  }
+
+  .form-group label {
+    font-size: 0.8rem;
+    margin-bottom: 6px;
+  }
+
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+
+  .btn {
+    min-height: 44px;
+    padding: 10px 16px;
+    font-size: 0.95rem;
+  }
+
+  .table-standard {
+    min-width: 740px;
+  }
+
+  .team-action-btn {
+      width: 100%;
+      min-height: 40px;
+      margin-top: 3%;
+  }
+}
+

@@ -1,0 +1,264 @@
+.booking-confirmation-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgb(119, 197, 250), rgb(224, 242, 254));
+  padding: 20px;
+}
+
+.confirmation-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 700px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.success-header {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  padding: 40px 30px;
+  text-align: center;
+}
+
+.success-icon {
+  font-size: 60px;
+  margin-bottom: 15px;
+  animation: scaleIn 0.5s ease-out;
+}
+
+.success-header h1 {
+  font-size: 28px;
+  margin: 0 0 10px 0;
+}
+
+.subtitle {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 16px;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.booking-summary {
+  padding: 40px 30px;
+}
+
+.booking-summary h2 {
+  font-size: 22px;
+  margin-bottom: 25px;
+  color: #333;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 15px;
+}
+
+.detail-section {
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.detail-section:last-of-type {
+  border-bottom: none;
+}
+
+.detail-section h3 {
+  font-size: 14px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.detail-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.detail-label {
+  font-size: 12px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 5px 0;
+}
+
+.detail-info {
+  font-size: 14px;
+  color: #666;
+  margin: 5px 0 0 0;
+}
+
+.date-time-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.status-box {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+  border-left: 4px solid #ffc107;
+}
+
+.status-label {
+  font-size: 12px;
+  color: #666;
+  text-transform: uppercase;
+  margin: 0 0 8px 0;
+}
+
+.status-pending {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffc107;
+  margin: 0 0 10px 0;
+}
+
+.status-note {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.next-steps {
+  background: #f8f9fa;
+  padding: 30px;
+  margin-top: 30px;
+}
+
+.next-steps h2 {
+  font-size: 18px;
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+.next-steps ol {
+  margin: 0;
+  padding-left: 25px;
+  color: #666;
+}
+
+.next-steps li {
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.action-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  padding: 30px;
+  background: white;
+  border-top: 1px solid #f0f0f0;
+}
+
+.btn {
+  padding: 14px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn-secondary {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.btn-secondary:hover {
+  background: #e0e0e0;
+  transform: translateY(-2px);
+}
+
+.booking-id {
+  padding: 20px 30px;
+  background: #f8f9fa;
+  text-align: center;
+  border-top: 1px solid #e0e0e0;
+}
+
+.booking-id p {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.booking-id code {
+  background: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #667eea;
+}
+
+.text-muted {
+  color: #999;
+  font-size: 12px;
+  margin-top: 5px !important;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .confirmation-card {
+    border-radius: 0;
+  }
+
+  .success-header {
+    padding: 30px 20px;
+  }
+
+  .success-icon {
+    font-size: 48px;
+  }
+
+  .success-header h1 {
+    font-size: 24px;
+  }
+
+  .booking-summary {
+    padding: 25px 20px;
+  }
+
+  .booking-summary h2 {
+    font-size: 20px;
+  }
+
+  .action-buttons {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 20px;
+  }
+
+  .date-time-grid {
+    grid-template-columns: 1fr;
+  }
+}

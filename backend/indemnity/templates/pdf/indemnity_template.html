@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+
+{% load booking_tags %}
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Indemnity Agreement</title>
+        <style>
+            @page {
+                size: a4 portrait;
+                margin: 1.5cm;
+            }
+            body {
+                font-family: Helvetica, Arial, sans-serif;
+                font-size: 11pt;
+                color: #333;
+                line-height: 1.4;
+            }
+            .header {
+                text-align: center;
+                border-bottom: 2px solid #000;
+                padding-bottom: 10px;
+                margin-bottom: 20px;
+            }
+            .section-title {
+                background-color: #f0f0f0;
+                padding: 8px;
+                font-weight: bold;
+                text-transform: uppercase;
+                margin-top: 20px;
+                border-left: 4px solid #333;
+            }
+            .info-table {
+                width: 100%;
+                margin-top: 10px;
+            }
+            .info-table td {
+                padding: 5px;
+                vertical-align: top;
+            }
+            .photo-table {
+                width: 100%;
+                margin-top: 10px;
+            }
+            .photo-cell {
+                width: 50%;
+                padding: 5px;
+                text-align: center;
+            }
+            .photo-img {
+                width: 280px; /* Precise for A4 half-width */
+                height: auto;
+                border: 1px solid #ddd;
+            }
+            .signature-box {
+                margin-top: 40px;
+                width: 100%;
+            }
+            .sig-img {
+                width: 200px;
+                height: auto;
+                border-bottom: 1px solid #000;
+            }
+            .footer-meta {
+                font-size: 8pt;
+                color: #777;
+                margin-top: 10px;
+            }
+
+            @media screen and (max-width: 768px) {
+                body {
+                    font-size: 10pt;
+                    padding: 12px;
+                }
+
+                .info-table,
+                .photo-table {
+                    display: block;
+                    width: 100%;
+                    overflow-x: auto;
+                    white-space: nowrap;
+                }
+
+                .photo-cell {
+                    width: 100%;
+                    display: block;
+                    padding: 6px 0;
+                }
+
+                .photo-img,
+                .sig-img {
+                    width: 100%;
+                    max-width: 100%;
+                    height: auto;
+                }
+            }
+
+            @media print {
+                body {
+                    font-size: 11pt;
+                }
+
+                .photo-img {
+                    width: 280px;
+                }
+
+                .sig-img {
+                    width: 200px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+
+        <div class="header">
+            <h1>VEHICLE INSPECTION & INDEMNITY</h1>
+            <h3>{{ company.name }}</h3>
+        </div>
+
+        <table class="info-table">
+            <tr>
+                <td><strong>Customer:</strong> {{ agreement.customer.firstname }} {{ agreement.customer.lastname }}</td>
+                <td><strong>Reg:</strong> {{ agreement.booking.vehicle.registration }}</td>
+            </tr>
+            <tr>
+                <td><strong>Vehicle:</strong> {{ agreement.booking.vehicle.make }} {{ agreement.booking.vehicle.model }}</td>
+                <td><strong>Date:</strong> {{ agreement.signed_at|date:"D, d M Y H:i" }}</td>
+            </tr>
+            <tr>
+                <td><strong>Template Version:</strong> {{ agreement.template.version }}</td>
+                <td><strong>Booking Ref:</strong> #{{ agreement.booking.id|short_ref }}</td>
+            <tr>
+                <td colspan="2"><strong>Location at Signing:</strong> {% if agreement.latitude and agreement.longitude %}{{ agreement.latitude }}, {{ agreement.longitude }}{% else %}Not Provided{% endif %}</td>
+            </tr>
+        </table>
+
+        <div class="section-title">Inspection: Before Service (Arrival)</div>
+        {% if before_photos %}
+            <table class="photo-table">
+                {% for photo in before_photos %}
+                    {% if forloop.counter0|divisibleby:2 %}<tr>{% endif %}
+                    <td class="photo-cell">
+                        <img src="{{ photo.image.path }}" class="photo-img">
+                    </td>
+                    {% if forloop.counter|divisibleby:2 or forloop.last %}</tr>{% endif %}
+                {% endfor %}
+            </table>
+        {% else %}
+            <p>No arrival photos recorded.</p>
+        {% endif %}
+
+        {% if after_photos %}
+            <div class="section-title">Inspection: After Service (Completion)</div>
+            <table class="photo-table">
+                {% for photo in after_photos %}
+                    {% if forloop.counter0|divisibleby:2 %}<tr>{% endif %}
+                    <td class="photo-cell">
+                        <img src="{{ photo.image.path }}" class="photo-img">
+                    </td>
+                    {% if forloop.counter|divisibleby:2 or forloop.last %}</tr>{% endif %}
+                {% endfor %}
+            </table>
+        {% endif %}
+
+        <div class="section-title">Authorization & Acceptance</div>
+        <div class="signature-box">
+            <p>By signing below, the customer acknowledges the pre-existing condition of the vehicle as documented in the "Before" photos and accepts the terms of the indemnity agreement.</p>
+            
+            <img src="{{ agreement.signature_image.path }}" class="sig-img">
+            <p><strong>Customer Signature</strong></p>
+            
+            <div class="footer-meta">
+                <strong>Verification Details:</strong><br>
+                Digital Signature Hash: {{ agreement.document_hash }}<br>
+                
+                {% if agreement.signing_address %}
+                    Signed at: {{ agreement.signing_address }}<br>
+                {% endif %}
+                
+                Coordinates: {{ agreement.latitude }}, {{ agreement.longitude }}<br>
+                <a href="https://www.google.com/maps/search/?api=1&query={{ agreement.latitude }},{{ agreement.longitude }}" style="color: #007bff; text-decoration: none;">
+                    📍 View on Google Maps
+                </a>
+            </div>
+        </div>
+
+    </body>
+</html>
