@@ -121,7 +121,7 @@ export default function LandingPage() {
               </div>
 
               <ul className={styles.heroTrust}>
-                <li><Check size={14} strokeWidth={3} /> 14-day free trial</li>
+                <li><Check size={14} strokeWidth={3} /> Free starter tier</li>
                 <li><Check size={14} strokeWidth={3} /> No card required</li>
                 <li><Check size={14} strokeWidth={3} /> Cancel anytime</li>
               </ul>

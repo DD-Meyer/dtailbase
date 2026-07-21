@@ -64,7 +64,7 @@ const COMPARE_ROWS = [
   { label: "Job cards + indemnity", dtail: true, generic: false, calendar: false },
   { label: "Team roles & performance", dtail: true, generic: false, calendar: false },
   { label: "Installable web app", dtail: true, generic: false, calendar: false },
-  { label: "Free trial", dtail: "14 days", generic: "None", calendar: "30 days" },
+  { label: "Free option", dtail: true, generic: "None", calendar: "30 days" },
 ];
 
 export default function ProductsPage() {
@@ -155,7 +155,7 @@ export default function ProductsPage() {
           <div className={styles.ctaInner}>
             <h2 className={styles.ctaTitle}>See it in your shop today.</h2>
             <p className={styles.ctaLede}>
-              14 days free. No card required. Import your services in minutes.
+              Completely Free. No card required. Import your customers in minutes.
             </p>
             <div className={styles.ctaActions}>
               <Link
