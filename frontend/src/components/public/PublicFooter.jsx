@@ -43,23 +43,18 @@ const FOOTER_LINKS = [
     links: [
       { to: "/products", label: "Features" },
       { to: "/plans", label: "Pricing" },
-      { to: "/Features", label: "What's new" },
-      { to: "/Security", label: "Security" },
     ],
   },
   {
     title: "Company",
     links: [
       { to: "/about", label: "About" },
-      { to: "/Our-Story", label: "Our story" },
-      { to: "/community", label: "Community" },
       { to: "/contact", label: "Contact" },
     ],
   },
   {
     title: "Resources",
     links: [
-      { to: "/tutorials", label: "Tutorials" },
       { to: "/help-center", label: "Help center" },
       { to: "/support-info", label: "Support" },
       { to: "/legal", label: "Legal" },
@@ -89,9 +84,9 @@ export default function PublicFooter() {
               platform built for auto detailers.
             </p>
 
-            <a href="mailto:hello@dtailbase.com" className={styles.contactLink}>
+            <a href="mailto:info@netictechnologies.com" className={styles.contactLink}>
               <Mail size={16} strokeWidth={2.25} />
-              hello@dtailbase.com
+              info@netictechnologies.com
             </a>
           </div>
 

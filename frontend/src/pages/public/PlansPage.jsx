@@ -215,7 +215,6 @@ export default function PlansPage({ showBackToDashboard = false }) {
 
           <p className={styles.lede}>
             Start free. Grow into more powerful features when you&rsquo;re ready.
-            All plans come with a 14-day free trial &mdash; no card required.
           </p>
 
           <p className={styles.currencyNote}>
