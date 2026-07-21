@@ -62,10 +62,15 @@ fi
 log "Switching to app directory: $APP_DIR"
 cd "$APP_DIR"
 
-log "Fetching latest code"
-git fetch origin
-git checkout "$BRANCH"
-git pull --ff-only origin "$BRANCH"
+echo "[deploy] Fetching latest code"
+git fetch origin main
+git reset --hard origin/main
+git clean -fd -e venv/
+
+# log "Fetching latest code"
+# # git fetch origin
+# # git checkout "$BRANCH"
+# # git pull --ff-only origin "$BRANCH"
 
 if [[ -d "$APP_DIR/$VENV_DIR" ]]; then
   # shellcheck disable=SC1091
