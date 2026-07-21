@@ -1,0 +1,85 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve SSH credentials
+        id: ssh
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_USERNAME: ${{ secrets.VPS_USERNAME }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          VPS_SSH_PASSPHRASE: ${{ secrets.VPS_SSH_PASSPHRASE }}
+          SSH_KEY_PASSPHRASE: ${{ secrets.SSH_KEY_PASSPHRASE }}
+          VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          host="${VPS_HOST:-}"
+          [[ -n "$host" ]] || host="${SSH_HOST:-}"
+          user="${VPS_USER:-}"
+          [[ -n "$user" ]] || user="${VPS_USERNAME:-}"
+          [[ -n "$user" ]] || user="${SSH_USER:-}"
+          key="${VPS_SSH_KEY:-}"
+          [[ -n "$key" ]] || key="${SSH_PRIVATE_KEY:-}"
+          passphrase="${VPS_SSH_PASSPHRASE:-}"
+          [[ -n "$passphrase" ]] || passphrase="${SSH_KEY_PASSPHRASE:-}"
+          auth_pass="${VPS_PASSWORD:-}"
+          [[ -n "$auth_pass" ]] || auth_pass="${SSH_PASSWORD:-}"
+
+          if [[ -z "$host" ]]; then
+            echo "Missing SSH host secret. Set VPS_HOST or SSH_HOST." >&2
+            exit 1
+          fi
+
+          if [[ -z "$user" ]]; then
+            echo "Missing SSH user secret. Set VPS_USER, VPS_USERNAME, or SSH_USER." >&2
+            exit 1
+          fi
+
+          {
+            echo "host=$host"
+            echo "username=$user"
+          } >> "$GITHUB_OUTPUT"
+
+          if [[ -n "$key" ]]; then
+            {
+              echo "key<<EOF"
+              echo "$key"
+              echo "EOF"
+              echo "passphrase<<EOF"
+              echo "$passphrase"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          elif [[ -n "$auth_pass" ]]; then
+            {
+              echo "password<<EOF"
+              echo "$auth_pass"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "Missing SSH authentication secret. Set VPS_SSH_KEY/SSH_PRIVATE_KEY or VPS_PASSWORD/SSH_PASSWORD." >&2
+            exit 1
+          fi
+
+      - name: Trigger VPS Deployment Script via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ steps.ssh.outputs.host }}
+          username: ${{ steps.ssh.outputs.username }}
+          key: ${{ steps.ssh.outputs.key }}
+          passphrase: ${{ steps.ssh.outputs.passphrase }}
+          password: ${{ steps.ssh.outputs.password }}
+          script: |
+            bash /var/www/dtailbase/deploy_vps_ols_dtailbase.sh
