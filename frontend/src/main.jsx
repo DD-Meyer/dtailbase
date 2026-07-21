@@ -1,6 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+<<<<<<< HEAD
+=======
+import "./styles/theme.css";
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 import "./styles/tailwind.css";
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;

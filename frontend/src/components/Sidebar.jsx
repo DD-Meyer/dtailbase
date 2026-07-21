@@ -8,11 +8,20 @@ import "../styles/Sidebar.css";
 
 // ... imports stay the same ...
 
+<<<<<<< HEAD
 function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
   const { user } = useContext(AuthContext);
   const { unreadCount } = useSupportNotifications();
+=======
+function Sidebar({ isCollapsed = false, onToggleCollapse }) {
+  const [internalCollapsed, setInternalCollapsed] = useState(false);
+  const location = useLocation();
+  const { user } = useContext(AuthContext);
+  const { unreadCount } = useSupportNotifications();
+  const collapsed = typeof onToggleCollapse === "function" ? isCollapsed : internalCollapsed;
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 
   const menuItems = [
     { path: "/bookings", label: "Bookings", icon: CalendarDays },
@@ -21,7 +30,17 @@ function Sidebar() {
     { path: "/services", label: "Services", icon: Wrench },
   ];
 
+<<<<<<< HEAD
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
+=======
+  const toggleSidebar = () => {
+    if (typeof onToggleCollapse === "function") {
+      onToggleCollapse(!collapsed);
+      return;
+    }
+    setInternalCollapsed((prev) => !prev);
+  };
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
   const isBillingSettings = location.pathname === "/settings" && location.search.includes("tab=billing");
   const isBusinessSettings = location.pathname === "/settings" && !location.search.includes("tab=billing");
   const [isSettingsSubmenuOpen, setIsSettingsSubmenuOpen] = useState(isBusinessSettings || isBillingSettings);
@@ -35,6 +54,7 @@ function Sidebar() {
   return (
     // {/* NEW: only displays sidebar on desktop - remove all references to mobile here*/}
     <>
+<<<<<<< HEAD
       <nav className={`sidebar ${isCollapsed ? "collapsed" : ""}`}>
       {/* NEW HEADER SECTION */}
       <div className="sidebar-header">
@@ -43,6 +63,16 @@ function Sidebar() {
         </div>
         <button className="collapse-toggle" onClick={toggleSidebar} title="Toggle Sidebar">
           {isCollapsed ? (
+=======
+      <nav className={`sidebar ${collapsed ? "collapsed" : ""}`}>
+      {/* NEW HEADER SECTION */}
+      <div className="sidebar-header">
+        <div className="sidebar-logo">
+          <h2 className="tracking-tight">{collapsed ? (<><span className="text-white">D</span><span className="bg-linear-to-r from-blue-500 to-sky-400 bg-clip-text text-transparent">B</span></>) : (<><span className="text-white">Dtail</span><span className="bg-linear-to-r from-blue-500 to-sky-400 bg-clip-text text-transparent">base</span></>)}</h2>
+        </div>
+        <button className="collapse-toggle" onClick={toggleSidebar} title="Toggle Sidebar">
+          {collapsed ? (
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg>
           ) : (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="11 17 6 12 11 7"></polyline><polyline points="18 17 13 12 18 7"></polyline></svg>
@@ -59,7 +89,11 @@ function Sidebar() {
           <li key={item.path} className={location.pathname === item.path ? "active" : ""}>
             <Link to={item.path} title={item.label}>
               <span className="icon"><Icon size={18} strokeWidth={2.1} aria-hidden="true" /></span>
+<<<<<<< HEAD
               {!isCollapsed && <span className="label">{item.label}</span>}
+=======
+              {!collapsed && <span className="label">{item.label}</span>}
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
             </Link>
           </li>
         )})}
@@ -72,26 +106,44 @@ function Sidebar() {
           <li className={location.pathname === "/profile" ? "active" : ""}>
             <Link to="/profile" title="My Profile">
               <span className="icon"><UserRound size={18} strokeWidth={2.1} aria-hidden="true" /></span>
+<<<<<<< HEAD
               {!isCollapsed && <span className="label">My Profile</span>}
+=======
+              {!collapsed && <span className="label">My Profile</span>}
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
             </Link>
           </li>
           
           {user?.role === 'OWNER' && (
             <>
+<<<<<<< HEAD
               {!isCollapsed && <p className="admin-header">Admin</p>}
               <li className={location.pathname === "/team" ? "active" : ""}>
                 <Link to="/team" title="Team Management">
                   <span className="icon"><UserCog size={18} strokeWidth={2.1} aria-hidden="true" /></span>
                   {!isCollapsed && <span className="label">Team</span>}
+=======
+              {!collapsed && <p className="admin-header">Admin</p>}
+              <li className={location.pathname === "/team" ? "active" : ""}>
+                <Link to="/team" title="Team Management">
+                  <span className="icon"><UserCog size={18} strokeWidth={2.1} aria-hidden="true" /></span>
+                  {!collapsed && <span className="label">Team</span>}
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
                 </Link>
               </li>
               <li className={`sidebar-parent ${isBusinessSettings || isBillingSettings ? "active" : ""}`}>
                 <div className="sidebar-parent-head">
                   <Link to="/settings" title="Business Settings">
                     <span className="icon"><Settings size={18} strokeWidth={2.1} aria-hidden="true" /></span>
+<<<<<<< HEAD
                     {!isCollapsed && <span className="label">Settings</span>}
                   </Link>
                   {!isCollapsed && (
+=======
+                    {!collapsed && <span className="label">Settings</span>}
+                  </Link>
+                  {!collapsed && (
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
                     <button
                       type="button"
                       className="sidebar-submenu-toggle"
@@ -103,7 +155,11 @@ function Sidebar() {
                     </button>
                   )}
                 </div>
+<<<<<<< HEAD
                 {!isCollapsed && isSettingsSubmenuOpen && (
+=======
+                {!collapsed && isSettingsSubmenuOpen && (
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
                   <ul className="sidebar-submenu">
                     <li className={isBillingSettings ? "active" : ""}>
                       <Link to="/settings?tab=billing" title="Billing Settings">
@@ -117,7 +173,11 @@ function Sidebar() {
               <li className={location.pathname === "/settings/indemnity" ? "active" : ""}>
                 <Link to="/settings/indemnity" title="Indemnity Settings">
                   <span className="icon"><ShieldCheck size={18} strokeWidth={2.1} aria-hidden="true" /></span>
+<<<<<<< HEAD
                   {!isCollapsed && <span className="label">Settings: Indemnity</span>}
+=======
+                  {!collapsed && <span className="label">Settings: Indemnity</span>}
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
                 </Link>
               </li>
             </>
@@ -135,7 +195,11 @@ function Sidebar() {
                     </span>
                   )}
                 </span>
+<<<<<<< HEAD
                 {!isCollapsed && (
+=======
+                {!collapsed && (
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
                   <span className="label">
                     Support
                     {unreadCount > 0 && (
@@ -156,7 +220,11 @@ function Sidebar() {
                     </span>
                   )}
                 </span>
+<<<<<<< HEAD
                 {!isCollapsed && (
+=======
+                {!collapsed && (
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
                   <span className="label">
                     Support
                     {unreadCount > 0 && (

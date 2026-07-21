@@ -133,10 +133,18 @@
   color: #64748b !important;
 }
 
+<<<<<<< HEAD
 /* --- 6. UTILITIES --- */
 .w-full { width: 100%; }
 .flex-col { display: flex; flex-direction: column; }
 .gap-2 { gap: 0.5rem; }
+=======
+/* --- 6. UTILITIES ---
+   Note: removed global .w-full/.flex-col/.gap-2 overrides — these collided
+   with Tailwind utilities of the same name and broke responsive layouts
+   (e.g. sm:flex-row / sm:w-auto) on the landing/public pages. Tailwind
+   already provides these utilities, so no replacement is needed. */
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 
 /* TABLE REFRESH */
 .table-standard {

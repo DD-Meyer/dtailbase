@@ -1,8 +1,24 @@
+<<<<<<< HEAD
+=======
+import { useEffect, useState } from "react";
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 import { Link, NavLink } from "react-router-dom";
 import UserDropdownMenu from "./UserDropdownMenu";
 import "../styles/PublicHeader.css";
 
 function PublicHeader({ isAuthenticated, isMenuOpen, setIsMenuOpen }) {
+<<<<<<< HEAD
+=======
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
   const baseLinks = [
     { to: "/", label: "Home" },
     { to: "/about", label: "About" },
@@ -18,11 +34,19 @@ function PublicHeader({ isAuthenticated, isMenuOpen, setIsMenuOpen }) {
     : baseLinks;
 
   return (
+<<<<<<< HEAD
     <nav className="public-nav">
       <Link to="/" className="public-header-logo">
         <span className="text-white">Dtail</span>
         <span className="bg-linear-to-r from-blue-500 to-sky-400 bg-clip-text text-transparent">base</span>
         <span className="text-blue-500 font-black">.</span>
+=======
+    <nav className={`public-nav${isScrolled ? " is-scrolled" : ""}`}>
+      <Link to="/" className="public-header-logo marketing-logo">
+        <span className="text-white">Dtail</span>
+        <span className="bg-linear-to-r from-blue-500 to-sky-400 bg-clip-text text-transparent">base</span>
+        <span className="logo-dot text-blue-500 font-black">.</span>
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
       </Link>
 
       {isMenuOpen && (

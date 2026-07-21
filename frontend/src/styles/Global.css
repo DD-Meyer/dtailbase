@@ -25,7 +25,10 @@
 html {
   /* 1. Force the smooth pacing globally on the master timeline container */
   scroll-behavior: smooth;
+<<<<<<< HEAD
   scroll-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+=======
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 }
 
 body {
@@ -80,6 +83,13 @@ body.mobile-nav-open {
     var(--bg-main);
 }
 
+<<<<<<< HEAD
+=======
+.app-layout.sidebar-collapsed .main-content {
+  margin-left: var(--sidebar-collapsed-width);
+}
+
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 /* 4. Sticky header in main content */
 .main-header {
   height: var(--header-height);
@@ -487,6 +497,10 @@ body.mobile-nav-open {
     min-width: 0;
     flex: 1 1 0%;
     height: 100dvh;
+<<<<<<< HEAD
+=======
+    margin-left: 0;
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
   }
 
   .page-body {

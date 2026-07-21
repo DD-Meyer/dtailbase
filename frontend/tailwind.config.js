@@ -20,6 +20,15 @@ export default {
           deep: "#0f172a",
           soft: "#eff6ff",
         },
+<<<<<<< HEAD
+=======
+        landing: {
+          accent: "#3B82F6",
+          secondary: "#1D4ED8",
+          deep: "#1E3A8A",
+          glow: "rgba(59,130,246,0.15)",
+        },
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
       },
       spacing: {
         18: "4.5rem",

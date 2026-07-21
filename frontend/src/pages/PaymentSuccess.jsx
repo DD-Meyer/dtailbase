@@ -2,10 +2,21 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import api from '../axios_instance';
 import { useCompany } from '../context/CompanyContext';
+<<<<<<< HEAD
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
   const { refreshCompany } = useCompany();
+=======
+import { DEFAULT_PRICE_FALLBACKS } from '../services/pricingService';
+import { trackSubscriptionConfirmed } from '../utils/gtm';
+
+const PLAN_ORDER = { STARTER: 0, PRO: 1, ENTERPRISE: 2 };
+
+const PaymentSuccess = () => {
+  const [searchParams] = useSearchParams();
+  const { refreshCompany, currentPlan } = useCompany();
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
   const [state, setState] = useState({
     loading: true,
     success: false,
@@ -21,6 +32,7 @@ const PaymentSuccess = () => {
 
   useEffect(() => {
     const confirmSubscription = async () => {
+<<<<<<< HEAD
       // FIRE GOOGLE ADS CONVERSION HERE
       if (typeof window.gtag === 'function') {
         window.gtag('event', 'conversion', {
@@ -29,6 +41,8 @@ const PaymentSuccess = () => {
         });
       }
       
+=======
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
       if (!subscriptionId) {
         setState({
           loading: false,
@@ -50,6 +64,27 @@ const PaymentSuccess = () => {
           const isDeferred = response.data?.deferred_downgrade;
           const pendingPlan = response.data?.pending_plan;
           const targetPlan = response.data?.target_plan || response.data?.plan;
+<<<<<<< HEAD
+=======
+          const confirmedPlan = response.data?.plan || response.data?.target_plan || null;
+          const isUpgradeConversion =
+            !isDeferred &&
+            !pendingPlan &&
+            typeof PLAN_ORDER[currentPlan] === 'number' &&
+            typeof PLAN_ORDER[confirmedPlan] === 'number' &&
+            PLAN_ORDER[confirmedPlan] > PLAN_ORDER[currentPlan];
+
+          if (isUpgradeConversion) {
+            const value = Number(DEFAULT_PRICE_FALLBACKS.USD?.[confirmedPlan] || 0);
+            trackSubscriptionConfirmed({
+              subscriptionId,
+              planId: confirmedPlan,
+              value,
+              currency: 'USD',
+            });
+          }
+
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
           let message;
           if (isDeferred) {
             message = `Downgrade scheduled. Your current plan access continues until your renewal date, then switches to ${targetPlan}.`;
@@ -57,6 +92,7 @@ const PaymentSuccess = () => {
             message = `Subscription approved. Your ${pendingPlan} plan will activate once payment is confirmed — this usually takes just a moment. Refresh this page if your plan does not update.`;
           } else {
             message = 'Payment successful. Your plan has been updated.';
+<<<<<<< HEAD
 
             // // FIRE GOOGLE ADS CONVERSION HERE
             // if (typeof window.gtag === 'function') {
@@ -65,6 +101,8 @@ const PaymentSuccess = () => {
             //     'transaction_id': subscriptionId // Dynamically populating to prevent duplicate counts
             //   });
             // }
+=======
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
           }
           setState({
             loading: false,
@@ -98,7 +136,11 @@ const PaymentSuccess = () => {
     };
 
     confirmSubscription();
+<<<<<<< HEAD
   }, [subscriptionId, refreshCompany]);
+=======
+  }, [currentPlan, refreshCompany, subscriptionId]);
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 
   return (
       <div className="upgrade-container">

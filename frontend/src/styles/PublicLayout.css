@@ -1,5 +1,6 @@
 /* ===== Desktop Styles ===== */
 /* --- 1. CORE VARIABLES & GLOBAL RESET --- */
+<<<<<<< HEAD
 :root {
   --primary: #3b82f6;
   --bg-deep: #020617;
@@ -9,6 +10,27 @@
   --text-dim: #94a3b8;
   --glow: rgba(59, 130, 246, 0.15);
   --transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+=======
+/* Palette retuned to the ui-ux-pro-max design system (DtailBase MASTER.md).
+   All shared variables are aliases to the --ds-* tokens defined in
+   MarketingSite.css :root so a single change of tokens re-themes every
+   legacy public-page selector below. */
+:root {
+  --primary: #2563eb;                       /* was #3b82f6 → ds-primary */
+  --primary-strong: #1d4ed8;
+  --primary-soft: #3b82f6;
+  --accent: #10b981;
+  --bg-deep: #0b1220;                       /* was #020617 → ds-bg-1 */
+  --bg-deeper: #06090f;                     /* ds-bg-0 */
+  --card-bg: rgba(15, 23, 42, 0.62);        /* ds-bg-glass */
+  --border-light: rgba(148, 163, 184, 0.14);
+  --border-strong: rgba(148, 163, 184, 0.22);
+  --text-main: #f8fafc;
+  --text-soft: #cbd5e1;
+  --text-dim: #94a3b8;
+  --glow: rgba(37, 99, 235, 0.28);
+  --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,7 +49,11 @@ html::-webkit-scrollbar { display: none; }
 body {
   background-color: var(--bg-deep);
   color: var(--text-main);
+<<<<<<< HEAD
   font-family: 'Inter', sans-serif;
+=======
+  font-family: 'Plus Jakarta Sans', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
   overflow-x: hidden;
   width: 100%;
 }
@@ -38,6 +64,7 @@ body {
   padding: 0 5%;
 }
 
+<<<<<<< HEAD
 /* --- 2. ORBITAL SYSTEM (FIXED BACKGROUND) --- */
 .orbital-system {
   position: fixed;
@@ -70,6 +97,136 @@ body {
 .ring-2 { width: 700px; height: 700px; border-style: dashed; opacity: 0.6; }
 .ring-3 { width: 1100px; height: 1100px; }
 .ring-4 { width: 1500px; height: 1500px; border-style: dotted; opacity: 0.3; }
+=======
+/* --- 2. AURORA SYSTEM (Supabase-inspired ambient background) --- */
+.aurora-system {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100dvh;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Subtle dot grid overlay */
+.aurora-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(148, 163, 184, 0.08) 1px, transparent 0);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse 85% 60% at 50% 30%, #000 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 85% 60% at 50% 30%, #000 40%, transparent 100%);
+  opacity: 0.9;
+}
+
+/* Vignette to fade edges into background */
+.aurora-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 100% 70% at 50% 40%, transparent 40%, rgba(6, 9, 15, 0.55) 80%, rgba(6, 9, 15, 0.85) 100%);
+}
+
+/* Base blob style */
+.aurora-blob {
+  --scroll-y: 0px;
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.55;
+  mix-blend-mode: screen;
+  will-change: transform;
+  transform: translate3d(0, var(--scroll-y), 0);
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.aurora-blob--primary {
+  top: -8%;
+  left: 18%;
+  width: 620px;
+  height: 620px;
+  background: radial-gradient(circle at 30% 30%, rgba(37, 99, 235, 0.75), transparent 65%);
+  animation: auroraDrift1 22s ease-in-out infinite;
+}
+
+.aurora-blob--accent {
+  top: 20%;
+  right: 8%;
+  width: 540px;
+  height: 540px;
+  background: radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.6), transparent 65%);
+  animation: auroraDrift2 26s ease-in-out infinite;
+  animation-delay: -8s;
+}
+
+.aurora-blob--violet {
+  top: 55%;
+  left: 5%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.5), transparent 65%);
+  animation: auroraDrift3 24s ease-in-out infinite;
+  animation-delay: -12s;
+  opacity: 0.4;
+}
+
+.aurora-blob--rose {
+  top: 40%;
+  right: 22%;
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle at 50% 50%, rgba(244, 63, 94, 0.35), transparent 65%);
+  animation: auroraDrift4 30s ease-in-out infinite;
+  animation-delay: -4s;
+  opacity: 0.35;
+}
+
+@keyframes auroraDrift1 {
+  0%, 100% { transform: translate3d(0, var(--scroll-y), 0) scale(1); }
+  50% { transform: translate3d(60px, calc(var(--scroll-y) + 40px), 0) scale(1.12); }
+}
+
+@keyframes auroraDrift2 {
+  0%, 100% { transform: translate3d(0, var(--scroll-y), 0) scale(1); }
+  50% { transform: translate3d(-70px, calc(var(--scroll-y) - 30px), 0) scale(1.08); }
+}
+
+@keyframes auroraDrift3 {
+  0%, 100% { transform: translate3d(0, var(--scroll-y), 0) scale(1); }
+  50% { transform: translate3d(50px, calc(var(--scroll-y) + 60px), 0) scale(1.15); }
+}
+
+@keyframes auroraDrift4 {
+  0%, 100% { transform: translate3d(0, var(--scroll-y), 0) scale(1); }
+  50% { transform: translate3d(-40px, calc(var(--scroll-y) - 50px), 0) scale(1.1); }
+}
+
+/* Legacy orbital classes kept as no-ops so existing markup does not error */
+.orbital-system { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.orbital-core,
+.ring,
+.ring-1,
+.ring-2,
+.ring-3,
+.ring-4 { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-blob {
+    animation: none !important;
+    transform: translate3d(0, 0, 0) !important;
+  }
+
+  .highlight,
+  .ds-gradient-text,
+  .ds-divider {
+    animation: none !important;
+    background-position: 0% 50% !important;
+  }
+}
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 
 
 /* Shared public header styles moved to PublicHeader.css */
@@ -87,6 +244,7 @@ body {
 .hero-content { max-width: 900px; width: 100%; z-index: 10; }
 
 .hero-title {
+<<<<<<< HEAD
   font-size: clamp(2.8rem, 8vw, 5.5rem);
   font-weight: 900; line-height: 1.05; letter-spacing: -0.04em;
   margin-bottom: 24px;
@@ -94,10 +252,23 @@ body {
 
 .highlight {
   background: linear-gradient(to right, #60a5fa, #2563eb);
+=======
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: clamp(2.8rem, 8vw, 5.5rem);
+  font-weight: 800; line-height: 1.05; letter-spacing: -0.03em;
+  margin-bottom: 24px;
+  text-wrap: balance;
+}
+
+.highlight {
+  background: linear-gradient(90deg, #22d3ee 0%, #3b82f6 30%, #8b5cf6 65%, #f43f5e 100%);
+  background-size: 200% 100%;
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
+<<<<<<< HEAD
 }
 
 .new-badge {
@@ -105,19 +276,43 @@ body {
   border: 1px solid rgba(59, 130, 246, 0.3);
   color: #60a5fa; padding: 8px 20px; border-radius: 100px;
   font-size: 0.9rem; font-weight: 600; margin-bottom: 32px;
+=======
+  animation: highlightShift 8s ease-in-out infinite;
+}
+
+@keyframes highlightShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.new-badge {
+  background: rgba(37, 99, 235, 0.12);
+  border: 1px solid rgba(37, 99, 235, 0.32);
+  color: #93c5fd; padding: 8px 20px; border-radius: 100px;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+  margin-bottom: 32px;
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
   display: inline-block;
 }
 
 /* --- 5. BUTTONS --- */
 .btn-main, .btn-outline, .btn-primary-plan, .btn-secondary-plan, .btn-login, .btn-get-started {
   display: inline-flex; align-items: center; justify-content: center;
+<<<<<<< HEAD
   padding: 16px 32px; border-radius: 12px; font-weight: 700;
+=======
+  padding: 14px 26px; border-radius: 12px;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-weight: 700; font-size: 0.95rem;
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
   text-decoration: none !important; transition: var(--transition);
   cursor: pointer;
 }
 
 .btn-main, .btn-primary-plan {
   background: var(--primary); color: white !important;
+<<<<<<< HEAD
   box-shadow: 0 10px 30px -5px var(--primary); border: none;
 }
 
@@ -127,10 +322,26 @@ body {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-light);
   color: white !important; /* Start white */
+=======
+  box-shadow: 0 14px 34px -14px var(--glow); border: none;
+}
+
+.btn-main:hover, .btn-primary-plan:hover {
+  transform: translateY(-2px);
+  background: var(--primary-strong);
+  box-shadow: 0 20px 44px -14px var(--glow);
+}
+
+.btn-outline {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-strong);
+  color: var(--text-main) !important;
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
   transition: var(--transition);
 }
 
 .btn-outline:hover {
+<<<<<<< HEAD
   background: #f8fafc !important; /* Becomes white/light grey */
   color: #020617 !important;    /* Becomes deep black/navy */
   transform: translateY(-3px);
@@ -142,6 +353,20 @@ body {
 .btn-outline:hover i {
   color: #020617 !important;
   fill: #020617 !important;
+=======
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(37, 99, 235, 0.55);
+  color: var(--text-main) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -14px var(--glow);
+}
+
+/* If there is an icon (like a play button) inside, make it change color too */
+.btn-outline:hover svg,
+.btn-outline:hover i {
+  color: var(--text-main) !important;
+  fill: var(--text-main) !important;
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 }
 
 /* --- 6. STORY ROWS (THE FIX) --- */
@@ -159,7 +384,20 @@ body {
 .story-row.reverse { flex-direction: row-reverse; }
 
 .story-text { flex: 1; }
+<<<<<<< HEAD
 .step-num { color: var(--primary); font-weight: 900; font-size: 1.2rem; margin-bottom: 15px; display: block; }
+=======
+.step-num {
+  color: var(--primary-soft);
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+  display: block;
+}
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 .story-text h3 {
   font-size: 3rem;
   margin-bottom: 25px;
@@ -189,14 +427,26 @@ body {
 /* --- 7. BENTO & PRICING --- */
 .section-header { text-align: center; margin-bottom: 60px; }
 .section-header h2 {
+<<<<<<< HEAD
   font-size: 3.5rem;
   font-weight: 900;
+=======
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
   margin-bottom: 15px;
   background: linear-gradient(135deg, #f8fafc 0%, #93c5fd 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
+<<<<<<< HEAD
+=======
+  text-wrap: balance;
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 }
 
 .features-grid {
@@ -206,13 +456,31 @@ body {
 
 .feature-card {
   background: var(--card-bg); border: 1px solid var(--border-light);
+<<<<<<< HEAD
   padding: 50px; border-radius: 32px; backdrop-filter: blur(10px);
   position: relative; overflow: hidden;
+=======
+  padding: 44px; border-radius: 24px; backdrop-filter: blur(10px);
+  position: relative; overflow: hidden;
+  transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(37, 99, 235, 0.32);
+  box-shadow: 0 28px 70px -32px var(--glow);
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 }
 
 .feature-card.highlight-card {
   grid-column: span 2;
+<<<<<<< HEAD
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(2, 6, 23, 1) 100%);
+=======
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.12) 0%, rgba(6, 9, 15, 1) 100%);
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 }
 
 /* --- COMPACT PRICING GRID --- */
@@ -547,6 +815,164 @@ body {
 /* --- RESPONSIVE FOOTER --- */
 
 
+<<<<<<< HEAD
+=======
+/* ============================================================
+   CONTACT / SUPPORT FORM
+   ============================================================ */
+.contact-form-card {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 40px;
+  border-radius: 24px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-light);
+  box-shadow: 0 32px 80px -40px rgba(0, 0, 0, 0.6);
+  position: relative;
+  overflow: hidden;
+}
+
+.contact-form-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.08), transparent 44%);
+  pointer-events: none;
+}
+
+.contact-form-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.contact-live-chat-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.btn-premium-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: 1px solid rgba(16, 185, 129, 0.55);
+  box-shadow: 0 12px 32px -14px rgba(16, 185, 129, 0.55);
+  color: #ffffff !important;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-premium-live:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 44px -14px rgba(16, 185, 129, 0.6);
+}
+
+.contact-live-chat-note {
+  color: var(--text-soft);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  flex: 1 1 220px;
+}
+
+.contact-notice {
+  margin-bottom: 16px;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  padding: 12px 14px;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.contact-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.contact-label {
+  color: var(--text-main);
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.contact-input {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--text-main);
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 0.95rem;
+  transition: border-color 180ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 180ms cubic-bezier(0.16, 1, 0.3, 1),
+    background 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.contact-input::placeholder {
+  color: var(--text-dim);
+  opacity: 0.7;
+}
+
+.contact-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: rgba(15, 23, 42, 0.8);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+.contact-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.btn-contact-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.contact-feedback {
+  margin-top: 4px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.contact-feedback--success {
+  color: #86efac;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.contact-feedback--error {
+  color: #fca5a5;
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.28);
+}
+
+
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 
 /* --- WHATSAPP FOOTER CTA --- */
 .whatsapp-cta-box {
@@ -858,6 +1284,7 @@ body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+<<<<<<< HEAD
   transition: var(--transition);
 }
 
@@ -869,12 +1296,42 @@ body {
 .product-card--highlight {
   border-color: rgba(59, 130, 246, 0.3);
   background: linear-gradient(135deg, rgba(59, 130, 246, 0.06) 0%, rgba(2, 6, 23, 1) 100%);
+=======
+  transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.product-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.06), transparent 44%);
+  pointer-events: none;
+}
+
+.product-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.product-card:hover {
+  border-color: rgba(37, 99, 235, 0.35);
+  transform: translateY(-4px);
+  box-shadow: 0 24px 60px -28px rgba(37, 99, 235, 0.35);
+}
+
+.product-card--highlight {
+  border-color: rgba(37, 99, 235, 0.35);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(6, 9, 15, 1) 100%);
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 }
 
 .product-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+<<<<<<< HEAD
   margin-bottom: 18px;
 }
 
@@ -886,6 +1343,37 @@ body {
   letter-spacing: 1px;
   color: var(--primary);
   background: rgba(59, 130, 246, 0.1);
+=======
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.product-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.18), rgba(16, 185, 129, 0.14));
+  border: 1px solid rgba(37, 99, 235, 0.24);
+  color: var(--primary-soft);
+  flex-shrink: 0;
+}
+
+.product-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.product-label {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--primary-soft);
+  background: rgba(37, 99, 235, 0.12);
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
   padding: 4px 10px;
   border-radius: 4px;
   text-transform: uppercase;
@@ -925,9 +1413,16 @@ body {
 }
 
 .check-mark {
+<<<<<<< HEAD
   color: #22c55e;
   flex-shrink: 0;
   font-size: 0.8rem;
+=======
+  color: var(--accent);
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
   margin-top: 2px;
 }
 
@@ -962,6 +1457,7 @@ body {
    ABOUT PAGE STYLES
    ============================================================ */
 .about-intro-badge {
+<<<<<<< HEAD
   display: inline-block;
   background: rgba(59, 130, 246, 0.1);
   border: 1px solid rgba(59, 130, 246, 0.25);
@@ -973,6 +1469,28 @@ body {
   margin-bottom: 28px;
 }
 
+=======
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(37, 99, 235, 0.1);
+  border: 1px solid rgba(37, 99, 235, 0.28);
+  color: #93c5fd;
+  padding: 7px 16px;
+  border-radius: 100px;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+
+.about-intro-badge svg {
+  color: var(--primary-soft);
+}
+
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 .founder-quote {
   font-size: 1.1rem;
   font-style: italic;
@@ -1021,9 +1539,40 @@ body {
   padding: 36px;
   border-radius: 24px;
   text-align: center;
+<<<<<<< HEAD
 }
 
 .value-icon { font-size: 2.2rem; margin-bottom: 16px; }
+=======
+  transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.value-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(37, 99, 235, 0.35);
+  box-shadow: 0 32px 80px -40px rgba(37, 99, 235, 0.4);
+}
+
+.value-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.18), rgba(16, 185, 129, 0.14));
+  border: 1px solid rgba(37, 99, 235, 0.24);
+  color: var(--primary-soft);
+  margin-bottom: 16px;
+}
+
+.value-icon svg {
+  width: 22px;
+  height: 22px;
+}
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 
 .value-card h4 {
   font-size: 1.1rem;
@@ -1053,10 +1602,30 @@ body {
   margin-bottom: 40px;
   position: relative;
   overflow: hidden;
+<<<<<<< HEAD
 }
 
 .legal-card:hover {
   border-color: rgba(59, 130, 246, 0.25);
+=======
+  transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 260ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.legal-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(37, 99, 235, 0.06), transparent 40%);
+  pointer-events: none;
+}
+
+.legal-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(37, 99, 235, 0.32);
+  box-shadow: 0 24px 60px -30px rgba(37, 99, 235, 0.32);
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 }
 
 .legal-card-header {
@@ -1064,6 +1633,7 @@ body {
   align-items: center;
   gap: 16px;
   margin-bottom: 20px;
+<<<<<<< HEAD
 }
 
 .legal-card-icon {
@@ -1082,6 +1652,42 @@ body {
   text-transform: uppercase;
   margin-bottom: 6px;
   display: block;
+=======
+  position: relative;
+  z-index: 1;
+}
+
+.legal-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.18), rgba(16, 185, 129, 0.14));
+  border: 1px solid rgba(37, 99, 235, 0.24);
+  color: var(--primary-soft);
+  flex-shrink: 0;
+}
+
+.legal-card-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.legal-card-label {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--primary-soft);
+  background: rgba(37, 99, 235, 0.12);
+  padding: 4px 10px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: inline-block;
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 }
 
 .legal-card h3 {
@@ -1115,8 +1721,14 @@ body {
 }
 
 .legal-highlights li .check-mark {
+<<<<<<< HEAD
   color: #22c55e;
   flex-shrink: 0;
+=======
+  color: var(--accent);
+  flex-shrink: 0;
+  font-weight: 700;
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 }
 
 .screenshot-slot {

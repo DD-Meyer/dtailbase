@@ -1,4 +1,5 @@
 :root {
+<<<<<<< HEAD
   --ph-primary: #3b82f6;
   --ph-text-main: #f8fafc;
   --ph-text-muted: #94a3b8;
@@ -13,6 +14,27 @@
   --ph-auth-shadow: rgba(255, 255, 255, 0.1);
   --ph-auth-shadow-hover: rgba(59, 130, 246, 0.3);
   --ph-hamburger-bg: rgba(15, 23, 42, 0.65);
+=======
+  --ph-primary: #2563eb;
+  --ph-primary-soft: #3b82f6;
+  --ph-accent: #10b981;
+  --ph-text-main: #f8fafc;
+  --ph-text-muted: #94a3b8;
+  --ph-bg-deep: #06090f;
+  --ph-nav-bg: rgba(11, 18, 32, 0.72);
+  --ph-nav-bg-scrolled: rgba(6, 9, 15, 0.9);
+  --ph-menu-bg: rgba(6, 9, 15, 0.94);
+  --ph-overlay-bg: rgba(2, 6, 15, 0.62);
+  --ph-border-light: rgba(148, 163, 184, 0.14);
+  --ph-border-strong: rgba(148, 163, 184, 0.24);
+  --ph-hover-bg: rgba(255, 255, 255, 0.04);
+  --ph-active-bg: rgba(37, 99, 235, 0.12);
+  --ph-active-glow: rgba(37, 99, 235, 0.28);
+  --ph-auth-shadow: rgba(0, 0, 0, 0.4);
+  --ph-auth-shadow-hover: rgba(37, 99, 235, 0.35);
+  --ph-hamburger-bg: rgba(15, 23, 42, 0.65);
+  --ph-ease: cubic-bezier(0.16, 1, 0.3, 1);
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 }
 
 .public-nav {
@@ -23,6 +45,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+<<<<<<< HEAD
   padding: 15px 5%;
   background: var(--ph-nav-bg);
   backdrop-filter: blur(12px);
@@ -37,6 +60,50 @@
   z-index: 1100;
   display: flex;
   align-items: center;
+=======
+  padding: 14px clamp(1rem, 4vw, 3rem);
+  background: var(--ph-nav-bg);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border-bottom: 1px solid var(--ph-border-light);
+  transition: background 260ms var(--ph-ease),
+    border-color 260ms var(--ph-ease),
+    box-shadow 260ms var(--ph-ease);
+}
+
+.public-nav.is-scrolled {
+  background: var(--ph-nav-bg-scrolled);
+  border-bottom-color: rgba(37, 99, 235, 0.32);
+  box-shadow: 0 12px 40px -20px rgba(0, 0, 0, 0.65);
+}
+
+.public-header-logo {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-decoration: none;
+  z-index: 1100;
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  color: var(--ph-text-main);
+  transition: transform 260ms var(--ph-ease);
+}
+
+.public-header-logo:hover {
+  transform: translateY(-1px);
+}
+
+.public-header-logo .logo-dot {
+  color: var(--ph-primary-soft);
+  transition: transform 260ms var(--ph-ease), filter 260ms var(--ph-ease);
+}
+
+.public-header-logo:hover .logo-dot {
+  transform: translateX(2px) scale(1.14);
+  filter: drop-shadow(0 0 10px var(--ph-active-glow));
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 }
 
 .nav-menu {
@@ -55,7 +122,11 @@
   gap: 10px;
   padding: 96px 20px 24px;
   z-index: 1090;
+<<<<<<< HEAD
   transition: right 0.35s ease;
+=======
+  transition: right 0.35s var(--ph-ease);
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 }
 
 .nav-menu.active {
@@ -66,10 +137,16 @@
   position: fixed;
   inset: 0;
   background: var(--ph-overlay-bg);
+<<<<<<< HEAD
+=======
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
   z-index: 1080;
 }
 
 .nav-item {
+<<<<<<< HEAD
   color: var(--ph-text-muted);
   text-decoration: none;
   font-size: 0.9rem;
@@ -84,25 +161,76 @@
 .nav-item:hover {
   color: var(--ph-text-main);
   background: var(--ph-hover-bg);
+=======
+  position: relative;
+  color: var(--ph-text-muted);
+  text-decoration: none;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: color 180ms var(--ph-ease),
+    background-color 180ms var(--ph-ease);
+}
+
+.nav-item::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 3px;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--ph-primary), var(--ph-primary-soft));
+  border-radius: 999px;
+  transform: translateX(-50%);
+  transition: width 260ms var(--ph-ease), opacity 260ms var(--ph-ease);
+  opacity: 0;
+}
+
+.nav-item:hover,
+.nav-item:focus-visible {
+  color: var(--ph-text-main);
+  background: var(--ph-hover-bg);
+  outline: none;
+}
+
+.nav-item:hover::after,
+.nav-item:focus-visible::after,
+.nav-item.active::after {
+  width: calc(100% - 1.8rem);
+  opacity: 1;
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 }
 
 .nav-item.active {
   color: var(--ph-text-main);
+<<<<<<< HEAD
   border-color: var(--ph-primary);
   background: var(--ph-active-bg);
   box-shadow: 0 0 15px var(--ph-active-glow);
+=======
+  background: var(--ph-active-bg);
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 }
 
 .nav-auth-persistent {
   display: flex;
   align-items: center;
+<<<<<<< HEAD
   gap: 15px;
+=======
+  gap: 12px;
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
   z-index: 1100;
 }
 
 .btn-login-text {
   color: var(--ph-text-main);
   text-decoration: none;
+<<<<<<< HEAD
   font-weight: 700;
   font-size: 0.9rem;
   transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
@@ -146,6 +274,63 @@
 .btn-dashboard-sm:hover {
   filter: brightness(1.1);
   transform: translateY(-1px);
+=======
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: color 180ms var(--ph-ease),
+    background-color 180ms var(--ph-ease);
+}
+
+.btn-login-text:hover {
+  color: var(--ph-primary-soft);
+  background: var(--ph-hover-bg);
+}
+
+.btn-join-now {
+  background: var(--ph-primary);
+  color: #ffffff !important;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: transform 260ms var(--ph-ease),
+    background 260ms var(--ph-ease),
+    box-shadow 260ms var(--ph-ease);
+  box-shadow: 0 12px 32px -12px var(--ph-auth-shadow-hover);
+}
+
+.btn-join-now:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 18px 44px -14px var(--ph-auth-shadow-hover);
+}
+
+.btn-dashboard-sm {
+  background: var(--ph-accent);
+  color: #ffffff !important;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-decoration: none;
+  transition: transform 260ms var(--ph-ease),
+    background 260ms var(--ph-ease),
+    box-shadow 260ms var(--ph-ease);
+  box-shadow: 0 10px 26px -12px rgba(16, 185, 129, 0.5);
+}
+
+.btn-dashboard-sm:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px -14px rgba(16, 185, 129, 0.55);
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 }
 
 .hamburger {
@@ -156,12 +341,26 @@
   gap: 4px;
   width: 40px;
   height: 40px;
+<<<<<<< HEAD
   border: 1px solid var(--ph-border-light);
+=======
+  border: 1px solid var(--ph-border-strong);
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
   border-radius: 10px;
   background: var(--ph-hamburger-bg);
   cursor: pointer;
   z-index: 1100;
   padding: 0;
+<<<<<<< HEAD
+=======
+  transition: background 180ms var(--ph-ease),
+    border-color 180ms var(--ph-ease);
+}
+
+.hamburger:hover {
+  background: rgba(37, 99, 235, 0.14);
+  border-color: rgba(37, 99, 235, 0.4);
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 }
 
 .bar {
@@ -169,7 +368,12 @@
   width: 18px;
   height: 2px;
   background: var(--ph-text-main);
+<<<<<<< HEAD
   transition: transform 0.25s ease, opacity 0.25s ease;
+=======
+  border-radius: 999px;
+  transition: transform 0.25s var(--ph-ease), opacity 0.25s var(--ph-ease);
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 }
 
 .hamburger.active .bar:nth-child(1) {
@@ -197,7 +401,11 @@
     -webkit-backdrop-filter: none;
     flex-direction: row;
     align-items: center;
+<<<<<<< HEAD
     gap: 6px;
+=======
+    gap: 4px;
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
     padding: 0;
     z-index: auto;
   }
@@ -218,7 +426,11 @@
 
   .btn-join-now {
     padding: 8px 16px;
+<<<<<<< HEAD
     font-size: 0.75rem;
+=======
+    font-size: 0.78rem;
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
   }
 
   .hamburger {
@@ -229,9 +441,12 @@
 @media (max-width: 768px) {
   .public-header-logo {
     font-size: 1.1rem;
+<<<<<<< HEAD
     max-width: 42vw;
     overflow: hidden;
     text-overflow: ellipsis;
+=======
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
   }
 
   .public-nav {
@@ -252,8 +467,13 @@
   .btn-join-now,
   .btn-dashboard-sm {
     white-space: nowrap;
+<<<<<<< HEAD
     padding: 7px 10px;
     font-size: 0.72rem;
+=======
+    padding: 7px 12px;
+    font-size: 0.75rem;
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
   }
 
   .hamburger {
@@ -268,13 +488,21 @@
   }
 
   .public-header-logo {
+<<<<<<< HEAD
     max-width: 36vw;
+=======
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
     font-size: 1rem;
   }
 
   .btn-join-now,
   .btn-dashboard-sm {
+<<<<<<< HEAD
     padding: 6px 9px;
     font-size: 0.68rem;
+=======
+    padding: 6px 10px;
+    font-size: 0.7rem;
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
   }
 }

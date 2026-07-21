@@ -114,9 +114,13 @@
   font-family: 'JetBrains Mono', monospace;
 }
 
+<<<<<<< HEAD
 .flex-1 { flex: 1; }
 
 .mb-6 { margin-bottom: 1.5rem; }
+=======
+/* Removed global .flex-1/.mb-6 — collided with Tailwind utilities. */
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 
 .vehicles-mobile-actions {
   display: flex;

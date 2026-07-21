@@ -11,8 +11,13 @@ import { CompanyProvider } from './context/CompanyContext';
 import { SupportNotificationProvider } from './context/SupportNotificationContext';
 
 // Pages
+<<<<<<< HEAD
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+=======
+import Login from "./pages/public/LoginPage";
+import Register from "./pages/public/RegisterPage";
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 import Customers from "./pages/Customers";
 import Vehicles from "./pages/Vehicles";
 import Services from "./pages/Services";
@@ -24,6 +29,7 @@ import TeamManagement from "./components/TeamManagement";
 import Profile from "./components/Profile";
 import Settings from "./pages/Settings";
 import IndemnitySettings from "./pages/IndemnitySettings";
+<<<<<<< HEAD
 import Hero from "./components/Hero";
 import BookingDetail from "./pages/BookingDetails";
 import About from "./pages/About";
@@ -32,6 +38,17 @@ import Plans from "./pages/Plans";
 import Legal from "./pages/Legal";
 import Contact from "./pages/Contact";
 import ContentPage from "./pages/ContentPage";
+=======
+import DtailBaseLanding from "./pages/public/LandingPage";
+import BookingDetail from "./pages/BookingDetails";
+import About from "./pages/public/AboutPage";
+import Products from "./pages/public/ProductsPage";
+import Plans from "./pages/public/PlansPage";
+import Legal from "./pages/public/LegalPage";
+import Contact from "./pages/public/ContactPage";
+import ContentPage from "./pages/public/ContentPage";
+import NotFound from "./pages/public/NotFoundPage";
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 import PublicBooking from "./pages/PublicBooking";
 import BookingConfirmation from "./pages/BookingConfirmation";
 import PublicBookings from "./pages/PublicBookings";
@@ -40,17 +57,36 @@ import Payments from "./pages/Payments";
 import ShareBooking from "./pages/ShareBooking";
 import SupportAdminInbox from "./pages/SupportAdminInbox";
 import MySupport from "./pages/MySupport";
+<<<<<<< HEAD
+=======
+import { trackSpaPageView } from "./utils/gtm";
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 
 
 function AppContent() {
   const { isAuthenticated, user } = useContext(AuthContext); 
   const location = useLocation();
+<<<<<<< HEAD
+=======
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 
   // Scroll to top on every route change so new pages always start at the top
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, [location.pathname]);
 
+<<<<<<< HEAD
+=======
+  useEffect(() => {
+    trackSpaPageView({
+      pathname: location.pathname,
+      search: location.search,
+      title: document.title,
+    });
+  }, [location.pathname, location.search]);
+
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
   const getInstalledState = () => {
     const standaloneDisplayMode = window.matchMedia("(display-mode: standalone)").matches;
     const iosStandalone = window.navigator.standalone === true;
@@ -289,6 +325,7 @@ function AppContent() {
     />
   );
 
+<<<<<<< HEAD
   return (
   
     <div className={isAuthPage ? "auth-wrapper" : (isLandingPage || isMinimalChromeRoute) ? "landing-wrapper" : "app-layout"}>
@@ -296,6 +333,21 @@ function AppContent() {
       {/* Sidebar hidden on Hero and Auth pages */}
       {showDashboardChrome && (
         <Sidebar />
+=======
+  const rootClassName = isAuthPage
+    ? "auth-wrapper"
+    : (isLandingPage || isMinimalChromeRoute)
+      ? "landing-wrapper"
+      : `app-layout${showDashboardChrome && isSidebarCollapsed ? " sidebar-collapsed" : ""}`;
+
+  return (
+  
+    <div className={rootClassName}>
+      
+      {/* Sidebar hidden on public landing and auth pages */}
+      {showDashboardChrome && (
+        <Sidebar isCollapsed={isSidebarCollapsed} onToggleCollapse={setIsSidebarCollapsed} />
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
       )}
 
       {showDashboardChrome && (
@@ -303,7 +355,11 @@ function AppContent() {
       )}
       
       <main className={isLandingPage || isAuthPage || isMinimalChromeRoute ? "full-page-content" : "main-content"}>
+<<<<<<< HEAD
         {/* Header hidden on Hero and Auth pages */}
+=======
+        {/* Header hidden on public landing and auth pages */}
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
         {showDashboardChrome && (
           <Header showInstallButton={showInstallButton && !isInstalledApp && !isLandingPage} handleInstallClick={handleInstallClick} />
         )}
@@ -315,6 +371,7 @@ function AppContent() {
             <Route path="/public/bookings/:companySlug" element={<PublicBookings />} />
             
             {/* Landing Page is now the root */}
+<<<<<<< HEAD
             <Route path="/" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Hero isAuthenticated={isAuthenticated} />} />
             <Route path="/hero" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Navigate to="/" replace />} />
             <Route path="/about" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <PublicLayout><About /></PublicLayout>} />
@@ -333,6 +390,19 @@ function AppContent() {
             <Route path="/payments" element={<PublicLayout showNav={false} showFooter={false}><Payments /></PublicLayout>} />
             <Route path="/legal" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <PublicLayout><Legal /></PublicLayout>} />
             <Route path="/contact" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <PublicLayout><Contact /></PublicLayout>} />
+=======
+            <Route path="/" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <DtailBaseLanding />} />
+            <Route path="/hero" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Navigate to="/" replace />} />
+            <Route path="/about" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <About />} />
+            <Route path="/products" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Products />} />
+            <Route
+              path="/plans"
+              element={<Plans showBackToDashboard={isInstalledApp && isAuthenticated} />}
+            />
+            <Route path="/payments" element={<PublicLayout showNav={false} showFooter={false}><Payments /></PublicLayout>} />
+            <Route path="/legal" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Legal />} />
+            <Route path="/contact" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Contact />} />
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
             <Route path="/payment-success" element={<PublicLayout><PaymentSuccess /></PublicLayout>} />
 
             {/* Example of using the reusable ContentPage for a new "Community" page */}
@@ -346,8 +416,19 @@ function AppContent() {
 
 
             {/* Public Auth Routes */}
+<<<<<<< HEAD
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+=======
+            <Route
+              path="/login"
+              element={isAuthenticated ? <Navigate to="/bookings" replace /> : <Login />}
+            />
+            <Route
+              path="/register"
+              element={isAuthenticated ? <Navigate to="/bookings" replace /> : <Register />}
+            />
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
             
             {/* Protected Routes */}
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
@@ -382,8 +463,13 @@ function AppContent() {
               }
             />
             
+<<<<<<< HEAD
             {/* Catch-all redirect */}
             <Route path="*" element={<Navigate to="/" replace />} />
+=======
+            {/* Catch-all — friendly 404 for unknown public paths */}
+            <Route path="*" element={<NotFound />} />
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
           </Routes>
 
           {/* Install button is now only in the header for all devices */}

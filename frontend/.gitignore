@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+<<<<<<< HEAD
+=======
+*ui-ux-pro-max-skill-main
+
+>>>>>>> 96a4d46 (MAJOR - Refactor and redeesign of landing pages, login/register flow, contact pages, redesign.)
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
