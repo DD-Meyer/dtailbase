@@ -20,8 +20,8 @@
   --color-on-primary:     #050b16; /* Deep navy — text on cyan */
 
   --color-secondary:      #5cc5ff; /* Cyan 400 — highlights */
-  --color-accent:         #46ffb3; /* Neon mint — CTA / accent */
-  --color-accent-strong:  #2fe89c; /* Mint hover */
+  --color-accent:         #279739; /* Neon mint — CTA / accent */
+  --color-accent-strong:  #18895a; /* Mint hover */
   --color-accent-soft:    rgba(70, 255, 179, 0.14); /* Chip bg */
   --color-on-accent:      #050b16;
 

@@ -466,6 +466,397 @@
 }
 
 /* ============================================================
+   ANIMATED GRAPH MODULE
+   ============================================================ */
+.graphCard {
+    --graph-bg: #1e293b;
+    --bar-default: #3b82f6;
+    --bar-hover: #60a5fa;
+    --graph-text: #f8fafc;
+    --graph-text-muted: #94a3b8;
+
+    background: var(--graph-bg);
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    margin: 0 auto;
+  }
+
+  .graphHeader {
+    margin-bottom: 24px;
+  }
+
+  .graphHeader h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--graph-text);
+    margin: 0;
+  }
+
+  .graphHeader p {
+    font-size: 0.875rem;
+    color: var(--graph-text-muted);
+    margin-top: 4px;
+  }
+
+  .chartContainer {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    height: 220px;
+    padding-top: 30px;
+    border-bottom: 2px solid #334155;
+    position: relative;
+  }
+
+  .barWrapper {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .bar {
+    width: 100%;
+    max-width: 48px;
+    background: linear-gradient(180deg, var(--bar-hover) 0%, var(--bar-default) 100%);
+    border-radius: 6px 6px 0 0;
+    transition: 
+      height 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.25s ease,
+      filter 0.25s ease,
+      opacity 0.25s ease;
+    transform-origin: bottom;
+  }
+
+  .tooltip {
+    position: absolute;
+    top: -28px;
+    background: #0f172a;
+    color: var(--graph-text);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: all 0.2s ease;
+    pointer-events: none;
+    white-space: nowrap;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Hover States */
+  .barWrapper:hover .bar {
+    transform: scaleY(1.04) scaleX(1.05);
+    filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.5));
+  }
+
+  .barWrapper:hover .tooltip {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .chartContainer:hover .barWrapper:not(:hover) .bar {
+    opacity: 0.35;
+  }
+
+  .labels {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .labelItem {
+    flex: 1;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--graph-text-muted);
+  }
+
+
+  /* ==================================== MOBILE STYLES ========================================= */
+  @media (max-width: 640px) {
+    .chartContainer {
+      height: 180px;
+    }
+
+    .bar {
+      max-width: 36px;
+    }
+
+    .labels {
+      gap: 8px;
+    }
+
+    .labelItem {
+      font-size: 0.45rem;
+    }
+  }
+
+
+  /* ============================================================
+   INTERACTIVE JOB CARD MODULE
+   ============================================================ */
+.cardContainer {
+    --card-bg: #1e293b;
+    --accent-amber: #f59e0b;
+    --accent-amber-glow: rgba(245, 158, 11, 0.25);
+    --accent-blue: #3b82f6;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border-color: #334155;
+
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.4);
+    margin: 0 auto;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .cardContainer:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 25px 35px -5px rgba(0, 0, 0, 0.5), 0 0 20px var(--accent-amber-glow);
+  }
+
+  /* Header */
+  .cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .badge {
+    display: inline-block;
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--accent-amber);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+
+  .vehicleTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+  }
+
+  .customerMeta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .timerBadge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #0f172a;
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+
+  .pulseIcon {
+    color: var(--accent-amber);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Progress Bar */
+  .progressSection {
+    margin-bottom: 20px;
+  }
+
+  .progressText {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .progressText strong {
+    color: var(--text-main);
+  }
+
+  .track {
+    width: 100%;
+    height: 8px;
+    background: #0f172a;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-amber), #fbbf24);
+    border-radius: 999px;
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Checklist Items */
+  .taskList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .sectionLabel {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+
+  .taskRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #0f172a;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+
+  .taskRow:hover {
+    border-color: var(--accent-amber);
+    transform: translateX(4px);
+  }
+
+  .checkbox {
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    transition: color 0.2s ease;
+  }
+
+  .taskText {
+    font-size: 0.875rem;
+    color: var(--text-main);
+    transition: color 0.2s ease;
+  }
+
+  /* Completed State */
+  .taskDone .checkbox {
+    color: #10b981;
+  }
+
+  .taskDone .taskText {
+    color: var(--text-muted);
+    text-decoration: line-through;
+  }
+
+  /* Footer */
+  .cardFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .indemnityBadge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .indemnityBadge.signed {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+  }
+
+  .depositPaid {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent-amber);
+  }
+
+  /* ==================================== MOBILE STYLES ========================================= */
+  
+  @media (max-width: 640px) {
+    .jobCardDemo {
+      padding: 0 20px;
+    }
+
+    .cardContainer {
+      padding: 20px;
+    }
+
+    .vehicleTitle {
+      font-size: 1.125rem;
+    }
+
+    .customerMeta {
+      font-size: 0.75rem;
+    }
+
+    .timerBadge {
+      font-size: 0.7rem;
+      padding: 4px 10px;
+    }
+
+    .progressText {
+      font-size: 0.75rem;
+    }
+
+    .taskRow {
+      padding: 8px 12px;
+    }
+
+    .taskText {
+      font-size: 0.8rem;
+    }
+
+    .indemnityBadge {
+      font-size: 0.5rem;
+      padding: 4px 10px;
+    }
+  }
+
+/* ============================================================
    FEATURES
    ============================================================ */
 .features {
@@ -674,3 +1065,9 @@
   justify-content: center;
   margin-top: 8px;
 }
+
+
+
+
+
+/*============================== MOBILE STYLES ===========================================*/

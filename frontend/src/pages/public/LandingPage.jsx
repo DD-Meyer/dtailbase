@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   Calendar,
   CreditCard,
@@ -12,10 +12,15 @@ import {
   ShieldCheck,
   Smartphone,
   Zap,
+  User,
+  Clock,
+  CheckCircle2,
 } from "lucide-react";
 import PublicShell from "../../components/public/PublicShell";
 import { AuthContext } from "../../context/AuthContext";
+import WheelJourney from "../../components/public/WheelJourney";
 import styles from "./LandingPage.module.css";
+import { FeatureGraphicRenderer } from "../../components/public/FeatureGraphics";
 
 const FEATURES = [
   {
@@ -26,32 +31,32 @@ const FEATURES = [
   },
   {
     icon: CreditCard,
-    title: "Payments that just work",
-    body: "Take deposits at booking. Auto-invoice on completion. Payouts arrive in your account the next day.",
+    title: "Smart pricing & services",
+    body: "Create your custom services, with their own indemnity forms, and customers receive before-and-after photos.",
     tone: "blue",
   },
   {
     icon: Wrench,
     title: "Job cards on the shop floor",
-    body: "Every booking becomes a live job card with timers, photos, add-ons and signature capture.",
+    body: "Every booking becomes a live job card with timers, photos, actual-vs-estimated time, and signature capture.",
     tone: "amber",
   },
   {
     icon: Users,
-    title: "Team and roles",
-    body: "Give staff scoped access, track who did what, and reward top performers with clear stats.",
+    title: "Team management",
+    body: "Give staff scoped access, track who did what, staff signature capture, and reward top performers with clear stats.",
     tone: "blue",
   },
   {
     icon: ShieldCheck,
     title: "Digital indemnity",
-    body: "Legal waivers signed on the vehicle, stored with the booking. Compliance made effortless.",
+    body: "Legal waivers signed on the vehicle, stored with the booking, and easily accessible. Compliance made effortless.",
     tone: "amber",
   },
   {
     icon: Smartphone,
     title: "Runs on any phone",
-    body: "Installable web app. No store approvals. Works offline for the essentials on the shop floor.",
+    body: "Installable web app. No store approvals, linked directly to your desktop app. Essentials on the shop floor.",
     tone: "blue",
   },
 ];
@@ -59,7 +64,7 @@ const FEATURES = [
 const REVIEWS = [
   {
     quote:
-      "We went from 3 no-shows a week to zero. The booking deposits alone paid for the software in the first month.",
+      "We went from 3 bookings a week to 10. I have more time to focus on actual detailing.",
     name: "Sipho M.",
     role: "Owner, Detailz Pro",
   },
@@ -83,10 +88,152 @@ const STEPS = [
   { n: "03", title: "Run the day from your phone", body: "Job cards, indemnity, add-ons, payments — all in one place." },
 ];
 
+const GRAPH_DATA = [
+  { label: "No System", value: 10 },
+  { label: "PaperBased", value: 20 },
+  { label: "WhatsApp", value: 40 },
+  { label: "Website Form", value: 50 },
+  { label: "Calendar", value: 60 },
+  { label: "Multiple Apps", value: 70 },
+  { label: "DtailBase", value: 95 },
+];
+
+// Graph animated
+function EngagementChart() {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const maxValue = Math.max(...GRAPH_DATA.map((item) => item.value));
+
+  useEffect(() => {
+    // Triggers the CSS height transition after initial mount
+    const timer = setTimeout(() => setIsLoaded(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div className={styles.graphCard}>
+      <div className={styles.graphHeader}>
+        <h1>Weekly Jobs</h1>
+        <p>Free up your time from admin & fit more bookings</p>
+      </div>
+
+      <div className={styles.chartContainer}>
+        {GRAPH_DATA.map((item) => {
+          const percentage = (item.value / maxValue) * 100;
+          return (
+            <div key={item.label} className={styles.barWrapper}>
+              <div className={styles.tooltip}>{item.value} bookings</div>
+              <div
+                className={styles.bar}
+                style={{
+                  height: isLoaded ? `${percentage}%` : "0%",
+                }}
+              />
+            </div>
+          );
+        })}
+      </div>
+
+      <div className={styles.labels}>
+        {GRAPH_DATA.map((item) => (
+          <div key={item.label} className={styles.labelItem}>
+            {item.label}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const INITIAL_TASKS = [
+  { id: 1, text: "Exterior foam wash & iron decontam", done: true },
+  { id: 2, text: "Single-stage paint correction", done: true },
+  { id: 3, text: "Ceramic coating application (2 layers)", done: false },
+  { id: 4, text: "Interior deep steam & leather seal", done: false },
+];
+
+// Job Card animated 
+function JobCardModule() {
+  const [tasks, setTasks] = useState(INITIAL_TASKS);
+  const [isSigned, setIsSigned] = useState(true);
+
+  const completedCount = tasks.filter((t) => t.done).length;
+  const progressPercent = Math.round((completedCount / tasks.length) * 100);
+
+  const toggleTask = (id) => {
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === id ? { ...task, done: !task.done } : task
+      )
+    );
+  };
+
+  return (
+    <div className={styles.cardContainer}>
+      {/* Top Bar / Header */}
+      <div className={styles.cardHeader}>
+        <div className={styles.vehicleInfo}>
+          <span className={styles.badge}>Live Job Card</span>
+          <h3 className={styles.vehicleTitle}>2024 Porsche 911 GT3</h3>
+          <p className={styles.customerMeta}>
+            <User size={14} /> Sipho M. &bull; #JOB-8842
+          </p>
+        </div>
+        <div className={styles.timerBadge}>
+          <Clock size={14} className={styles.pulseIcon} />
+          <span>02:15:40 elapsed</span>
+        </div>
+      </div>
+
+      {/* Dynamic Progress Indicator */}
+      <div className={styles.progressSection}>
+        <div className={styles.progressText}>
+          <span>Completion Progress</span>
+          <strong>{progressPercent}%</strong>
+        </div>
+        <div className={styles.track}>
+          <div
+            className={styles.fill}
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Interactive Checklist */}
+      <div className={styles.taskList}>
+        <span className={styles.sectionLabel}>Service Checklist (Click to toggle)</span>
+        {tasks.map((task) => (
+          <div
+            key={task.id}
+            className={`${styles.taskRow} ${task.done ? styles.taskDone : ""}`}
+            onClick={() => toggleTask(task.id)}
+          >
+            <div className={styles.checkbox}>
+              <CheckCircle2 size={16} />
+            </div>
+            <span className={styles.taskText}>{task.text}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Indemnity & Signature Footer */}
+      <div className={styles.cardFooter}>
+        <div
+          className={`${styles.indemnityBadge} ${isSigned ? styles.signed : ""}`}
+          onClick={() => setIsSigned(!isSigned)}
+        >
+          <ShieldCheck size={16} />
+          <span>{isSigned ? "Digital Waiver Signed" : "Waiver Pending"}</span>
+        </div>
+        <span className={styles.depositPaid}>Deposit Paid: $150.00</span>
+      </div>
+    </div>
+  );
+}
+
 export default function LandingPage() {
   const { isAuthenticated } = useContext(AuthContext);
   const primaryCtaTo = isAuthenticated ? "/bookings" : "/register";
-  const primaryCtaLabel = isAuthenticated ? "Go to dashboard" : "Start free trial";
+  const primaryCtaLabel = isAuthenticated ? "Go to dashboard" : "Sign up free";
 
   return (
     <PublicShell>
@@ -95,15 +242,10 @@ export default function LandingPage() {
         <div className={styles.container}>
           <div className={styles.heroInner}>
             <div className={styles.heroCopy}>
-              <span className={styles.eyebrow}>
-                <Sparkles size={14} strokeWidth={2.5} />
-                Built for auto detailers
-              </span>
-
-              <h1 className={styles.heroTitle}>
+              <h2 className={styles.heroTitle}>
                 Run a busier detailing business{" "}
                 <span className={styles.heroTitleAccent}>without the paperwork.</span>
-              </h1>
+              </h2>
 
               <p className={styles.heroLede}>
                 DtailBase turns bookings, deposits, job cards, indemnity, and
@@ -120,11 +262,11 @@ export default function LandingPage() {
                 </Link>
               </div>
 
-              <ul className={styles.heroTrust}>
+              {/* <ul className={styles.heroTrust}>
                 <li><Check size={14} strokeWidth={3} /> Free starter tier</li>
                 <li><Check size={14} strokeWidth={3} /> No card required</li>
                 <li><Check size={14} strokeWidth={3} /> Cancel anytime</li>
-              </ul>
+              </ul> */}
 
               <div className={styles.ratingRow}>
                 <div className={styles.stars} aria-hidden="true">
@@ -133,7 +275,7 @@ export default function LandingPage() {
                   ))}
                 </div>
                 <span className={styles.ratingText}>
-                  <strong>4.9 out of 5</strong> from 320+ detailing shops
+                  <strong>Focus on your work</strong> NOT admin
                 </span>
               </div>
             </div>
@@ -156,6 +298,8 @@ export default function LandingPage() {
           </ul>
         </div>
       </section>
+      <WheelJourney />
+
 
       {/* ============ FEATURES ============ */}
       <section className={styles.features} id="features">
@@ -169,21 +313,30 @@ export default function LandingPage() {
               Stop stitching together a calendar app, a spreadsheet, a
               WhatsApp group and a card reader. DtailBase does all of it.
             </p>
+            <EngagementChart />
           </header>
 
           <ul className={styles.featureGrid}>
             {FEATURES.map(({ icon: Icon, title, body, tone }) => (
-              <li key={title} className={`${styles.featureCard} ${styles[`tone_${tone}`]}`}>
-                <span className={styles.featureIcon}>
-                  <Icon size={22} strokeWidth={2.25} />
-                </span>
-                <h3 className={styles.featureTitle}>{title}</h3>
-                <p className={styles.featureBody}>{body}</p>
-              </li>
+              <Link to={primaryCtaTo}>
+                <li key={title} className={`${styles.featureCard} ${styles[`tone_${tone}`]}`}>
+                
+                  {/* Dynamic graphic for each specific card */}
+                  <FeatureGraphicRenderer title={title} />
+
+                  <h3 className={styles.featureTitle}>{title}</h3>
+                  <p className={styles.featureBody}>{body}</p>
+                </li>
+              </Link>
             ))}
           </ul>
         </div>
       </section>
+
+      {/* ============ LIVE JOB CAR DEMO =========== */}
+      <div className={styles.jobCardDemo}>
+        <JobCardModule />
+      </div>
 
       {/* ============ HOW IT WORKS ============ */}
       <section className={styles.how}>

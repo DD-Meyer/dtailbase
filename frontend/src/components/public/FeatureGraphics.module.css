@@ -1,0 +1,580 @@
+/* ============================================================
+   SHARED GRAPHIC CONTAINER & STAGE
+   ============================================================ */
+.graphicBox {
+  --accent-amber: #f59e0b;
+  --accent-blue: #3b82f6;
+  --bg-dark: #0f172a;
+  --border-subtle: rgba(255, 255, 255, 0.1);
+
+  width: 100%;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  perspective: 800px;
+  user-select: none;
+}
+
+/* ============================================================
+   1. BOOKING GRAPHIC (Interactive Slot Sync)
+   ============================================================ */
+.calendarCard {
+  width: 160px;
+  background: var(--bg-dark);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  transition: transform 0.4s ease, border-color 0.4s ease;
+}
+
+.calendarGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.slot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1e293b;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  color: #94a3b8;
+  transition: all 0.3s ease;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #64748b;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Replace `:global(.featureCard):hover` with direct hover on `.graphicBox` 
+   or apply `:hover` directly to the graphics! */
+
+/* 1. BOOKING GRAPHIC */
+.graphicBox:hover .calendarCard {
+  transform: translateY(-4px) rotateX(10deg);
+  border-color: var(--accent-amber);
+}
+
+.graphicBox:hover .slotActive {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f8fafc;
+  transform: scale(1.03);
+}
+
+.graphicBox:hover .slotActive .dot {
+  background: var(--accent-amber);
+  box-shadow: 0 0 8px var(--accent-amber);
+}
+
+/* 2. PAYMENTS GRAPHIC */
+.graphicBox:hover .cardStage {
+  transform: rotateX(25deg) rotateY(-25deg) rotateZ(5deg);
+}
+
+.graphicBox:hover .layerBase {
+  transform: translateZ(-15px);
+}
+
+.graphicBox:hover .layerMiddle {
+  transform: translateZ(15px);
+  filter: drop-shadow(-4px 8px 6px rgba(0, 0, 0, 0.3));
+}
+
+.graphicBox:hover .layerTop {
+  transform: translateZ(35px);
+  filter: drop-shadow(-6px 12px 10px rgba(0, 0, 0, 0.4));
+}
+
+/* 3. JOB CARDS GRAPHIC */
+.graphicBox:hover .jobCard {
+  transform: translateY(-4px);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.graphicBox:hover .scanBeam {
+  opacity: 1;
+  animation: scan 1.5s infinite linear;
+}
+
+/* 4. TEAM & ROLES GRAPHIC */
+.graphicBox:hover .avatarMain {
+  transform: scale(1.15);
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+}
+
+.graphicBox:hover .avatarLeft {
+  transform: translateX(-8px) translateY(4px);
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+
+.graphicBox:hover .avatarRight {
+  transform: translateX(8px) translateY(4px);
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+
+/* 5. DIGITAL INDEMNITY GRAPHIC */
+.graphicBox:hover .waiverCard {
+  transform: translateY(-4px);
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+.graphicBox:hover .sigPath {
+  stroke-dashoffset: 0;
+}
+
+.graphicBox:hover .shieldBadge {
+  transform: scale(1);
+  transition-delay: 0.6s;
+}
+
+/* 6. RUNS ON ANY PHONE GRAPHIC */
+.graphicBox:hover .phoneFrame {
+  transform: translateY(-6px) rotate(-3deg);
+  border-color: var(--accent-blue);
+}
+
+.graphicBox:hover .appIcon {
+  transform: scale(1.2);
+}
+
+.graphicBox:hover .offlineBadge {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ============================================================
+   2. PAYMENTS GRAPHIC (Deconstructed 3D Split Card)
+   ============================================================ */
+.cardStage {
+  width: 160px;
+  height: 96px;
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateX(15deg) rotateY(-15deg);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.layerBase, .layerMiddle, .layerTop {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
+}
+
+.layerBase {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+.layerMiddle {
+  padding: 12px;
+}
+
+.chip {
+  width: 20px;
+  height: 14px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-radius: 3px;
+}
+
+.layerTop {
+  padding: 12px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: #f8fafc;
+}
+
+:global(.featureCard):hover .cardStage {
+  transform: rotateX(25deg) rotateY(-25deg) rotateZ(5deg);
+}
+
+:global(.featureCard):hover .layerBase {
+  transform: translateZ(-15px);
+}
+
+:global(.featureCard):hover .layerMiddle {
+  transform: translateZ(15px);
+  filter: drop-shadow(-4px 8px 6px rgba(0, 0, 0, 0.3));
+}
+
+:global(.featureCard):hover .layerTop {
+  transform: translateZ(35px);
+  filter: drop-shadow(-6px 12px 10px rgba(0, 0, 0, 0.4));
+}
+
+/* ============================================================
+   3. JOB CARDS GRAPHIC (Active Inspection Scanner)
+   ============================================================ */
+.jobCard {
+  width: 150px;
+  background: var(--bg-dark);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 10px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  transition: transform 0.4s ease;
+}
+
+.jobHeader {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--accent-amber);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.line {
+  height: 6px;
+  background: #1e293b;
+  border-radius: 4px;
+  width: 100%;
+}
+
+.lineShort { width: 60%; }
+
+.scanBeam {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(180deg, transparent, rgba(59, 130, 246, 0.3), rgba(59, 130, 246, 0.8));
+  border-bottom: 2px solid var(--accent-blue);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+:global(.featureCard):hover .jobCard {
+  transform: translateY(-4px);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+:global(.featureCard):hover .scanBeam {
+  opacity: 1;
+  animation: scan 1.5s infinite linear;
+}
+
+@keyframes scan {
+  0% { top: -40%; }
+  100% { top: 120%; }
+}
+
+/* ============================================================
+   4. TEAM & ROLES GRAPHIC (Role Access Hierarchy)
+   ============================================================ */
+.teamStage {
+  position: relative;
+  width: 160px;
+  height: 90px;
+}
+
+.avatar {
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #1e293b;
+  border: 2px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.avatarMain {
+  top: 0;
+  left: calc(50% - 19px);
+  border-color: var(--accent-amber);
+  color: var(--accent-amber);
+  z-index: 2;
+}
+
+.avatarLeft { bottom: 0; left: 15px; }
+.avatarRight { bottom: 0; right: 15px; }
+
+:global(.featureCard):hover .avatarMain {
+  transform: scale(1.15);
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+}
+
+:global(.featureCard):hover .avatarLeft {
+  transform: translateX(-8px) translateY(4px);
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+
+:global(.featureCard):hover .avatarRight {
+  transform: translateX(8px) translateY(4px);
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+
+/* ============================================================
+   5. DIGITAL INDEMNITY GRAPHIC (Signing Waiver)
+   ============================================================ */
+.waiverCard {
+  width: 140px;
+  height: 100px;
+  background: var(--bg-dark);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 12px;
+  position: relative;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  transition: transform 0.4s ease;
+}
+
+.shieldBadge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 28px;
+  height: 28px;
+  background: #10b981;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(0);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4);
+}
+
+.sigPath {
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+  transition: stroke-dashoffset 1s ease-in-out;
+}
+
+:global(.featureCard):hover .waiverCard {
+  transform: translateY(-4px);
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+:global(.featureCard):hover .sigPath {
+  stroke-dashoffset: 0;
+}
+
+:global(.featureCard):hover .shieldBadge {
+  transform: scale(1);
+  transition-delay: 0.6s;
+}
+
+/* ============================================================
+   6. RUNS ON ANY PHONE GRAPHIC (PWA Phone Frame)
+   ============================================================ */
+.phoneFrame {
+  width: 90px;
+  height: 120px;
+  background: var(--bg-dark);
+  border: 2px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 6px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  transition: transform 0.4s ease, border-color 0.4s ease;
+}
+
+.notch {
+  width: 28px;
+  height: 4px;
+  background: #334155;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.screenContent {
+  width: 100%;
+  flex: 1;
+  background: #1e293b;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.appIcon {
+  color: var(--accent-blue);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.offlineBadge {
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: #10b981;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: all 0.3s ease;
+}
+
+:global(.featureCard):hover .phoneFrame {
+  transform: translateY(-6px) rotate(-3deg);
+  border-color: var(--accent-blue);
+}
+
+:global(.featureCard):hover .appIcon {
+  transform: scale(1.2);
+}
+
+:global(.featureCard):hover .offlineBadge {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+/* ==================================== MOBILE STYLES ========================================= */
+
+/* ============================================================
+   MOBILE OPTIMIZATIONS & AUTO-ANIMATIONS FOR CARDS
+   ============================================================ */
+@media (max-width: 768px) {
+  /* Scale containers slightly down for small mobile viewports */
+  .graphicBox {
+    height: 110px;
+    margin-bottom: 12px;
+  }
+
+  .calendarCard {
+    width: 140px;
+  }
+
+  .cardStage {
+    width: 140px;
+    height: 84px;
+  }
+
+  .jobCard {
+    width: 130px;
+  }
+
+  .waiverCard {
+    width: 120px;
+    height: 90px;
+  }
+
+  .phoneFrame {
+    width: 80px;
+    height: 105px;
+  }
+
+  /* ------------------------------------------------------------
+     AUTO-PLAY ANIMATIONS ON MOBILE (Replaces Hover Trigger)
+     ------------------------------------------------------------ */
+
+  /* 1. Booking: Pulse the active slot */
+  .slotActive {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f8fafc;
+  }
+  .slotActive .dot {
+    background: var(--accent-amber);
+    box-shadow: 0 0 8px var(--accent-amber);
+    animation: mobilePulse 2s infinite ease-in-out;
+  }
+
+  /* 2. Payments: Slight ambient float */
+  .layerBase {
+    transform: translateZ(-10px);
+  }
+  .layerMiddle {
+    transform: translateZ(10px);
+  }
+  .layerTop {
+    transform: translateZ(25px);
+    animation: mobileCardFloat 3s ease-in-out infinite alternate;
+  }
+
+  /* 3. Job Cards: Continuous scanning beam */
+  .scanBeam {
+    opacity: 1;
+    animation: scan 2s infinite linear;
+  }
+
+  /* 4. Team: Subtly float team members */
+  .avatarMain {
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+  }
+  .avatarLeft {
+    transform: translateX(-4px);
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+  }
+  .avatarRight {
+    transform: translateX(4px);
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+  }
+
+  /* 5. Indemnity: Auto draw signature and reveal badge */
+  .sigPath {
+    animation: mobileDrawSig 3s ease-in-out infinite alternate;
+  }
+  .shieldBadge {
+    transform: scale(1);
+  }
+
+  /* 6. Phone App: Float phone slightly */
+  .phoneFrame {
+    border-color: var(--accent-blue);
+    animation: mobilePhoneTilt 4s ease-in-out infinite alternate;
+  }
+  .offlineBadge {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Mobile Keyframes --- */
+@keyframes mobilePulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.4); opacity: 1; }
+}
+
+@keyframes mobileCardFloat {
+  0% { transform: translateZ(20px) translateY(0); }
+  100% { transform: translateZ(30px) translateY(-4px); }
+}
+
+@keyframes mobileDrawSig {
+  0% { stroke-dashoffset: 200; }
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes mobilePhoneTilt {
+  0% { transform: translateY(0) rotate(-2deg); }
+  100% { transform: translateY(-4px) rotate(2deg); }
+}
