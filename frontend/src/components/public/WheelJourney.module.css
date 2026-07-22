@@ -1,0 +1,233 @@
+/* ============================================================
+   WheelJourney.module.css
+   Fixed Sticky-Left / Scrollable-Right Layout
+   ============================================================ */
+.sectionWrapper {
+  --db-bg: #0b0f19;
+  --db-accent-amber: #f59e0b;
+  --db-accent-blue: #3b82f6;
+  --db-text-main: #f9fafb;
+  --db-text-muted: #94a3b8;
+  --db-border: #1f2937;
+
+  background-color: var(--db-bg);
+  color: var(--db-text-main);
+  /* The tall height creates the "scroll track" length */
+  min-height: 300vh;
+  position: relative;
+  font-family: sans-serif;
+}
+
+/* This container locks into the screen while scrolling through the wrapper */
+.stickyContainer {
+  position: sticky;
+  top: 0;
+  height: 100vh; /* Locks exactly to full screen height */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10%;
+  overflow: hidden;
+}
+
+/* ============================================================
+   GRAPHIC MODULE: Center-Pinned Wheel Column (Left)
+   ============================================================ */
+.visualColumn {
+  position: relative;
+  width: 40%;
+  height: 100%;
+  display: flex;
+  align-items: center;    /* Center wheel vertically */
+  justify-content: center; /* Center wheel horizontally */
+}
+
+.wheelGraphic {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  scale: 0.9;
+  transition: opacity 0.4s ease, scale 0.4s ease, filter 0.4s ease;
+  pointer-events: none;
+}
+
+.wheelActive {
+  opacity: 1;
+  scale: 1;
+  filter: drop-shadow(0 0 25px rgba(59, 130, 246, 0.4));
+}
+
+/* Image wrapper handles inline JS rotation cleanly */
+.wheelGraphic img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform-origin: center center;
+}
+
+.foamOverlay,.waterJets,
+.ceramicShine {
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  top: 0;
+  left: 50%;
+  transform: translateX(50%);
+  display: flex;
+  align-items: top;
+  justify-content: center;
+  pointer-events: none; /* Allow clicks to pass through */
+}
+
+/* ============================================================
+   TEXT MODULES: The Journey (Right Side)
+   ============================================================ */
+.textColumn {
+  width: 50%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.journeyPoint {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  opacity: 0.2;
+  transform: translateX(10px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.pointActive {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.numberCircle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid var(--db-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--db-text-muted);
+  background: var(--db-bg);
+  transition: all 0.3s ease;
+}
+
+.pointActive .numberCircle {
+  border-color: var(--db-accent-amber);
+  color: var(--db-accent-amber);
+  box-shadow: 0 0 15px var(--db-accent-amber);
+}
+
+.connectingLine {
+  width: 2px;
+  height: 48px;
+  background-color: var(--db-border);
+  margin-top: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.pointActive .connectingLine {
+  background-color: var(--db-accent-amber);
+}
+
+.textContent {
+  flex: 1;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.icon {
+  color: var(--db-accent-blue);
+}
+
+.textContent h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--db-text-main);
+}
+
+.textContent p {
+  font-size: 0.95rem;
+  color: var(--db-text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+
+
+
+/* ==================================== MOBILE STYLES ========================================= */
+
+
+/* ==================================== MOBILE STYLES ========================================= */
+
+@media (max-width: 768px) {
+  .stickyContainer {
+    flex-direction: column;
+    padding-right: 20px;
+    padding-left: 20px;
+    padding-top: 20px;
+    padding-bottom: 100px;
+    height: 120vh; /* Increase height for mobile scrolling */
+  }
+
+  .visualColumn {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 0px;
+  }
+
+  .wheelGraphic {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 0px;
+    padding: 0px;
+  }
+
+  .textColumn {
+    width: 100%;
+    gap: 20px;
+  }
+
+  .journeyPoint {
+    flex-direction: row;
+    gap: 15px;
+  }
+
+  .numberCircle {
+    width: 30px;
+    height: 30px;
+    font-size: 0.75rem;
+  }
+
+  .connectingLine {
+    height: 30px;
+    margin-top: 4px;
+  }
+}
