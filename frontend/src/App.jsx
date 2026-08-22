@@ -11,8 +11,8 @@ import { CompanyProvider } from './context/CompanyContext';
 import { SupportNotificationProvider } from './context/SupportNotificationContext';
 
 // Pages
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import Login from "./pages/public/LoginPage";
+import Register from "./pages/public/RegisterPage";
 import Customers from "./pages/Customers";
 import Vehicles from "./pages/Vehicles";
 import Services from "./pages/Services";
@@ -24,14 +24,15 @@ import TeamManagement from "./components/TeamManagement";
 import Profile from "./components/Profile";
 import Settings from "./pages/Settings";
 import IndemnitySettings from "./pages/IndemnitySettings";
-import Hero from "./components/Hero";
+import DtailBaseLanding from "./pages/public/LandingPage";
 import BookingDetail from "./pages/BookingDetails";
-import About from "./pages/About";
-import Products from "./pages/Products";
-import Plans from "./pages/Plans";
-import Legal from "./pages/Legal";
-import Contact from "./pages/Contact";
-import ContentPage from "./pages/ContentPage";
+import About from "./pages/public/AboutPage";
+import Products from "./pages/public/ProductsPage";
+import Plans from "./pages/public/PlansPage";
+import Legal from "./pages/public/LegalPage";
+import Contact from "./pages/public/ContactPage";
+import ContentPage from "./pages/public/ContentPage";
+import NotFound from "./pages/public/NotFoundPage";
 import PublicBooking from "./pages/PublicBooking";
 import BookingConfirmation from "./pages/BookingConfirmation";
 import PublicBookings from "./pages/PublicBookings";
@@ -40,16 +41,26 @@ import Payments from "./pages/Payments";
 import ShareBooking from "./pages/ShareBooking";
 import SupportAdminInbox from "./pages/SupportAdminInbox";
 import MySupport from "./pages/MySupport";
+import { trackSpaPageView } from "./utils/gtm";
 
 
 function AppContent() {
   const { isAuthenticated, user } = useContext(AuthContext); 
   const location = useLocation();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Scroll to top on every route change so new pages always start at the top
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, [location.pathname]);
+
+  useEffect(() => {
+    trackSpaPageView({
+      pathname: location.pathname,
+      search: location.search,
+      title: document.title,
+    });
+  }, [location.pathname, location.search]);
 
   const getInstalledState = () => {
     const standaloneDisplayMode = window.matchMedia("(display-mode: standalone)").matches;
@@ -289,13 +300,19 @@ function AppContent() {
     />
   );
 
+  const rootClassName = isAuthPage
+    ? "auth-wrapper"
+    : (isLandingPage || isMinimalChromeRoute)
+      ? "landing-wrapper"
+      : `app-layout${showDashboardChrome && isSidebarCollapsed ? " sidebar-collapsed" : ""}`;
+
   return (
   
-    <div className={isAuthPage ? "auth-wrapper" : (isLandingPage || isMinimalChromeRoute) ? "landing-wrapper" : "app-layout"}>
+    <div className={rootClassName}>
       
-      {/* Sidebar hidden on Hero and Auth pages */}
+      {/* Sidebar hidden on public landing and auth pages */}
       {showDashboardChrome && (
-        <Sidebar />
+        <Sidebar isCollapsed={isSidebarCollapsed} onToggleCollapse={setIsSidebarCollapsed} />
       )}
 
       {showDashboardChrome && (
@@ -303,7 +320,7 @@ function AppContent() {
       )}
       
       <main className={isLandingPage || isAuthPage || isMinimalChromeRoute ? "full-page-content" : "main-content"}>
-        {/* Header hidden on Hero and Auth pages */}
+        {/* Header hidden on public landing and auth pages */}
         {showDashboardChrome && (
           <Header showInstallButton={showInstallButton && !isInstalledApp && !isLandingPage} handleInstallClick={handleInstallClick} />
         )}
@@ -315,24 +332,17 @@ function AppContent() {
             <Route path="/public/bookings/:companySlug" element={<PublicBookings />} />
             
             {/* Landing Page is now the root */}
-            <Route path="/" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Hero isAuthenticated={isAuthenticated} />} />
+            <Route path="/" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <DtailBaseLanding />} />
             <Route path="/hero" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Navigate to="/" replace />} />
-            <Route path="/about" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <PublicLayout><About /></PublicLayout>} />
-            <Route path="/products" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <PublicLayout><Products /></PublicLayout>} />
+            <Route path="/about" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <About />} />
+            <Route path="/products" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Products />} />
             <Route
               path="/plans"
-              element={
-                <PublicLayout
-                  showNav={!(isInstalledApp && isAuthenticated)}
-                  showFooter={!(isInstalledApp && isAuthenticated)}
-                >
-                  <Plans showBackToDashboard={isInstalledApp && isAuthenticated} />
-                </PublicLayout>
-              }
+              element={<Plans showBackToDashboard={isInstalledApp && isAuthenticated} />}
             />
             <Route path="/payments" element={<PublicLayout showNav={false} showFooter={false}><Payments /></PublicLayout>} />
-            <Route path="/legal" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <PublicLayout><Legal /></PublicLayout>} />
-            <Route path="/contact" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <PublicLayout><Contact /></PublicLayout>} />
+            <Route path="/legal" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Legal />} />
+            <Route path="/contact" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Contact />} />
             <Route path="/payment-success" element={<PublicLayout><PaymentSuccess /></PublicLayout>} />
 
             {/* Example of using the reusable ContentPage for a new "Community" page */}
@@ -346,8 +356,14 @@ function AppContent() {
 
 
             {/* Public Auth Routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route
+              path="/login"
+              element={isAuthenticated ? <Navigate to="/bookings" replace /> : <Login />}
+            />
+            <Route
+              path="/register"
+              element={isAuthenticated ? <Navigate to="/bookings" replace /> : <Register />}
+            />
             
             {/* Protected Routes */}
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
@@ -382,8 +398,8 @@ function AppContent() {
               }
             />
             
-            {/* Catch-all redirect */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            {/* Catch-all — friendly 404 for unknown public paths */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
 
           {/* Install button is now only in the header for all devices */}

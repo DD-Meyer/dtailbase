@@ -212,10 +212,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Utility Gaps */
-.gap-2 { gap: 0.5rem; }
-.mt-4 { margin-top: 1rem; }
-.mb-4 { margin-bottom: 1rem; }
+/* Utility Gaps — removed: global .gap-2/.mt-4/.mb-4 collided with Tailwind. */
 
 /* ===== Mobile Styles (<= 768px) ===== */
 @media (max-width: 768px) {

@@ -105,14 +105,8 @@
   margin-right: 1rem;
 }
 
-/* --- 5. LOADING & EMPTY STATES --- */
-.text-center {
-  text-align: center;
-}
-
-.p-8 {
-  padding: 2rem;
-}
+/* --- 5. LOADING & EMPTY STATES ---
+   Removed global .text-center/.p-8 — collided with Tailwind utilities. */
 
 /* Animations for new service entry */
 tr {

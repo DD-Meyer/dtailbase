@@ -42,7 +42,11 @@ urlpatterns = [
 if settings.DEBUG:
     import os
     from django.views.static import serve as _serve
+    from django.contrib.staticfiles.urls import staticfiles_urlpatterns
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Explicitly serve /static/ via the staticfiles finder so admin/DRF CSS
+    # works even if the runserver StaticFilesHandler wrapper is bypassed.
+    urlpatterns += staticfiles_urlpatterns()
     _fb = os.path.join(settings.BASE_DIR, 'frontend_build')
     urlpatterns += [
         # Vite-built bundles and hashed assets (JS/CSS/images)

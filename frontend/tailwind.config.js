@@ -20,6 +20,12 @@ export default {
           deep: "#0f172a",
           soft: "#eff6ff",
         },
+        landing: {
+          accent: "#3B82F6",
+          secondary: "#1D4ED8",
+          deep: "#1E3A8A",
+          glow: "rgba(59,130,246,0.15)",
+        },
       },
       spacing: {
         18: "4.5rem",

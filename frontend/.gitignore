@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 
+*ui-ux-pro-max-skill-main
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -888,6 +888,7 @@ class PayPalWebhookView(APIView):
 class PayPalConfirmView(APIView):
     """
     Confirm PayPal subscription after customer returns from approval flow.
+    Upgrades plan immediately for active non-deferred subscriptions.
     """
     permission_classes = [IsAuthenticated, IsAccountAdmin]
 
@@ -928,7 +929,7 @@ class PayPalConfirmView(APIView):
             logger.info(
                 f"PAYPAL CONFIRM (no stored id) | company={company.id} | "
                 f"paypal_status={subscription_status} | plan_tier={plan_tier} | "
-                f"current_db_plan={company.plan} | NOTE: plan will NOT change here"
+                f"current_db_plan={company.plan}"
             )
             if plan_tier and subscription_status == 'ACTIVE':
                 from django.utils import timezone as _tz_fb_confirm
@@ -937,18 +938,21 @@ class PayPalConfirmView(APIView):
                     and company.subscription_ends_at
                     and company.subscription_ends_at > _tz_fb_confirm.now()
                 )
-                # Save the subscription_id and mark active. Do NOT change the plan
-                # here — ACTIVE means the user approved, not that payment was charged.
-                # Plan is updated exclusively in _handle_subscription_payment when
-                # BILLING.SUBSCRIPTION.PAYMENT.COMPLETED is received.
+                
                 company.paypal_subscription_id = subscription_id
                 company.is_subscription_active = True
                 save_fields = ['paypal_subscription_id', 'is_subscription_active']
+
+                # Immediately upgrade if not a deferred downgrade
+                if not _is_deferred_fb:
+                    company.plan = plan_tier
+                    save_fields.append('plan')
+
                 company.save(update_fields=save_fields)
 
                 logger.info(
-                    f"AUDIT: Subscription approved (payment pending) - Company: {company.id}, "
-                    f"Pending plan: {plan_tier}, Subscription ID: {subscription_id}, "
+                    f"AUDIT: Subscription approved - Company: {company.id}, "
+                    f"Active plan: {company.plan}, Subscription ID: {subscription_id}, "
                     f"Confirmed by: {user.email}"
                 )
 
@@ -956,7 +960,7 @@ class PayPalConfirmView(APIView):
                     {
                         'success': True,
                         'plan': company.plan,
-                        'pending_plan': plan_tier if not _is_deferred_fb else None,
+                        'pending_plan': None if not _is_deferred_fb else plan_tier,
                         'target_plan': plan_tier if _is_deferred_fb else None,
                         'subscription_status': subscription_status,
                         'deferred_downgrade': _is_deferred_fb,
@@ -986,12 +990,11 @@ class PayPalConfirmView(APIView):
         logger.info(
             f"PAYPAL CONFIRM | company={company.id} | "
             f"paypal_status={subscription_status} | plan_tier={plan_tier} | "
-            f"current_db_plan={company.plan} | NOTE: plan will NOT change here"
+            f"current_db_plan={company.plan}"
         )
         if not plan_tier:
             # PayPal tier lookup failed (timeout or sandbox flakiness).
             # Return 202 so the frontend shows a "still verifying" message.
-            # The webhook will update the plan when PayPal delivers the event.
             return Response(
                 {
                     'success': False,
@@ -1019,23 +1022,21 @@ class PayPalConfirmView(APIView):
         )
         update_fields = []
 
-        # Do NOT change company.plan here. ACTIVE means the user clicked
-        # "Agree & Subscribe" on the PayPal review page — the payment may not
-        # have been charged yet (deferred billing, setup fees still processing,
-        # or immediate billing in flight). Plan is updated exclusively in
-        # _handle_subscription_payment (BILLING.SUBSCRIPTION.PAYMENT.COMPLETED).
-        if company.plan != plan_tier and not _is_deferred_confirm:
-            logger.info(
-                f"AUDIT: Subscription approved (payment pending) - Company: {company.id}, "
-                f"plan change {company.plan} → {plan_tier} pending BILLING.SUBSCRIPTION.PAYMENT.COMPLETED, "
-                f"Confirmed by: {user.email}"
-            )
-        elif _is_deferred_confirm:
+        if _is_deferred_confirm:
             logger.info(
                 f"Deferred downgrade confirmed for company {company.id}: "
                 f"plan stays {company.plan} until {company.subscription_ends_at}, "
                 f"then switches to {plan_tier}"
             )
+        else:
+            # Upgrade / immediate switch path: apply new plan directly
+            if company.plan != plan_tier:
+                logger.info(
+                    f"AUDIT: Subscription confirmed & plan upgraded - Company: {company.id}, "
+                    f"plan change {company.plan} → {plan_tier}, Confirmed by: {user.email}"
+                )
+                company.plan = plan_tier
+                update_fields.append('plan')
 
         if not company.is_subscription_active:
             company.is_subscription_active = True
@@ -1048,13 +1049,185 @@ class PayPalConfirmView(APIView):
             {
                 'success': True,
                 'plan': company.plan,
-                'pending_plan': plan_tier if not _is_deferred_confirm else None,
+                'pending_plan': None if not _is_deferred_confirm else plan_tier,
                 'target_plan': plan_tier if _is_deferred_confirm else None,
                 'subscription_status': subscription_status,
                 'deferred_downgrade': _is_deferred_confirm,
             },
             status=status.HTTP_200_OK
         )
+    
+# @method_decorator(csrf_exempt, name='dispatch')
+# class PayPalConfirmView(APIView):
+#     """
+#     Confirm PayPal subscription after customer returns from approval flow.
+#     """
+#     permission_classes = [IsAuthenticated, IsAccountAdmin]
+
+#     def post(self, request):
+#         subscription_id = request.data.get('subscription_id')
+#         if not subscription_id:
+#             logger.error(f"Missing subscription_id in request: {request.data}")
+#             return Response(
+#                 {'error': 'Missing subscription_id'},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+
+#         user = request.user
+#         company = user.company if hasattr(user, 'company') else None
+        
+#         if not company:
+#             logger.error(f"User {user.id} has no company")
+#             return Response(
+#                 {'error': 'User company not found'},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+
+#         # Refresh company from database to get latest paypal_subscription_id
+#         company.refresh_from_db()
+#         stored_id = company.paypal_subscription_id or ''
+
+#         logger.info(
+#             f"PAYPAL CONFIRM | company={company.id} | stored_sub='{stored_id}' | "
+#             f"received_sub='{subscription_id}' | current_plan={company.plan}"
+#         )
+        
+#         if not stored_id:
+#             logger.warning(
+#                 f"No stored subscription_id for company {company.id}. This may indicate the subscription creation didn't complete."
+#             )
+#             # Still proceed to verify with PayPal in case it was created but not saved
+#             plan_tier, subscription_status = get_paypal_plan_tier(subscription_id)
+#             logger.info(
+#                 f"PAYPAL CONFIRM (no stored id) | company={company.id} | "
+#                 f"paypal_status={subscription_status} | plan_tier={plan_tier} | "
+#                 f"current_db_plan={company.plan} | NOTE: plan will NOT change here"
+#             )
+#             if plan_tier and subscription_status == 'ACTIVE':
+#                 from django.utils import timezone as _tz_fb_confirm
+#                 _is_deferred_fb = (
+#                     company.pending_downgrade_plan == plan_tier
+#                     and company.subscription_ends_at
+#                     and company.subscription_ends_at > _tz_fb_confirm.now()
+#                 )
+#                 # Save the subscription_id and mark active. Do NOT change the plan
+#                 # here — ACTIVE means the user approved, not that payment was charged.
+#                 # Plan is updated exclusively in _handle_subscription_payment when
+#                 # BILLING.SUBSCRIPTION.PAYMENT.COMPLETED is received.
+#                 company.paypal_subscription_id = subscription_id
+#                 company.is_subscription_active = True
+#                 save_fields = ['paypal_subscription_id', 'is_subscription_active']
+#                 company.save(update_fields=save_fields)
+
+#                 logger.info(
+#                     f"AUDIT: Subscription approved (payment pending) - Company: {company.id}, "
+#                     f"Pending plan: {plan_tier}, Subscription ID: {subscription_id}, "
+#                     f"Confirmed by: {user.email}"
+#                 )
+
+#                 return Response(
+#                     {
+#                         'success': True,
+#                         'plan': company.plan,
+#                         'pending_plan': plan_tier if not _is_deferred_fb else None,
+#                         'target_plan': plan_tier if _is_deferred_fb else None,
+#                         'subscription_status': subscription_status,
+#                         'deferred_downgrade': _is_deferred_fb,
+#                     },
+#                     status=status.HTTP_200_OK
+#                 )
+#             return Response(
+#                 {
+#                     'success': False,
+#                     'subscription_status': subscription_status,
+#                     'error': 'Unable to verify subscription with PayPal'
+#                 },
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+        
+#         if stored_id != subscription_id:
+#             logger.warning(
+#                 f"Subscription mismatch for company {company.id}: "
+#                 f"stored='{stored_id}', received='{subscription_id}'"
+#             )
+#             return Response(
+#                 {'error': f'Subscription mismatch: expected {stored_id}, got {subscription_id}'},
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+
+#         plan_tier, subscription_status = get_paypal_plan_tier(subscription_id)
+#         logger.info(
+#             f"PAYPAL CONFIRM | company={company.id} | "
+#             f"paypal_status={subscription_status} | plan_tier={plan_tier} | "
+#             f"current_db_plan={company.plan} | NOTE: plan will NOT change here"
+#         )
+#         if not plan_tier:
+#             # PayPal tier lookup failed (timeout or sandbox flakiness).
+#             # Return 202 so the frontend shows a "still verifying" message.
+#             # The webhook will update the plan when PayPal delivers the event.
+#             return Response(
+#                 {
+#                     'success': False,
+#                     'subscription_status': subscription_status or 'UNKNOWN',
+#                     'error': 'Subscription is still being verified. Your plan will update automatically — please wait a moment and refresh.',
+#                 },
+#                 status=status.HTTP_202_ACCEPTED
+#             )
+
+#         if subscription_status != 'ACTIVE':
+#             return Response(
+#                 {
+#                     'success': False,
+#                     'subscription_status': subscription_status,
+#                     'error': 'Subscription is not active yet'
+#                 },
+#                 status=status.HTTP_202_ACCEPTED
+#             )
+
+#         from django.utils import timezone as _tz_confirm
+#         _is_deferred_confirm = (
+#             company.pending_downgrade_plan == plan_tier
+#             and company.subscription_ends_at
+#             and company.subscription_ends_at > _tz_confirm.now()
+#         )
+#         update_fields = []
+
+#         # Do NOT change company.plan here. ACTIVE means the user clicked
+#         # "Agree & Subscribe" on the PayPal review page — the payment may not
+#         # have been charged yet (deferred billing, setup fees still processing,
+#         # or immediate billing in flight). Plan is updated exclusively in
+#         # _handle_subscription_payment (BILLING.SUBSCRIPTION.PAYMENT.COMPLETED).
+#         if company.plan != plan_tier and not _is_deferred_confirm:
+#             logger.info(
+#                 f"AUDIT: Subscription approved (payment pending) - Company: {company.id}, "
+#                 f"plan change {company.plan} → {plan_tier} pending BILLING.SUBSCRIPTION.PAYMENT.COMPLETED, "
+#                 f"Confirmed by: {user.email}"
+#             )
+#         elif _is_deferred_confirm:
+#             logger.info(
+#                 f"Deferred downgrade confirmed for company {company.id}: "
+#                 f"plan stays {company.plan} until {company.subscription_ends_at}, "
+#                 f"then switches to {plan_tier}"
+#             )
+
+#         if not company.is_subscription_active:
+#             company.is_subscription_active = True
+#             update_fields.append('is_subscription_active')
+
+#         if update_fields:
+#             company.save(update_fields=update_fields)
+
+#         return Response(
+#             {
+#                 'success': True,
+#                 'plan': company.plan,
+#                 'pending_plan': plan_tier if not _is_deferred_confirm else None,
+#                 'target_plan': plan_tier if _is_deferred_confirm else None,
+#                 'subscription_status': subscription_status,
+#                 'deferred_downgrade': _is_deferred_confirm,
+#             },
+#             status=status.HTTP_200_OK
+#         )
 
 
 class PayPalWebhookDebugView(APIView):

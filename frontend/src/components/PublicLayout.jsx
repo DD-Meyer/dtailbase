@@ -2,8 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { AuthContext } from "../context/AuthContext";
 import { Link, useLocation} from 'react-router-dom';
 import PublicHeader from './PublicHeader';
-import '../styles/PublicLayout.css';
-import { CloudAlertIcon, MessageCircle, MessageCircleCodeIcon, MessageSquare, PhoneCallIcon } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 
 const PublicLayout = ({ children, showNav = true, showFooter = true }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -14,36 +13,30 @@ const PublicLayout = ({ children, showNav = true, showFooter = true }) => {
     // 1. Handle Body Scroll Lock for Mobile Menu
     document.body.style.overflow = isMenuOpen ? 'hidden' : 'unset';
 
-    // 2. Mouse Tracking for Glowing Cards (Works for any card inside {children})
-    // Replace your old handleMouseMove with this:
+    // 2. Mouse Tracking for Glowing Cards (Supabase-style spotlight)
     const handleMouseMove = (e) => {
-      // We look for the closest parent that is a card
-      const card = e.target.closest(".feature-card, .stat-card, .pricing-card, .glass-mockup, .stat-card");
-      
+      const card = e.target.closest(
+        ".feature-card, .stat-card, .pricing-card, .glass-mockup, .product-card, .legal-card, .value-card, .marketing-bento-card, .marketing-feature-card, .contact-form-card"
+      );
+
       if (card) {
         const rect = card.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-        
+
         card.style.setProperty("--mouse-x", `${x}px`);
         card.style.setProperty("--mouse-y", `${y}px`);
       }
     };
 
-    // 3. Parallax Scroll Logic for Background Rings
+    // 3. Subtle parallax drift for ambient blobs (replaces old orbital rings)
     const handleScroll = () => {
       const scrolled = window.scrollY;
-      const rings = document.querySelectorAll('.ring');
-      const core = document.querySelector('.orbital-core');
-
-      rings.forEach((ring, i) => {
-        const speed = (i + 1) * 0.15;
-        ring.style.transform = `translate3d(-50%, calc(-50% + ${scrolled * speed}px), 0) rotate(${scrolled * 0.05}deg)`;
+      const blobs = document.querySelectorAll('.aurora-blob');
+      blobs.forEach((blob, i) => {
+        const speed = (i + 1) * 0.06;
+        blob.style.setProperty('--scroll-y', `${scrolled * speed}px`);
       });
-
-      if (core) {
-        core.style.transform = `translate3d(-50%, calc(-50% + ${scrolled * 0.1}px), 0)`;
-      }
     };
 
     // 4. Reveal Animations
@@ -57,7 +50,7 @@ const PublicLayout = ({ children, showNav = true, showFooter = true }) => {
     animatedElements.forEach(el => observer.observe(el));
 
     window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
@@ -69,13 +62,14 @@ const PublicLayout = ({ children, showNav = true, showFooter = true }) => {
 
   return (
     <div className="landing-page">
-      {/* SHARED BACKGROUND */}
-      <div className="orbital-system">
-        <div className="orbital-core"></div>
-        <div className="ring ring-1"></div>
-        <div className="ring ring-2"></div>
-        <div className="ring ring-3"></div>
-        <div className="ring ring-4"></div>
+      {/* SHARED AURORA BACKGROUND (Supabase-inspired) */}
+      <div className="aurora-system" aria-hidden="true">
+        <div className="aurora-grid"></div>
+        <div className="aurora-blob aurora-blob--primary"></div>
+        <div className="aurora-blob aurora-blob--accent"></div>
+        <div className="aurora-blob aurora-blob--violet"></div>
+        <div className="aurora-blob aurora-blob--rose"></div>
+        <div className="aurora-vignette"></div>
       </div>
 
       {/* SHARED NAV */}

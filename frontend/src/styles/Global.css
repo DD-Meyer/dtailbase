@@ -25,7 +25,6 @@
 html {
   /* 1. Force the smooth pacing globally on the master timeline container */
   scroll-behavior: smooth;
-  scroll-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 body {
@@ -78,6 +77,10 @@ body.mobile-nav-open {
     radial-gradient(1200px 600px at 90% -10%, rgba(35, 180, 255, 0.16), transparent 60%),
     radial-gradient(900px 500px at -10% 10%, rgba(70, 255, 179, 0.12), transparent 60%),
     var(--bg-main);
+}
+
+.app-layout.sidebar-collapsed .main-content {
+  margin-left: var(--sidebar-collapsed-width);
 }
 
 /* 4. Sticky header in main content */
@@ -487,6 +490,7 @@ body.mobile-nav-open {
     min-width: 0;
     flex: 1 1 0%;
     height: 100dvh;
+    margin-left: 0;
   }
 
   .page-body {

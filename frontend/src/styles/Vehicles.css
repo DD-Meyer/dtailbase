@@ -114,9 +114,7 @@
   font-family: 'JetBrains Mono', monospace;
 }
 
-.flex-1 { flex: 1; }
-
-.mb-6 { margin-bottom: 1.5rem; }
+/* Removed global .flex-1/.mb-6 — collided with Tailwind utilities. */
 
 .vehicles-mobile-actions {
   display: flex;
