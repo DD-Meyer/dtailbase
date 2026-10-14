@@ -46,6 +46,20 @@ Payment QA must replace the Axios adapter in memory and restore it afterward;
 service workers can bypass browser route interception. Do not make live purchases
 or mutate real subscriptions for visual testing.
 
+### Mobile signing
+
+The Sign & start sheet uses a full-height mobile dialog with one vertical scroll
+surface, no nested card margins, and numbered agreement/photo/signature sections.
+Agreement text flows naturally rather than using a narrow nested scroll box.
+Camera and photo-library inputs are separate; before-photo requirements, plan
+limits, GPS verification and signing payload are unchanged. Photo processing
+also holds the dialog busy to prevent premature submission/dismissal.
+The white signature pad retains strokes when its width changes and is sized for
+device pixel density. Other record/completion dialogs keep their existing layout.
+Validation and submission errors remain visible and receive focus so they are
+not missed below a long agreement. Signing QA uses an in-memory Axios adapter;
+never submit a real signature or start a real job during visual testing.
+
 The reference photographs are served locally from `public/landing/images`:
 
 - `detailing-hero.jpg`: [Zac Nielson / Unsplash](https://images.unsplash.com/photo-1708805282706-f44730b7e527).

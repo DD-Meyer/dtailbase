@@ -31,6 +31,15 @@
 .record-dialog .photo-preview-item { position: relative; }
 .record-dialog .photo-preview-item img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; }
 .record-dialog .remove-photo-btn { min-width: 44px; min-height: 44px; }
+.record-dialog-signing { width: min(760px, calc(100vw - 32px)); }
+.record-dialog-signing .record-dialog-body { padding: 24px; }
+.record-dialog-signing .indemnity-page { max-width: none; padding: 0; margin: 0; }
+.record-dialog-signing .indemnity-card { width: 100%; max-width: none; margin: 0; padding: 0; border: 0; border-radius: 0; box-shadow: none; }
+@media (max-width: 600px) {
+  .record-dialog.record-dialog-signing { width: 100%; max-width: 100%; height: 100dvh; max-height: 100dvh; margin: 0; border: 0; border-radius: 0; }
+  .record-dialog-signing .record-dialog-header { padding: max(10px, env(safe-area-inset-top)) 16px 10px; }
+  .record-dialog-signing .record-dialog-body { padding: 20px 16px max(24px, env(safe-area-inset-bottom)); }
+}
 .job-upload { display: grid; gap: 16px; }
 .job-upload p { margin: 0; color: var(--app-muted); font-size: 13px; }
 .job-upload label { display: grid; gap: 8px; font-size: 14px; }

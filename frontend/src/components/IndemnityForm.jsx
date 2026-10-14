@@ -15,6 +15,7 @@ function IndemnityForm({ bookingId: suppliedBookingId, onSuccess, onClose, onBus
   const { planLimits, company } = useCompany();
   const sigCanvas = useRef({});
   const signatureContainer = useRef(null);
+  const noticeRef = useRef(null);
   const navigate = useNavigate();
 
   const [bookingData, setBookingData] = useState(null);
@@ -39,6 +40,9 @@ function IndemnityForm({ bookingId: suppliedBookingId, onSuccess, onClose, onBus
     onBusyChange?.(isSubmitting || isProcessingPhotos);
   }, [isSubmitting, isProcessingPhotos, onBusyChange]);
   useEffect(() => () => previewUrls.current.forEach((url) => URL.revokeObjectURL(url)), []);
+  useEffect(() => {
+    if (toast.show && toast.type === "error") noticeRef.current?.focus();
+  }, [toast.show, toast.type, toast.message]);
 
   // 1. Consolidated Data Loader
   useEffect(() => {
@@ -77,10 +81,8 @@ function IndemnityForm({ bookingId: suppliedBookingId, onSuccess, onClose, onBus
       const width = container.clientWidth;
       if (!width) return;
       const oldWidth = Number(canvas.dataset.logicalWidth) || width;
-      const strokes = pad.toData().map((stroke) => ({
-        ...stroke,
-        points: stroke.points.map((point) => ({ ...point, x: point.x * width / oldWidth })),
-      }));
+      const strokes = pad.toData().map((stroke) =>
+        stroke.map((point) => ({ ...point, x: point.x * width / oldWidth })));
       const ratio = Math.max(window.devicePixelRatio || 1, 1);
       canvas.width = Math.round(width * ratio);
       canvas.height = Math.round(200 * ratio);
@@ -145,7 +147,6 @@ function IndemnityForm({ bookingId: suppliedBookingId, onSuccess, onClose, onBus
 
   const triggerToast = (message, type = "success") => {
     setToast({ show: true, message, type });
-    setTimeout(() => setToast({ show: false, message: "", type: "success" }), 4000);
   };
 
   const handleSubmit = async (e) => {
@@ -163,6 +164,7 @@ function IndemnityForm({ bookingId: suppliedBookingId, onSuccess, onClose, onBus
 
     submitLock.current = true;
     setIsSubmitting(true);
+    setToast({ show: false, message: "", type: "success" });
 
     // 1. Check if geolocation is supported
     if (!("geolocation" in navigator)) {
@@ -294,7 +296,7 @@ function IndemnityForm({ bookingId: suppliedBookingId, onSuccess, onClose, onBus
 
   return (
     <div className="indemnity-page">
-      {toast.show && <div role={toast.type === "error" ? "alert" : "status"} className={`indemnity-notice ${toast.type}`}>{toast.message}</div>}
+      {toast.show && <div ref={noticeRef} tabIndex={-1} role={toast.type === "error" ? "alert" : "status"} className={`indemnity-notice ${toast.type}`}>{toast.message}</div>}
       <div className="indemnity-card">
         <header className="indemnity-header">
           <h1>Before you start</h1>
@@ -334,7 +336,7 @@ function IndemnityForm({ bookingId: suppliedBookingId, onSuccess, onClose, onBus
             <div className="indemnity-section-heading"><Camera size={20} aria-hidden="true" /><h2 id="inspection-heading">2. Before photos</h2></div>
             <p className="indemnity-help">Add at least one clear photo of the vehicle before work begins.</p>
             <p className="limit-hint">
-              {beforePhotos.length} photos added. 
+              {beforePhotos.length} {beforePhotos.length === 1 ? "photo" : "photos"} added.{" "}
               <span className={beforePhotos.length >= maxBeforePhotos ? "text-warning" : ""}> 
                 ({company?.plan 
                   ? company.plan.charAt(0) + company.plan.slice(1).toLowerCase() 

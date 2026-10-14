@@ -1,290 +1,53 @@
-/* ===== Desktop Styles ===== */
-/* --- 1. THE LEGAL CARD --- */
-.indemnity-card {
-  max-width: 800px;
-  margin: 2rem auto;
-  background: var(--app-surface);
-  padding: 2.4rem;
-  border-radius: 18px;
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
-  border: 1px solid var(--border-color);
-}
-
-.indemnity-card h1 {
-  margin-bottom: 0.5rem;
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: var(--app-text);
-  text-align: center;
-}
-
-.indemnity-subtitle {
-  text-align: center;
-  color: var(--text-muted);
-  margin-bottom: 2rem;
-  font-size: 0.95rem;
-}
-
-/* --- 2. TERMS & CONDITIONS VIEWPORT --- */
-.template-body-html {
-  background: var(--app-surface-alt);
-  padding: 1.25rem;
-  border: 1px solid var(--app-border);
-  border-radius: 4px;
-  max-height: min(52vh, 360px);
-  overflow-y: auto;
-  margin: 1.5rem 0;
-  font-size: 0.9rem;
-  line-height: 1.6;
-  color: var(--app-primary);
-  scrollbar-width: thin;
-}
-
-.template-body-html::-webkit-scrollbar {
-  width: 6px;
-}
-.template-body-html::-webkit-scrollbar-thumb {
-  background: var(--app-surface-alt);
-  border-radius: 4px;
-}
-
-/* --- 3. VEHICLE CONDITION PHOTOS --- */
-.photo-upload-section {
-  margin-top: 2rem;
-}
-
-.photo-upload-section h3 {
-  font-size: 1.1rem;
-  margin-bottom: 1rem;
-  color: var(--app-text);
-}
-
-.photo-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 16px;
-  margin-bottom: 2rem;
-}
-
-.photo-preview-item {
-  position: relative;
-  aspect-ratio: 1;
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-}
-
-.photo-preview-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-/* --- PHOTO PREVIEW CONTAINER --- */
-.photo-preview-item {
-  position: relative; /* REQUIRED for the button to anchor correctly */
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: 4px;
-  overflow: hidden;
-  border: 1px solid var(--app-border);
-}
-
-.photo-preview-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* --- THE REMOVE BUTTON (Targeting your existing class) --- */
-.remove-photo-btn {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 24px;
-  height: 24px;
-  background: var(--app-danger) !important; /* Bold Red */
-  color: var(--app-on-primary) !important;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  line-height: 1;
-  z-index: 10; /* Ensures it sits ABOVE the image */
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  transition: transform 0.2s ease;
-}
-
-.remove-photo-btn:hover {
-  transform: scale(1.1);
-  background: var(--app-danger) !important;
-}
-
-.remove-btn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: var(--app-danger);
-  color: var(--app-on-primary);
-  border: none;
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  cursor: pointer;
-  font-weight: bold;
-  backdrop-filter: none;
-  z-index: 10;
-}
-
-.add-photo-box {
-  position: relative;
-  aspect-ratio: 1;
-  border: 2px dashed var(--app-border);
-  border-radius: 4px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  background: var(--app-surface);
-  color: var(--app-primary);
-  transition: all 0.2s ease;
-}
-
-.add-photo-input {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.add-photo-box:hover {
-  border-color: var(--primary);
-  background: var(--app-surface);
-  color: var(--primary);
-}
-
-/* --- 4. SIGNATURE PAD (CRITICAL) --- */
-.signature-section {
-  margin-top: 2.5rem;
-}
-
-.sig-canvas-container {
-  background: var(--app-surface);
-  border: 2px solid var(--app-border); /* Darker border for focus */
-  border-radius: 4px;
-  margin: 12px 0;
-  touch-action: none; /* Prevents scrolling while signing */
-  overflow: hidden;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.sigCanvas {
-  width: 100%;
-  height: 200px;
-  cursor: crosshair;
-}
-
-.sig-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.btn-clear {
-  background: transparent;
-  color: var(--app-primary);
-  border: 1px solid var(--app-border);
-  padding: 6px 16px;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.btn-clear:hover {
-  background: var(--app-surface-alt);
-  color: var(--app-text);
-}
-
-/* --- 5. SUBMIT BUTTON --- */
-.submit-indemnity {
-  width: 100%;
-  padding: 1rem;
-  font-size: 1.1rem;
-  margin-top: 2rem;
-}
-
-/* ===== Mobile Styles (<= 768px) ===== */
-@media (max-width: 768px) {
-  .indemnity-card {
-    margin: 1rem;
-    padding: 1.25rem;
-    border-radius: 4px;
-  }
-
-  .indemnity-card h1 {
-    font-size: 1.4rem;
-  }
-
-  .template-body-html {
-    max-height: 46vh;
-    padding: 0.95rem;
-  }
-
-  .photo-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-    gap: 10px;
-  }
-
-  .photo-preview-item,
-  .add-photo-box {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    align-self: start;
-    min-height: 0;
-    max-width: none;
-  }
-
-  .add-photo-box {
-    padding: 12px;
-    font-size: 0.9rem;
-  }
-
-  .add-photo-box .add-photo-input {
-    font-size: 0.9rem;
-  }
-
-  .sigCanvas {
-    height: 180px;
-  }
-
-  .submit-indemnity {
-    min-height: 46px;
-    font-size: 1rem;
-  }
-}
-
-@media (max-width: 420px) {
-  .photo-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-    gap: 8px;
-  }
-
-  .photo-preview-item,
-  .add-photo-box {
-    aspect-ratio: 1 / 1;
-    align-self: start;
-    min-height: 0;
-    max-width: none;
-  }
+.indemnity-page { box-sizing: border-box; width: 100%; min-width: 0; max-width: 860px; margin: 0 auto; padding: 24px; color: var(--app-text); }
+.indemnity-card { box-sizing: border-box; min-width: 0; padding: 28px; border: 1px solid var(--app-border); border-radius: 16px; background: var(--app-surface); display: grid; gap: 24px; }
+.indemnity-header h1 { margin: 0 0 8px; font-size: 24px; line-height: 1.3; font-weight: 800; text-align: left; }
+.indemnity-intro, .indemnity-help { margin: 0; color: var(--app-muted); font-size: 14px; line-height: 1.6; }
+.indemnity-header .booking-info { display: flex; flex-wrap: wrap; gap: 6px 20px; padding-top: 12px; margin-top: 12px; border-top: 1px solid var(--app-border); font-size: 13px; line-height: 1.6; }
+.indemnity-header .booking-info p { margin: 0; overflow-wrap: anywhere; }
+.indemnity-section-heading { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.indemnity-section-heading svg { flex-shrink: 0; color: var(--app-primary); }
+.indemnity-section-heading h2 { margin: 0; font-size: 17px; line-height: 1.4; }
+.agreement-meta { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; margin-bottom: 12px; }
+.agreement-meta h3 { margin: 0; font-size: 15px; line-height: 1.5; overflow-wrap: anywhere; }
+.agreement-meta .version-label { font-size: 12px; color: var(--app-muted); }
+.indemnity-card .template-body-html { padding: 16px; border: 1px solid var(--app-border); border-radius: 8px; background: var(--app-surface-alt); color: var(--app-text); font-size: 15px; line-height: 1.7; overflow-wrap: anywhere; min-width: 0; }
+.template-body-html p { margin: 0 0 12px; }
+.template-body-html :is(h1, h2, h3, h4, h5, h6) { margin: 16px 0 8px; font-size: 1em; font-weight: 700; line-height: 1.4; }
+.template-body-html > :first-child { margin-top: 0; }
+.template-body-html > :last-child { margin-bottom: 0; }
+.template-body-html :is(img, video, iframe) { max-width: 100%; height: auto; }
+.template-body-html :is(pre, table) { display: block; max-width: 100%; overflow-x: auto; }
+.template-body-html pre { white-space: pre-wrap; }
+.indemnity-card form { display: grid; gap: 24px; min-width: 0; }
+.indemnity-card :is(.photo-upload-section, .signature-section) { margin: 0; padding-top: 20px; border-top: 1px solid var(--app-border); min-width: 0; }
+.indemnity-card .limit-hint { margin: 6px 0; color: var(--app-muted); font-size: 12px; line-height: 1.6; }
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
+.photo-preview-item { position: relative; aspect-ratio: 1; min-width: 0; overflow: hidden; border-radius: 8px; border: 1px solid var(--app-border); }
+.photo-preview-item img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.remove-photo-btn { position: absolute; top: 4px; right: 4px; min-width: 44px; min-height: 44px; border: 0; border-radius: 8px; background: var(--app-danger); color: var(--app-on-primary); display: grid; place-items: center; cursor: pointer; }
+.indemnity-card .photo-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); margin: 12px 0; gap: 12px; }
+.indemnity-card .photo-grid:empty { display: none; }
+.indemnity-card .photo-preview-item img { height: 100%; }
+.indemnity-photo-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.indemnity-photo-picker { position: relative; box-sizing: border-box; flex: 1 1 130px; display: flex; gap: 8px; align-items: center; justify-content: center; min-height: 48px; padding: 10px 12px; border: 1px solid var(--app-border); border-radius: 8px; background: var(--app-surface-alt); color: var(--app-text); font-size: 14px; font-weight: 700; cursor: pointer; }
+.indemnity-photo-picker input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.indemnity-photo-picker:focus-within { outline: 2px solid var(--app-primary); outline-offset: 3px; }
+.indemnity-card .sig-canvas-container { width: 100%; min-width: 0; box-sizing: border-box; margin-top: 12px; overflow: hidden; border: 1px solid var(--app-border); border-radius: 8px; background: #fff; }
+.sigCanvas { display: block; width: 100%; height: 200px; touch-action: none; cursor: crosshair; }
+.indemnity-clear { min-height: 44px; margin-top: 8px; padding: 8px 12px; border: 1px solid var(--app-border); border-radius: 8px; color: var(--app-text); background: var(--app-surface); font: inherit; font-size: 14px; cursor: pointer; }
+.indemnity-actions { display: grid; gap: 12px; padding-top: 20px; border-top: 1px solid var(--app-border); }
+.indemnity-actions .btn { width: 100%; min-height: 48px; white-space: normal; line-height: 1.5; display: flex; justify-content: center; align-items: center; gap: 8px; }
+.indemnity-actions .btn svg { flex-shrink: 0; }
+.indemnity-card form[aria-busy="true"] .sigCanvas { pointer-events: none; }
+.indemnity-card button:disabled, .indemnity-photo-picker:has(input:disabled) { opacity: 0.65; cursor: wait; }
+.indemnity-notice, .indemnity-error { padding: 16px; margin-bottom: 16px; border: 1px solid var(--app-border); border-radius: 8px; background: var(--app-surface); font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
+.indemnity-notice.error { border-color: var(--app-danger); color: var(--app-danger); }
+.indemnity-page :is(button, input):focus-visible { outline: 2px solid var(--app-primary); outline-offset: 3px; }
+@media (max-width: 600px) {
+  .indemnity-page { padding: 12px; }
+  .indemnity-card { padding: 18px; gap: 20px; }
+  .indemnity-header h1 { font-size: 21px; }
+  .indemnity-card .template-body-html { padding: 12px; font-size: 16px; }
+  .indemnity-photo-actions { flex-direction: column; }
+  .indemnity-photo-picker { flex-basis: auto; }
 }
