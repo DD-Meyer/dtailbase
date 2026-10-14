@@ -156,7 +156,7 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const res = await api.post("token/", {
-        email,
+        email: email.trim().toLowerCase(),
         password,
         mobile_app: useMobilePersistence,
         remember_me: rememberMe,

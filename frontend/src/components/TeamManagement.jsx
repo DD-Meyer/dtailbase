@@ -135,8 +135,8 @@ function TeamManagement() {
           const payload = { 
               first_name: formData.first_name,
               last_name: formData.last_name,
-              email: formData.email,
-              username: formData.email, // Standard practice to use email as username
+              email: formData.email.trim().toLowerCase(),
+              username: formData.email.trim().toLowerCase(),
               role: formData.role,
               password: temporaryPassword,
               is_active: true
@@ -286,6 +286,9 @@ function TeamManagement() {
           <input 
             type="email" 
             name="email"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             placeholder="Email (Username)" 
             required 
             value={formData.email}

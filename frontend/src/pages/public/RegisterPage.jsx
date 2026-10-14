@@ -125,7 +125,7 @@ export default function RegisterPage() {
     try {
       const res = await api.post("users/", {
         company_name: formData.company_name,
-        email: formData.email,
+        email: formData.email.trim().toLowerCase(),
         first_name: formData.firstName,
         last_name: formData.lastName,
         username: formData.username,
@@ -136,7 +136,7 @@ export default function RegisterPage() {
       if (res.status !== 201) throw new Error("Unexpected registration response");
       created = true;
       const loginRes = await api.post("token/", {
-        email: formData.email,
+        email: formData.email.trim().toLowerCase(),
         password: formData.password,
         mobile_app: useMobilePersistence,
         remember_me: true,

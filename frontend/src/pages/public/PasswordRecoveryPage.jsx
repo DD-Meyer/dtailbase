@@ -36,7 +36,7 @@ export default function PasswordRecoveryPage() {
         ? await api.post("auth/password-reset/confirm/", {
           uid: link.uid, token: link.token, password, password_confirm: confirmation,
         })
-        : await api.post("auth/password-reset/", { email });
+        : await api.post("auth/password-reset/", { email: email.trim().toLowerCase() });
       const detail = response.data?.detail;
       if (typeof detail !== "string" || !detail.trim()) {
         throw new Error("Invalid password recovery response");
@@ -70,7 +70,7 @@ export default function PasswordRecoveryPage() {
               {!resetting ? (
                 <div className={styles.field}>
                   <label htmlFor="recovery-email" className={styles.label}>Email</label>
-                  <input id="recovery-email" type="email" autoComplete="email" required
+                  <input id="recovery-email" type="email" autoComplete="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} required
                     className={styles.input} value={email} onChange={(event) => setEmail(event.target.value)} />
                 </div>
               ) : (

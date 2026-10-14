@@ -1,5 +1,17 @@
 # Dtailbase
 
+## Email sign-in
+
+Account email identities are case-insensitive. The user manager resolves login
+using an `iexact` lookup, including legacy accounts stored with mixed case.
+New account/team emails and account email updates are trimmed and lowercased;
+the user serializer rejects case variants of another account's address.
+Existing addresses are not rewritten and passwords remain case-sensitive.
+If legacy accounts collide ignoring case, login fails with the standard invalid
+credentials response and logs an error for administrator resolution rather than
+selecting an arbitrary account. No schema or data migration is required.
+Password recovery already uses a case-insensitive lookup.
+
 ## Dashboard read API
 
 `GET /api/dashboard/?today=YYYY-MM-DD&date=YYYY-MM-DD&month=YYYY-MM`

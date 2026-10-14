@@ -500,6 +500,15 @@ class UserSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'company_id', 'plan', 'usage_count', 'is_superuser', 'is_staff']
     
+    def validate_email(self, value):
+        email = User.objects.normalize_email(value)
+        matches = User.objects.filter(email__iexact=email)
+        if self.instance:
+            matches = matches.exclude(pk=self.instance.pk)
+        if matches.exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        return email
+
     def get_usage_count(self, obj):
         if obj.company:
             return obj.company.get_monthly_booking_count()

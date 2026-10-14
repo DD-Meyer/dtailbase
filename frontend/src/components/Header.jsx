@@ -1,6 +1,5 @@
 import UserDropdownMenu from "./UserDropdownMenu";
 import "../styles/Header.css";
-import headerLogo from ".././../public/landing/images/logo.svg";
 import { useCompany } from "../context/CompanyContext";
 import { Link, useLocation } from "react-router-dom";
 import ThemeToggle from "./ThemeToggle";
@@ -18,7 +17,7 @@ function Header({ showInstallButton, handleInstallClick }) {
         {/* Logo only visible on mobile */}
         <Link to="/dashboard" className="dashboard-logo mobile-only" title="DtailBase" aria-label="DtailBase Logo">
           <span className="logo-expanded">
-            <img src={headerLogo} alt="" width="34" height="34" />
+            <img src="/landing/images/logo.svg" alt="" width="34" height="34" />
           </span>
         </Link>
         {title && <span className="mobile-page-title">{title}</span>}

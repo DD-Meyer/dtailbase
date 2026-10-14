@@ -2,7 +2,6 @@ import { Link, useLocation } from "react-router-dom";
 import { useContext, useEffect, useRef, useState } from "react";
 import { ArrowRight, Menu, X } from "lucide-react";
 import { AuthContext } from "../../context/AuthContext";
-import headerLogo from ".././../../public/landing/images/logo.svg";
 import styles from "./PublicNav.module.css";
 
 const NAV_LINKS = [
@@ -101,7 +100,7 @@ export default function PublicNav() {
     <header ref={headerRef} className={styles.header}>
       <div className={styles.inner}>
         <Link to="/" className={styles.brand} aria-label="DtailBase home">
-          <img src={headerLogo} alt="" width="34" height="34" />
+          <img src="/landing/images/logo.svg" alt="" width="34" height="34" />
           <span className=" text-black">DtailBase</span>
         </Link>
 

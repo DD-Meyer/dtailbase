@@ -2,7 +2,6 @@ import { createElement } from "react";
 import { Link } from "react-router-dom";
 import { Mail } from "lucide-react";
 import styles from "./PublicFooter.module.css";
-import footerLogo from ".././../../public/landing/images/logo.svg";
 
 const Icon = ({ children, label }) => (
   <svg
@@ -81,7 +80,7 @@ export default function PublicFooter() {
         <div className={styles.top}>
           <div className={styles.brandCol}>
             <Link to="/" className={styles.brand}>
-              <img src={footerLogo} alt="" width="34" height="34" />
+              <img src="/landing/images/logo.svg" alt="" width="34" height="34" />
               <span>DtailBase</span>
             </Link>
             <p className={styles.tag}>

@@ -1,5 +1,20 @@
 # React + Vite
 
+## Brand assets and browser icons
+
+`public/landing/images/logo.svg` is the canonical DtailBase blue mark, used by
+the public header/footer, app header/sidebar and SVG favicon. Reference public
+assets using `/landing/images/logo.svg`, not imports from the public directory.
+`public/icons/app-icon.svg` retains identical artwork for older bookmarked icon
+URLs. The manifest also provides 192px/512px PNG versions for installed apps.
+
+The maskable SVG and its 512px PNG use the same mark on a neutral opaque surface,
+with the artwork inside the central maskable safe zone. The 180px Apple touch
+icon uses that padded variant; the 32px favicon PNG is a transparent fallback.
+Regenerate these derivatives from the canonical mark whenever the logo changes.
+Customer-uploaded business logos are separate and must not be replaced.
+Browsers and existing installed apps may retain cached icons after deployment.
+
 ## Public marketing design
 
 The public marketing pages opt into the photographic editorial theme with
@@ -25,6 +40,10 @@ sign-in, password recovery, persistence and selected-plan redirects are retained
 Auth-page route guards and submit handlers share `getAuthDestination` so a
 successful login cannot overwrite a selected paid plan with the Dashboard route.
 No Clerk integration or additional identity providers are introduced.
+Sign-in, registration, password recovery and team-member creation trim and
+lowercase submitted account email addresses. The backend also authenticates
+email case-insensitively, including older mixed-case accounts; passwords are
+never lowercased or otherwise normalized.
 
 ### PayPal subscription flow
 

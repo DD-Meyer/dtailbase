@@ -1,3 +1,4 @@
+import logging
 import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
@@ -6,6 +7,8 @@ from django.utils.text import slugify
 from django.db.models import Case, When, Value, IntegerField
 
 from core.plan_limits import PLAN_CONFIG
+
+logger = logging.getLogger(__name__)
 
 class Company(models.Model):
     LOCATION_VERIFICATION_STATUS = [
@@ -169,6 +172,17 @@ class Company(models.Model):
         return self.name
 
 class UserManager(BaseUserManager):
+    @classmethod
+    def normalize_email(cls, email):
+        return super().normalize_email(email).strip().lower()
+
+    def get_by_natural_key(self, username):
+        try:
+            return self.get(email__iexact=username.strip())
+        except self.model.MultipleObjectsReturned:
+            logger.error("Email sign-in blocked: multiple accounts match the same case-insensitive email.")
+            raise self.model.DoesNotExist from None
+
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError("The Email field must be set")

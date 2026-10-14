@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useSupportNotifications } from "../context/SupportNotificationContext";
-import headerLogo from ".././../public/landing/images/logo.svg";
 import { House, CalendarRange, CalendarDays, Car, ChevronDown, ChevronUp, Plus, ShieldCheck, Settings, UserRound, Users, UserCog, Wrench } from "lucide-react";
 import "../styles/Sidebar.css";
 
@@ -51,9 +50,9 @@ function Sidebar({ isCollapsed = false, onToggleCollapse }) {
         <div className="sidebar-logo">
           <h2 className="tracking-tight">{
           collapsed ?
-          (<><span className="text-white"><img src={headerLogo} alt="" width="24" height="24" /></span></>)
+          (<><span className="text-white"><img src="/landing/images/logo.svg" alt="" width="24" height="24" /></span></>)
           :
-          (<><span className=" text-white inline-flex items-center gap-2"><img src={headerLogo} alt="" width="24" height="24" /> DtailBase</span></>)}</h2>
+          (<><span className=" text-white inline-flex items-center gap-2"><img src="/landing/images/logo.svg" alt="" width="24" height="24" /> DtailBase</span></>)}</h2>
         </div>
         <button className="collapse-toggle" onClick={toggleSidebar} title="Toggle Sidebar" aria-label="Toggle sidebar">
           {collapsed ? (

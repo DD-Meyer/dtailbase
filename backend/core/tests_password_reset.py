@@ -57,6 +57,15 @@ class PasswordResetTests(TestCase):
         self.assertEqual(len(message.alternatives), 1)
         self.assertNotIn("Old-Workshop-Entry", message.body)
 
+    def test_mixed_case_email_reaches_legacy_mixed_case_account(self):
+        get_user_model().objects.filter(pk=self.user.pk).update(email="Owner@Example.Com")
+        self.assertEqual(self.request_reset("OWNER@EXAMPLE.COM").status_code, 202)
+        self.assertEqual(deliver_password_resets(), 0)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ["owner@example.com"])
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, "Owner@Example.Com")
+
     def test_unknown_and_inactive_responses_do_not_reveal_account(self):
         active = self.request_reset()
         unknown = self.request_reset("absent@example.com")
