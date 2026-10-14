@@ -235,7 +235,7 @@ function TeamManagement() {
   });
 
   return (
-    <div className="page-container">
+    <div className="page-container team-management-page">
       <div className="card-banner mb-6">
         <div className="page-banner">
           <div className="page-banner-copy">
@@ -307,15 +307,15 @@ function TeamManagement() {
 
       {/* Search bar for filtering team members */}
       <input 
-        type="text" placeholder="Search team members..." className="search-input mb-4"
+        type="search" aria-label="Search team members" placeholder="Search team members..." className="search-input mb-4"
         value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
       />
 
       {/* If no members match the search query, show a friendly message */}
       {filteredTeam.length === 0 && <p className="text-center text-gray-500">No team members found.</p>}
-      <div className="card">
+      <div className="card team-records">
         {msg && <div className="badge badge-info mb-4 p-4 block w-full text-center">{msg}</div>}
-        <table className="table-standard">
+        <table className="table-standard team-table" aria-label="Team members">
           <thead>
             <tr>
               <th>Name</th>
@@ -327,29 +327,33 @@ function TeamManagement() {
           </thead>
           <tbody>
             {filteredTeam.map((member) => (
-              <tr key={member.id}>
+              <tr key={member.id} className={editingId === member.id ? "team-record is-editing" : "team-record"}>
                 {editingId === member.id ? (
                   /* Render separate cells without a fragment wrapper */
                   [
-                    <td key="edit-name">
-                      <div className="flex flex-col gap-2">
-                        <div className="flex gap-2">
-                          <input className="input-sm" value={editData.first_name} onChange={e => setEditData({...editData, first_name: e.target.value})} />
-                          <input className="input-sm" value={editData.last_name} onChange={e => setEditData({...editData, last_name: e.target.value})} />
+                    <td key="edit-name" data-label="Member" className="team-member-name">
+                      <div className="team-edit-fields">
+                        <div className="team-edit-names">
+                          <label>First name<input className="input-sm" value={editData.first_name} onChange={e => setEditData({...editData, first_name: e.target.value})} /></label>
+                          <label>Last name<input className="input-sm" value={editData.last_name} onChange={e => setEditData({...editData, last_name: e.target.value})} /></label>
                         </div>
+                        <label>Reset password (optional)
                         <input
                           type="password"
                           placeholder="Reset Password (optional, min 8 chars)"
                           className="input-sm text-xs"
+                          aria-describedby={`team-password-help-${member.id}`}
                           onChange={e => setEditData({...editData, password: e.target.value})}
                         />
-                        <span className="text-xs text-muted">{PASSWORD_GUIDANCE}</span>
+                        </label>
+                        <span id={`team-password-help-${member.id}`} className="text-xs text-muted">{PASSWORD_GUIDANCE}</span>
                       </div>
                     </td>,
-                    <td key="edit-email">{member.email}</td>,
-                    <td key="edit-role">
+                    <td key="edit-email" data-label="Email" className="team-member-email">{member.email}</td>,
+                    <td key="edit-role" data-label="Role">
                       <select
                         className="input-sm"
+                        aria-label="Member role"
                         value={editData.role}
                         onChange={e => setEditData({...editData, role: e.target.value})}
                         disabled={member.email === user.email && member.role === "OWNER"}
@@ -359,24 +363,29 @@ function TeamManagement() {
                         <option value="STAFF">Staff</option>
                       </select>
                     </td>,
-                    <td key="edit-status"></td>,
-                    <td key="edit-actions" className="flex gap-2">
+                    <td key="edit-status" data-label="Status">
+                      <span className={`badge ${member.is_active ? 'badge-success' : 'badge-ghost'}`}>{member.is_active ? "Active" : "Inactive"}</span>
+                    </td>,
+                    <td key="edit-actions" data-label="Actions" className="team-member-actions">
+                      <div className="team-action-group">
                       <button className="btn btn-success btn-xs" onClick={() => handleUpdateMember(member.id)}>Save</button>
                       <button className="btn btn-ghost btn-xs" onClick={() => setEditingId(null)}>Cancel</button>
+                      </div>
                     </td>
                   ]
                 ) : (
                   /* Render separate cells without a fragment wrapper */
                   [
-                    <td key="view-name">{member.first_name} {member.last_name}</td>,
-                    <td key="view-email">{member.email}</td>,
-                    <td key="view-role"><span className={`badge badge-${member.role}`}>{member.role}</span></td>,
-                    <td key="view-status">
+                    <td key="view-name" data-label="Name" className="team-member-name">{member.first_name} {member.last_name}</td>,
+                    <td key="view-email" data-label="Email" className="team-member-email">{member.email}</td>,
+                    <td key="view-role" data-label="Role"><span className={`badge badge-${member.role}`}>{member.role}</span></td>,
+                    <td key="view-status" data-label="Status">
                       <span className={`badge ${member.is_active ? 'badge-success' : 'badge-ghost'}`}>
                         {member.is_active ? "Active" : "Inactive"}
                       </span>
                     </td>,
-                    <td key="view-actions" className="team-action-group">
+                    <td key="view-actions" data-label="Actions" className="team-member-actions">
+                      <div className="team-action-group">
                       <button className="btn btn-xs team-action-btn team-action-edit" onClick={() => {setEditingId(member.id); setEditData(member); }}>
                         Edit
                       </button>
@@ -391,7 +400,7 @@ function TeamManagement() {
                       )}
                       {/* If this is the logged-in user, show a note instead of the deactivate button */}
                       {member.email === user.email && (
-                        <span className="text-xs text-gray-500">You cannot deactivate your own account</span>
+                        <span className="team-self-note text-xs text-muted">You cannot deactivate your own account</span>
                       )}
                       {/*delete account button only for owner and not for themselves*/}
                       {user.role === "OWNER" && member.email !== user.email && (
@@ -399,6 +408,7 @@ function TeamManagement() {
                           Delete
                         </button>
                       )}
+                      </div>
                     </td>
                   ]
                 )}

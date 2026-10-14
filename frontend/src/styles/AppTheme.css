@@ -96,7 +96,7 @@
   .app-layout .page-banner-copy h1 { font-size: 22px; }
   .app-layout .page-banner-copy p { font-size: 13px; margin-top: 4px; }
   .app-layout .app-header { border-bottom-color: var(--app-border); }
-  .mobile-page-title { display: block; font-weight: 700; font-size: 15px; }
+  .mobile-page-title { display: block; font-weight: 700; font-size: 12px; }
   .header-left { gap: 10px; }
   .app-layout .app-header.is-home { top: 16px; right: 12px; }
   .app-route-home .page-body { padding-top: 0; }
@@ -261,7 +261,7 @@ body { background: var(--app-bg); color: var(--app-text); font-family: var(--fon
   .app-header { padding: 0 12px; gap: 8px; }
   .header-center { gap: 8px; }
   .current-plan { display: none; }
-  .header-install-btn { font-size: 13px; padding: 8px 10px; }
+  .header-install-btn { font-size: 12px; padding: 8px 10px; }
   .app-layout .btn-icon { min-width: 44px; }
   .app-layout .card-banner { padding: 20px; }
   .app-layout .page-banner-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }

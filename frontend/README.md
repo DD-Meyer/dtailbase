@@ -46,6 +46,13 @@ Payment QA must replace the Axios adapter in memory and restore it afterward;
 service workers can bypass browser route interception. Do not make live purchases
 or mutate real subscriptions for visual testing.
 
+### Mobile team records
+
+Team Management keeps its table on desktop and presents labelled member records
+at 768px and below. Names and email addresses wrap, role/status badges remain visible,
+and record actions wrap into touch-sized buttons. Inline editing uses labelled,
+full-width fields on phones without changing account permissions or API payloads.
+
 ### Mobile signing
 
 The Sign & start sheet uses a full-height mobile dialog with one vertical scroll
