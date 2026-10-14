@@ -22,7 +22,6 @@ from core.serializers import MyTokenSerializer
 class MyTokenView(TokenObtainPairView):
     serializer_class = MyTokenSerializer
 
-
 urlpatterns = [
     path('admin/', admin.site.urls),
 

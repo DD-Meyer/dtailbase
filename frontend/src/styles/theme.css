@@ -13,6 +13,7 @@
 
 /* --- 2. DESIGN TOKENS ------------------------------------------- */
 :root {
+  --brand-lime: #c9f45b;
   /* -- Brand palette (dashboard cyan + neon-mint on dark navy) -- */
   --color-primary:        #23b4ff; /* Cyan 500 — brand */
   --color-primary-strong: #0f8ed4; /* Cyan 700 — hover */
@@ -20,13 +21,13 @@
   --color-on-primary:     #050b16; /* Deep navy — text on cyan */
 
   --color-secondary:      #5cc5ff; /* Cyan 400 — highlights */
-  --color-accent:         #279739; /* Neon mint — CTA / accent */
-  --color-accent-strong:  #18895a; /* Mint hover */
+  --color-accent:         #23b4ff; /* Neon mint — CTA / accent */
+  --color-accent-strong:  #09adff; /* Mint hover */
   --color-accent-soft:    rgba(70, 255, 179, 0.14); /* Chip bg */
   --color-on-accent:      #050b16;
 
   /* -- Neutrals (dark theme, matches dashboard) ----------------- */
-  --color-background:     #070d17; /* Page bg — matches --bg-main */
+  --color-background:     #FEFEFE; /* Page bg — matches --bg-main */
   --color-surface:        #0f1a2b; /* Cards — matches --bg-panel */
   --color-surface-alt:    #0a1220; /* Alt section bg */
   --color-muted:          #131f33; /* Chip / disabled bg */
@@ -35,10 +36,10 @@
   --color-divider:        rgba(123, 154, 196, 0.18);
 
   /* -- Text ------------------------------------------------------ */
-  --color-foreground:     #ebf2ff; /* Light blue-white — headings */
-  --color-text:           #dbe5f5; /* Body text on dark */
-  --color-text-muted:     #8ba1bf; /* Muted blue-grey */
-  --color-text-subtle:    #6b8099; /* Subtle blue-grey */
+  --color-foreground:     #111213; /* Light blue-white — headings */
+  --color-text:           #070d17; /* Body text on dark */
+  --color-text-muted:     #353e49; /* Muted blue-grey */
+  --color-text-subtle:    #333f4d; /* Subtle blue-grey */
 
   /* -- Feedback -------------------------------------------------- */
   --color-success:        #46ffb3;
@@ -116,6 +117,13 @@
   --z-toast:   90;
 }
 
+.screen-max-width {
+  max-width: var(--container-base);
+  margin-inline-start: auto;
+  margin-inline-end: auto;
+  position: relative;
+}
+
 /* --- 3. MINIMAL RESET (public pages only) ----------------------- */
 /* Scoped via `.dbase-public` so it never touches the dashboard.   */
 .dbase-public,
@@ -126,6 +134,30 @@
 }
 
 .dbase-public {
+  --color-primary: #244de8;
+  --color-primary-strong: #173fc7;
+  --color-primary-soft: rgba(36, 77, 232, 0.1);
+  --color-on-primary: #ffffff;
+  --color-secondary: #6684ff;
+  --color-accent: #244de8;
+  --color-accent-strong: #173fc7;
+  --color-accent-soft: rgba(36, 77, 232, 0.1);
+  --color-on-accent: #ffffff;
+  --color-background: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f5f6f8;
+  --color-muted: #edf0f5;
+  --color-border: rgba(17, 24, 39, 0.12);
+  --color-border-subtle: rgba(17, 24, 39, 0.08);
+  --color-divider: rgba(17, 24, 39, 0.1);
+  --color-foreground: #111214;
+  --color-text: #292c32;
+  --color-text-muted: #626975;
+  --color-text-subtle: #747b86;
+  --color-success: #16804a;
+  --color-ring: #244de8;
+  --elev-2: 0 12px 32px -20px rgba(17, 24, 39, 0.35);
+  --elev-focus: 0 0 0 3px rgba(36, 77, 232, 0.32);
   font-family: var(--font-sans);
   font-size: var(--fs-base);
   line-height: var(--lh-normal);
@@ -137,15 +169,15 @@
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
-.dbase-public img,
-.dbase-public svg,
-.dbase-public video {
+:where(.dbase-public) img,
+:where(.dbase-public) svg,
+:where(.dbase-public) video {
   display: block;
   max-width: 100%;
   height: auto;
 }
 
-.dbase-public button {
+:where(.dbase-public) button {
   font: inherit;
   cursor: pointer;
   background: none;
@@ -154,17 +186,17 @@
   color: inherit;
 }
 
-.dbase-public a {
+:where(.dbase-public) a {
   color: inherit;
   text-decoration: none;
 }
 
-.dbase-public h1,
-.dbase-public h2,
-.dbase-public h3,
-.dbase-public h4,
-.dbase-public h5,
-.dbase-public h6 {
+:where(.dbase-public) h1,
+:where(.dbase-public) h2,
+:where(.dbase-public) h3,
+:where(.dbase-public) h4,
+:where(.dbase-public) h5,
+:where(.dbase-public) h6 {
   font-weight: 700;
   line-height: var(--lh-tight);
   letter-spacing: var(--tracking-tight);
@@ -172,12 +204,12 @@
   margin: 0;
 }
 
-.dbase-public h1 { font-size: clamp(2.25rem, 5vw, var(--fs-6xl)); font-weight: 800; }
-.dbase-public h2 { font-size: clamp(1.75rem, 3.5vw, var(--fs-4xl)); }
-.dbase-public h3 { font-size: clamp(1.35rem, 2.4vw, var(--fs-2xl)); }
-.dbase-public h4 { font-size: var(--fs-xl); }
+:where(.dbase-public) h1 { font-size: clamp(2.25rem, 5vw, var(--fs-6xl)); font-weight: 800; }
+:where(.dbase-public) h2 { font-size: clamp(1.75rem, 3.5vw, var(--fs-4xl)); }
+:where(.dbase-public) h3 { font-size: clamp(1.35rem, 2.4vw, var(--fs-2xl)); }
+:where(.dbase-public) h4 { font-size: var(--fs-xl); }
 
-.dbase-public p {
+:where(.dbase-public) p {
   margin: 0;
   color: var(--color-text-muted);
   line-height: var(--lh-relaxed);

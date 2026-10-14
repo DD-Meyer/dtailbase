@@ -2,21 +2,22 @@
 /* --- Public Wrapper (The Background) --- */
 .public-wrapper {
   min-height: 100vh;
-  background-color: #f8fafc;
+  background-color: var(--app-surface);
+  color: var(--app-text);
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 20px;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
 }
 
 /* --- The Booking Card --- */
 .public-card {
-  background: #ffffff;
+  background: var(--app-surface);
   width: 100%;
   max-width: 500px;
   padding: 40px;
-  border-radius: 16px;
+  border-radius: 4px;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   text-align: center;
 }
@@ -26,18 +27,18 @@
   max-width: 120px;
   height: auto;
   margin-bottom: 20px;
-  border-radius: 8px;
+  border-radius: 4px;
 }
 
 .public-card h1 {
-  color: #1e293b;
+  color: var(--app-text);
   font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 8px;
 }
 
 .public-card .address {
-  color: #64748b;
+  color: var(--app-primary);
   font-size: 0.9rem;
   margin-bottom: 30px;
 }
@@ -47,7 +48,7 @@
   text-align: left;
   margin-bottom: 24px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--app-border);
 }
 
 .public-card section:last-of-type {
@@ -55,7 +56,7 @@
 }
 
 .public-card h3 {
-  color: #334155;
+  color: var(--app-primary);
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -75,37 +76,37 @@
 .public-card textarea {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  border: 1px solid var(--app-border);
+  border-radius: 4px;
   font-size: 1rem;
   margin-bottom: 12px;
   transition: all 0.2s ease;
-  background-color: #fff;
+  background-color: var(--app-surface);
 }
 
 .public-card input:focus, 
 .public-card select:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: var(--app-primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .hint {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--app-primary);
   margin-top: -8px;
   margin-bottom: 12px;
 }
 
 /* --- Messages --- */
 .error-msg {
-  background-color: #fef2f2;
-  color: #dc2626;
+  background-color: var(--app-surface);
+  color: var(--app-danger);
   padding: 12px;
-  border-radius: 8px;
+  border-radius: 4px;
   margin-bottom: 20px;
   font-size: 0.9rem;
-  border-left: 4px solid #dc2626;
+  border-left: 4px solid var(--app-danger);
 }
 
 .success-container {
@@ -114,7 +115,7 @@
 }
 
 .success-container h1 {
-  color: #059669;
+  color: var(--app-success);
   margin-bottom: 15px;
 }
 
@@ -122,10 +123,10 @@
 .btn-submit {
   width: 100%;
   padding: 14px;
-  background-color: #2563eb;
-  color: white;
+  background-color: var(--app-primary);
+  color: var(--app-on-primary);
   border: none;
-  border-radius: 8px;
+  border-radius: 4px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -133,7 +134,7 @@
 }
 
 .btn-submit:hover {
-  background-color: #1d4ed8;
+  background-color: var(--app-primary);
 }
 
 /* --- Responsive Adjustments --- */

@@ -158,7 +158,7 @@ export default function LiveChat({ isOpen, onClose }) {
       return (
         <div className="message support">
           <div className="message-content">
-            <p className="message-text">Hello! How can we help you today? 👋</p>
+            <p className="message-text">Hello! How can we help you today?</p>
           </div>
         </div>
       );
@@ -189,7 +189,7 @@ export default function LiveChat({ isOpen, onClose }) {
             <h3>Chat with us</h3>
           </div>
           <button className="chat-close-btn" onClick={onClose}>
-            ✕
+            Close
           </button>
         </div>
 
@@ -213,7 +213,7 @@ export default function LiveChat({ isOpen, onClose }) {
         </div>
 
         {error && (
-          <div className="chat-error" style={{ padding: '6px 12px', color: '#b91c1c', fontSize: '0.85rem' }}>
+          <div className="chat-error" style={{ padding: '6px 12px', color: "var(--app-danger)", fontSize: '0.85rem' }}>
             {error}
           </div>
         )}

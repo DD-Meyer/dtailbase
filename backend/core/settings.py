@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 import mimetypes
 import os
+import sentry_sdk
 
 import dj_database_url
 from corsheaders.defaults import default_headers
@@ -25,6 +26,24 @@ except ImportError:
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 PROJECT_ROOT = BASE_DIR.parent
+
+sentry_sdk.init(
+    dsn="https://8c77c7dd6ec074416618b8dfaf05b584@o4511960757633025.ingest.de.sentry.io/4511960764842064",
+    # Add data like request headers and IP for users,
+    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+    send_default_pii=True,
+    # Enable sending logs to Sentry
+    enable_logs=True,
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for tracing.
+    traces_sample_rate=1.0,
+    # Set profile_session_sample_rate to 1.0 to profile 100%
+    # of profile sessions.
+    profile_session_sample_rate=1.0,
+    # Set profile_lifecycle to "trace" to automatically
+    # run the profiler on when there is an active transaction
+    profile_lifecycle="trace",
+)
 
 
 def env_bool(name, default=False):
@@ -145,6 +164,10 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_THROTTLE_RATES': {
+        'password_reset_ip': '20/hour',
+        'password_reset_email': '3/hour',
+    },
 }
 
 AUTHENTICATION_BACKENDS = (
@@ -214,7 +237,7 @@ if os.environ.get('DATABASE_URL'):
     DATABASES = {
         'default': dj_database_url.config(
             default=os.environ.get('DATABASE_URL'),
-            conn_max_age=600
+            conn_max_age=0 if DEBUG else 600
         )
     }
 elif USE_POSTGRES:
@@ -228,7 +251,7 @@ elif USE_POSTGRES:
             'HOST': os.environ.get('DB_HOST', 'localhost'),
             'PORT': os.environ.get('DB_PORT', '5432'),
             'ATOMIC_REQUESTS': True,
-            'CONN_MAX_AGE': 600,
+            'CONN_MAX_AGE': 0 if DEBUG else 600,
         }
     }
 else:
@@ -320,8 +343,8 @@ IPSTACK_API_KEY = os.environ.get('IPSTACK_API_KEY', '')
 # ========== Cache Configuration ==========
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'dtailbase-cache',
+        'BACKEND': os.environ.get('CACHE_BACKEND', 'django.core.cache.backends.locmem.LocMemCache'),
+        'LOCATION': os.environ.get('CACHE_LOCATION', 'dtailbase-cache'),
         'OPTIONS': {
             'MAX_ENTRIES': 1000
         }
@@ -333,9 +356,12 @@ EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.conso
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
 EMAIL_USE_TLS = env_bool('EMAIL_USE_TLS', default=True)
+EMAIL_USE_SSL = env_bool('EMAIL_USE_SSL', default=False)
+EMAIL_TIMEOUT = int(os.environ.get('EMAIL_TIMEOUT', 10))
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@dtailbase.com')
 
 # Frontend URL for email links
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
+PASSWORD_RESET_TIMEOUT = int(os.environ.get('PASSWORD_RESET_TIMEOUT', 3600))

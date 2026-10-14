@@ -1,0 +1,89 @@
+.compact-records { display: grid; gap: 10px; min-width: 0; }
+.compact-record { background: var(--app-surface); border: 1px solid var(--app-border); border-radius: 12px; min-width: 0; }
+.compact-record-open { width: 100%; display: flex; gap: 12px; align-items: center; text-align: left; padding: 16px; min-height: 88px; background: transparent; color: var(--app-text); border: 0; border-radius: inherit; cursor: pointer; }
+.compact-record-open:hover { background: var(--app-primary-soft); }
+.record-avatar { width: 36px; height: 36px; flex: 0 0 36px; display: grid; place-items: center; background: var(--app-primary-soft); color: var(--app-primary); border-radius: 10px; font-size: 12px; font-weight: 800; }
+.compact-record-copy { display: grid; gap: 4px; flex: 1; min-width: 0; }
+.compact-record-copy strong { font-size: 14px; overflow-wrap: anywhere; }
+.compact-record-copy > span { color: var(--app-muted); font-size: 12px; overflow-wrap: anywhere; }
+.compact-record-meta { font-size: 12px; font-weight: 600; color: var(--app-muted); display: grid; gap: 4px; text-align: right; flex: 0 1 auto; max-width: 35%; overflow-wrap: anywhere; }
+.compact-record-open > svg { flex-shrink: 0; color: var(--app-primary); }
+.record-empty { padding: 20px; color: var(--app-muted); }
+.record-dialog { margin: auto; padding: 0; width: min(640px, calc(100vw - 24px)); max-height: calc(100dvh - 32px); border: 1px solid var(--app-border); border-radius: 16px; background: var(--app-surface); color: var(--app-text); overflow-y: auto; box-shadow: 0 20px 70px #0005; }
+.record-dialog::backdrop { background: var(--app-overlay); }
+.record-dialog-header { position: sticky; top: 0; z-index: 2; background: var(--app-surface); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--app-border); }
+.record-dialog-header h2 { font-size: 18px; margin: 0; }
+.record-dialog-header button { width: 44px; height: 44px; flex-shrink: 0; display: grid; place-items: center; border: 1px solid var(--app-border); border-radius: 50%; background: var(--app-surface); color: var(--app-text); cursor: pointer; }
+.record-dialog-body { padding: 20px; }
+.record-details { display: grid; gap: 16px; margin: 0; }
+.record-details dt { color: var(--app-muted); font-size: 12px; margin-bottom: 4px; }
+.record-details dd { margin: 0; font-size: 14px; overflow-wrap: anywhere; white-space: pre-wrap; }
+.record-detail-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+.record-dialog :is(button, input, select) { font-family: inherit; }
+.record-dialog :is(button, input[type="file"]) { min-height: 44px; }
+.record-dialog :focus-visible { outline: 2px solid var(--app-primary); outline-offset: 3px; }
+.record-dialog .page-container { padding: 0; margin: 0; width: 100%; }
+.record-dialog .indemnity-card { padding: 0; border: 0; box-shadow: none; }
+.record-dialog .indemnity-header h1 { font-size: 20px; }
+.record-dialog .signature-pad { max-width: 100%; touch-action: none; }
+.record-dialog .toast-notification { position: static; transform: none; margin-bottom: 12px; }
+.record-dialog .photo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+.record-dialog .photo-preview-item { position: relative; }
+.record-dialog .photo-preview-item img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; }
+.record-dialog .remove-photo-btn { min-width: 44px; min-height: 44px; }
+.job-upload { display: grid; gap: 16px; }
+.job-upload p { margin: 0; color: var(--app-muted); font-size: 13px; }
+.job-upload label { display: grid; gap: 8px; font-size: 14px; }
+.job-action-error { color: var(--app-danger); font-size: 12px; margin: 8px 0 0; overflow-wrap: anywhere; }
+.job-action-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.job-action-controls button { min-height: 44px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--app-border); background: var(--app-surface); color: var(--app-text); cursor: pointer; font: inherit; font-size: 12px; font-weight: 700; }
+.job-action-controls .job-next-action { background: var(--app-primary); border-color: transparent; color: var(--app-on-primary); }
+.job-action-controls button:disabled { opacity: .6; cursor: not-allowed; }
+.job-status { font-size: 11px; border-radius: 20px; padding: 3px 8px; white-space: nowrap; color: var(--app-primary); background: var(--app-primary-soft); }
+.job-status-confirmed, .job-status-completed { color: var(--app-success); background: var(--app-success-soft); }
+.job-status-pending { color: var(--app-warning); background: var(--app-warning-soft); }
+.job-status-cancelled { color: var(--app-danger); background: var(--app-danger-soft); }
+.job-record { min-width: 0; position: relative; border: 1px solid var(--app-border); border-radius: 14px; background: var(--app-surface); padding: 12px; }
+.job-record-main { display: flex; gap: 10px; color: var(--app-text) !important; text-decoration: none; align-items: center; min-height: 48px; }
+.job-record-main:hover .job-record-title strong { color: var(--app-primary); }
+.job-record-copy { flex: 1; min-width: 0; }
+.job-record-title { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 8px; font-size: 13px; }
+.job-record-title strong { overflow-wrap: anywhere; }
+.job-record-title > span { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.job-record-copy p { margin: 4px 0 !important; color: var(--app-muted); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.job-record-meta { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; font-size: 11px; color: var(--app-muted); }
+.job-record-meta span { display: inline-flex; align-items: center; gap: 4px; }
+.job-record-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
+.job-record-list { display: grid; gap: 10px; }
+.job-record-notes { font-size: 12px; color: var(--app-muted); margin: 8px 0; }
+.record-list-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.record-list-toolbar .search-wrapper { flex: 1; max-width: none; margin: 0; }
+.record-filters { display: grid; grid-template-columns: minmax(0, 2fr) minmax(145px, 1fr) minmax(160px, 1fr); align-items: start; gap: 20px; padding: 20px; margin-bottom: 12px; background: var(--app-surface); border: 1px solid var(--app-border); border-radius: 12px; }
+.record-filters fieldset, .schedule-filter-group { min-width: 0; padding: 0; margin: 0; border: 0; }
+.record-filters legend, .schedule-filter-group legend { padding: 0; margin-bottom: 12px; font-size: 13px; font-weight: 800; color: var(--app-text); }
+.filter-date-inputs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.filter-presets { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.filter-presets button { min-height: 44px; padding: 8px 12px; border: 1px solid var(--app-border); border-radius: 8px; color: var(--app-text); background: var(--app-surface); font: inherit; font-size: 12px; cursor: pointer; }
+.filter-presets button[aria-pressed="true"] { background: var(--app-primary-soft); color: var(--app-primary); border-color: var(--app-primary); }
+.filter-results { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+.filter-results p { font-size: 12px; color: var(--app-muted); margin: 0; }
+.record-filters :is(input, select) { width: 100%; box-sizing: border-box; min-width: 0; }
+.app-layout .record-filters :is(input, select), .app-layout .schedule-filter-group :is(input, select) { padding: 10px; font-size: 14px; line-height: 1.5; margin: 0; min-height: 44px; }
+.record-filters label { display: grid; gap: 6px; color: var(--app-muted); font-size: 12px; min-width: 0; }
+.record-filters :is(input, select) { min-height: 44px; padding: 8px; border: 1px solid var(--app-border); border-radius: 8px; color: var(--app-text); background: var(--app-surface); max-width: 100%; }
+.record-fetch-error { padding: 16px; margin-bottom: 16px; border: 1px solid var(--app-danger); border-radius: 12px; color: var(--app-danger); }
+.bookings-record-page { padding: 0; }
+@media (min-width: 1024px) {
+  .job-record-list .job-record { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: center; }
+  .job-record-list .job-record-footer { margin: 0; }
+  .job-record-list .job-action-error { grid-column: 1 / -1; }
+}
+@media (max-width: 767px) {
+  .record-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding: 16px; }
+  .record-filters .filter-date-group { grid-column: 1 / -1; }
+  .app-layout .record-filters :is(input, select), .app-layout .schedule-filter-group :is(input, select) { font-size: 16px; }
+  .compact-record-open { padding: 12px; min-height: 88px; gap: 10px; }
+  .compact-record-open > .record-avatar { display: none; }
+  .record-dialog { max-height: calc(100dvh - 16px); width: calc(100vw - 16px); border-radius: 14px; }
+  .record-dialog-body { padding: 16px; }
+}

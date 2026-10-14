@@ -82,7 +82,7 @@ const Contact = () => {
                   boxShadow: "0 0 18px rgba(245, 158, 11, 0.45)",
                 }}
               >
-                ⚡ Premium Instant Message
+                Premium Instant Message
               </button>
               <span style={{ color: "#fbbf24", fontSize: "0.85rem" }}>
                 Instant feedback and priority support direct from our technicians.

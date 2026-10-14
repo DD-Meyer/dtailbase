@@ -5,9 +5,9 @@
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(123, 154, 196, 0.2);
-  border-radius: 10px;
+  background: var(--app-surface);
+  border: 1px solid var(--app-primary);
+  border-radius: 4px;
   padding: 0.75rem 1.25rem;
   margin-bottom: 1.25rem;
   flex-wrap: wrap;
@@ -15,8 +15,8 @@
 
 /* --- Light theme (IndemnitySettings) --- */
 .plan-usage-banner--light {
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  background: var(--app-surface-alt);
+  border: 1px solid var(--app-border);
 }
 
 /* --- Metrics container --- */
@@ -39,11 +39,11 @@
 }
 
 .usage-metric--at-limit .usage-label {
-  color: #f87171;
+  color: var(--app-danger);
 }
 
 .plan-usage-banner--light .usage-metric--at-limit .usage-label {
-  color: #dc2626 !important;
+  color: var(--app-danger) !important;
 }
 
 /* --- Label / fraction row --- */
@@ -59,52 +59,52 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #8ba1bf;
+  color: var(--app-muted);
   white-space: nowrap;
 }
 
 .plan-usage-banner--light .usage-label {
-  color: #64748b !important;
+  color: var(--app-primary) !important;
 }
 
 .usage-fraction {
   font-size: 0.78rem;
   font-weight: 700;
-  color: #ebf2ff;
+  color: var(--app-text);
   white-space: nowrap;
 }
 
 .plan-usage-banner--light .usage-fraction {
-  color: #1e293b !important;
+  color: var(--app-text) !important;
 }
 
 .usage-unlimited {
-  color: #46ffb3 !important;
+  color: var(--app-success) !important;
   font-size: 0.72rem;
 }
 
 .plan-usage-banner--light .usage-unlimited {
-  color: #059669 !important;
+  color: var(--app-success) !important;
 }
 
 .usage-at-limit {
-  color: #f87171 !important;
+  color: var(--app-danger) !important;
 }
 
 .usage-near-limit {
-  color: #fbbf24 !important;
+  color: var(--app-warning) !important;
 }
 
 /* --- Progress track & bar --- */
 .usage-progress-track {
   height: 5px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--app-surface);
   border-radius: 99px;
   overflow: hidden;
 }
 
 .plan-usage-banner--light .usage-progress-track {
-  background: #e2e8f0;
+  background: var(--app-surface-alt);
 }
 
 .usage-progress-bar {
@@ -114,31 +114,32 @@
 }
 
 .progress-bar--ok {
-  background: #46ffb3;
+  background: var(--app-success);
 }
 
 .progress-bar--warn {
-  background: #fbbf24;
+  background: var(--app-warning);
 }
 
 .progress-bar--danger {
-  background: #f87171;
+  background: var(--app-danger);
 }
 
 .progress-bar--unlimited {
-  background: linear-gradient(90deg, #46ffb3, #23b4ff);
+  background: var(--app-primary);
   opacity: 0.6;
 }
 
 /* --- Upgrade CTA button --- */
 .plan-usage-upgrade-btn {
   display: inline-flex;
+  min-height: 44px;
   align-items: center;
   gap: 6px;
   padding: 0.4rem 1rem;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #23b4ff, #0f8ed4);
-  color: #fff !important;
+  border-radius: 4px;
+  background: var(--upgrade-action);
+  color: var(--upgrade-on-action);
   font-size: 0.78rem;
   font-weight: 700;
   text-decoration: none;
@@ -153,14 +154,14 @@
 
 /* Light theme upgrade button */
 .plan-usage-banner--light .plan-usage-upgrade-btn {
-  background: linear-gradient(135deg, #0f8ed4, #0369a1);
+  background: var(--upgrade-action);
 }
 
 /* --- Top tier label --- */
 .plan-usage-top-tier {
   font-size: 0.72rem;
   font-weight: 600;
-  color: #46ffb3;
+  color: var(--app-success);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -169,25 +170,25 @@
 .usage-feature-available {
   font-size: 0.72rem;
   font-weight: 600;
-  color: #46ffb3;
+  color: var(--app-success);
 }
 
 .usage-feature-locked {
   font-size: 0.72rem;
   font-weight: 600;
-  color: #f87171;
+  color: var(--app-danger);
 }
 
 .plan-usage-banner--light .usage-feature-available {
-  color: #16a34a;
+  color: var(--app-success);
 }
 
 .plan-usage-banner--light .usage-feature-locked {
-  color: #dc2626;
+  color: var(--app-danger);
 }
 
 .plan-usage-banner--light .plan-usage-top-tier {
-  color: #059669 !important;
+  color: var(--app-success) !important;
 }
 
 /* --- Responsive --- */

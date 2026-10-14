@@ -1,137 +1,169 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import api from '../axios_instance';
-import { useCompany } from '../context/CompanyContext';
-import { DEFAULT_PRICE_FALLBACKS } from '../services/pricingService';
-import { trackSubscriptionConfirmed } from '../utils/gtm';
+import { useContext, useEffect, useRef, useState } from "react";
+import { Link, Navigate, useLocation, useSearchParams } from "react-router-dom";
+import { CheckCircle2, Clock3, Info } from "lucide-react";
+import api from "../axios_instance";
+import { AuthContext } from "../context/AuthContext";
+import { useCompany } from "../context/CompanyContext";
+import { DEFAULT_PRICE_FALLBACKS } from "../services/pricingService";
+import { trackSubscriptionConfirmed } from "../utils/gtm";
+import { confirmSubscription, getVerificationResult, isUpgrade, PAYMENT_PLAN_LABELS } from "../utils/paymentVerification";
+import PaymentFlowCard from "../components/PaymentFlowCard";
+import styles from "../components/PaymentFlowCard.module.css";
 
-const PLAN_ORDER = { STARTER: 0, PRO: 1, ENTERPRISE: 2 };
+const trackedSubscriptions = new Set();
 
-const PaymentSuccess = () => {
-  const [searchParams] = useSearchParams();
-  const { refreshCompany, currentPlan } = useCompany();
-  const [state, setState] = useState({
-    loading: true,
-    success: false,
-    message: 'Verifying your subscription... Please wait.',
-    plan: null,
-    subscriptionStatus: null,
+function trackUpgrade(subscriptionId, previousPlan, result) {
+  if (result.kind !== "active" || !isUpgrade(previousPlan, result.plan)) return;
+  const key = `dtailbase:subscription-confirmed:${subscriptionId}`;
+  if (trackedSubscriptions.has(key)) return;
+  try {
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+  } catch (error) {
+    console.warn("Unable to persist subscription analytics deduplication:", error);
+  }
+  trackedSubscriptions.add(key);
+  trackSubscriptionConfirmed({
+    subscriptionId, planId: result.plan,
+    value: Number(DEFAULT_PRICE_FALLBACKS.USD[result.plan] || 0), currency: "USD",
   });
+}
 
-  const subscriptionId = useMemo(
-    () => searchParams.get('subscription_id') || searchParams.get('token') || '',
-    [searchParams]
-  );
+export default function PaymentSuccess() {
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const { isAuthenticated } = useContext(AuthContext);
+  const { refreshCompany, company, loading: companyLoading } = useCompany();
+  const subscriptionId = searchParams.get("subscription_id") || searchParams.get("token") || "";
+  return isAuthenticated
+    ? <Verification key={subscriptionId} subscriptionId={subscriptionId} refreshCompany={refreshCompany}
+        currentPlan={company?.plan} companyLoading={companyLoading} />
+    : <Navigate to="/login" replace state={{ returnAfterAuth: location.pathname + location.search }} />;
+}
+
+function Verification({ subscriptionId, refreshCompany, currentPlan, companyLoading }) {
+  const [state, setState] = useState({ kind: "checking" });
+  const [attempt, setAttempt] = useState(0);
+  const [refreshBusy, setRefreshBusy] = useState(false);
+  const previousPlan = useRef(null);
+  const retrying = useRef(false);
+  const mounted = useRef(false);
 
   useEffect(() => {
-    const confirmSubscription = async () => {
-      if (!subscriptionId) {
-        setState({
-          loading: false,
-          success: false,
-          message: 'Missing subscription details. Please contact support if you were charged.',
-          plan: null,
-          subscriptionStatus: null,
-        });
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!companyLoading && previousPlan.current === null) previousPlan.current = currentPlan;
+  }, [companyLoading, currentPlan]);
+
+  useEffect(() => {
+    if (companyLoading) return;
+    let cancelled = false;
+    const verify = async () => {
+      if (!subscriptionId.trim()) {
+        setState({ kind: "missing" });
         return;
       }
-
+      setState({ kind: "checking" });
       try {
-        const response = await api.post('/payments/confirm/', {
-          subscription_id: subscriptionId,
-        });
-
-        if (response.data?.success) {
-          await refreshCompany();
-          const isDeferred = response.data?.deferred_downgrade;
-          const pendingPlan = response.data?.pending_plan;
-          const targetPlan = response.data?.target_plan || response.data?.plan;
-          const confirmedPlan = response.data?.plan || response.data?.target_plan || null;
-          const isUpgradeConversion =
-            !isDeferred &&
-            !pendingPlan &&
-            typeof PLAN_ORDER[currentPlan] === 'number' &&
-            typeof PLAN_ORDER[confirmedPlan] === 'number' &&
-            PLAN_ORDER[confirmedPlan] > PLAN_ORDER[currentPlan];
-
-          if (isUpgradeConversion) {
-            const value = Number(DEFAULT_PRICE_FALLBACKS.USD?.[confirmedPlan] || 0);
-            trackSubscriptionConfirmed({
-              subscriptionId,
-              planId: confirmedPlan,
-              value,
-              currency: 'USD',
-            });
-          }
-
-          let message;
-          if (isDeferred) {
-            message = `Downgrade scheduled. Your current plan access continues until your renewal date, then switches to ${targetPlan}.`;
-          } else if (pendingPlan) {
-            message = `Subscription approved. Your ${pendingPlan} plan will activate once payment is confirmed — this usually takes just a moment. Refresh this page if your plan does not update.`;
-          } else {
-            message = 'Payment successful. Your plan has been updated.';
-          }
-          setState({
-            loading: false,
-            success: true,
-            message,
-            plan: pendingPlan || response.data.plan || null,
-            subscriptionStatus: response.data.subscription_status || null,
-          });
-          return;
+        const response = await confirmSubscription(api, subscriptionId);
+        if (cancelled) return;
+        const result = getVerificationResult(response.data);
+        if (result.kind === "active" || result.kind === "scheduled") {
+          const refreshed = await refreshCompany();
+          if (cancelled) return;
+          result.refreshFailed = !refreshed?.ok || refreshed.company?.plan !== result.plan;
+          trackUpgrade(subscriptionId, previousPlan.current, result);
         }
-
+        setState(result);
+      } catch (error) {
+        if (cancelled) return;
+        console.error("Payment verification failed:", error.response?.status || error.message);
         setState({
-          loading: false,
-          success: false,
-          message: response.data?.error || 'Subscription confirmation is still pending.',
-          plan: null,
-          subscriptionStatus: response.data?.subscription_status || null,
+          kind: "error",
+          permission: [401, 403].includes(error.response?.status),
+          message: [401, 403].includes(error.response?.status)
+            ? "Only the account owner can verify this subscription. Sign in as the owner or contact them for help."
+            : "We could not verify your subscription. Check your connection and try again. Do not pay again.",
         });
-      } catch (err) {
-        const apiError = err.response?.data?.error;
-        const pendingStatus = err.response?.data?.subscription_status;
-
-        setState({
-          loading: false,
-          success: false,
-          message: apiError || 'Failed to confirm your payment. Please try again shortly.',
-          plan: null,
-          subscriptionStatus: pendingStatus || null,
-        });
+      } finally {
+        if (!cancelled) retrying.current = false;
       }
     };
+    verify();
+    return () => { cancelled = true; };
+  }, [subscriptionId, attempt, companyLoading, refreshCompany]);
 
-    confirmSubscription();
-  }, [currentPlan, refreshCompany, subscriptionId]);
+  const retry = () => {
+    if (retrying.current || state.kind === "checking") return;
+    retrying.current = true;
+    setState({ kind: "checking" });
+    setAttempt((value) => value + 1);
+  };
+
+  const retryRefresh = async () => {
+    if (retrying.current) return;
+    retrying.current = true;
+    setRefreshBusy(true);
+    try {
+      const refreshed = await refreshCompany();
+      if (mounted.current) setState((previous) => ({
+        ...previous, refreshFailed: !refreshed?.ok || refreshed.company?.plan !== previous.plan,
+      }));
+    } finally {
+      retrying.current = false;
+      if (mounted.current) setRefreshBusy(false);
+    }
+  };
+
+  const active = state.kind === "active";
+  const scheduled = state.kind === "scheduled";
+  const title = {
+    checking: "Verifying your subscription",
+    pending: "Activation pending",
+    active: "Subscription active",
+    scheduled: "Plan change scheduled",
+    missing: "Subscription details missing",
+    error: "Verification unavailable",
+  }[state.kind];
+  const description = {
+    checking: "Checking securely with PayPal. This may take a moment.",
+    pending: "Your subscription is not active yet. Check again shortly—there is no need to pay again.",
+    active: "Your subscription is confirmed. You can continue working.",
+    scheduled: "Your current plan remains available until the scheduled change takes effect.",
+    missing: "Return using the PayPal approval link. If you were charged, contact support before starting another subscription.",
+    error: state.message,
+  }[state.kind];
+  const Icon = active ? CheckCircle2 : ["pending", "checking"].includes(state.kind) ? Clock3 : Info;
 
   return (
-      <div className="upgrade-container">
-        <div className="upgrade-header mt-10">
-          <h1>{state.success ? 'Subscription Active' : 'Payment Verification'}</h1>
-          <p>{state.loading ? 'Checking with PayPal...' : state.message}</p>
-          {state.plan && <p>Your active tier: <strong>{state.plan}</strong></p>}
-        {state.subscriptionStatus && (
-          <p>PayPal status: <strong>{state.subscriptionStatus}</strong></p>
-        )}
+    <PaymentFlowCard step={2} complete={active} title={title} description="Step 2 of 2 · Confirm your subscription">
+      <div role={state.kind === "error" || state.kind === "missing" ? "alert" : "status"}
+        aria-live="polite" className={`${styles.status} ${state.kind === "error" ? styles.error : ""}`}>
+        <Icon size={22} aria-hidden="true" /><p>{description}</p>
       </div>
-
-      <div className="payment-info">
-        <h3>Next Steps</h3>
-        <ul>
-          <li>Plan limits update automatically after confirmation.</li>
-          <li>Open your dashboard to continue working.</li>
-          <li>If status is pending, wait a minute and retry this page.</li>
-        </ul>
+      {(active || scheduled) && <div className={styles.summary} aria-label="Confirmed plan summary">
+        <dl>
+          <div className={styles.row}><dt>Current plan</dt><dd>{PAYMENT_PLAN_LABELS[state.plan] || "Check your plan in Settings"}</dd></div>
+          <div className={styles.row}><dt>Subscription</dt><dd>{scheduled ? "Change scheduled" : "Active"}</dd></div>
+          {scheduled && <div className={styles.row}><dt>Scheduled plan</dt><dd>{PAYMENT_PLAN_LABELS[state.targetPlan] || "Check your plan in Settings"}</dd></div>}
+        </dl>
+      </div>}
+      {state.refreshFailed && <p role="status" className={styles.note}>PayPal confirmation succeeded, but we could not refresh your workspace access. Refresh access below. Do not pay again.</p>}
+      <div className={styles.actions}>
+        {["checking", "pending", "error"].includes(state.kind) && !state.permission &&
+          <button className={styles.primary} disabled={state.kind === "checking"} onClick={retry}>
+            {state.kind === "checking" ? "Checking with PayPal…" : "Check again"}
+          </button>}
+        {state.refreshFailed && <button className={styles.primary} disabled={refreshBusy} onClick={retryRefresh}>
+          {refreshBusy ? "Refreshing access…" : "Refresh workspace access"}
+        </button>}
+        <Link className={active || scheduled ? styles.primary : styles.secondary} to="/dashboard">Go to Dashboard</Link>
+        <Link className={styles.secondary} to="/plans">View Plans</Link>
       </div>
-
-      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '20px' }}>
-        <Link className="btn-upgrade" to="/bookings">Go to Dashboard</Link>
-        <Link className="btn-upgrade btn-current" to="/plans">Back to Plans</Link>
-      </div>
-    </div>
+      <p className={styles.note}>Need help with a payment? <Link to="/support">Contact support</Link>.</p>
+    </PaymentFlowCard>
   );
-};
-
-export default PaymentSuccess;
+}

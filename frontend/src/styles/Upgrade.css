@@ -3,24 +3,24 @@
   padding: 80px 20px;
   max-width: 1200px;
   margin: 0 auto;
-  color: white;
+  color: var(--app-text);
 }
 
 .upgrade-header {
   margin-top: 60px;
-  background: linear-gradient(160deg, rgba(18, 32, 52, 0.92), rgba(15, 36, 58, 0.86));
-  border: 1px solid rgba(168, 197, 235, 0.4);
-  border-radius: 16px;
+  background: var(--app-primary);
+  border: 1px solid var(--app-primary);
+  border-radius: 4px;
   padding: 30px;
   justify-self: center;
   text-align: left;
 }
 
 .badge {
-  background: rgba(0, 255, 136, 0.1);
-  color: #00ff88;
+  background: var(--app-success-soft);
+  color: var(--app-success);
   padding: 6px 15px;
-  border-radius: 20px;
+  border-radius: 4px;
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -34,9 +34,9 @@
 
 /* The Glass Card */
 .pricing-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: 4px;
   padding: 40px;
   position: relative;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -46,13 +46,13 @@
 
 .pricing-card:hover {
   transform: translateY(-10px);
-  border-color: rgba(0, 255, 136, 0.4);
-  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--app-success);
+  background: var(--app-surface);
 }
 
 .featured {
-  background: linear-gradient(145deg, rgba(0, 255, 136, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-  border: 1px solid rgba(0, 255, 136, 0.3);
+  background: var(--app-surface-alt);
+  border: 1px solid var(--app-success);
 }
 
 .popular-tag {
@@ -60,16 +60,16 @@
   top: -15px;
   left: 50%;
   transform: translateX(-50%);
-  background: #00ff88;
-  color: #000;
+  background: var(--app-success);
+  color: var(--app-text);
   padding: 4px 15px;
-  border-radius: 20px;
+  border-radius: 4px;
   font-weight: 700;
   font-size: 0.75rem;
 }
 
 .active-plan {
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid var(--app-border);
   opacity: 0.8;
 }
 
@@ -85,7 +85,7 @@
 }
 
 .check {
-  color: #00ff88;
+  color: var(--app-success);
   margin-right: 10px;
 }
 
@@ -93,11 +93,11 @@
   margin-top: auto;
   min-height: 48px;
   padding: 0.85rem 1rem;
-  border-radius: 12px;
+  border-radius: 4px;
   width: 100%;
-  border: 1px solid rgba(0, 255, 136, 0.35);
-  background: linear-gradient(135deg, #10b981, #047857);
-  color: #dcfce7;
+  border: 1px solid var(--app-success);
+  background: var(--app-primary);
+  color: var(--app-on-primary);
   font-weight: 800;
   font-size: 0.95rem;
   text-align: center;
@@ -112,9 +112,9 @@
 }
 
 .btn-current {
-  background: rgba(255, 255, 255, 0.09);
-  border-color: rgba(255, 255, 255, 0.25);
-  color: rgba(255, 255, 255, 0.8);
+  background: var(--app-surface);
+  border-color: var(--app-border);
+  color: var(--app-text);
 }
 
 .btn-current:disabled {
@@ -123,9 +123,9 @@
 }
 
 .btn-downgrade {
-  background: linear-gradient(135deg, #10b9811f, #18181b);
-  border-color: rgba(113, 113, 122, 0.65);
-  color: #f4f4f5;
+  background: var(--app-surface-alt);
+  border-color: var(--app-border);
+  color: var(--app-text);
 }
 
 .btn-downgrade:hover:not(:disabled) {
@@ -138,27 +138,27 @@
   margin: 12px auto 0;
   max-width: 760px;
   padding: 10px 14px;
-  border-radius: 10px;
+  border-radius: 4px;
   font-size: 0.92rem;
 }
 
 .plan-action-message {
-  background: #10b9811f;
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  color: #a7f3d0;
+  background: var(--app-success-soft);
+  border: 1px solid var(--app-success);
+  color: var(--app-success);
 }
 
 .plan-action-error {
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  color: #fecaca;
+  background: var(--app-danger-soft);
+  border: 1px solid var(--app-danger);
+  color: var(--app-danger);
 }
 
 .plan-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(2, 6, 23, 0.72);
-  backdrop-filter: blur(3px);
+  background: var(--app-overlay);
+  backdrop-filter: none;
   z-index: 1300;
   display: flex;
   align-items: center;
@@ -168,21 +168,21 @@
 
 .plan-modal-card {
   width: min(560px, 100%);
-  border-radius: 16px;
-  border: 1px solid rgba(113, 113, 122, 0.5);
-  background: linear-gradient(150deg, #111827, #0b1120);
+  border-radius: 4px;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface-alt);
   padding: 20px;
   box-shadow: 0 20px 40px -25px rgba(0, 0, 0, 0.8);
 }
 
 .plan-modal-card h3 {
   margin: 0 0 10px;
-  color: #f8fafc;
+  color: var(--app-text);
 }
 
 .plan-modal-card p {
   margin: 0 0 10px;
-  color: #cbd5e1;
+  color: var(--app-text);
   line-height: 1.45;
 }
 
@@ -203,7 +203,7 @@
 
 .pricing-card .btn-paypal-subscribe {
   min-height: 48px;
-  border-radius: 12px;
+  border-radius: 4px;
   font-size: 0.95rem;
   font-weight: 800;
 }
@@ -215,27 +215,26 @@
   grid-template-columns: 1.6fr 1fr;
   gap: 18px;
   align-items: center;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(16, 185, 129, 0.45);
+  background: var(--app-surface);
+  border: 1px solid var(--app-success);
   border-radius: 18px;
   padding: 18px;
 }
 
 .payments-no-scroll {
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 .payments-page {
-  position: fixed;
-  inset: 0;
+  position: relative;
   min-height: 100dvh;
-  height: 100dvh;
-  width: 100vw;
+  height: auto;
+  width: 100%;
   box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible;
   padding: 40px 20px;
 }
 
@@ -243,9 +242,9 @@
   width: min(620px, 100%);
   margin: 0 auto;
   border-radius: 18px;
-  border: 1px solid rgba(16, 185, 129, 0.45);
-  background: rgba(2, 6, 23, 0.85);
-  backdrop-filter: blur(14px);
+  border: 1px solid var(--app-success);
+  background: var(--app-surface-alt);
+  backdrop-filter: none;
   padding: 28px;
   box-shadow: 0 30px 55px -35px rgba(0, 0, 0, 0.78);
 }
@@ -256,23 +255,23 @@
 
 .payment-overlay-card p {
   margin: 0 0 14px;
-  color: rgba(255, 255, 255, 0.86);
+  color: var(--app-text);
 }
 
 .payment-currency-fallback-note {
   margin: 0 0 12px;
   padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid rgba(251, 191, 36, 0.45);
-  background: rgba(217, 119, 6, 0.16);
-  color: #fde68a;
+  border-radius: 4px;
+  border: 1px solid var(--app-warning);
+  background: var(--app-warning-soft);
+  color: var(--app-warning);
   font-size: 0.9rem;
 }
 
 .payment-plan-summary {
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  background: rgba(15, 23, 42, 0.58);
-  border-radius: 14px;
+  border: 1px solid var(--app-primary);
+  background: var(--app-surface);
+  border-radius: 4px;
   padding: 14px;
   margin-bottom: 14px;
 }
@@ -283,22 +282,22 @@
   align-items: center;
   margin-bottom: 8px;
   gap: 10px;
-  color: rgba(226, 232, 240, 0.94);
+  color: var(--app-text);
 }
 
 .payment-plan-row strong {
-  color: #ecfeff;
+  color: var(--app-text);
 }
 
 .payment-plan-features {
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 1px solid rgba(148, 163, 184, 0.22);
+  border-top: 1px solid var(--app-primary);
 }
 
 .payment-plan-features p {
   margin: 0 0 6px;
-  color: #a7f3d0;
+  color: var(--app-success);
   font-size: 0.85rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -308,7 +307,7 @@
 .payment-plan-features ul {
   margin: 0;
   padding-left: 18px;
-  color: rgba(226, 232, 240, 0.95);
+  color: var(--app-text);
   display: grid;
   gap: 4px;
 }
@@ -324,7 +323,7 @@
   font-size: 0.72rem;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: #6ee7b7;
+  color: var(--app-success);
   font-weight: 700;
 }
 
@@ -335,7 +334,7 @@
 
 .checkout-focus-card p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--app-text);
 }
 
 .slide-in-right {
@@ -357,11 +356,11 @@
 .currency-note {
   margin-top: 15px;
   font-size: 0.9rem;
-  color: #00ff88;
-  background: rgba(0, 255, 136, 0.05);
+  color: var(--app-success);
+  background: var(--app-success-soft);
   padding: 10px 15px;
-  border-radius: 8px;
-  border-left: 3px solid #00ff88;
+  border-radius: 4px;
+  border-left: 3px solid var(--app-success);
 }
 
 /* Loading and Error States */
@@ -369,9 +368,9 @@
 .error-state {
   text-align: center;
   padding: 60px 20px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: 4px;
   margin: 20px 0;
 }
 
@@ -382,19 +381,19 @@
 }
 
 .error-state p {
-  color: #ff6b6b;
+  color: var(--app-danger);
 }
 
 .error-state {
-  border-left: 4px solid #ff6b6b;
+  border-left: 4px solid var(--app-danger);
 }
 
 /* Payment Info Section */
 .payment-info {
   margin-top: 60px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: 4px;
   padding: 30px;
   text-align: center;
   place-items: center;
@@ -404,7 +403,7 @@
   margin-top: 0;
   margin-bottom: 20px;
   font-size: 1.3rem;
-  color: #fff;
+  color: var(--app-text);
 }
 
 .payment-info ul {
@@ -420,7 +419,7 @@
   display: list-item;       /* Required to make standard bullets show up correctly */
   text-align: left;
   font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--app-text);
 }
 
 .payment-info li::before {
@@ -429,8 +428,8 @@
   width: 20px;
   height: 20px;
   margin-right: 10px;
-  background: rgba(0, 255, 136, 0.2);
-  border: 1px solid #00ff88;
+  background: var(--app-success-soft);
+  border: 1px solid var(--app-success);
   border-radius: 4px;
   flex-shrink: 0;
 }

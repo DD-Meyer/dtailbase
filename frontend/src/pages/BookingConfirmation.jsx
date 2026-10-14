@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/BookingConfirmation.css';
-import { Hourglass, MapPin, PinIcon } from 'lucide-react';
+import { Hourglass, MapPin, PinIcon, Check } from 'lucide-react';
 
 export default function BookingConfirmation() {
   const { companySlug } = useParams();
@@ -37,7 +37,7 @@ export default function BookingConfirmation() {
       <div className="confirmation-card">
         {/* Success Badge */}
         <div className="success-header">
-          <div className="success-icon">✓</div>
+          <div className="success-icon"><Check size={32} aria-hidden="true" /></div>
           <h1>Booking Submitted Successfully!</h1>
           <p className="subtitle">Thank you for your submission</p>
         </div>

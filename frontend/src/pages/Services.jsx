@@ -1,9 +1,13 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import api from "../axios_instance";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Search } from "lucide-react";
 import "../styles/Services.css";
 import "../styles/EditableRow.css";
 import EditableRow from "../components/EditableRow";
+import CompactRecords from "../components/CompactRecords";
+import RecordDialog from "../components/RecordDialog";
+import { moneyLabel } from "../utils/calendar";
+import { jobError } from "../utils/jobStatus";
 import { showConfirm, showToast } from "../utils/uiFeedback";
 import { useCompany } from "../context/CompanyContext";
 
@@ -13,11 +17,12 @@ function Services() {
   const [editingId, setEditingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [isCompactView, setIsCompactView] = useState(() => window.innerWidth <= TABLET_BREAKPOINT);
   const [showServiceForm, setShowServiceForm] = useState(() => window.innerWidth > TABLET_BREAKPOINT);
   const [showModal, setShowModal] = useState(false);
   const [indemnityTemplates, setIndemnityTemplates] = useState([]);
-  const { currentPlan } = useCompany();
+  const { currentPlan, company } = useCompany();
   const isEnterprisePlan = currentPlan === "ENTERPRISE";
   const linkedTemplateCount = services.filter((service) => Boolean(service.service_indemnity_template)).length;
   const linkedTemplateLimit = 20;
@@ -30,9 +35,19 @@ function Services() {
     service_indemnity_template: "",
   });
 
+  const fetchServices = useCallback(async () => {
+    setLoadError("");
+    try {
+      const res = await api.get("services/?include_inactive=1");
+      if (!Array.isArray(res.data)) throw new Error("Unexpected service response.");
+      setServices(res.data);
+    } catch (err) { setLoadError(jobError(err)); }
+    finally { setLoading(false); }
+  }, []);
+
   useEffect(() => {
     fetchServices();
-  }, []);
+  }, [fetchServices]);
 
   useEffect(() => {
     if (!isEnterprisePlan) {
@@ -64,17 +79,6 @@ function Services() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-
-  const fetchServices = async () => {
-    try {
-      const res = await api.get("services/?include_inactive=1");
-      setServices(res.data);
-      setLoading(false);
-    } catch (err) {
-      console.error("Fetch error:", err);
-      setLoading(false);
-    }
-  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -365,70 +369,32 @@ function Services() {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="search-input"
         />
-        <span className="search-icon">🔍</span>
+        <Search className="search-icon" size={18} aria-hidden="true" />
       </div>
 
       {/* Services Table */}
-      <div className="card services-table-container">
-        <table className="table-standard services-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Duration (minutes)</th>
-              <th>Base Price</th>
-              <th>Indemnity Template</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredServices.map((service) => (
-              <tr key={service.id}>
-                <td data-label="Name">{service.name}</td>
-                <td data-label="Description">{service.description}</td>
-                <td data-label="Duration (Minutes)">{service.duration_minutes}</td>
-                <td data-label="Base Price">{service.base_price}</td>
-                <td data-label="Indemnity Template">
-                  {service.service_indemnity_template_title || "Active Default Template"}
-                </td>
-                <td data-label="Status">
-                  <span className={`badge ${service.is_active ? 'badge-success' : 'badge-ghost'}`}>
-                    {service.is_active ? "Active" : "Inactive"}
-                  </span>
-                </td>
-                <td data-label="Actions">
-                  <div className="service-action-group">
-                    <button className="btn btn-xs team-action-btn team-action-edit" onClick={() => handleEdit(service)}>
-                      Edit
-                    </button>
-                    <button
-                      className={`btn btn-xs team-action-btn ${service.is_active ? 'team-action-deactivate' : 'team-action-reactivate'}`}
-                      onClick={() => handleToggleActive(service)}
-                    >
-                      {service.is_active ? "Deactivate" : "Reactivate"}
-                    </button>
-                    <button className="btn btn-xs team-action-btn team-action-delete" onClick={() => handleDelete(service.id)}>
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {loadError && <div className="record-fetch-error" role="alert">{loadError}<button className="btn btn-secondary" onClick={fetchServices}>Try again</button></div>}
+      {!loadError && <CompactRecords records={filteredServices.map((service) => ({
+        id: service.id, title: service.name, subtitle: `${service.duration_minutes} min · ${service.is_active ? "Active" : "Inactive"}`,
+        meta: moneyLabel(service.base_price, company?.currency || "USD"),
+        fields: [["Description", service.description], ["Duration", `${service.duration_minutes} minutes`],
+          ["Base price", moneyLabel(service.base_price, company?.currency || "USD")],
+          ["Indemnity template", service.service_indemnity_template_title || "Active Default Template"],
+          ["Status", service.is_active ? "Active" : "Inactive"]],
+        actions: [{ label: "Edit service", run: () => handleEdit(service) },
+          { label: service.is_active ? "Deactivate" : "Reactivate", run: () => handleToggleActive(service) },
+          { label: "Delete", danger: true, run: () => handleDelete(service.id) }],
+      }))} emptyMessage="No services match your search." />}
 
       {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h2>Edit Service</h2>
+        <RecordDialog title="Edit service" onClose={cancelEdit}>
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label>Name</label>
                 <input
                   type="text"
                   name="name"
+                  aria-label="Service name"
                   value={formData.name}
                   onChange={handleInputChange}
                   required
@@ -439,6 +405,7 @@ function Services() {
                 <input
                   type="text"
                   name="description"
+                  aria-label="Description"
                   value={formData.description}
                   onChange={handleInputChange}
                 />
@@ -448,6 +415,7 @@ function Services() {
                 <input
                   type="number"
                   name="duration_minutes"
+                  aria-label="Duration in minutes"
                   value={formData.duration_minutes}
                   onChange={handleInputChange}
                   required
@@ -458,6 +426,7 @@ function Services() {
                 <input
                   type="number"
                   name="base_price"
+                  aria-label="Base price"
                   step="0.01"
                   value={formData.base_price}
                   onChange={handleInputChange}
@@ -469,6 +438,7 @@ function Services() {
                 {isEnterprisePlan ? (
                   <select
                     name="service_indemnity_template"
+                    aria-label="Linked indemnity template"
                     value={formData.service_indemnity_template || ""}
                     onChange={handleInputChange}
                   >
@@ -496,8 +466,7 @@ function Services() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+        </RecordDialog>
       )}
     </div>
   );

@@ -3,6 +3,7 @@ import { useParams, useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import api from '../axios_instance';
 import '../styles/PublicBookings.css';
+import { Plus, Car, Building2, Phone, ClipboardList, CalendarDays } from "lucide-react";
 
 export default function PublicBookings() {
   const { companySlug } = useParams();
@@ -119,7 +120,7 @@ export default function PublicBookings() {
                     className="btn btn-secondary" 
                     onClick={() => window.location.href = `/book/${companySlug}`}
                   >
-                    ➕ New Booking
+                    <Plus size={18} aria-hidden="true" /> New booking
                   </button>
                 </div>
                 
@@ -158,7 +159,7 @@ export default function PublicBookings() {
                         <div className="detail-item">
                           <span className="label">Location</span>
                           <span className="value">
-                            {booking.location_type === 'MOBILE' ? '🚗 Mobile – We come to you' : '🏢 On-site at Company'}
+                            {booking.location_type === 'MOBILE' ? <><Car size={16} aria-hidden="true" /> Mobile, we come to you</> : <><Building2 size={16} aria-hidden="true" /> On-site at the workshop</>}
                           </span>
                         </div>
                         {booking.location_type === 'MOBILE' && booking.customer_address && (
@@ -174,7 +175,7 @@ export default function PublicBookings() {
                           <p className="company-name">{booking.company_name}</p>
                           {booking.company_phone && (
                             <a href={`tel:${booking.company_phone}`} className="phone-link">
-                              📞 {booking.company_phone}
+                              <Phone size={16} aria-hidden="true" /> {booking.company_phone}
                             </a>
                           )}
                         </div>
@@ -187,7 +188,7 @@ export default function PublicBookings() {
 
             {searched && bookings.length === 0 && !error && (
               <div className="empty-state">
-                <div className="empty-icon">📋</div>
+                <div className="empty-icon"><ClipboardList size={36} aria-hidden="true" /></div>
                 <h3>No Bookings Found</h3>
                 <p>We couldn't find any bookings for <strong>{email}</strong></p>
                 <p className="empty-hint">If you believe this is an error, please contact us.</p>
@@ -198,7 +199,7 @@ export default function PublicBookings() {
 
         {!searched && (
           <div className="welcome-section">
-            <div className="welcome-icon">👋</div>
+            <div className="welcome-icon"><CalendarDays size={36} aria-hidden="true" /></div>
             <h2>Welcome Back</h2>
             <p>Enter your email address to view and manage your bookings.</p>
             <button 
@@ -206,7 +207,7 @@ export default function PublicBookings() {
               onClick={() => window.location.href = `/book/${companySlug}`}
               style={{ marginTop: '20px' }}
             >
-              ➕ Start a New Booking
+              <Plus size={18} aria-hidden="true" /> Start a new booking
             </button>
           </div>
         )}

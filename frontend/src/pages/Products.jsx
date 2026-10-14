@@ -1,4 +1,4 @@
-import { Calendar, Calendar1, CameraIcon, ShieldIcon, UsersIcon, CreditCardIcon, CarIcon, MapPinIcon, BarChartIcon, SmartphoneIcon } from "lucide-react";
+import { Check, Calendar, Calendar1, CameraIcon, ShieldIcon, UsersIcon, CreditCardIcon, CarIcon, MapPinIcon, BarChartIcon, SmartphoneIcon } from "lucide-react";
 
 const FEATURES = [
   {
@@ -167,7 +167,7 @@ const Products = () => {
             <ul className="product-highlights">
               {feature.highlights.map((h) => (
                 <li key={h}>
-                  <span className="check-mark">✓</span>
+                  <Check className="check-mark" size={18} aria-hidden="true" />
                   {h}
                 </li>
               ))}

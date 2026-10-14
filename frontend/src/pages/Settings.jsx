@@ -309,7 +309,7 @@ function Settings() {
     }
   };
 
-  if (loading) return <div className="p-10 ml-64 text-gray-500">Loading business profile...</div>;
+  if (loading) return <div className="p-4 text-muted" role="status">Loading business profile...</div>;
   if (!company) {
     return (
       <div className="settings-wrapper">
@@ -472,10 +472,10 @@ function Settings() {
                 onChange={e => setCompany({...company, closing_time: e.target.value})} 
               />
             </div>
-            <div className="input-group full-width">
+            <div className={`input-group full-width ${!planLimits.buffer_timer ? "premium-prompt" : ""}`}>
               <div style={{display: 'flex', justifyContent: 'space-between'}}>
                   <label>Booking Buffer</label>
-                  <span style={{color: planLimits.buffer_timer ? '#3b82f6' : '#94a3b8', fontWeight: 'bold'}}>
+                  <span className={!planLimits.buffer_timer ? "premium-badge" : ""}>
                       {company.booking_buffer} min 
                       {!planLimits.buffer_timer && " (Pro Only)"}
                   </span>
@@ -488,6 +488,7 @@ function Settings() {
                   disabled={!planLimits.buffer_timer} // 🛡️ Disable the slider if not allowed
                   onChange={e => setCompany({...company, booking_buffer: e.target.value})} 
               />
+              {!planLimits.buffer_timer && <Link to="/plans">Unlock custom buffers with Professional</Link>}
             </div>
           </div>
         </section>
@@ -545,7 +546,7 @@ function Settings() {
                   && billingSummary.pending_downgrade_plan.toUpperCase() !== effectivePlan
                   && (
                   <div className="input-group full-width">
-                    <p className="settings-note billing-footnote" style={{ color: '#f59e0b', borderLeft: '3px solid #f59e0b', paddingLeft: '0.75rem' }}>
+                    <p className="settings-note billing-footnote" style={{ color: "var(--app-warning)", borderLeft: "3px solid var(--app-warning)", paddingLeft: '0.75rem' }}>
                       ⏳ Your <strong>{effectivePlan}</strong> plan access continues until <strong>{formatDateTime(billingSummary.subscription_ends_at)}</strong>, then downgrades to <strong>{billingSummary.pending_downgrade_plan}</strong>.
                     </p>
                   </div>
@@ -607,7 +608,7 @@ function Settings() {
                 <div className="input-group full-width">
                   <label>Billing Controls</label>
                   <div className="billing-actions">
-                    <Link to="/plans" className="btn-save btn-billing-manage">
+                    <Link to="/plans" className={isStarterPlan ? "btn btn-premium" : "btn-save btn-billing-manage"}>
                       {isStarterPlan ? "Upgrade Plan" : "Change / Downgrade Plan"}
                     </Link>
                     {!isStarterPlan && hasActiveSubscription && Boolean(billingSummary?.cancel_available) && (

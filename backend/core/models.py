@@ -8,6 +8,14 @@ from indemnity.models import *
 
 # Create your models here.
 
+class PasswordResetDelivery(models.Model):
+    email = models.EmailField()
+    created_at = models.DateTimeField(default=timezone.now)
+    next_attempt_at = models.DateTimeField(default=timezone.now, db_index=True)
+    attempts = models.PositiveSmallIntegerField(default=0)
+    finished_at = models.DateTimeField(null=True, blank=True)
+
+
 class Customer(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     company = models.ForeignKey(

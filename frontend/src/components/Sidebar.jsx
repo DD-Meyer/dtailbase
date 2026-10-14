@@ -3,7 +3,8 @@ import { Link, useLocation } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useSupportNotifications } from "../context/SupportNotificationContext";
-import { CalendarDays, Car, ChevronDown, ChevronUp, ShieldCheck, Settings, UserRound, Users, UserCog, Wrench } from "lucide-react";
+import headerLogo from ".././../public/landing/images/logo.svg";
+import { House, CalendarRange, CalendarDays, Car, ChevronDown, ChevronUp, Plus, ShieldCheck, Settings, UserRound, Users, UserCog, Wrench } from "lucide-react";
 import "../styles/Sidebar.css";
 
 // ... imports stay the same ...
@@ -16,6 +17,8 @@ function Sidebar({ isCollapsed = false, onToggleCollapse }) {
   const collapsed = typeof onToggleCollapse === "function" ? isCollapsed : internalCollapsed;
 
   const menuItems = [
+    { path: "/dashboard", label: "Home", icon: House },
+    { path: "/schedule", label: "Schedule", icon: CalendarRange },
     { path: "/bookings", label: "Bookings", icon: CalendarDays },
     { path: "/customers", label: "Customers", icon: Users },
     { path: "/vehicles", label: "Vehicles", icon: Car },
@@ -46,9 +49,13 @@ function Sidebar({ isCollapsed = false, onToggleCollapse }) {
       {/* NEW HEADER SECTION */}
       <div className="sidebar-header">
         <div className="sidebar-logo">
-          <h2 className="tracking-tight">{collapsed ? (<><span className="text-white">D</span><span className="bg-linear-to-r from-blue-500 to-sky-400 bg-clip-text text-transparent">B</span></>) : (<><span className="text-white">Dtail</span><span className="bg-linear-to-r from-blue-500 to-sky-400 bg-clip-text text-transparent">base</span></>)}</h2>
+          <h2 className="tracking-tight">{
+          collapsed ?
+          (<><span className="text-white"><img src={headerLogo} alt="" width="24" height="24" /></span></>)
+          :
+          (<><span className=" text-white inline-flex items-center gap-2"><img src={headerLogo} alt="" width="24" height="24" /> DtailBase</span></>)}</h2>
         </div>
-        <button className="collapse-toggle" onClick={toggleSidebar} title="Toggle Sidebar">
+        <button className="collapse-toggle" onClick={toggleSidebar} title="Toggle Sidebar" aria-label="Toggle sidebar">
           {collapsed ? (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></svg>
           ) : (
@@ -75,6 +82,7 @@ function Sidebar({ isCollapsed = false, onToggleCollapse }) {
       <hr className="sidebar-divider" />
 
       <div className="sidebar-footer">
+        <Link className="sidebar-new-booking" to="/new-booking" title="New booking"><Plus size={18} aria-hidden="true" />{!collapsed && "New booking"}</Link>
         <ul className="sidebar-links">
           <li className={location.pathname === "/profile" ? "active" : ""}>
             <Link to="/profile" title="My Profile">

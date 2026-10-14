@@ -8,9 +8,8 @@
 
 .hero {
   padding: clamp(48px, 8vw, 96px) 0 clamp(24px, 4vw, 40px);
-  text-align: center;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(35, 180, 255, 0.14) 0%, transparent 60%);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .eyebrow {
@@ -27,19 +26,19 @@
 }
 
 .title {
-  font-size: clamp(2rem, 4.5vw, 3.75rem);
-  font-weight: 800;
+  font-size: clamp(3rem, 5.3vw, 5.2rem);
+  font-weight: 700;
   color: var(--color-foreground);
   max-width: 720px;
-  margin: 0 auto 20px;
-  line-height: 1.1;
-  letter-spacing: var(--tracking-tight);
+  margin: 0 0 25px;
+  line-height: 1;
+  letter-spacing: -0.055em;
 }
 .titleAccent { color: var(--color-primary-strong); }
 
 .lede {
   max-width: 560px;
-  margin: 0 auto;
+  margin: 0;
   font-size: var(--fs-md);
   color: var(--color-text-muted);
   line-height: 1.6;

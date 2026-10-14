@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./styles/theme.css";
 import "./styles/tailwind.css";
+import "./styles/AppTheme.css";
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 if (!googleClientId) {

@@ -316,7 +316,7 @@ function SupportAdminInbox() {
         <p className="text-muted mt-2">
           Hidden admin-only command center. Enterprise companies appear in a dedicated priority lane.
         </p>
-        {error && <p className="mt-3" style={{ color: "#fca5a5" }}>{error}</p>}
+        {error && <p className="mt-3" style={{ color: "var(--app-danger)" }}>{error}</p>}
       </div>
 
       <div className="card" style={{ marginTop: "1rem" }}>
@@ -343,8 +343,8 @@ function SupportAdminInbox() {
                 <span
                   style={{
                     marginLeft: "8px",
-                    background: "#ef4444",
-                    color: "#fff",
+                    background: "var(--app-danger)",
+                    color: "var(--app-on-primary)",
                     borderRadius: "9px",
                     padding: "2px 8px",
                     fontSize: "0.75rem",
@@ -355,7 +355,7 @@ function SupportAdminInbox() {
                 </span>
               )}
             </h2>
-            <span aria-hidden="true" style={{ fontSize: "1.1rem", color: "#9ab2d2" }}>
+            <span aria-hidden="true" style={{ fontSize: "1.1rem", color: "var(--app-muted)" }}>
               {notificationsCollapsed ? "▼" : "▲"}
             </span>
           </button>
@@ -379,10 +379,10 @@ function SupportAdminInbox() {
                 <div
                   key={`${row.created_at || index}-${row.company_name || "company"}`}
                   style={{
-                    border: "1px solid rgba(123, 154, 196, 0.28)",
+                    border: "1px solid var(--app-primary)",
                     borderRadius: "8px",
                     padding: "10px",
-                    background: "rgba(15, 26, 43, 0.45)",
+                    background: "var(--app-overlay)",
                   }}
                 >
                   <strong>{row.company_name || "Company"}</strong>
@@ -415,17 +415,17 @@ function SupportAdminInbox() {
             placeholder="Search company, subject, message..."
             style={{
               gridColumn: "1 / -1",
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(123, 154, 196, 0.28)",
+              background: "var(--app-surface)",
+              border: "1px solid var(--app-primary)",
               padding: "10px",
-              color: "white",
+              color: "var(--app-text)",
               borderRadius: "8px",
             }}
           />
           <select
             value={filterType}
             onChange={(event) => setFilterType(event.target.value)}
-            style={{ background: "#ffffff", border: "1px solid rgba(123, 154, 196, 0.28)", padding: "10px", color: "#0f172a", borderRadius: "8px" }}
+            style={{ background: "var(--app-surface)", border: "1px solid var(--app-primary)", padding: "10px", color: "var(--app-text)", borderRadius: "8px" }}
             aria-label="Type"
           >
             <option value="ALL">All conversations</option>
@@ -435,7 +435,7 @@ function SupportAdminInbox() {
           <select
             value={filterStatus}
             onChange={(event) => setFilterStatus(event.target.value)}
-            style={{ background: "#ffffff", border: "1px solid rgba(123, 154, 196, 0.28)", padding: "10px", color: "#0f172a", borderRadius: "8px" }}
+            style={{ background: "var(--app-surface)", border: "1px solid var(--app-primary)", padding: "10px", color: "var(--app-text)", borderRadius: "8px" }}
             aria-label="Status"
           >
             <option value="ALL">All statuses</option>
@@ -447,7 +447,7 @@ function SupportAdminInbox() {
           <select
             value={filterLane}
             onChange={(event) => setFilterLane(event.target.value)}
-            style={{ background: "#ffffff", border: "1px solid rgba(123, 154, 196, 0.28)", padding: "10px", color: "#0f172a", borderRadius: "8px" }}
+            style={{ background: "var(--app-surface)", border: "1px solid var(--app-primary)", padding: "10px", color: "var(--app-text)", borderRadius: "8px" }}
             aria-label="Lane"
           >
             <option value="ALL">All lanes</option>
@@ -457,7 +457,7 @@ function SupportAdminInbox() {
           <select
             value={filterAttendance}
             onChange={(event) => setFilterAttendance(event.target.value)}
-            style={{ background: "#ffffff", border: "1px solid rgba(123, 154, 196, 0.28)", padding: "10px", color: "#0f172a", borderRadius: "8px" }}
+            style={{ background: "var(--app-surface)", border: "1px solid var(--app-primary)", padding: "10px", color: "var(--app-text)", borderRadius: "8px" }}
             aria-label="Attendance"
           >
             <option value="ALL">Any attendance</option>
@@ -471,11 +471,11 @@ function SupportAdminInbox() {
       {filterType !== "TICKETS" && (
       <div className="card" style={{ marginTop: "1rem" }}>
         <h2 className="text-lg font-semibold">Chat Rooms</h2>
-        {claimError && <p style={{ color: "#fca5a5", marginTop: "8px" }}>{claimError}</p>}
+        {claimError && <p style={{ color: "var(--app-danger)", marginTop: "8px" }}>{claimError}</p>}
         {filteredChatRoomFeed.length === 0 ? (
           <p className="text-muted mt-2">No chat rooms match your filters.</p>
         ) : (
-          <div style={{ border: "1px solid rgba(123, 154, 196, 0.28)", borderRadius: "10px", padding: "12px", maxHeight: "360px", overflowY: "auto", marginTop: "12px" }}>
+          <div style={{ border: "1px solid var(--app-primary)", borderRadius: "10px", padding: "12px", maxHeight: "360px", overflowY: "auto", marginTop: "12px" }}>
             {filteredChatRoomFeed.map((row) => {
               const attendedByOther = Boolean(row.assigned_to_id) && !isAttendedByMe(row);
               return (
@@ -485,13 +485,13 @@ function SupportAdminInbox() {
                     marginBottom: "10px",
                     padding: "10px",
                     borderRadius: "8px",
-                    background: row.support_lane === "PRIORITY" ? "rgba(56, 189, 248, 0.22)" : "rgba(148, 163, 184, 0.18)",
-                    color: "#eaf3ff",
+                    background: row.support_lane === "PRIORITY" ? "var(--app-primary-soft)" : "var(--app-primary-soft)",
+                    color: "var(--app-text)",
                     border: isAttendedByMe(row)
-                      ? "1px solid rgba(34, 197, 94, 0.6)"
+                      ? "1px solid var(--app-success)"
                       : attendedByOther
-                        ? "1px solid rgba(251, 191, 36, 0.55)"
-                        : "1px solid rgba(123, 154, 196, 0.28)",
+                        ? "1px solid var(--app-warning)"
+                        : "1px solid var(--app-primary)",
                   }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
@@ -503,11 +503,11 @@ function SupportAdminInbox() {
                       className="badge"
                       style={{
                         background: isAttendedByMe(row)
-                          ? "#bbf7d0"
+                          ? "var(--app-success-soft)"
                           : attendedByOther
-                            ? "#fde68a"
-                            : "#e5e7eb",
-                        color: isAttendedByMe(row) ? "#065f46" : attendedByOther ? "#92400e" : "#1f2937",
+                            ? "var(--app-warning-soft)"
+                            : "var(--app-surface-alt)",
+                        color: isAttendedByMe(row) ? "var(--app-success)" : attendedByOther ? "var(--app-warning)" : "var(--app-text)",
                         fontWeight: 600,
                       }}
                     >
@@ -516,7 +516,7 @@ function SupportAdminInbox() {
                   </div>
                   <p style={{ marginTop: "6px", marginBottom: "6px", fontWeight: 500 }}>{row.ticket_subject}</p>
                   <p style={{ margin: 0, fontSize: "0.9rem" }}>{row.last_message}</p>
-                  <small style={{ color: "#cbd5f5" }}>{row.last_sender_email} • {formatDate(row.last_message_at)}</small>
+                  <small style={{ color: "var(--app-text)" }}>{row.last_sender_email} • {formatDate(row.last_message_at)}</small>
                   <div style={{ display: "flex", gap: "8px", marginTop: "8px", flexWrap: "wrap" }}>
                     <button
                       type="button"
@@ -572,10 +572,10 @@ function SupportAdminInbox() {
         ) : (
           <div style={{ display: "grid", gap: "10px", marginTop: "12px" }}>
             {filteredPriorityLane.map((company) => (
-              <div key={company.company_id} style={{ border: "1px solid rgba(123, 154, 196, 0.28)", borderRadius: "10px", padding: "10px" }}>
+              <div key={company.company_id} style={{ border: "1px solid var(--app-primary)", borderRadius: "10px", padding: "10px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: "8px" }}>
                   <strong>{company.company_name}</strong>
-                  <span className="badge ticket-count-badge" style={{ background: "#fef3c7", color: "#92400e" }}>{company.ticket_count} tickets</span>
+                  <span className="badge ticket-count-badge" style={{ background: "var(--app-warning-soft)", color: "var(--app-warning)" }}>{company.ticket_count} tickets</span>
                 </div>
                 <div style={{ marginTop: "8px", display: "grid", gap: "8px" }}>
                   {(company.tickets || []).map((ticket) => {
@@ -589,12 +589,12 @@ function SupportAdminInbox() {
                           textAlign: "left",
                           width: "100%",
                           border: isAttendedByMe(ticket)
-                            ? "1px solid rgba(34, 197, 94, 0.6)"
+                            ? "1px solid var(--app-success)"
                             : attendedByOther
-                              ? "1px solid rgba(251, 191, 36, 0.55)"
-                              : "1px solid rgba(123, 154, 196, 0.28)",
-                          background: "rgba(15, 26, 43, 0.6)",
-                          color: "#eaf3ff",
+                              ? "1px solid var(--app-warning)"
+                              : "1px solid var(--app-primary)",
+                          background: "var(--app-overlay)",
+                          color: "var(--app-text)",
                           borderRadius: "8px",
                           padding: "10px",
                           cursor: "pointer",
@@ -604,7 +604,7 @@ function SupportAdminInbox() {
                           <span>{ticket.subject}</span>
                           <small>{ticket.status}</small>
                         </div>
-                        <small style={{ color: isAttendedByMe(ticket) ? "#bbf7d0" : attendedByOther ? "#fde68a" : "#cbd5f5" }}>
+                        <small style={{ color: isAttendedByMe(ticket) ? "var(--app-success)" : attendedByOther ? "var(--app-warning)" : "var(--app-text)" }}>
                           {attendanceLabel(ticket)}
                         </small>
                       </button>
@@ -624,10 +624,10 @@ function SupportAdminInbox() {
         ) : (
           <div style={{ display: "grid", gap: "10px", marginTop: "12px" }}>
             {filteredStandardLane.map((company) => (
-              <div key={company.company_id} style={{ border: "1px solid rgba(123, 154, 196, 0.28)", borderRadius: "10px", padding: "10px" }}>
+              <div key={company.company_id} style={{ border: "1px solid var(--app-primary)", borderRadius: "10px", padding: "10px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: "8px" }}>
                   <strong>{company.company_name}</strong>
-                  <span className="badge ticket-count-badge" style={{ background: "#dbeafe", color: "#1e3a8a" }}>{company.ticket_count} tickets</span>
+                  <span className="badge ticket-count-badge" style={{ background: "var(--app-surface-alt)", color: "var(--app-primary)" }}>{company.ticket_count} tickets</span>
                 </div>
                 <div style={{ marginTop: "8px", display: "grid", gap: "8px" }}>
                   {(company.tickets || []).map((ticket) => {
@@ -641,12 +641,12 @@ function SupportAdminInbox() {
                           textAlign: "left",
                           width: "100%",
                           border: isAttendedByMe(ticket)
-                            ? "1px solid rgba(34, 197, 94, 0.6)"
+                            ? "1px solid var(--app-success)"
                             : attendedByOther
-                              ? "1px solid rgba(251, 191, 36, 0.55)"
-                              : "1px solid rgba(123, 154, 196, 0.28)",
-                          background: "rgba(15, 26, 43, 0.6)",
-                          color: "#eaf3ff",
+                              ? "1px solid var(--app-warning)"
+                              : "1px solid var(--app-primary)",
+                          background: "var(--app-overlay)",
+                          color: "var(--app-text)",
                           borderRadius: "8px",
                           padding: "10px",
                           cursor: "pointer",
@@ -656,7 +656,7 @@ function SupportAdminInbox() {
                           <span>{ticket.subject}</span>
                           <small>{ticket.status}</small>
                         </div>
-                        <small style={{ color: isAttendedByMe(ticket) ? "#bbf7d0" : attendedByOther ? "#fde68a" : "#cbd5f5" }}>
+                        <small style={{ color: isAttendedByMe(ticket) ? "var(--app-success)" : attendedByOther ? "var(--app-warning)" : "var(--app-text)" }}>
                           {attendanceLabel(ticket)}
                         </small>
                       </button>
@@ -680,11 +680,11 @@ function SupportAdminInbox() {
             <div style={{ marginTop: "10px", marginBottom: "10px" }}>
               <strong>{activeTicket.subject}</strong>
               <p className="text-muted">{activeTicket.company_name} • {activeTicket.company_plan}</p>
-              <p style={{ marginTop: "4px", color: isAttendedByMe(activeTicket) ? "#bbf7d0" : activeTicket.assigned_to_email ? "#fde68a" : "#cbd5f5" }}>
+              <p style={{ marginTop: "4px", color: isAttendedByMe(activeTicket) ? "var(--app-success)" : activeTicket.assigned_to_email ? "var(--app-warning)" : "var(--app-text)" }}>
                 {attendanceLabel(activeTicket)}
               </p>
             </div>
-            <div style={{ border: "1px solid rgba(123, 154, 196, 0.28)", borderRadius: "10px", padding: "12px", maxHeight: "320px", overflowY: "auto" }}>
+            <div style={{ border: "1px solid var(--app-primary)", borderRadius: "10px", padding: "12px", maxHeight: "320px", overflowY: "auto" }}>
               {ticketMessages.length === 0 ? (
                 <p className="text-muted">No messages yet.</p>
               ) : (
@@ -695,7 +695,7 @@ function SupportAdminInbox() {
                       marginBottom: "8px",
                       padding: "8px",
                       borderRadius: "8px",
-                      background: row.is_admin_reply ? "rgba(56, 189, 248, 0.22)" : "rgba(148, 163, 184, 0.2)",
+                      background: row.is_admin_reply ? "var(--app-primary-soft)" : "var(--app-primary-soft)",
                     }}
                   >
                     <p>{row.message}</p>
@@ -712,10 +712,10 @@ function SupportAdminInbox() {
                 placeholder="Reply to this ticket..."
                 style={{
                   width: "100%",
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(123, 154, 196, 0.28)",
+                  background: "var(--app-surface)",
+                  border: "1px solid var(--app-primary)",
                   padding: "10px",
-                  color: "white",
+                  color: "var(--app-text)",
                   borderRadius: "8px",
                 }}
               />

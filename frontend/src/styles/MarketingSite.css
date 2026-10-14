@@ -1,0 +1,85 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap");
+
+/* Figma Make's editorial palette is deliberately limited to marketing pages. */
+.dbase-public.dbase-marketing {
+  --marketing-ink: #121312;
+  --marketing-ink-soft: #4f514c;
+  --marketing-paper: #f5f1e8;
+  --marketing-paper-deep: #ebe5d8;
+  --marketing-white: #fffdf8;
+  --marketing-blue: #2456e6;
+  --marketing-blue-dark: #193fb8;
+  --marketing-lime: var(--brand-lime);
+  --marketing-line: rgba(18, 19, 18, 0.17);
+  --font-sans: "Manrope", Arial, sans-serif;
+  --font-display: "DM Serif Display", Georgia, serif;
+  --color-primary: var(--marketing-blue);
+  --color-primary-strong: var(--marketing-blue-dark);
+  --color-primary-soft: #e0e6fc;
+  --color-on-primary: #ffffff;
+  --color-accent: var(--marketing-blue);
+  --color-accent-strong: var(--marketing-blue-dark);
+  --color-accent-soft: var(--marketing-paper-deep);
+  --color-on-accent: #ffffff;
+  --color-background: var(--marketing-paper);
+  --color-surface: var(--marketing-white);
+  --color-surface-alt: var(--marketing-paper-deep);
+  --color-muted: var(--marketing-paper-deep);
+  --color-border: var(--marketing-line);
+  --color-border-subtle: rgba(18, 19, 18, 0.1);
+  --color-foreground: var(--marketing-ink);
+  --color-text: var(--marketing-ink);
+  --color-text-muted: var(--marketing-ink-soft);
+  --color-text-subtle: #666861;
+  --color-success: #277442;
+  --color-ring: var(--marketing-blue);
+  --color-destructive: #b4233d;
+  --radius-xs: 2px;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 2px;
+  --radius-2xl: 2px;
+  --radius-pill: 2px;
+  --container-wide: 1240px;
+  --section-py: clamp(64px, 8vw, 110px);
+  --section-py-lg: clamp(90px, 9vw, 130px);
+  --elev-focus: 0 0 0 3px rgba(36, 86, 230, 0.4);
+  color-scheme: light;
+  font-family: var(--font-sans);
+}
+
+.dbase-marketing h1 {
+  font-size: clamp(36px, 4.2vw, 60px);
+  font-weight: 700;
+  letter-spacing: -0.055em;
+}
+
+.dbase-marketing p { overflow-wrap: break-word; }
+@media (prefers-reduced-motion: reduce) {
+  .dbase-marketing *, .dbase-marketing *::before, .dbase-marketing *::after {
+    animation: none !important; transition: none !important; scroll-behavior: auto !important;
+  }
+}
+
+.dbase-marketing h1 em,
+.dbase-marketing h2 em,
+.dbase-marketing h1 > span {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.dbase-marketing a,
+.dbase-marketing summary {
+  cursor: pointer;
+}
+
+.dbase-marketing :focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 4px;
+}
+
+.dbase-marketing button:disabled {
+  cursor: not-allowed;
+}

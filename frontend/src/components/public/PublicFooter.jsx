@@ -1,6 +1,8 @@
+import { createElement } from "react";
 import { Link } from "react-router-dom";
 import { Mail } from "lucide-react";
 import styles from "./PublicFooter.module.css";
+import footerLogo from ".././../../public/landing/images/logo.svg";
 
 const Icon = ({ children, label }) => (
   <svg
@@ -39,9 +41,11 @@ const InstagramIcon = () => (
 
 const FOOTER_LINKS = [
   {
-    title: "Product",
+    title: "Platform",
     links: [
-      { to: "/products", label: "Features" },
+      { to: "/products", label: "Products" },
+      { to: "/#platform", label: "Features" },
+      { to: "/#workflow", label: "How it works" },
       { to: "/plans", label: "Pricing" },
     ],
   },
@@ -50,14 +54,15 @@ const FOOTER_LINKS = [
     links: [
       { to: "/about", label: "About" },
       { to: "/contact", label: "Contact" },
+      { to: "/Our-Story", label: "Our story" },
     ],
   },
   {
-    title: "Resources",
+    title: "Support",
     links: [
       { to: "/help-center", label: "Help center" },
-      { to: "/support-info", label: "Support" },
-      { to: "/legal", label: "Legal" },
+      { to: "/contact", label: "Get in touch" },
+      { to: "/login", label: "Sign in" },
     ],
   },
 ];
@@ -76,12 +81,11 @@ export default function PublicFooter() {
         <div className={styles.top}>
           <div className={styles.brandCol}>
             <Link to="/" className={styles.brand}>
-              <span className={styles.brandMark} aria-hidden="true">D</span>
-              <span className={styles.brandName}>DtailBase</span>
+              <img src={footerLogo} alt="" width="34" height="34" />
+              <span>DtailBase</span>
             </Link>
             <p className={styles.tag}>
-              The all-in-one booking, payments, and job-management
-              platform built for auto detailers.
+              The simpler way to run a professional detailing business.
             </p>
 
             <a href="mailto:info@netictechnologies.com" className={styles.contactLink}>
@@ -116,7 +120,6 @@ export default function PublicFooter() {
           <div className={styles.legalLinks}>
             <Link to="/legal">Terms</Link>
             <Link to="/legal">Privacy</Link>
-            <Link to="/legal">Refund policy</Link>
           </div>
 
           <ul className={styles.socials} aria-label="Social links">
@@ -129,7 +132,7 @@ export default function PublicFooter() {
                   aria-label={label}
                   className={styles.social}
                 >
-                  <Icon size={16} strokeWidth={2.25} />
+                  {createElement(Icon, { size: 16, strokeWidth: 2.25 })}
                 </a>
               </li>
             ))}

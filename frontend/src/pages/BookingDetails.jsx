@@ -1,270 +1,167 @@
-// BookingDetails.jsx - Detailed view for a single booking, including indemnity and photos
-// This page fetches the booking details, displays customer and vehicle info,
-// shows the indemnity signature and photos, and allows downloading the signed PDF agreement if available.
-const API_BASE_URL = import.meta.env.VITE_API_URL || "";
-
-const normalizeSecureUrl = (rawUrl) => {
-  if (!rawUrl) return "";
-  if (window.location.protocol === "https:" && rawUrl.startsWith("http://")) {
-    return rawUrl.replace("http://", "https://");
-  }
-  return rawUrl;
-};
-
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { ArrowLeft, Building2, Car, Copy, Download, Eye, MapPin } from "lucide-react";
 import api from "../axios_instance";
-import "../styles/BookingDetails.css";
+import JobActions, { JobTimer } from "../components/JobActions";
+import RecordDialog from "../components/RecordDialog";
+import { useCompany } from "../context/CompanyContext";
 import { formatShortRef } from "../utils/formatters";
+import { dateLabel, moneyLabel } from "../utils/calendar";
+import { JOB_LABELS, jobError } from "../utils/jobStatus";
 import { showToast } from "../utils/uiFeedback";
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
-import { CircleAlertIcon, ClipboardCheckIcon, FormIcon, LocateIcon, EyeIcon } from "lucide-react";
+import "../styles/BookingDetails.css";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+const STEPS = ["PENDING", "CONFIRMED", "IN_PROGRESS", "COMPLETED"];
+
+function imageUrl(url) {
+  if (!url) return "";
+  const absolute = /^(https?:|data:)/.test(url) ? url : `${API_BASE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
+  return window.location.protocol === "https:" ? absolute.replace(/^http:/, "https:") : absolute;
+}
+
+function PhotoSection({ title, photos, empty }) {
+  return <section className="report-gallery-section">
+    <h3>{title}<span>{photos.length} photos</span></h3>
+    {photos.length ? <div className="report-photo-grid">{photos.map((photo, index) =>
+      <a href={imageUrl(photo.image)} target="_blank" rel="noreferrer" key={photo.id || photo.image}>
+        <img src={imageUrl(photo.image)} alt={`${title} photo ${index + 1}`} loading="lazy" />
+      </a>)}</div> : <p className="report-empty">{empty}</p>}
+  </section>;
+}
 
 export default function BookingDetail() {
   const { id } = useParams();
+  const { company } = useCompany();
   const [booking, setBooking] = useState(null);
-  const [isDownloading, setIsDownloading] = useState(false); // Track download state
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [showIndemnityText, setShowIndemnityText] = useState(false);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchDetail = async () => {
-      try {
-        const res = await api.get(`bookings/${id}/`);
-        setBooking(res.data);
-      } catch (err) {
-        console.error("Error fetching details", err);
-      }
-    };
-    fetchDetail();
+  const fetchDetail = useCallback(async (rethrow = false) => {
+    setError("");
+    try {
+      const { data } = await api.get(`bookings/${id}/`);
+      setBooking(data);
+    } catch (failure) {
+      setError(jobError(failure));
+      if (rethrow) throw failure;
+    } finally { setLoading(false); }
   }, [id]);
+  useEffect(() => {
+    setBooking(null);
+    setLoading(true);
+    fetchDetail();
+  }, [fetchDetail]);
+  const retry = () => { fetchDetail(); };
 
-  // --- LOGIC: Handle PDF Download ---
   const handleDownloadPDF = async () => {
-    if (!booking.indemnity_data?.pdf_file) return;
-    
+    if (isDownloading || !booking.indemnity_data?.pdf_file) return;
     setIsDownloading(true);
     try {
-      const response = await api.get(`indemnity/agreements/${booking.indemnity_data.id}/download/`, {
-        responseType: 'blob',
-      });
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
+      const response = await api.get(`indemnity/agreements/${booking.indemnity_data.id}/download/`, { responseType: "blob" });
+      const url = URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
       link.href = url;
-      link.setAttribute('download', `Agreement_${booking.vehicle_details?.registration || id}.pdf`);
+      link.download = `Agreement_${booking.vehicle?.registration || id}.pdf`;
       document.body.appendChild(link);
       link.click();
       link.remove();
-    } catch (err) {
-      console.error("Download failed", err);
-      showToast("Could not download PDF. Check if it's generated.", "error");
-    } finally {
-      setIsDownloading(false);
-    }
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (failure) { showToast(`Could not download PDF: ${jobError(failure)}`, "error"); }
+    finally { setIsDownloading(false); }
   };
-
-  const handleViewSignedForm = () => {
-    const signedHtml = booking?.indemnity_data?.signed_body_html;
-    const fallbackTemplateHtml = booking?.indemnity_data?.template_body_html;
-    if (!signedHtml && !fallbackTemplateHtml) {
-      showToast("Signed indemnity text is not available on this record yet.", "error");
-      return;
-    }
-    setShowIndemnityText(true);
+  const copyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(booking.indemnity_data.signing_address);
+      showToast("Address copied.", "success");
+    } catch (failure) { showToast(`Could not copy address: ${jobError(failure)}`, "error"); }
   };
+  if (!booking) return <div className="booking-report">
+    <Link to="/bookings" className="report-back"><ArrowLeft size={18} />Back to bookings</Link>
+    {error ? <div role="alert" className="record-fetch-error"><p>{error}</p><button className="btn btn-secondary" onClick={retry}>Try again</button></div> :
+      <p role="status">{loading ? "Loading job report..." : "Job report unavailable."}</p>}
+  </div>;
 
-  if (!booking) return <div className="page-container">Loading details...</div>;
-
-  // --- LOGIC: Handle nested Indemnity & Photos ---
   const indemnity = booking.indemnity_data;
-  const signedIndemnityHtml = indemnity?.signed_body_html || indemnity?.template_body_html || '';
   const photos = indemnity?.photos || [];
-  const toAbsoluteUrl = (url) => {
-    if (!url) return "";
-    if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
-      return normalizeSecureUrl(url);
-    }
-    const safeBaseUrl = normalizeSecureUrl(API_BASE_URL);
-    if (url.startsWith("/")) return `${safeBaseUrl}${url}`;
-    return `${safeBaseUrl}/${url}`;
-  };
-  
-  // Filter photos by type from the combined list
-  const beforePhotos = photos.filter(p => p.photo_type === 'BEFORE');
-  const afterPhotos = photos.filter(p => p.photo_type === 'AFTER');
-
-  return (
-    <div className="page-container">
-      <div className="booking-header-action-btns">
-        <button className="btn-secondary" onClick={() => navigate(-1)}><ArrowLeftIcon className="h-6 w-5"/></button>
-
-        {/* DOWNLOAD BUTTON - More resilient logic */}
-        {indemnity ? (
-          <div className="action-buttons-grid" style={{ gap: '10px' }}>
-            <button
-              className="btn-secondary"
-              onClick={handleViewSignedForm}
-              disabled={!indemnity.pdf_file}
-            >
-              {!indemnity.pdf_file ? <><CircleAlertIcon className="h-5 w-5 mr-2"/> Form Processing...</> : <><EyeIcon className="h-5 w-5 mr-2"/> View Signed Form</>}
-            </button>
-            <button 
-              className="btn-primary" 
-              onClick={handleDownloadPDF}
-              disabled={isDownloading || !indemnity.pdf_file}
-            >
-              {isDownloading ? "Downloading..." : 
-              !indemnity.pdf_file ? <><CircleAlertIcon className="h-5 w-5 mr-2"/> PDF Generating...</> : <><FormIcon className="h-5 w-5 mr-2"/> Download Signed PDF</>}
-            </button>
-          </div>
-        ) : (
-          <span className="text-muted small">Indemnity not yet signed</span>
-        )}
-      </div>
-
-      {/* Inside BookingDetails.jsx */}
-      {indemnity && indemnity.latitude && (
-        <div className="action-buttons-grid flex-between gap-2 mt-4">
-          <button 
-            className="btn-map"
-            onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${indemnity.latitude},${indemnity.longitude}`, '_blank')}
-          >
-            <LocateIcon className="h-5 w-5 mr-2"/> View Signing Location
-          </button>
-          
-          {indemnity.signing_address && (
-            <button 
-              className="btn-secondary small"
-              onClick={() => {
-                navigator.clipboard.writeText(indemnity.signing_address);
-                showToast("Address copied to clipboard!", "success");
-              }}
-            >
-              <ClipboardCheckIcon className="h-5 w-5 mr-2 inline"/> Copy Address
-            </button>
-          )}
-        </div>
-      )}
-
-      <div className="flex-between mb-4">
-        <h1>Job Card: {booking.vehicle?.registration}</h1>
-        <span className={`status-badge ${booking.status.toLowerCase()}`}>{booking.status}</span>
-        <span className="text-muted small">Ref: {formatShortRef(booking.id)}</span>
-      </div>
-
-      <div className="grid-2-col mb-6">
-        {/* Customer & Vehicle Info */}
-        <div className="card">
-          <h3>Customer Information</h3>
-          {/* Note: Serializer now provides customer_details object */}
-          <p><strong>Name:</strong> {booking.customer?.firstname} {booking.customer?.lastname}</p>
-          <p><strong>Phone:</strong> {booking.customer?.phone}</p>
-          <p><strong>Vehicle:</strong> {booking.vehicle?.make} {booking.vehicle?.model}</p>
-          <p><strong>Service:</strong> {booking.service_name}</p>
-          <p><strong>Location Type:</strong> {booking.location_type === 'MOBILE' ? '🚗 Mobile – Go to Customer' : '🏢 On-site at Company'}</p>
-          {booking.location_type === 'MOBILE' && booking.customer_address && (
-            <p><strong>Customer Address:</strong> {booking.customer_address}</p>
-          )}
-        </div>
-
-        {/* Timestamps & Authorization */}
-        <div className="card">
-          <h3>Work Logs</h3>
-          <p><strong>Started:</strong> {booking.started_at ? new Date(booking.started_at).toLocaleString() : 'Not started'}</p>
-          {booking.completed_at && (
-            <p><strong>Completed:</strong> {new Date(booking.completed_at).toLocaleString()}</p>
-          )}
-          <div className="mt-3">
-            <strong>Staff Authorization (Check-in):</strong><br/>
-            {booking.admin_signature ? (
-                <img src={toAbsoluteUrl(booking.admin_signature)} alt="Admin Auth" style={{ width: '150px', borderBottom: '1px solid #eee', background: 'white' }} />
-            ) : <p className="text-muted">No staff signature</p>}
-          </div>
-        </div>
-      </div>
-
-      {/* PHOTO GALLERY SECTION */}
-      <div className="card">
-        <h3>Inspection Gallery</h3>
-        <hr />
-        
-          <div className="gallery-section mt-4">
-            <h4>Before Service (Arrival)</h4>
-            <div className="photo-grid">
-              {beforePhotos.map((img, index) => (
-                <a href={toAbsoluteUrl(img.image)} target="_blank" key={index} rel="noreferrer">
-                  <img src={toAbsoluteUrl(img.image)} alt="Before" className="gallery-img" />
-                </a>
-              ))}
-              {beforePhotos.length === 0 && <p className="text-muted">No arrival photos recorded.</p>}
-            </div>
-          </div>
-
-        <div className="gallery-section mt-6">
-          <h4>After Service (Completion)</h4>
-          <div className="photo-grid">
-            {afterPhotos.map((img, index) => (
-              <a href={toAbsoluteUrl(img.image)} target="_blank" key={index} rel="noreferrer">
-                <img src={toAbsoluteUrl(img.image)} alt="After" className="gallery-img" />
-              </a>
-            ))}
-            {afterPhotos.length === 0 && <p className="text-muted">No completion photos uploaded yet.</p>}
-          </div>
-        </div>
-      </div>
-      
-      {/* CUSTOMER SIGNATURE (Inside Indemnity Data) */}
-      <div className="card mt-6">
-        <h3>Customer Indemnity Signature</h3>
-        {indemnity?.signature_image ? (
-            <>
-            <img src={toAbsoluteUrl(indemnity.signature_image)} alt="Customer Sig" style={{ maxWidth: '100%', background: '#fff', border: '1px solid #ddd' }} />
-                <p className="text-muted small mt-2">
-                    Signed on: {new Date(indemnity.signed_at).toLocaleString()}<br/>
-                    IP Address: {indemnity.signer_ip}<br/>
-
-                    {/* DISPLAY THE PHYSICAL ADDRESS HERE */}
-                    {indemnity.signing_address && (
-                      <>
-                        <strong>Verified Address:</strong> {indemnity.signing_address}<br/>
-                      </>
-                    )}
-                </p>
-            </>
-        ) : (
-            <p className="text-danger">Awaiting customer signature.</p>
-        )}
-      </div>
-
-      {showIndemnityText && (
-        <div className="indemnity-text-modal-overlay" onClick={() => setShowIndemnityText(false)}>
-          <div className="indemnity-text-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="indemnity-text-modal-header">
-              <h3>Signed Indemnity Text</h3>
-              <button className="btn-secondary" onClick={() => setShowIndemnityText(false)}>Close</button>
-            </div>
-
-            {indemnity?.signed_template_title && (
-              <p className="text-muted small mb-3">
-                Template: {indemnity.signed_template_title}
-                {indemnity?.signed_template_version ? ` (v${indemnity.signed_template_version})` : ''}
-              </p>
-            )}
-
-            {!indemnity?.signed_body_html && (
-              <p className="text-muted small mb-3">
-                Legacy agreement: showing current template text because snapshot text was not stored at signing time.
-              </p>
-            )}
-
-            <div
-              className="indemnity-text-content"
-              dangerouslySetInnerHTML={{ __html: signedIndemnityHtml }}
-            />
-          </div>
-        </div>
-      )}
+  const signedText = indemnity?.signed_body_html || indemnity?.template_body_html;
+  const name = `${booking.customer?.firstname || ""} ${booking.customer?.lastname || ""}`.trim();
+  const step = STEPS.indexOf(booking.status);
+  const Location = booking.location_type === "MOBILE" ? Car : Building2;
+  return <div className="booking-report">
+    <Link to="/bookings" className="report-back"><ArrowLeft size={18} aria-hidden="true" />Back to bookings</Link>
+    {error && <div role="alert" className="record-fetch-error"><p>{error}</p><button className="btn btn-secondary" onClick={retry}>Refresh report</button></div>}
+    <header className="report-heading">
+      <div><p className="report-eyebrow">Job report · Ref {formatShortRef(booking.id)}</p>
+        <h1>{booking.vehicle?.registration || "Booking"}</h1>
+        <p>{booking.service_name} · {name}</p></div>
+      <div className="report-estimate"><span>Estimated value</span><strong>{moneyLabel(booking.total_price, company?.currency || "USD")}</strong></div>
+    </header>
+    <section className="report-workflow" aria-label="Job progress and actions">
+      {booking.status === "CANCELLED" ? <p>This booking was cancelled.</p> :
+        <ol className="report-progress">{STEPS.map((status, index) =>
+          <li key={status} className={index <= step ? "is-reached" : ""} aria-current={index === step ? "step" : undefined}>
+            <span aria-hidden="true">{index + 1}</span>{JOB_LABELS[status]}
+          </li>)}</ol>}
+      <JobActions key={id} booking={booking} name={name} onUpdated={() => fetchDetail(true)} />
+      {booking.status === "CONFIRMED" && !booking.can_start && <p className="report-hint">A customer signature and BEFORE photos are required to start this job.</p>}
+      {booking.status === "IN_PROGRESS" && booking.started_at && <p className="report-hint">Time on job: <JobTimer startedAt={booking.started_at} /></p>}
+    </section>
+    <div className="report-info-grid">
+      <section className="report-section">
+        <h2>Customer & vehicle</h2>
+        <dl className="report-fields">
+          <div><dt>Customer</dt><dd>{name}</dd></div>
+          <div><dt>Phone</dt><dd>{booking.customer?.phone || "Not provided"}</dd></div>
+          <div><dt>Vehicle</dt><dd>{booking.vehicle?.make} {booking.vehicle?.model}</dd></div>
+          <div><dt>Registration</dt><dd>{booking.vehicle?.registration}</dd></div>
+          <div><dt>Service</dt><dd>{booking.service_name}</dd></div>
+        </dl>
+      </section>
+      <section className="report-section">
+        <h2>Appointment & work log</h2>
+        <dl className="report-fields">
+          <div><dt>Appointment</dt><dd>{dateLabel(booking.booking_date)}<br />{booking.booking_time?.slice(0, 5)}–{booking.booking_end_time?.slice(0, 5)}</dd></div>
+          <div><dt>Location</dt><dd className="report-location"><Location size={16} aria-hidden="true" />{booking.location_type === "MOBILE" ? "Mobile, at the customer" : "On-site at the workshop"}</dd></div>
+          {booking.location_type === "MOBILE" && <div><dt>Address</dt><dd>{booking.customer_address || "Not provided"}</dd></div>}
+          <div><dt>Started</dt><dd>{booking.started_at ? new Date(booking.started_at).toLocaleString() : "Not started"}</dd></div>
+          <div><dt>Completed</dt><dd>{booking.completed_at ? new Date(booking.completed_at).toLocaleString() : "Not completed"}</dd></div>
+          <div><dt>Staff check-in</dt><dd>{booking.admin_signature ? <img className="report-signature" src={imageUrl(booking.admin_signature)} alt="Staff authorization signature" /> : "No staff signature"}</dd></div>
+        </dl>
+      </section>
     </div>
-  );
+    {booking.notes && <section className="report-section"><h2>Job notes</h2><p className="report-notes">{booking.notes}</p></section>}
+    <section className="report-section"><h2>Inspection gallery</h2>
+      <div className="report-gallery">
+        <PhotoSection title="Before service" photos={photos.filter(photo => photo.photo_type === "BEFORE")} empty="No arrival photos recorded." />
+        <PhotoSection title="After service" photos={photos.filter(photo => photo.photo_type === "AFTER")} empty="No completion photos uploaded yet." />
+      </div>
+    </section>
+    <section className="report-section">
+      <div className="report-section-heading"><div><h2>Indemnity & documents</h2><p>{indemnity?.signature_image ? "Customer agreement signed" : "Awaiting customer signature"}</p></div>
+        {indemnity && <div className="report-document-actions">
+          <button className="btn btn-secondary" disabled={!signedText} onClick={() => setShowIndemnityText(true)}><Eye size={16} aria-hidden="true" />View agreement</button>
+          <button className="btn btn-secondary" disabled={isDownloading || !indemnity.pdf_file} onClick={handleDownloadPDF}><Download size={16} aria-hidden="true" />{isDownloading ? "Downloading..." : indemnity.pdf_file ? "Download signed PDF" : "PDF not available yet"}</button>
+        </div>}
+      </div>
+      {indemnity?.signature_image && <div className="report-agreement">
+        <img className="report-signature" src={imageUrl(indemnity.signature_image)} alt="Customer indemnity signature" />
+        <dl className="report-fields">
+          <div><dt>Signed</dt><dd>{indemnity.signed_at ? new Date(indemnity.signed_at).toLocaleString() : "Not recorded"}</dd></div>
+          <div><dt>IP address</dt><dd>{indemnity.signer_ip || "Not recorded"}</dd></div>
+          {indemnity.signing_address && <div><dt>Signing address</dt><dd>{indemnity.signing_address}</dd></div>}
+        </dl>
+      </div>}
+      {indemnity?.latitude != null && indemnity?.longitude != null && <div className="report-document-actions">
+        <a className="btn btn-secondary" href={`https://www.google.com/maps/search/?api=1&query=${indemnity.latitude},${indemnity.longitude}`} target="_blank" rel="noreferrer"><MapPin size={16} aria-hidden="true" />View signing location</a>
+        {indemnity.signing_address && <button className="btn btn-secondary" onClick={copyAddress}><Copy size={16} aria-hidden="true" />Copy address</button>}
+      </div>}
+    </section>
+    {showIndemnityText && <RecordDialog title="Signed indemnity text" onClose={() => setShowIndemnityText(false)}>
+      {indemnity.signed_template_title && <p>Template: {indemnity.signed_template_title}{indemnity.signed_template_version ? ` (v${indemnity.signed_template_version})` : ""}</p>}
+      {!indemnity.signed_body_html && <p className="report-hint">Legacy agreement: showing current template text because snapshot text was not stored at signing time.</p>}
+      <div className="report-signed-text" dangerouslySetInnerHTML={{ __html: signedText }} />
+    </RecordDialog>}
+  </div>;
 }

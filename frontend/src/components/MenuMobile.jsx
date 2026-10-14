@@ -1,62 +1,54 @@
-// Floating navigation menu for mobile devices
-import React from "react";
-import { useContext } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import { CalendarDays, Car, Users, Wrench, UserCog } from "lucide-react";
-
+import { CalendarDays, CalendarRange, Car, House, MoreHorizontal, Users, Wrench, UserCog } from "lucide-react";
 
 function MenuMobile() {
   const location = useLocation();
-    const { user } = useContext(AuthContext);
-    // Menu items - same as Sidebar but without the collapse toggle and with icons only
-
-    const menuItems = [
-        // display text below icons only mobile
-        { path: "/customers", label: "Customers", icon: Users, text: "Customers" },
-        { path: "/vehicles", label: "Vehicles", icon: Car, text: "Vehicles" },
-        { path: "/bookings", label: "Bookings", icon: CalendarDays, text: "Bookings" },
-        { path: "/services", label: "Services", icon: Wrench, text: "Services" },
-    ];
-
-    if (user?.role === 'OWNER') {
-        // menuItems.push({ path: "/settings/indemnity", label: "Indemnity", icon: "🛡️" });
-        menuItems.push({ path: "/team", label: "Team", icon: UserCog, text: "Team" });
-        // menuItems.push({ path: "/settings", label: "Settings", icon: "⚙️" });
-    }
-
-    return (
-        // Moved menu items into sub menu and display only 4 icons/text for mobile, with option to expand to show all
-        <div
-        // Use env(safe-area-inset-bottom) to ensure the menu is above the iOS home indicator
-            className="fixed bottom-3 left-1/2 z-1000 w-[calc(100%-3rem)] max-w-md -translate-x-1/2 md:hidden"
-            style={{ bottom: "max(2rem, env(safe-area-inset-bottom))" }}
-        >
-            <div
-                className="rounded-2xl border border-cyan-400/20 bg-linear-to-br from-slate-900/95 via-slate-800/92 to-cyan-950/90 p-4 shadow-2xl backdrop-blur-md"
-            >
-                <ul className={`grid gap-1 opacity-100 ${menuItems.length > 4 ? "grid-cols-5" : "grid-cols-4"}`}>
-                    {menuItems.map((item) => {
-                        const isActive = location.pathname === item.path;
-                        const Icon = item.icon;
-                        return (
-                            <li key={item.path}>
-                                <Link
-                                    to={item.path}
-                                    title={item.label}
-                                    className={`flex text-[9px] opacity-100 min-h-12 flex-col items-center justify-center rounded-2xl text-xl transition-colors ${isActive ? "bg-cyan-500/20 text-emerald-500 border text-[9px]" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}
-                                >
-                                    {/* Center item pop out above the nav and is a larger icon */}
-                                    <Icon className={`h-4.5 w-4.5 ${isActive ? 'h-5 w-5' : ''}`} strokeWidth={2.1} aria-hidden="true" />
-                                    <span className="leading-tight tracking-wide">{item.text}</span>
-                                </Link>
-                            </li>
-                        );
-                    })}
-                </ul>
-            </div>
-        </div>
-    );
+  const { user } = useContext(AuthContext);
+  const [open, setOpen] = useState(false);
+  const nav = useRef(null);
+  const trigger = useRef(null);
+  const items = [
+    { path: "/dashboard", label: "Home", icon: House },
+    { path: "/customers", label: "Customers", icon: Users },
+    { path: "/bookings", label: "Bookings", icon: CalendarDays },
+    { path: "/schedule", label: "Schedule", icon: CalendarRange },
+  ];
+  const secondary = [
+    { path: "/vehicles", label: "Vehicles", icon: Car },
+    { path: "/services", label: "Services", icon: Wrench },
+    ...(user?.role === "OWNER" ? [{ path: "/team", label: "Team", icon: UserCog }] : []),
+  ];
+  useEffect(() => {
+    if (!open) return;
+    const dismiss = (event) => {
+      if (event.type === "keydown" && event.key === "Escape") {
+        setOpen(false);
+        trigger.current?.focus();
+      } else if (event.type === "pointerdown" && !nav.current?.contains(event.target)) setOpen(false);
+    };
+    document.addEventListener("keydown", dismiss);
+    document.addEventListener("pointerdown", dismiss);
+    return () => {
+      document.removeEventListener("keydown", dismiss);
+      document.removeEventListener("pointerdown", dismiss);
+    };
+  }, [open]);
+  const renderLink = (item) => {
+    const Icon = item.icon;
+    const active = location.pathname === item.path || (item.path === "/bookings" && location.pathname.startsWith("/bookings/"));
+    return <Link to={item.path} aria-current={active ? "page" : undefined} onClick={() => setOpen(false)}>
+      <Icon size={20} aria-hidden="true" /><span>{item.label}</span>
+    </Link>;
+  };
+  return <nav className="mobile-app-nav has-team" aria-label="Main navigation" ref={nav}>
+    <ul>{items.map((item) => <li key={item.path}>{renderLink(item)}</li>)}
+      <li><button ref={trigger} className="mobile-more-trigger" aria-expanded={open} aria-controls="mobile-more-links" onClick={() => setOpen((value) => !value)}>
+        <MoreHorizontal size={20} aria-hidden="true" /><span>More</span></button></li>
+    </ul>
+    {open && <div id="mobile-more-links" className="mobile-more-panel">{secondary.map((item) => <div key={item.path}>{renderLink(item)}</div>)}</div>}
+  </nav>;
 }
 
 export default MenuMobile;

@@ -1,14 +1,18 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import api from "../axios_instance";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Search, CheckCircle, CircleAlert, Car } from "lucide-react";
 import "../styles/Vehicles.css";
 import "../styles/EditableRow.css";
 import EditableRow from "../components/EditableRow";
+import CompactRecords from "../components/CompactRecords";
+import RecordDialog from "../components/RecordDialog";
+import { jobError } from "../utils/jobStatus";
 import { showConfirm } from "../utils/uiFeedback";
 
 function Vehicles() {
   const TABLET_BREAKPOINT = 1024;
   const [vehicles, setVehicles] = useState([]);
+  const [loadError, setLoadError] = useState("");
   const [customers, setCustomers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [newVehicle, setNewVehicle] = useState({ customer: "", make: "", model: "", year: "", registration: "" });
@@ -26,10 +30,16 @@ function Vehicles() {
     }, 4000); // Hide after 4 seconds
   };
 
-  useEffect(() => {
-    api.get("vehicles/").then(res => setVehicles(res.data));
-    api.get("customers/").then(res => setCustomers(res.data));
+  const fetchVehicles = useCallback(async () => {
+    setLoadError("");
+    try {
+      const [vehicleResponse, customerResponse] = await Promise.all([api.get("vehicles/"), api.get("customers/")]);
+      if (!Array.isArray(vehicleResponse.data) || !Array.isArray(customerResponse.data)) throw new Error("Unexpected vehicle or owner response.");
+      setVehicles(vehicleResponse.data);
+      setCustomers(customerResponse.data);
+    } catch (failure) { setLoadError(jobError(failure)); }
   }, []);
+  useEffect(() => { fetchVehicles(); }, [fetchVehicles]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -188,7 +198,7 @@ function Vehicles() {
       {/* Toast Notification */}
       {toast.show && (
         <div className={`toast-notification ${toast.type}`}>
-          {toast.type === "success" ? "✅" : "❌"} {toast.message}
+          {toast.type === "success" ? <CheckCircle size={18} aria-hidden="true" /> : <CircleAlert size={18} aria-hidden="true" />} {toast.message}
         </div>
       )}
 
@@ -232,7 +242,7 @@ function Vehicles() {
       {shouldShowVehicleForm && (
       <div className="card mb-6">
         {/* Title changes based on mode */}
-        <h3>{editingVehicle ? "🔧 Update Vehicle" : "🚗 Register New Vehicle"}</h3>
+        <h3 className="record-section-heading"><Car size={20} aria-hidden="true" />{editingVehicle ? "Update vehicle" : "Register a vehicle"}</h3>
         
         {/* ONLY ONE FORM HERE */}
         <form onSubmit={editingVehicle ? handleUpdateVehicle : handleSubmit} className="input-grid mt-4">
@@ -303,55 +313,29 @@ function Vehicles() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="search-input vehicles-search-input"
           />
-          <span className="search-icon">🔍</span>
+          <Search className="search-icon" size={18} aria-hidden="true" />
         </div>
       )}
 
-      <div className="card vehicles-table-container">
-        <table className="table-standard vehicles-table">
-          <thead>
-            <tr>
-              <th>Owner</th>
-              <th>Make</th>
-              <th>Model</th>
-              <th>Year</th>
-              <th>Registration</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredVehicles.map((vehicle) => (
-              <tr key={vehicle.id}>
-                <td data-label="Owner">{vehicle.customer?.firstname} {vehicle.customer?.lastname}</td>
-                <td data-label="Make">{vehicle.make}</td>
-                <td data-label="Model">{vehicle.model}</td>
-                <td data-label="Year">{vehicle.year}</td>
-                <td data-label="Registration">{vehicle.registration}</td>
-                <td data-label="Actions">
-                  <div className="vehicle-action-group">
-                    <button className="btn btn-xs team-action-btn team-action-edit" onClick={() => handleEdit(vehicle)}>
-                      Edit
-                    </button>
-                    <button className="btn btn-xs team-action-btn team-action-delete" onClick={() => handleDeleteVehicle(vehicle.id)}>
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {loadError && <div className="record-fetch-error" role="alert">{loadError}<button className="btn btn-secondary" onClick={fetchVehicles}>Try again</button></div>}
+      {!loadError && <CompactRecords records={filteredVehicles.map((vehicle) => ({
+        id: vehicle.id, title: vehicle.registration,
+        subtitle: `${vehicle.year || ""} ${vehicle.make} ${vehicle.model}`.trim(),
+        meta: `${vehicle.customer?.firstname || ""} ${vehicle.customer?.lastname || ""}`.trim(),
+        fields: [["Registration", vehicle.registration], ["Make", vehicle.make], ["Model", vehicle.model],
+          ["Year", vehicle.year], ["Owner", `${vehicle.customer?.firstname || ""} ${vehicle.customer?.lastname || ""}`.trim()]],
+        actions: [{ label: "Edit vehicle", run: () => handleEdit(vehicle) },
+          { label: "Delete", danger: true, run: () => handleDeleteVehicle(vehicle.id) }],
+      }))} emptyMessage="No vehicles match your search." />}
 
       {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h2>Edit Vehicle</h2>
+        <RecordDialog title="Edit vehicle" onClose={cancelEdit}>
             <form onSubmit={handleUpdateVehicle}>
               <div className="form-group">
                 <label>Customer</label>
                 <select
                   name="customer"
+                  aria-label="Vehicle owner"
                   value={formData.customer}
                   onChange={(e) => setFormData({ ...formData, customer: e.target.value })}
                   required
@@ -369,6 +353,7 @@ function Vehicles() {
                 <input
                   type="text"
                   name="make"
+                  aria-label="Make"
                   value={formData.make}
                   onChange={(e) => setFormData({ ...formData, make: e.target.value })}
                   required
@@ -379,6 +364,7 @@ function Vehicles() {
                 <input
                   type="text"
                   name="model"
+                  aria-label="Model"
                   value={formData.model}
                   onChange={(e) => setFormData({ ...formData, model: e.target.value })}
                   required
@@ -389,6 +375,7 @@ function Vehicles() {
                 <input
                   type="number"
                   name="year"
+                  aria-label="Year"
                   value={formData.year}
                   onChange={(e) => setFormData({ ...formData, year: e.target.value })}
                   required
@@ -399,6 +386,7 @@ function Vehicles() {
                 <input
                   type="text"
                   name="registration"
+                  aria-label="Registration"
                   value={formData.registration}
                   onChange={(e) => setFormData({ ...formData, registration: e.target.value })}
                   required
@@ -413,8 +401,7 @@ function Vehicles() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+        </RecordDialog>
       )}
     </div>
   );

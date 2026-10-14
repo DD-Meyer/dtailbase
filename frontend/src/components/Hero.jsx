@@ -350,9 +350,9 @@ const Hero = ({ isAuthenticated }) => {
             <h3>Digitize Your Front Desk</h3>
             <p>Replace paper forms with a clean digital workflow for bookings, intake details, signatures, and photo evidence.</p>
             <ul className="story-list">
-              <li>✓ Digital booking and intake records</li>
-              <li>✓ Before and after photo capture</li>
-              <li>✓ Signed indemnity forms stored per booking</li>
+              <li>Digital booking and intake records</li>
+              <li>Before and after photo capture</li>
+              <li>Signed indemnity forms stored per booking</li>
             </ul>
           </div>
           <div className="glass-mockup">
@@ -369,9 +369,9 @@ const Hero = ({ isAuthenticated }) => {
             <h3>Signature-First Workflow</h3>
             <p>Stop "Ghost Claims" before they start. Our system requires a digital signature before a technician can start.</p>
             <ul className="story-list">
-              <li>✓ Geofenced Signatures</li>
-              <li>✓ Version-Controlled Legal Text</li>
-              <li>✓ Court-Ready Documentation</li>
+              <li>Geofenced Signatures</li>
+              <li>Version-Controlled Legal Text</li>
+              <li>Court-Ready Documentation</li>
             </ul>
           </div>
           <div className="glass-mockup">

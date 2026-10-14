@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, matchPath } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext, AuthProvider } from "./context/AuthContext";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
@@ -13,10 +13,13 @@ import { SupportNotificationProvider } from './context/SupportNotificationContex
 // Pages
 import Login from "./pages/public/LoginPage";
 import Register from "./pages/public/RegisterPage";
+import PasswordRecoveryPage from "./pages/public/PasswordRecoveryPage";
 import Customers from "./pages/Customers";
 import Vehicles from "./pages/Vehicles";
 import Services from "./pages/Services";
 import Bookings from "./pages/Bookings";
+import Dashboard from "./pages/Dashboard";
+import Schedule from "./pages/Schedule";
 import NewBooking from "./pages/NewBooking";
 import IndemnityForm from "./components/IndemnityForm";
 import AgreementsList from "./components/AgreementsList";
@@ -42,6 +45,7 @@ import ShareBooking from "./pages/ShareBooking";
 import SupportAdminInbox from "./pages/SupportAdminInbox";
 import MySupport from "./pages/MySupport";
 import { trackSpaPageView } from "./utils/gtm";
+import { getAuthDestination } from "./utils/authNavigation";
 
 
 function AppContent() {
@@ -76,6 +80,10 @@ function AppContent() {
   const APP_ALLOWED_ROUTES = [
     "/login",
     "/register",
+    "/forgot-password",
+    "/reset-password",
+    "/dashboard",
+    "/schedule",
     "/bookings",
     "/customers",
     "/vehicles",
@@ -201,13 +209,15 @@ function AppContent() {
 
   // 1. Identify ALL public-facing "Marketing" pages
   const publicRoutes = ["/", "/hero", "/about", "/products", "/plans", "/payments", "/contact", "/legal", "/community", "/features", "/security", "/our-Story", "/support-info", "/help-center", "/tutorials", "/public-booking/:companySlug", "/payment-success", "/book/:companySlug", "/booking-confirmation/:companySlug", "/public/bookings/:companySlug"];
-  const isLandingPage = publicRoutes.includes(location.pathname);
+  const isLandingPage = publicRoutes.some(
+    (route) => matchPath({ path: route, caseSensitive: false, end: true }, location.pathname),
+  );
 
   if (isInstalledApp && !isAllowedInInstalledApp(location.pathname)) {
-    return <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace />;
+    return <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />;
   }
 
-  const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
+  const isAuthPage = ["/login", "/register", "/forgot-password", "/reset-password"].includes(location.pathname);
   const isMinimalChromeRoute = location.pathname === "/share-booking";
   const isPlatformAdmin = Boolean(user?.is_superuser || user?.is_staff);
   
@@ -304,7 +314,7 @@ function AppContent() {
     ? "auth-wrapper"
     : (isLandingPage || isMinimalChromeRoute)
       ? "landing-wrapper"
-      : `app-layout${showDashboardChrome && isSidebarCollapsed ? " sidebar-collapsed" : ""}`;
+      : `app-layout${location.pathname === "/dashboard" ? " app-route-home" : ""}${showDashboardChrome && isSidebarCollapsed ? " sidebar-collapsed" : ""}`;
 
   return (
   
@@ -332,42 +342,46 @@ function AppContent() {
             <Route path="/public/bookings/:companySlug" element={<PublicBookings />} />
             
             {/* Landing Page is now the root */}
-            <Route path="/" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <DtailBaseLanding />} />
-            <Route path="/hero" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Navigate to="/" replace />} />
-            <Route path="/about" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <About />} />
-            <Route path="/products" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Products />} />
+            <Route path="/" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace /> : <DtailBaseLanding />} />
+            <Route path="/hero" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace /> : <Navigate to="/" replace />} />
+            <Route path="/about" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace /> : <About />} />
+            <Route path="/products" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace /> : <Products />} />
             <Route
               path="/plans"
               element={<Plans showBackToDashboard={isInstalledApp && isAuthenticated} />}
             />
             <Route path="/payments" element={<PublicLayout showNav={false} showFooter={false}><Payments /></PublicLayout>} />
-            <Route path="/legal" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Legal />} />
-            <Route path="/contact" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Contact />} />
-            <Route path="/payment-success" element={<PublicLayout><PaymentSuccess /></PublicLayout>} />
+            <Route path="/legal" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace /> : <Legal />} />
+            <Route path="/contact" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace /> : <Contact />} />
+            <Route path="/payment-success" element={<PublicLayout showNav={false} showFooter={false}><PaymentSuccess /></PublicLayout>} />
 
             {/* Example of using the reusable ContentPage for a new "Community" page */}
-            <Route path="/Features" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Features />} />
-            <Route path="/Security" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Security />} />
-            <Route path="/Our-Story" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <OurStory />} />
-            <Route path="/support-info" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Support />} />
-            <Route path="/community" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <CommunityPage />} />
-            <Route path="/tutorials" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <Tutorials />} />
-            <Route path="/help-center" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/bookings" : "/login"} replace /> : <HelpCenter />} />
+            <Route path="/Features" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace /> : <Features />} />
+            <Route path="/Security" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace /> : <Security />} />
+            <Route path="/Our-Story" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace /> : <OurStory />} />
+            <Route path="/support-info" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace /> : <Support />} />
+            <Route path="/community" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace /> : <CommunityPage />} />
+            <Route path="/tutorials" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace /> : <Tutorials />} />
+            <Route path="/help-center" element={isInstalledApp ? <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace /> : <HelpCenter />} />
 
 
             {/* Public Auth Routes */}
+            <Route path="/forgot-password" element={<PasswordRecoveryPage key="request" />} />
+            <Route path="/reset-password" element={<PasswordRecoveryPage key={`reset:${location.hash}`} />} />
             <Route
               path="/login"
-              element={isAuthenticated ? <Navigate to="/bookings" replace /> : <Login />}
+              element={isAuthenticated ? <Navigate to={getAuthDestination(location.state)} replace /> : <Login />}
             />
             <Route
               path="/register"
-              element={isAuthenticated ? <Navigate to="/bookings" replace /> : <Register />}
+              element={isAuthenticated ? <Navigate to={getAuthDestination(location.state)} replace /> : <Register />}
             />
             
             {/* Protected Routes */}
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/bookings" element={<ProtectedRoute><Bookings /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
             <Route path="/bookings/:id" element={<ProtectedRoute><BookingDetail /></ProtectedRoute>} />
             <Route path="/new-booking" element={<ProtectedRoute><NewBooking /></ProtectedRoute>} />
             <Route path="/share-booking" element={<ProtectedRoute><ShareBooking /></ProtectedRoute>} />
@@ -379,7 +393,7 @@ function AppContent() {
             <Route path="/settings/indemnity" element={<ProtectedRoute><IndemnitySettings /></ProtectedRoute>} />
             
             {/* Admin Only */}
-            <Route path="/team" element={(isAuthenticated && user?.role === 'OWNER') ? <TeamManagement /> : <Navigate to="/bookings" />} />
+            <Route path="/team" element={(isAuthenticated && user?.role === 'OWNER') ? <TeamManagement /> : <Navigate to="/dashboard" />} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route
               path="/support"
@@ -393,7 +407,7 @@ function AppContent() {
               path="/admin/support"
               element={
                 <ProtectedRoute>
-                  {isPlatformAdmin ? <Navigate to="/support" replace /> : <Navigate to="/bookings" replace />}
+                  {isPlatformAdmin ? <Navigate to="/support" replace /> : <Navigate to="/dashboard" replace />}
                 </ProtectedRoute>
               }
             />

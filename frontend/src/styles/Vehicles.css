@@ -26,38 +26,38 @@
 .input-grid select {
   width: 100%;
   padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  background-color: #f8fafc;
-  color: #0f172a !important; /* Force dark text */
+  border-radius: 4px;
+  border: 1px solid var(--app-border);
+  background-color: var(--app-surface);
+  color: var(--app-text) !important; /* Force dark text */
   font-size: 0.95rem;
   transition: all 0.2s ease;
 }
 
 .input-grid input:focus, 
 .input-grid select:focus {
-  background-color: #ffffff;
-  border-color: #3b82f6;
+  background-color: var(--app-surface);
+  border-color: var(--app-primary);
   outline: none;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 /* --- 2. VEHICLE TABLE SPECIALS --- */
-.table-standard td strong {
-  color: #0f172a;
+.vehicles-table-container .table-standard td strong {
+  color: var(--app-text);
   font-family: 'JetBrains Mono', monospace; /* Professional 'Plate' look */
-  background: #f1f5f9;
+  background: var(--app-surface-alt);
   padding: 2px 6px;
   border-radius: 4px;
   letter-spacing: 1px;
 }
 
 .text-btn-primary {
-  background: #eff6ff;
-  color: #2563eb;
+  background: var(--app-surface-alt);
+  color: var(--app-primary);
   border: none;
   padding: 6px 14px;
-  border-radius: 6px;
+  border-radius: 4px;
   font-weight: 700;
   font-size: 0.8rem;
   cursor: pointer;
@@ -66,8 +66,8 @@
 }
 
 .text-btn-primary:hover {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--app-surface-alt);
+  color: var(--app-primary);
 }
 
 /* --- 3. TOAST NOTIFICATIONS --- */
@@ -76,7 +76,7 @@
   top: 24px;
   right: 24px;
   padding: 16px 24px;
-  border-radius: 12px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -87,26 +87,26 @@
 }
 
 .toast-notification.success {
-  background: #10b981;
-  color: white;
-  border-left: 6px solid #059669;
+  background: var(--app-success);
+  color: var(--app-on-primary);
+  border-left: 6px solid var(--app-success);
 }
 
 .toast-notification.error {
-  background: #ef4444;
-  color: white;
-  border-left: 6px solid #dc2626;
+  background: var(--app-danger);
+  color: var(--app-on-primary);
+  border-left: 6px solid var(--app-danger);
 }
 
 /* --- 4. BUTTONS & UTILITIES --- */
 .btn-secondary {
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--app-surface-alt);
+  color: var(--app-primary);
 }
 
 .btn-secondary:hover {
-  background: #e2e8f0;
-  color: #1e293b;
+  background: var(--app-surface-alt);
+  color: var(--app-text);
 }
 
 .input[placeholder="Registration"] {
@@ -135,8 +135,8 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(4px);
+  background: var(--app-overlay);
+  backdrop-filter: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -145,9 +145,9 @@
 }
 
 .modal-content {
-  background: white;
+  background: var(--app-surface);
   padding: 2rem;
-  border-radius: 16px;
+  border-radius: 4px;
   width: 90%;
   max-width: 520px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
@@ -155,7 +155,7 @@
 
 .modal-content h2 {
   margin-bottom: 1.25rem;
-  color: #0f172a;
+  color: var(--app-text);
   font-weight: 800;
   font-size: 1.35rem;
 }
@@ -168,7 +168,7 @@
   display: block;
   font-size: 0.85rem;
   font-weight: 700;
-  color: #64748b;
+  color: var(--app-primary);
   margin-bottom: 6px;
   text-transform: uppercase;
   letter-spacing: 0.025em;
@@ -178,18 +178,18 @@
 .form-group select {
   width: 100%;
   padding: 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border: 1px solid var(--app-border);
+  border-radius: 4px;
   font-size: 1rem;
-  color: #0f172a;
-  background-color: #f8fafc;
+  color: var(--app-text);
+  background-color: var(--app-surface);
   transition: 0.2s;
 }
 
 .form-group input:focus,
 .form-group select:focus {
-  background-color: #fff;
-  border-color: #3b82f6;
+  background-color: var(--app-surface);
+  border-color: var(--app-primary);
   outline: none;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
@@ -225,17 +225,17 @@
   .vehicles-search-input {
     width: 100%;
     padding: 12px 16px 12px 45px;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    background: white;
+    border-radius: 4px;
+    border: 1px solid var(--app-border);
+    background: var(--app-surface);
     font-size: 0.95rem;
-    color: #0f172a !important;
+    color: var(--app-text) !important;
     transition: all 0.2s ease;
   }
 
   .vehicles-search-input:focus {
     outline: none;
-    border-color: #3b82f6;
+    border-color: var(--app-primary);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
 
@@ -302,9 +302,9 @@
 
   .vehicles-table-container .table-standard tbody tr {
     display: block;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
+    background: var(--app-surface);
+    border: 1px solid var(--app-border);
+    border-radius: 4px;
     box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
     padding: 0.35rem 0;
     margin: 0 auto;
@@ -315,7 +315,7 @@
   }
 
   .vehicles-table-container .table-standard td {
-    border-bottom: 1px solid #eef2f7;
+    border-bottom: 1px solid var(--app-border);
     padding: 0.66rem 0.78rem;
     font-size: 0.88rem;
     width: 100%;
@@ -333,7 +333,7 @@
     content: attr(data-label);
     display: block;
     margin-bottom: 0.3rem;
-    color: #64748b;
+    color: var(--app-primary);
     font-size: 0.68rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -385,17 +385,17 @@
   .vehicles-search-input {
     width: 100%;
     padding: 12px 16px 12px 45px;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    background: white;
+    border-radius: 4px;
+    border: 1px solid var(--app-border);
+    background: var(--app-surface);
     font-size: 0.95rem;
-    color: #0f172a !important;
+    color: var(--app-text) !important;
     transition: all 0.2s ease;
   }
 
   .vehicles-search-input:focus {
     outline: none;
-    border-color: #3b82f6;
+    border-color: var(--app-primary);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
 

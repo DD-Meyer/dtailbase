@@ -4,13 +4,14 @@ import { AuthContext } from '../context/AuthContext';
 import { useCompany } from '../context/CompanyContext';
 import PayPalSubscribeButton from '../components/PayPalSubscribeButton';
 import api from '../axios_instance';
+import PaymentFlowCard from '../components/PaymentFlowCard';
+import styles from '../components/PaymentFlowCard.module.css';
 import {
   DEFAULT_PRICE_FALLBACKS,
   extractPlanFeatures,
   fetchPricingWithFallback,
   isValidPricingPayload,
 } from '../services/pricingService';
-import '../styles/Upgrade.css';
 
 const PLAN_LABELS = {
   PRO: 'Professional',
@@ -36,20 +37,11 @@ function Payments() {
     PLAN_ORDER[currentPlan] > PLAN_ORDER[planId];
   const paypalButtonLabel = isDowngradeFlow ? 'Downgrade via PayPal' : 'Upgrade via PayPal';
   const selectedPlanFeatures = planFeatures;
-  const currency = 'USD';
 
   const formattedPlanPrice = useMemo(() => {
     if (!planPrice) return null;
     return `$${String(planPrice).replace(/\.00$/, '')} / month`;
   }, [planPrice]);
-
-  useEffect(() => {
-    document.body.classList.add('payments-no-scroll');
-
-    return () => {
-      document.body.classList.remove('payments-no-scroll');
-    };
-  }, []);
 
   useEffect(() => {
     if (!isAuthenticated && isPaidPlan) {
@@ -100,15 +92,9 @@ function Payments() {
 
   if (!isPaidPlan) {
     return (
-      <div className="payments-page">
-        <div className="payment-overlay-card slide-in-right">
-          <h2>Select Your Studio Engine</h2>
-          <p>
-            Choose Professional or Enterprise on the plans page to continue with secure activation.
-          </p>
-          <Link className="btn-upgrade" to="/plans">Go to Plans</Link>
-        </div>
-      </div>
+      <PaymentFlowCard step={1} title="Choose your plan" description="Select Professional or Enterprise to continue securely through PayPal.">
+        <Link className={styles.primary} to="/plans">Go to Plans</Link>
+      </PaymentFlowCard>
     );
   }
 
@@ -117,39 +103,33 @@ function Payments() {
   }
 
   return (
-    <div className="payments-page">
-      <div className="payment-overlay-card slide-in-right">
-        <p className="checkout-focus-kicker">Activate Premium Engine</p>
-        <h2>{PLAN_LABELS[planId]}</h2>
-        <p>
-          Activate your legal-grade workflow stack and continue securely through PayPal.
-        </p>
-
-        <div className="payment-plan-summary" aria-label="Selected plan summary">
-          <div className="payment-plan-row">
-            <span>Plan</span>
-            <strong>{PLAN_LABELS[planId]}</strong>
+    <PaymentFlowCard step={1} title={PLAN_LABELS[planId]} description="Review your plan, then continue securely through PayPal.">
+      <div className={styles.summary} aria-label="Selected plan summary">
+        <dl>
+          <div className={styles.row}>
+            <dt>Plan</dt>
+            <dd>{PLAN_LABELS[planId]}</dd>
           </div>
-          <div className="payment-plan-row">
-            <span>Price</span>
-            <strong>{formattedPlanPrice || 'Loading price...'}</strong>
+          <div className={styles.row}>
+            <dt>Price</dt>
+            <dd>{formattedPlanPrice || 'Loading price...'}</dd>
           </div>
-          <div className="payment-plan-features">
-            <p>Included in your liability engine</p>
-            <ul>
-              {selectedPlanFeatures.map((feature) => (
-                <li key={feature}>{feature}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        <div className="payment-overlay-actions">
-          <PayPalSubscribeButton planId={planId} buttonLabel={paypalButtonLabel} />
-          <Link className="btn-upgrade btn-current" to="/plans">Back to Plans</Link>
+        </dl>
+        <div className={styles.features}>
+          <h2>Included in your plan</h2>
+          <ul>
+            {selectedPlanFeatures.map((feature) => (
+              <li key={feature}>{feature}</li>
+            ))}
+          </ul>
         </div>
       </div>
-    </div>
+
+      <div className={styles.actions}>
+        <PayPalSubscribeButton planId={planId} buttonLabel={paypalButtonLabel} />
+        <Link className={styles.secondary} to="/plans">Back to Plans</Link>
+      </div>
+    </PaymentFlowCard>
   );
 }
 

@@ -174,7 +174,7 @@ function MySupport() {
         <p className="text-muted mt-2">
           Your support tickets and live chat with the DtailBase team. Conversations are saved here even after you log out.
         </p>
-        {error && <p style={{ color: "#fca5a5", marginTop: "8px" }}>{error}</p>}
+        {error && <p style={{ color: "var(--app-danger)", marginTop: "8px" }}>{error}</p>}
       </div>
 
       <div className="card" style={{ marginTop: "1rem" }}>
@@ -187,10 +187,10 @@ function MySupport() {
             placeholder="Subject"
             required
             style={{
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(123, 154, 196, 0.28)",
+              background: "var(--app-surface)",
+              border: "1px solid var(--app-primary)",
               padding: "10px",
-              color: "white",
+              color: "var(--app-text)",
               borderRadius: "8px",
             }}
           />
@@ -200,10 +200,10 @@ function MySupport() {
             placeholder="Describe how we can help..."
             rows={4}
             style={{
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(123, 154, 196, 0.28)",
+              background: "var(--app-surface)",
+              border: "1px solid var(--app-primary)",
               padding: "10px",
-              color: "white",
+              color: "var(--app-text)",
               borderRadius: "8px",
               resize: "vertical",
             }}
@@ -235,10 +235,10 @@ function MySupport() {
                     textAlign: "left",
                     width: "100%",
                     border: isActive
-                      ? "1px solid rgba(56, 189, 248, 0.7)"
-                      : "1px solid rgba(123, 154, 196, 0.28)",
-                    background: isActive ? "rgba(56, 189, 248, 0.18)" : "rgba(15, 26, 43, 0.6)",
-                    color: "#eaf3ff",
+                      ? "1px solid var(--app-primary)"
+                      : "1px solid var(--app-primary)",
+                    background: isActive ? "var(--app-primary-soft)" : "var(--app-overlay)",
+                    color: "var(--app-text)",
                     borderRadius: "8px",
                     padding: "10px",
                     cursor: "pointer",
@@ -248,7 +248,7 @@ function MySupport() {
                     <strong>{ticket.subject}</strong>
                     <small>{ticket.status}</small>
                   </div>
-                  <small style={{ color: "#cbd5f5" }}>
+                  <small style={{ color: "var(--app-text)" }}>
                     Lane: {ticket.support_lane} • Updated {new Date(ticket.updated_at).toLocaleString()}
                   </small>
                 </button>
@@ -270,7 +270,7 @@ function MySupport() {
             </div>
             <div
               style={{
-                border: "1px solid rgba(123, 154, 196, 0.28)",
+                border: "1px solid var(--app-primary)",
                 borderRadius: "10px",
                 padding: "12px",
                 maxHeight: "360px",
@@ -290,15 +290,15 @@ function MySupport() {
                         padding: "10px",
                         borderRadius: "8px",
                         background: row.is_admin_reply
-                          ? "rgba(56, 189, 248, 0.22)"
+                          ? "var(--app-primary-soft)"
                           : mine
-                            ? "rgba(34, 197, 94, 0.18)"
-                            : "rgba(148, 163, 184, 0.2)",
-                        color: "#eaf3ff",
+                            ? "var(--app-success-soft)"
+                            : "var(--app-primary-soft)",
+                        color: "var(--app-text)",
                       }}
                     >
                       <p style={{ margin: 0 }}>{row.message}</p>
-                      <small style={{ color: "#cbd5f5" }}>
+                      <small style={{ color: "var(--app-text)" }}>
                         {row.is_admin_reply ? "DtailBase support" : row.sender_email || "You"} •
                         {" "}
                         {row.created_at ? new Date(row.created_at).toLocaleString() : ""}
@@ -316,10 +316,10 @@ function MySupport() {
                 placeholder="Type a reply..."
                 style={{
                   width: "100%",
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(123, 154, 196, 0.28)",
+                  background: "var(--app-surface)",
+                  border: "1px solid var(--app-primary)",
                   padding: "10px",
-                  color: "white",
+                  color: "var(--app-text)",
                   borderRadius: "8px",
                 }}
               />

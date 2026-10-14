@@ -5,7 +5,7 @@ const About = () => {
     <div className="landing-page about-page">
       {/* HERO */}
       <section className="products-hero animate-on-scroll">
-        <div className="about-intro-badge">🏢 Our Story</div>
+        <div className="about-intro-badge">Our Story</div>
         <h1 className="hero-title">
           Built From the <span className="highlight">Bay Up.</span>
         </h1>
@@ -58,11 +58,11 @@ const About = () => {
               system, it&apos;s easy to:
             </p>
             <ul className="story-list">
-              <li>✓ Lose track of exactly what services a client booked</li>
-              <li>✓ Go overtime on a job and only realise it at the end of the day</li>
-              <li>✓ Have zero documentation if a client disputes pre-existing damage</li>
-              <li>✓ Not know whether the business made a profit that week</li>
-              <li>✓ Manage bookings via scattered WhatsApp messages and notes</li>
+              <li>Lose track of exactly what services a client booked</li>
+              <li>Go overtime on a job and only realise it at the end of the day</li>
+              <li>Have zero documentation if a client disputes pre-existing damage</li>
+              <li>Not know whether the business made a profit that week</li>
+              <li>Manage bookings via scattered WhatsApp messages and notes</li>
             </ul>
             <p style={{ color: 'var(--text-dim)', lineHeight: '1.85', marginTop: '20px' }}>
               Dtailbase was designed specifically to solve these problems - nothing more, nothing less.

@@ -30,7 +30,7 @@
   align-items: center;
   padding: 14px clamp(1rem, 4vw, 3rem);
   background: var(--ph-nav-bg);
-  backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: none;
   -webkit-backdrop-filter: blur(14px) saturate(160%);
   border-bottom: 1px solid var(--ph-border-light);
   transition: background 260ms var(--ph-ease),
@@ -40,12 +40,12 @@
 
 .public-nav.is-scrolled {
   background: var(--ph-nav-bg-scrolled);
-  border-bottom-color: rgba(37, 99, 235, 0.32);
+  border-bottom-color: var(--app-primary);
   box-shadow: 0 12px 40px -20px rgba(0, 0, 0, 0.65);
 }
 
 .public-header-logo {
-  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-family: var(--font-sans);
   font-size: 1.4rem;
   font-weight: 800;
   letter-spacing: -0.03em;
@@ -79,7 +79,7 @@
   width: min(340px, 88vw);
   height: 100vh;
   background: var(--ph-menu-bg);
-  backdrop-filter: blur(20px) saturate(165%);
+  backdrop-filter: none;
   -webkit-backdrop-filter: blur(20px) saturate(165%);
   border-left: 1px solid var(--ph-border-light);
   display: flex;
@@ -99,7 +99,7 @@
   position: fixed;
   inset: 0;
   background: var(--ph-overlay-bg);
-  backdrop-filter: blur(4px);
+  backdrop-filter: none;
   -webkit-backdrop-filter: blur(4px);
   z-index: 1080;
 }
@@ -108,13 +108,13 @@
   position: relative;
   color: var(--ph-text-muted);
   text-decoration: none;
-  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-family: var(--font-sans);
   font-size: 0.92rem;
   font-weight: 500;
   cursor: pointer;
   padding: 8px 14px;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: 4px;
   transition: color 180ms var(--ph-ease),
     background-color 180ms var(--ph-ease);
 }
@@ -126,7 +126,7 @@
   bottom: 3px;
   width: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--ph-primary), var(--ph-primary-soft));
+  background: var(--app-surface-alt);
   border-radius: 999px;
   transform: translateX(-50%);
   transition: width 260ms var(--ph-ease), opacity 260ms var(--ph-ease);
@@ -162,11 +162,11 @@
 .btn-login-text {
   color: var(--ph-text-main);
   text-decoration: none;
-  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-family: var(--font-sans);
   font-weight: 600;
   font-size: 0.9rem;
   padding: 6px 10px;
-  border-radius: 8px;
+  border-radius: 4px;
   transition: color 180ms var(--ph-ease),
     background-color 180ms var(--ph-ease);
 }
@@ -178,10 +178,10 @@
 
 .btn-join-now {
   background: var(--ph-primary);
-  color: #ffffff !important;
+  color: var(--app-text) !important;
   padding: 10px 20px;
-  border-radius: 10px;
-  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  border-radius: 4px;
+  font-family: var(--font-sans);
   font-weight: 700;
   font-size: 0.85rem;
   text-decoration: none;
@@ -193,17 +193,17 @@
 }
 
 .btn-join-now:hover {
-  background: #1d4ed8;
+  background: var(--app-primary);
   transform: translateY(-2px);
   box-shadow: 0 18px 44px -14px var(--ph-auth-shadow-hover);
 }
 
 .btn-dashboard-sm {
   background: var(--ph-accent);
-  color: #ffffff !important;
+  color: var(--app-text) !important;
   padding: 8px 16px;
-  border-radius: 10px;
-  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  border-radius: 4px;
+  font-family: var(--font-sans);
   font-weight: 700;
   font-size: 0.82rem;
   text-decoration: none;
@@ -214,7 +214,7 @@
 }
 
 .btn-dashboard-sm:hover {
-  background: #059669;
+  background: var(--app-success);
   transform: translateY(-2px);
   box-shadow: 0 18px 40px -14px rgba(16, 185, 129, 0.55);
 }
@@ -228,7 +228,7 @@
   width: 40px;
   height: 40px;
   border: 1px solid var(--ph-border-strong);
-  border-radius: 10px;
+  border-radius: 4px;
   background: var(--ph-hamburger-bg);
   cursor: pointer;
   z-index: 1100;
@@ -238,8 +238,8 @@
 }
 
 .hamburger:hover {
-  background: rgba(37, 99, 235, 0.14);
-  border-color: rgba(37, 99, 235, 0.4);
+  background: var(--app-primary-soft);
+  border-color: var(--app-primary);
 }
 
 .bar {

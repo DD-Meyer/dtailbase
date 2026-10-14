@@ -19,6 +19,7 @@ export const pushGtmEvent = (payload) => {
 };
 
 export const trackSpaPageView = ({ pathname, search = "", title = "" }) => {
+  if (pathname.startsWith("/reset-password")) return;
   pushGtmEvent({
     event: "spa_page_view",
     page_path: `${pathname}${search}`,

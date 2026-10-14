@@ -3,6 +3,8 @@ import api from "../axios_instance";
 import { useCompany } from "../context/CompanyContext";
 import "../styles/IndemnitySettings.css";
 import PlanUsageBanner from "../components/PlanUsageBanner";
+import { History } from "lucide-react";
+import { Link } from "react-router-dom";
 
 function IndemnitySettings() {
   const { currentPlan, planLimits, nextPlan } = useCompany();
@@ -204,7 +206,7 @@ function IndemnitySettings() {
                   : "You can either type the indemnity text here or upload a PDF and let us extract it for you."}
               </p>
             </div>
-            <div className="input-group full-width">
+            <div className={`input-group full-width ${!canUploadTemplatePdf ? "premium-prompt" : ""}`}>
               <label>Optional PDF Upload</label>
               <input
                 type="file"
@@ -217,6 +219,7 @@ function IndemnitySettings() {
                   ? "Pro and Enterprise plans can attach a PDF version of the indemnity for download and reference."
                   : "PDF uploads are available on Pro and Enterprise plans only."}
               </p>
+              {!canUploadTemplatePdf && <Link to="/plans">Upgrade to Professional for PDF uploads</Link>}
               {editingTemplate.template_pdf && !selectedTemplatePdf && (
                 <p className="helper-text existing-file">
                   Current PDF attached:{" "}
@@ -236,7 +239,7 @@ function IndemnitySettings() {
                   type="button" 
                   onClick={resetEditor}
                   className="btn-text"
-                  style={{ color: '#ef4444' }}
+                  style={{ color: "var(--app-danger)" }}
                 >
                   Cancel Edit
                 </button>
@@ -246,7 +249,7 @@ function IndemnitySettings() {
         </section>
 
         <section className="settings-card">
-          <h2 className="card-title">📜 Template History</h2>
+          <h2 className="card-title record-section-heading"><History size={20} aria-hidden="true" />Template history</h2>
           <div className="history-table-wrap">
             <table className="history-table">
               <thead>

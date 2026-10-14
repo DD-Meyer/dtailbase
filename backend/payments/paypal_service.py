@@ -25,12 +25,12 @@ PAYPAL_WEB_BASE = {
 PRICING = {
     'USD': {
         'PRO': {
-            'amount': '129.00',
+            'amount': '99.00',
             'currency': 'USD',
             'description': 'Dtailbase Professional Liability Engine'
         },
         'ENTERPRISE': {
-            'amount': '299.00',
+            'amount': '199.00',
             'currency': 'USD',
             'description': 'Dtailbase Enterprise Asset Vault'
         }

@@ -28,7 +28,7 @@ PLAN_CONFIG = {
         'max_customers': 5000,
         'indemnity_history_limit': 5,
         'buffer_timer': True,
-        'price_usd': 129,
+        'price_usd': 99,
         'features': [
             '60 Monthly Bookings',
             '10 Team Members',
@@ -53,7 +53,7 @@ PLAN_CONFIG = {
         'max_linked_service_templates': 20,
         'storage_limit_gb': 100,
         'buffer_timer': True,
-        'price_usd': 299,
+        'price_usd': 199,
         'features': [
             'Unlimited Bookings',
             '50 Team Members',

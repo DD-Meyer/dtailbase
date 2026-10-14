@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import api from '../axios_instance';
 import { showToast } from '../utils/uiFeedback';
 import '../styles/PayPalSubscribeButton.css';
@@ -12,8 +12,11 @@ const PayPalSubscribeButton = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const submitting = useRef(false);
 
   const handleCreateSubscription = useCallback(async () => {
+    if (submitting.current || disabled) return;
+    submitting.current = true;
     setLoading(true);
     setError(null);
 
@@ -27,11 +30,11 @@ const PayPalSubscribeButton = ({
         throw new Error(response.data.error || 'Failed to create subscription');
       }
 
-      // Redirect to PayPal approval URL
-      if (response.data.approval_url) {
-        if (onSuccess) onSuccess(response.data);
-        window.location.href = response.data.approval_url;
+      if (!response.data.approval_url) {
+        throw new Error('PayPal did not provide an approval link. Please try again.');
       }
+      if (onSuccess) onSuccess(response.data);
+      window.location.href = response.data.approval_url;
 
       return response.data.subscription_id || null;
     } catch (err) {
@@ -55,20 +58,21 @@ const PayPalSubscribeButton = ({
       if (onError) onError(errorMsg);
       return null;
     } finally {
+      submitting.current = false;
       setLoading(false);
     }
-  }, [planId, onError, onSuccess]);
+  }, [planId, onError, onSuccess, disabled]);
 
   return (
     <div className="paypal-subscribe-button-wrapper">
       {error && (
-        <div className="error-message">
+        <div className="error-message" role="alert">
           <p>{error}</p>
         </div>
       )}
 
       {loading && (
-        <div className="loading-spinner">
+        <div className="loading-spinner" role="status">
           <p>Processing...</p>
         </div>
       )}

@@ -1,10 +1,12 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useRef } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import api from "../../axios_instance";
 import { AuthContext } from "../../context/AuthContext";
 import { getCountryLabel } from "../../utils/countries";
 import PublicShell from "../../components/public/PublicShell";
 import styles from "./RegisterPage.module.css";
+import PasswordInput from "../../components/public/PasswordInput";
+import { getAuthDestination } from "../../utils/authNavigation";
 
 function detectInstalledMobileApp() {
   const userAgent =
@@ -38,10 +40,18 @@ export default function RegisterPage() {
   });
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [step, setStep] = useState(1);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [accountCreated, setAccountCreated] = useState(false);
+  const submittingRef = useRef(false);
+  const formRef = useRef(null);
+  const headingRef = useRef(null);
+  const errorRef = useRef(null);
+  const focusTarget = useRef(null);
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
-  const planContext = location.state?.fromPlanCta ? location.state : null;
+  const planContext = location.state?.fromPlanCta || location.state?.returnAfterAuth ? location.state : null;
 
   useEffect(() => {
     let mounted = true;
@@ -88,10 +98,30 @@ export default function RegisterPage() {
     return () => { mounted = false; };
   }, []);
 
+  useEffect(() => {
+    if (isLoading || !focusTarget.current) return;
+    const target = focusTarget.current;
+    focusTarget.current = null;
+    if (target === "heading") headingRef.current?.focus();
+    else if (target === "error") errorRef.current?.focus();
+    else formRef.current?.elements.namedItem(target)?.focus();
+  }, [step, fieldErrors, errorMessage, accountCreated, isLoading]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submittingRef.current || accountCreated) return;
+    if (step === 1) {
+      setErrorMessage("");
+      setFieldErrors({});
+      focusTarget.current = "heading";
+      setStep(2);
+      return;
+    }
+    submittingRef.current = true;
     setErrorMessage("");
+    setFieldErrors({});
     setIsLoading(true);
+    let created = false;
     try {
       const res = await api.post("users/", {
         company_name: formData.company_name,
@@ -103,170 +133,136 @@ export default function RegisterPage() {
         role: "OWNER",
       });
 
-      if (res.status === 201) {
-        const loginRes = await api.post("token/", {
-          email: formData.email,
-          password: formData.password,
-          mobile_app: useMobilePersistence,
-          remember_me: true,
-        });
-        login(loginRes.data.access, loginRes.data.refresh, loginRes.data.user);
+      if (res.status !== 201) throw new Error("Unexpected registration response");
+      created = true;
+      const loginRes = await api.post("token/", {
+        email: formData.email,
+        password: formData.password,
+        mobile_app: useMobilePersistence,
+        remember_me: true,
+      });
+      login(loginRes.data.access, loginRes.data.refresh, loginRes.data.user);
 
-        if (planContext?.selectedPlanId && planContext.selectedPlanId !== "STARTER") {
-          navigate(
-            planContext.redirectTo || `/payments?plan=${planContext.selectedPlanId}`
-          );
-        } else {
-          navigate("/bookings");
-        }
-      }
+      navigate(getAuthDestination(planContext));
     } catch (err) {
       console.error("Registration Error:", err.response?.data);
+      if (created) {
+        setAccountCreated(true);
+        setErrorMessage("Your workspace was created, but automatic sign-in failed. Sign in with your new account to continue.");
+        focusTarget.current = "error";
+        return;
+      }
       const data = err.response?.data;
-      const firstError = data
-        ? Object.values(data).flat()[0]
-        : "Registration failed";
-      setErrorMessage(firstError);
+      const fields = {};
+      const general = [];
+      const apiNames = { email: "email", username: "username", password: "password", first_name: "firstName", last_name: "lastName", company_name: "company_name" };
+      if (data && typeof data === "object") {
+        for (const [key, value] of Object.entries(data)) {
+          const message = (Array.isArray(value) ? value : [value])
+            .filter((item) => typeof item === "string").join(" ");
+          if (!message) continue;
+          if (apiNames[key]) fields[apiNames[key]] = message;
+          else general.push(message);
+        }
+      }
+      const invalidField = ["email", "username", "password", "firstName", "lastName", "company_name"].find((key) => fields[key]);
+      setFieldErrors(fields);
+      if (invalidField) {
+        setStep(["email", "username", "password"].includes(invalidField) ? 1 : 2);
+        focusTarget.current = invalidField;
+      } else {
+        focusTarget.current = "error";
+      }
+      setErrorMessage(general.join(" ") || (invalidField
+        ? "Please check the highlighted details."
+        : "Unable to create your workspace. Please try again."));
     } finally {
+      submittingRef.current = false;
       setIsLoading(false);
     }
   };
 
-  const update = (key) => (e) =>
+  const update = (key) => (e) => {
     setFormData((p) => ({ ...p, [key]: e.target.value }));
+    setFieldErrors((previous) => {
+      if (!previous[key]) return previous;
+      const next = { ...previous };
+      delete next[key];
+      return next;
+    });
+  };
+
+  const renderField = (key, label, options = {}) => {
+    const Input = key === "password" ? PasswordInput : "input";
+    return (
+      <div className={styles.field} key={key}>
+        <label className={styles.label} htmlFor={`reg-${key}`}>{label}</label>
+        <Input
+          id={`reg-${key}`}
+          name={key}
+          className={styles.input}
+          type="text"
+          {...options}
+          value={formData[key]}
+          onChange={update(key)}
+          aria-invalid={fieldErrors[key] ? true : undefined}
+          aria-describedby={fieldErrors[key] ? `reg-${key}-error` : undefined}
+          required
+        />
+        {fieldErrors[key] && <p id={`reg-${key}-error`} className={styles.fieldError}>{fieldErrors[key]}</p>}
+      </div>
+    );
+  };
 
   return (
-    <PublicShell showFooter={false} variant="auth">
+    <PublicShell marketing showFooter={false} variant="auth">
       <section className={styles.page}>
         <div className={styles.card}>
           <div className={styles.head}>
-            <span className={styles.badge}>Create account</span>
-            <h1 className={styles.title}>Start your free trial</h1>
+            <span className={styles.step} data-step={step} role="status">Step {step} of 2 · {step === 1 ? "Account details" : "Workspace details"}</span>
+            <h1 ref={headingRef} tabIndex={-1} className={styles.title}>{accountCreated ? "Your workspace is ready" : step === 1 ? "Create your account" : "Set up your workspace"}</h1>
             <p className={styles.lede}>
-              14-day free trial &middot; No card required &middot; Cancel anytime.
+              {accountCreated ? "Sign in to finish getting started." : step === 1 ? "Your shop, organised. Start for free." : "A few details to make it yours."}
             </p>
           </div>
 
+          {planContext?.fromPlanCta && <p className={styles.planCtx}>Selected plan: <strong>{planContext.selectedPlan}</strong></p>}
           {errorMessage && (
-            <div className={styles.errorBanner}>{errorMessage}</div>
+            <p ref={errorRef} tabIndex={-1} role="alert" className={styles.errorBanner}>{errorMessage}</p>
           )}
 
-          <form onSubmit={handleSubmit} className={styles.form}>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="reg-company">
-                Company name
-              </label>
-              <input
-                id="reg-company"
-                className={styles.input}
-                type="text"
-                placeholder="e.g. Detailz Pro"
-                value={formData.company_name}
-                onChange={update("company_name")}
-                required
-              />
-            </div>
-
-            <div className={styles.row}>
-              <div className={styles.field}>
-                <label className={styles.label} htmlFor="reg-first">
-                  First name
-                </label>
-                <input
-                  id="reg-first"
-                  className={styles.input}
-                  type="text"
-                  placeholder="Alex"
-                  value={formData.firstName}
-                  onChange={update("firstName")}
-                  required
-                />
+          {accountCreated ? (
+            <Link className={styles.submitBtn} to="/login" state={planContext || undefined}>Continue to sign in</Link>
+          ) : <form ref={formRef} onSubmit={handleSubmit} className={styles.form} aria-busy={isLoading}>
+            {step === 1 ? <>
+              {renderField("email", "Email", { type: "email", inputMode: "email", autoComplete: "email", autoCapitalize: "none", spellCheck: false, placeholder: "name@example.com" })}
+              {renderField("username", "Username", { autoComplete: "username", autoCapitalize: "none", spellCheck: false, placeholder: "Choose a username" })}
+              {renderField("password", "Password", { autoComplete: "new-password", placeholder: "Create a password" })}
+            </> : <>
+              <div className={styles.row}>
+                {renderField("firstName", "First name", { autoComplete: "given-name", placeholder: "Alex" })}
+                {renderField("lastName", "Last name", { autoComplete: "family-name", placeholder: "Taylor" })}
               </div>
-              <div className={styles.field}>
-                <label className={styles.label} htmlFor="reg-last">
-                  Last name
-                </label>
-                <input
-                  id="reg-last"
-                  className={styles.input}
-                  type="text"
-                  placeholder="Detailer"
-                  value={formData.lastName}
-                  onChange={update("lastName")}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="reg-user">
-                Username
-              </label>
-              <input
-                id="reg-user"
-                className={styles.input}
-                type="text"
-                placeholder="Choose a username"
-                value={formData.username}
-                onChange={update("username")}
-                required
-              />
-            </div>
-
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="reg-email">
-                Email
-              </label>
-              <input
-                id="reg-email"
-                className={styles.input}
-                type="email"
-                placeholder="name@example.com"
-                value={formData.email}
-                onChange={update("email")}
-                required
-              />
-            </div>
-
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="reg-pw">
-                Password
-              </label>
-              <input
-                id="reg-pw"
-                className={styles.input}
-                type="password"
-                autoComplete="new-password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={update("password")}
-                required
-              />
-            </div>
-
-            <div className={styles.meta}>
-              <p>
-                <strong>Country:</strong>{" "}
-                {getCountryLabel(formData.country_code)} (
-                {formData.country_code})
-              </p>
-              <p>
-                <strong>Billing:</strong> {formData.currency}
-              </p>
-              <p className={styles.metaHint}>
-                Detected as {getCountryLabel(detectedCountryCode)}. You can
-                change your billing region later from Settings.
-              </p>
-            </div>
+              {renderField("company_name", "Company name", { autoComplete: "organization", placeholder: "Your shop name" })}
+              <details className={styles.meta}>
+                <summary>{getCountryLabel(formData.country_code)} · {formData.currency} billing</summary>
+                <p>Detected as {getCountryLabel(detectedCountryCode)}. You can change your billing region later from Settings.</p>
+              </details>
+            </>}
 
             <button
               type="submit"
               className={styles.submitBtn}
               disabled={isLoading}
             >
-              {isLoading ? "Creating your workspace…" : "Create account"}
+              {isLoading ? "Creating your workspace…" : step === 1 ? "Continue" : "Create workspace"}
             </button>
-          </form>
+            {step === 2 && <button type="button" className={styles.backButton} disabled={isLoading} onClick={() => {
+              focusTarget.current = "heading";
+              setErrorMessage("");
+              setStep(1);
+            }}>← Back to account details</button>}
+          </form>}
 
           <div className={styles.foot}>
             <p>

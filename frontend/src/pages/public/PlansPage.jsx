@@ -173,7 +173,7 @@ export default function PlansPage({ showBackToDashboard = false }) {
 
   if (loading) {
     return (
-      <PublicShell>
+      <PublicShell marketing>
         <div className={styles.stateWrap}>
           <p>Loading pricing information&hellip;</p>
         </div>
@@ -183,7 +183,7 @@ export default function PlansPage({ showBackToDashboard = false }) {
 
   if (error) {
     return (
-      <PublicShell>
+      <PublicShell marketing>
         <div className={styles.stateWrap}>
           <p className={styles.stateError}>{error}</p>
         </div>
@@ -192,21 +192,17 @@ export default function PlansPage({ showBackToDashboard = false }) {
   }
 
   return (
-    <PublicShell>
+    <PublicShell marketing>
       <section className={styles.header}>
         <div className={styles.container}>
           {showBackToDashboard && (
             <button
               className={styles.backBtn}
-              onClick={() => navigate("/bookings")}
+              onClick={() => navigate("/dashboard")}
             >
               &larr; Back to dashboard
             </button>
           )}
-
-          <span className={styles.eyebrow}>
-            {isAuthenticated ? `Current plan: ${currentPlan}` : "Pricing"}
-          </span>
 
           <h1 className={styles.title}>
             Simple pricing.{" "}
@@ -254,12 +250,12 @@ export default function PlansPage({ showBackToDashboard = false }) {
               return (
                 <li
                   key={plan.id}
-                  className={`${styles.card} ${plan.featured ? styles.cardFeatured : ""} ${
+                  className={`${styles.card} ${isAuthenticated && !isCurrent && !isDowngradeOption && !isPendingTarget ? "premium-tier-card" : ""} ${plan.featured ? styles.cardFeatured : ""} ${
                     isCurrent ? styles.cardActive : ""
                   }`}
                 >
                   {plan.featured && (
-                    <span className={styles.popular}>
+                    <span className={`${styles.popular} premium-plan-badge`}>
                       <Star size={12} strokeWidth={0} fill="currentColor" />
                       Most popular
                     </span>
@@ -356,7 +352,7 @@ function renderCta({
   if (isCurrent && hasPendingDowngrade) {
     return (
       <button
-        className={styles.btnPrimary}
+        className={`${styles.btnPrimary} btn btn-premium`}
         onClick={() => openPaymentPage(plan.id)}
       >
         Keep {plan.name}

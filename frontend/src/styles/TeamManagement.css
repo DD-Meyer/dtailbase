@@ -1,10 +1,8 @@
 /* ===== Desktop Styles ===== */
 /* --- 0. VISIBILITY RESET (Add this to the top) --- */
-.team-management-page, 
-.main-content, 
-.page-body {
-  background-color: #f8fafc !important;
-  color: #1e293b !important; /* Forces dark text globally for this page */
+.team-management-page {
+  background-color: var(--app-bg);
+  color: var(--app-text) !important; /* Forces dark text globally for this page */
 }
 
 /* Fix Headings and Labels that are likely inheriting 'white' */
@@ -12,7 +10,7 @@
 .team-management-page h2, 
 .team-management-page h3,
 .form-group label {
-  color: #0f172a !important;
+  color: var(--app-text) !important;
 }
 
 /* --- 1. THE ACTION HEADER --- */
@@ -28,19 +26,19 @@
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1rem;
   align-items: center;
-  background: #ffffff;
+  background: var(--app-surface);
   padding: 1.5rem;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  color: #1e293b !important; /* Ensures text inside form is dark */
+  border-radius: 4px;
+  border: 1px solid var(--app-border);
+  color: var(--app-text) !important; /* Ensures text inside form is dark */
 }
 
 /* Ensure inputs themselves have dark text and light backgrounds */
 .grid-form input, 
 .grid-form select {
-  background: #ffffff !important;
-  color: #1e293b !important;
-  border: 1px solid #cbd5e1;
+  background: var(--app-surface) !important;
+  color: var(--app-text) !important;
+  border: 1px solid var(--app-border);
 }
 
 /* Ensure the button spans appropriately if the grid wraps */
@@ -52,17 +50,17 @@
 .input-sm {
   padding: 6px 10px;
   font-size: 0.85rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
+  border: 1px solid var(--app-border);
+  border-radius: 4px;
   width: 100%;
-  color: #1e293b !important;
-  background-color: #ffffff !important;
+  color: var(--app-text) !important;
+  background-color: var(--app-surface) !important;
 }
 
 .input-sm:focus {
-  border-color: #3b82f6;
+  border-color: var(--app-primary);
   outline: none;
-  background: #fff;
+  background: var(--app-surface);
 }
 
 /* --- 4. BADGES (ROLES & STATUS) --- */
@@ -77,26 +75,26 @@
 
 /* Roles */
 .badge-OWNER {
-  background: #fef3c7;
-  color: #92400e !important;
-  border: 1px solid #fde68a;
+  background: var(--app-warning-soft);
+  color: var(--app-warning) !important;
+  border: 1px solid var(--app-warning);
 }
 
 .badge-STAFF {
-  background: #e0f2fe;
-  color: #075985 !important;
-  border: 1px solid #bae6fd;
+  background: var(--app-surface-alt);
+  color: var(--app-primary) !important;
+  border: 1px solid var(--app-primary);
 }
 
 /* Statuses */
 .badge-success {
-  background: #dcfce7;
-  color: #166534 !important;
+  background: var(--app-surface-alt);
+  color: var(--app-success) !important;
 }
 
 .badge-ghost {
-  background: #f1f5f9;
-  color: #475569 !important;
+  background: var(--app-surface-alt);
+  color: var(--app-primary) !important;
   opacity: 0.6;
 }
 
@@ -109,28 +107,28 @@
 
 .btn-outline {
   background: transparent;
-  border: 1px solid #cbd5e1;
-  color: #475569 !important;
+  border: 1px solid var(--app-border);
+  color: var(--app-primary) !important;
 }
 
 .btn-outline:hover {
-  background: #f8fafc;
-  border-color: #94a3b8;
+  background: var(--app-surface);
+  border-color: var(--app-primary);
 }
 
 .btn-warning {
-  border-color: #f59e0b;
-  color: #d97706 !important;
+  border-color: var(--app-warning);
+  color: var(--app-warning) !important;
 }
 
 .btn-warning:hover {
-  background: #fffbeb;
+  background: var(--app-surface-alt);
 }
 
 .btn-ghost {
   background: transparent;
   border: none;
-  color: #64748b !important;
+  color: var(--app-primary) !important;
 }
 
 /* --- 6. UTILITIES ---
@@ -141,18 +139,18 @@
 
 /* TABLE REFRESH */
 .table-standard {
-  background-color: #ffffff !important;
+  background-color: var(--app-surface) !important;
 }
 
 .table-standard thead th {
-  color: #64748b !important; /* Grey headers */
-  background: #f8fafc !important;
-  border-bottom: 2px solid #e2e8f0;
+  color: var(--app-primary) !important; /* Grey headers */
+  background: var(--app-surface) !important;
+  border-bottom: 2px solid var(--app-border);
 }
 
 .table-standard tbody td {
-  color: #1e293b !important; /* Dark body text */
-  background-color: #ffffff !important;
+  color: var(--app-text) !important; /* Dark body text */
+  background-color: var(--app-surface) !important;
 }
 
 
@@ -162,20 +160,20 @@
 /* 1. General Button Reset (Ensures no white text leakage) */
 .team-management-page button,
 .team-management-page .btn {
-  color: #1e293b; /* Default dark text */
+  color: var(--app-text); /* Default dark text */
 }
 
 /* 2. EDIT BUTTON (Warning/Yellow) */
 .btn-warning {
-  background: #fffbeb !important; /* Very light yellow background */
-  border: 1px solid #f59e0b !important;
-  color: #b45309 !important; /* Deep amber text for contrast */
+  background: var(--app-surface-alt) !important; /* Very light yellow background */
+  border: 1px solid var(--app-warning) !important;
+  color: var(--app-warning) !important; /* Deep amber text for contrast */
   font-weight: 600;
 }
 
 .btn-warning:hover {
-  background: #fef3c7 !important;
-  color: #92400e !important;
+  background: var(--app-warning-soft) !important;
+  color: var(--app-warning) !important;
   box-shadow: 0 2px 4px rgba(180, 83, 9, 0.1);
 }
 
@@ -183,29 +181,29 @@
 /* If you want Deactivate to look like a danger action */
 .btn-ghost.deactivate, 
 .btn-outline.deactivate {
-  background: #fff1f2 !important; /* Light red wash */
-  color: #e11d48 !important;      /* Sharp red text */
-  border: 1px solid #fecdd3 !important;
+  background: var(--app-surface) !important; /* Light red wash */
+  color: var(--app-danger) !important;      /* Sharp red text */
+  border: 1px solid var(--app-danger) !important;
 }
 
 .btn-ghost.deactivate:hover, 
 .btn-outline.deactivate:hover {
-  background: #ffe4e6 !important;
-  border-color: #fb7185 !important;
-  color: #be123c !important;
+  background: var(--app-surface-alt) !important;
+  border-color: var(--app-danger) !important;
+  color: var(--app-danger) !important;
 }
 
 /* 4. DEFAULT OUTLINE BUTTON (If used for other actions) */
 .btn-outline {
-  background: #ffffff !important;
-  border: 1px solid #cbd5e1 !important;
-  color: #475569 !important; /* Slate grey text */
+  background: var(--app-surface) !important;
+  border: 1px solid var(--app-border) !important;
+  color: var(--app-primary) !important; /* Slate grey text */
 }
 
 .btn-outline:hover {
-  background: #f8fafc !important;
-  border-color: #94a3b8 !important;
-  color: #1e293b !important;
+  background: var(--app-surface) !important;
+  border-color: var(--app-primary) !important;
+  color: var(--app-text) !important;
 }
 
 /* 5. ICON VISIBILITY (If buttons have SVG icons) */
@@ -218,12 +216,12 @@
 
 /* Force the page container to have dark text */
 .page-container {
-    color: #1e293b !important;
+    color: var(--app-text) !important;
 }
 
 /* Fix Headings */
 .page-container h1 {
-    color: #0f172a !important;
+    color: var(--app-text) !important;
     margin-bottom: 20px;
 }
 
@@ -235,108 +233,107 @@
 
 /* Edit Button */
 .page-container .btn-outline {
-    background-color: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
-    color: #475569 !important;
+    background-color: var(--app-surface) !important;
+    border: 1px solid var(--app-border) !important;
+    color: var(--app-primary) !important;
 }
 
 .page-container .btn-outline:hover {
-    background-color: #f1f5f9 !important;
-    color: #1e293b !important;
+    background-color: var(--app-surface-alt) !important;
+    color: var(--app-text) !important;
 }
 
 /* Deactivate / Warning Button */
 .page-container .btn-warning {
-    background-color: #fffbeb !important; /* Light amber wash */
-    color: #92400e !important;           /* Deep brown/gold text */
-    border: 1px solid #fcd34d !important;
+    background-color: var(--app-surface-alt) !important; /* Light amber wash */
+    color: var(--app-warning) !important;           /* Deep brown/gold text */
+    border: 1px solid var(--app-warning) !important;
 }
 
 .page-container .btn-warning:hover {
-    background-color: #fef3c7 !important;
-    color: #78350f !important;
+    background-color: var(--app-warning-soft) !important;
+    color: var(--app-warning) !important;
 }
 
 /* Save / Success Button */
 .page-container .btn-success {
-    background-color: #dcfce7 !important;
-    color: #166534 !important;
-    border: 1px solid #86efac !important;
+    background-color: var(--app-surface-alt) !important;
+    color: var(--app-success) !important;
+    border: 1px solid var(--app-success) !important;
 }
 
 .team-action-btn {
   min-height: 30px;
   font-weight: 700;
-  border-radius: 8px;
+  border-radius: 4px;
   border: 1px solid transparent;
   transition: all 0.2s ease;
   margin-left: 3%;
 }
 
 .team-action-edit {
-  background: #eff6ff !important;
-  color: #1d4ed8 !important;
-  border-color: #bfdbfe !important;
+  background: var(--app-surface-alt) !important;
+  color: var(--app-primary) !important;
+  border-color: var(--app-primary) !important;
 }
 
 .team-action-edit:hover {
-  background: #dbeafe !important;
-  border-color: #93c5fd !important;
+  background: var(--app-surface-alt) !important;
+  border-color: var(--app-primary) !important;
 }
 
 .team-action-deactivate {
-  background: #fff1f2 !important;
-  color: #be123c !important;
-  border-color: #fecdd3 !important;
+  background: var(--app-surface) !important;
+  color: var(--app-danger) !important;
+  border-color: var(--app-danger) !important;
 }
 
 .team-action-deactivate:hover {
-  background: #ffe4e6 !important;
-  border-color: #fda4af !important;
+  background: var(--app-surface-alt) !important;
+  border-color: var(--app-danger) !important;
 }
 
 .team-action-reactivate {
-  background: #ecfdf3 !important;
-  color: #047857 !important;
-  border-color: #a7f3d0 !important;
+  background: var(--app-surface-alt) !important;
+  color: var(--app-success) !important;
+  border-color: var(--app-success) !important;
 }
 
 .team-action-reactivate:hover {
-  background: #d1fae5 !important;
-  border-color: #6ee7b7 !important;
+  background: var(--app-success-soft) !important;
+  border-color: var(--app-success) !important;
 }
 
 .team-action-delete {
-  background: #fee2e2 !important;
-  color: #b91c1c !important;
-  border-color: #fca5a5 !important;
+  background: var(--app-surface-alt) !important;
+  color: var(--app-danger) !important;
+  border-color: var(--app-danger) !important;
 }
 
 .team-action-delete:hover {
-  background: #fecaca !important;
-  border-color: #f87171 !important;
+  background: var(--app-danger-soft) !important;
+  border-color: var(--app-danger) !important;
 }
 
 /* Fix Inputs (typed text visibility) */
 .page-container input, 
 .page-container select {
-    background-color: #ffffff !important;
-    color: #1e293b !important;
-    border: 1px solid #e2e8f0 !important;
+    background-color: var(--app-surface) !important;
+    color: var(--app-text) !important;
+    border: 1px solid var(--app-border) !important;
 }
 
 .page-container input::placeholder {
-    color: #94a3b8 !important;
+    color: var(--app-primary) !important;
 }
 
 
 /* MOBILE ONLY STYLES */
 @media (max-width: 768px) {
   .team-management-page, 
-  .main-content, 
-  .page-body {
-    background-color: #f8fafc !important;
-    color: #1e293b !important; /* Forces dark text globally for this page */
+  .team-management-page {
+    background-color: var(--app-bg);
+    color: var(--app-text) !important; /* Forces dark text globally for this page */
   }
 
   /* Fix Headings and Labels that are likely inheriting 'white' */
@@ -344,60 +341,60 @@
   .team-management-page h2, 
   .team-management-page h3,
   .form-group label {
-    color: #0f172a !important;
+    color: var(--app-text) !important;
   }
 
   /* Ensure inputs themselves have dark text and light backgrounds */
   .grid-form input,
   .grid-form select {
-    background: #ffffff !important;
-    color: #1e293b !important;
-    border: 1px solid #cbd5e1;
+    background: var(--app-surface) !important;
+    color: var(--app-text) !important;
+    border: 1px solid var(--app-border);
   }
 
   /* Fix the button visibility on mobile */
   .team-management-page button,
   .team-management-page .btn {
-    color: #1e293b; /* Default dark text */
+    color: var(--app-text); /* Default dark text */
   }
 
   .btn-warning {
-    background: #fffbeb !important; /* Very light yellow background */
-    border: 1px solid #f59e0b !important;
-    color: #b45309 !important; /* Deep amber text for contrast */
+    background: var(--app-surface-alt) !important; /* Very light yellow background */
+    border: 1px solid var(--app-warning) !important;
+    color: var(--app-warning) !important; /* Deep amber text for contrast */
     font-weight: 600;
   }
 
   .btn-warning:hover {
-    background: #fef3c7 !important;
-    color: #92400e !important;
+    background: var(--app-warning-soft) !important;
+    color: var(--app-warning) !important;
     box-shadow: 0 2px 4px rgba(180, 83, 9, 0.1);
   }
 
   .btn-ghost.deactivate, 
   .btn-outline.deactivate {
-    background: #fff1f2 !important; /* Light red wash */
-    color: #e11d48 !important;      /* Sharp red text */
-    border: 1px solid #fecdd3 !important;
+    background: var(--app-surface) !important; /* Light red wash */
+    color: var(--app-danger) !important;      /* Sharp red text */
+    border: 1px solid var(--app-danger) !important;
   }
 
   .btn-ghost.deactivate:hover, 
   .btn-outline.deactivate:hover {
-    background: #ffe4e6 !important;
-    border-color: #fb7185 !important;
-    color: #be123c !important;
+    background: var(--app-surface-alt) !important;
+    border-color: var(--app-danger) !important;
+    color: var(--app-danger) !important;
   }
 
   .btn-outline {
-    background: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
-    color: #475569 !important; /* Slate grey text */
+    background: var(--app-surface) !important;
+    border: 1px solid var(--app-border) !important;
+    color: var(--app-primary) !important; /* Slate grey text */
   }
 
   .btn-outline:hover {
-    background: #f8fafc !important;
-    border-color: #94a3b8 !important;
-    color: #1e293b !important;
+    background: var(--app-surface) !important;
+    border-color: var(--app-primary) !important;
+    color: var(--app-text) !important;
   }
 
   /* .team-action-btn {
@@ -425,13 +422,13 @@
   /* Fix Inputs (typed text visibility) */
   .page-container input,
   .page-container select {
-    background-color: #ffffff !important;
-    color: #1e293b !important;
-    border: 1px solid #e2e8f0 !important;
+    background-color: var(--app-surface) !important;
+    color: var(--app-text) !important;
+    border: 1px solid var(--app-border) !important;
   }
 
   .page-container input::placeholder {
-    color: #94a3b8 !important;
+    color: var(--app-primary) !important;
   }
 
   /* Ensure the button spans appropriately if the grid wraps */
@@ -444,47 +441,47 @@
 
   /* Fix the action buttons in the table */
   .team-action-edit {
-    background: #eff6ff !important;
-    color: #1d4ed8 !important;
-    border-color: #bfdbfe !important;
+    background: var(--app-surface-alt) !important;
+    color: var(--app-primary) !important;
+    border-color: var(--app-primary) !important;
   }
 
   .team-action-edit:hover {
-    background: #dbeafe !important;
-    border-color: #93c5fd !important;
+    background: var(--app-surface-alt) !important;
+    border-color: var(--app-primary) !important;
   }
 
   .team-action-deactivate {
-    background: #fff1f2 !important;
-    color: #be123c !important;
-    border-color: #fecdd3 !important;
+    background: var(--app-surface) !important;
+    color: var(--app-danger) !important;
+    border-color: var(--app-danger) !important;
   }
 
   .team-action-deactivate:hover {
-    background: #ffe4e6 !important;
-    border-color: #fda4af !important;
+    background: var(--app-surface-alt) !important;
+    border-color: var(--app-danger) !important;
   }
 
   .team-action-reactivate {
-    background: #ecfdf3 !important;
-    color: #047857 !important;
-    border-color: #a7f3d0 !important;
+    background: var(--app-surface-alt) !important;
+    color: var(--app-success) !important;
+    border-color: var(--app-success) !important;
   }
 
   .team-action-reactivate:hover {
-    background: #d1fae5 !important;
-    border-color: #6ee7b7 !important;
+    background: var(--app-success-soft) !important;
+    border-color: var(--app-success) !important;
   }
 
   .team-action-delete {
-    background: #fee2e2 !important;
-    color: #b91c1c !important;
-    border-color: #fca5a5 !important;
+    background: var(--app-surface-alt) !important;
+    color: var(--app-danger) !important;
+    border-color: var(--app-danger) !important;
   }
 
   .team-action-delete:hover {
-    background: #fecaca !important;
-    border-color: #f87171 !important;
+    background: var(--app-danger-soft) !important;
+    border-color: var(--app-danger) !important;
   }
 
 }

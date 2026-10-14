@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import api from '../axios_instance';
 import { AuthContext } from './AuthContext';
 
@@ -20,7 +20,7 @@ export const CompanyProvider = ({ children }) => {
     return null;
   };
 
-  const fetchCompanyData = async () => {
+  const fetchCompanyData = useCallback(async () => {
       if (!isAuthenticated) {
         setCompany(null);
         setLoading(false);
@@ -35,16 +35,18 @@ export const CompanyProvider = ({ children }) => {
         if (res.data.usage_stats) {
             setUsageStats(res.data.usage_stats);
         }
+        return { ok: true, company: res.data };
       } catch (err) {
         console.error("Error loading company context:", err);
+        return { ok: false };
       } finally {
         setLoading(false);
       }
-    };
+    }, [isAuthenticated]);
 
   useEffect(() => {
     fetchCompanyData();
-  }, [isAuthenticated]);
+  }, [fetchCompanyData]);
 
   // Derived values for easy access
   const currentPlan = company?.plan || "STARTER";

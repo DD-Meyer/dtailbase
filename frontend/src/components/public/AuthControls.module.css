@@ -1,0 +1,7 @@
+.tabs { display: grid; grid-template-columns: 1fr 1fr; padding: 4px; gap: 4px; background: var(--color-surface-alt); border: 1px solid var(--color-border); }
+.tabs a { min-height: 44px; display: grid; place-items: center; font-size: 15px; font-weight: 700; border: 1px solid transparent; color: var(--color-text-muted); }
+.tabs a[aria-current="page"] { color: var(--color-primary); background: var(--color-surface); border-color: var(--color-border); }
+.password { position: relative; }
+.password input { padding-right: 56px; }
+.password button { position: absolute; right: 3px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; display: grid; place-items: center; border: 0; background: transparent; color: var(--color-text-muted); cursor: pointer; }
+.password button:hover { color: var(--color-primary); }

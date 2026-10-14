@@ -6,6 +6,7 @@ import { useCompany } from "../context/CompanyContext";
 import UpgradeValueCards from "./UpgradeValueCards";
 import PlanUsageBanner from "./PlanUsageBanner";
 import { showConfirm, showToast } from "../utils/uiFeedback";
+import { Link } from "react-router-dom";
 
 const MIN_PASSWORD_LENGTH = 8;
 const PASSWORD_GUIDANCE =
@@ -26,6 +27,7 @@ function TeamManagement() {
   const { user } = useContext(AuthContext);
   const { planLimits, currentPlan, nextPlan } = useCompany();
   const [team, setTeam] = useState([]);
+  const teamLimitReached = planLimits?.max_users != null && team.length >= planLimits.max_users;
   const [msg, setMsg] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -242,9 +244,9 @@ function TeamManagement() {
           </div>
 
           <div className="page-banner-actions">
-            <button className="btn btn-primary" onClick={() => setShowAddForm(!showAddForm)}>
+            {nextPlan && teamLimitReached && !showAddForm ? <Link className="btn btn-premium" to="/plans">Upgrade for more members</Link> : <button className="btn btn-primary" onClick={() => setShowAddForm(!showAddForm)}>
               {showAddForm ? "Cancel" : "Add Member"}
-            </button>
+            </button>}
           </div>
         </div>
       </div>
@@ -293,7 +295,8 @@ function TeamManagement() {
             <option value="OWNER">Owner</option>
             <option value="STAFF">Technician / Staff</option>
           </select>
-          <button className="btn btn-success" type="submit">Save Member</button>
+          <button className="btn btn-success" type="submit" disabled={teamLimitReached}>Save Member</button>
+          {nextPlan && teamLimitReached && <p className="premium-prompt">Team capacity reached. <Link to="/plans">Upgrade for more team members</Link></p>}
           <p className="text-sm text-muted" style={{ gridColumn: "1 / -1" }}>
             New team members receive a temporary strong password automatically. You will see it once after saving.
           </p>
@@ -413,7 +416,7 @@ function TeamManagement() {
               Save this temporary password now. It will not be shown again for this creation.
             </p>
 
-            <div className="card p-4 mb-4" style={{ background: "#f8fafc" }}>
+            <div className="card p-4 mb-4" style={{ background: "var(--app-surface)" }}>
               <p className="text-sm text-muted mb-1">Member</p>
               <p className="font-semibold mb-3">{createdMemberName || "New team member"}</p>
               <p className="text-sm text-muted mb-1">Temporary password</p>

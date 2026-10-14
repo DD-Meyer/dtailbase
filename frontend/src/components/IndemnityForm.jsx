@@ -6,19 +6,23 @@ import "../styles/Indemnity.css";
 import { formatShortRef } from "../utils/formatters";
 import { useCompany } from "../context/CompanyContext";
 import { resizeImagesToPlanLimit } from "../utils/imageResize";
+import { jobError } from "../utils/jobStatus";
+import { Camera, Check, PenLine, FileText, X } from "lucide-react";
 
-function IndemnityForm() {
-  const { bookingId } = useParams();
+function IndemnityForm({ bookingId: suppliedBookingId, onSuccess, onClose, onBusyChange }) {
+  const { bookingId: routeBookingId } = useParams();
+  const bookingId = suppliedBookingId || routeBookingId;
   const { planLimits, company } = useCompany();
   const sigCanvas = useRef({});
+  const signatureContainer = useRef(null);
   const navigate = useNavigate();
 
   const [bookingData, setBookingData] = useState(null);
-  const [location, setLocation] = useState({ lat: null, lng: null });
-  const [customerData, setCustomerData] = useState(null); // Added to store customer details
   const [template, setTemplate] = useState(null);
   const [previews, setPreviews] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submitLock = useRef(false);
+  const previewUrls = useRef(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
@@ -29,6 +33,12 @@ function IndemnityForm() {
 
   // Add preview state at the top of Bookings component
   const [beforePhotos, setBeforePhotos] = useState([]);
+  const [isProcessingPhotos, setIsProcessingPhotos] = useState(false);
+  const photoLock = useRef(false);
+  useEffect(() => {
+    onBusyChange?.(isSubmitting || isProcessingPhotos);
+  }, [isSubmitting, isProcessingPhotos, onBusyChange]);
+  useEffect(() => () => previewUrls.current.forEach((url) => URL.revokeObjectURL(url)), []);
 
   // 1. Consolidated Data Loader
   useEffect(() => {
@@ -50,7 +60,7 @@ function IndemnityForm() {
         }
         setError(null);
       } catch (err) {
-        setError("Could not load form details.");
+        setError(jobError(err));
       } finally {
         setIsLoading(false);
       }
@@ -58,15 +68,35 @@ function IndemnityForm() {
     if (bookingId) loadFormData();
   }, [bookingId]);
 
-  // const handlePhotoChange = (e) => {
-  //   const files = Array.from(e.target.files);
-  //   setPhotos((prev) => [...prev, ...files]);
-  //   const newPreviews = files.map((file) => URL.createObjectURL(file));
-  //   setPreviews((prev) => [...prev, ...newPreviews]);
-  // };
+  useEffect(() => {
+    const container = signatureContainer.current;
+    if (!container) return;
+    const observer = new ResizeObserver(() => {
+      const pad = sigCanvas.current;
+      const canvas = pad.getCanvas();
+      const width = container.clientWidth;
+      if (!width) return;
+      const oldWidth = Number(canvas.dataset.logicalWidth) || width;
+      const strokes = pad.toData().map((stroke) => ({
+        ...stroke,
+        points: stroke.points.map((point) => ({ ...point, x: point.x * width / oldWidth })),
+      }));
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      canvas.width = Math.round(width * ratio);
+      canvas.height = Math.round(200 * ratio);
+      canvas.getContext("2d").scale(ratio, ratio);
+      canvas.dataset.logicalWidth = String(width);
+      pad.clear();
+      pad.fromData(strokes);
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [isLoading, error]);
 
   const handlePhotoChange = async (e) => {
     const files = Array.from(e.target.files);
+    e.target.value = "";
+    if (photoLock.current || submitLock.current || !files.length) return;
     
     // Calculate how many more photos are allowed
     const remainingSlots = maxBeforePhotos - beforePhotos.length;
@@ -83,6 +113,8 @@ function IndemnityForm() {
       triggerToast(`Only the first ${remainingSlots} photos were added due to plan limits.`, "info");
     }
 
+    photoLock.current = true;
+    setIsProcessingPhotos(true);
     try {
       const resizedFiles = await resizeImagesToPlanLimit(
         allowedFiles,
@@ -91,17 +123,20 @@ function IndemnityForm() {
       );
       setBeforePhotos((prev) => [...prev, ...resizedFiles]);
       const newPreviews = resizedFiles.map((file) => URL.createObjectURL(file));
+      newPreviews.forEach((url) => previewUrls.current.add(url));
       setPreviews((prev) => [...prev, ...newPreviews]);
     } catch (resizeError) {
       console.error("Image resize failed:", resizeError);
       triggerToast("Could not process one or more images. Please try again.", "error");
     } finally {
-      e.target.value = "";
+      photoLock.current = false;
+      setIsProcessingPhotos(false);
     }
   };
 
   const removePhoto = (index) => {
     URL.revokeObjectURL(previews[index]);
+    previewUrls.current.delete(previews[index]);
     setBeforePhotos(beforePhotos.filter((_, i) => i !== index));
     setPreviews(previews.filter((_, i) => i !== index));
   };
@@ -115,6 +150,7 @@ function IndemnityForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (submitLock.current || photoLock.current) return;
     if (!template || !bookingData) return;
     if (sigCanvas.current.isEmpty()) {
       triggerToast("Please provide a signature.", "error");
@@ -125,6 +161,7 @@ function IndemnityForm() {
       return;
     }
 
+    submitLock.current = true;
     setIsSubmitting(true);
 
     // 1. Check if geolocation is supported
@@ -134,6 +171,7 @@ function IndemnityForm() {
         "error"
       );
       setIsSubmitting(false);
+      submitLock.current = false;
       return;
     }
 
@@ -167,6 +205,7 @@ function IndemnityForm() {
         
         triggerToast(errorMessage, "error");
         setIsSubmitting(false);
+        submitLock.current = false;
       },
       { 
         enableHighAccuracy: true, // Force GPS instead of IP-based location
@@ -182,6 +221,7 @@ function IndemnityForm() {
     if (!coords.lat || !coords.lng) {
       triggerToast("Submission blocked: Valid GPS coordinates are required.", "error");
       setIsSubmitting(false);
+      submitLock.current = false;
       return;
     }
 
@@ -220,7 +260,8 @@ function IndemnityForm() {
       });
 
       triggerToast("Indemnity submitted successfully!", "success");
-      setTimeout(() => navigate("/bookings"), 900);
+      if (onSuccess) await onSuccess();
+      else navigate("/bookings");
     } catch (err) {
       console.error("API Error:", err.response?.data);
       const apiError = err.response?.data;
@@ -233,6 +274,7 @@ function IndemnityForm() {
       triggerToast(firstFieldError, "error");
     } finally {
       setIsSubmitting(false);
+      submitLock.current = false;
     }
   };
 
@@ -240,26 +282,25 @@ function IndemnityForm() {
 
   if (error) {
     return (
-      <div className="page-container">
-        <div className="card error-card">
+      <div className="indemnity-page">
+        <div className="indemnity-error">
           <h2>Notice</h2>
-          <p>{error}</p>
-          <button onClick={() => navigate("/bookings")} className="btn btn-primary">Back to Bookings</button>
+          <p role="alert">{error}</p>
+          <button onClick={onClose || (() => navigate("/bookings"))} className="btn btn-primary">{onClose ? "Back to job" : "Back to Bookings"}</button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="page-container">
-      {toast.show && <div className={`toast-notification ${toast.type}`}>{toast.message}</div>}
-      <div className="card indemnity-card">
+    <div className="indemnity-page">
+      {toast.show && <div role={toast.type === "error" ? "alert" : "status"} className={`indemnity-notice ${toast.type}`}>{toast.message}</div>}
+      <div className="indemnity-card">
         <header className="indemnity-header">
-          <h1>Vehicle Condition & Indemnity</h1>
+          <h1>Before you start</h1>
+          <p className="indemnity-intro">Review the agreement, add before photos, then ask the customer to sign.</p>
           <div className="booking-info">
             <p><strong>Ref:</strong> {formatShortRef(bookingId)}</p>
-            {/* Updated to use customerData state */}
-            {/* Change this line in your JSX */}
             <p>
               <strong>Customer:</strong> {
                 // 1. If it's the 'List' view structure (flattened)
@@ -279,18 +320,19 @@ function IndemnityForm() {
           </div>
         </header>
 
-        <section className="template-section">
-          <h3>{template?.title}</h3>
+        <section className="template-section" aria-labelledby="agreement-heading">
+          <div className="indemnity-section-heading"><FileText size={20} aria-hidden="true" /><h2 id="agreement-heading">1. Review agreement</h2></div>
+          <div className="agreement-meta"><h3>{template?.title}</h3><span className="version-label">Version {template?.version}</span></div>
           <div 
             className="template-body-html"
             dangerouslySetInnerHTML={{ __html: template?.body_html || "<p>No content available.</p>" }}
           />
-          <span className="version-label">Version {template?.version}</span>
         </section>
 
-        <form onSubmit={handleSubmit}>
-          <div className="photo-upload-section">
-            <h3>Vehicle Inspection Photos</h3>
+        <form onSubmit={handleSubmit} aria-busy={isSubmitting || isProcessingPhotos}>
+          <section className="photo-upload-section" aria-labelledby="inspection-heading">
+            <div className="indemnity-section-heading"><Camera size={20} aria-hidden="true" /><h2 id="inspection-heading">2. Before photos</h2></div>
+            <p className="indemnity-help">Add at least one clear photo of the vehicle before work begins.</p>
             <p className="limit-hint">
               {beforePhotos.length} photos added. 
               <span className={beforePhotos.length >= maxBeforePhotos ? "text-warning" : ""}> 
@@ -303,36 +345,42 @@ function IndemnityForm() {
             <div className="photo-grid">
               {previews.map((url, index) => (
                 <div key={index} className="photo-preview-item">
-                  <img src={url} alt="Vehicle preview" />
-                  <button type="button" onClick={() => removePhoto(index)} className="remove-photo-btn">×</button>
+                  <img src={url} alt={`Before photo ${index + 1}`} />
+                  <button type="button" disabled={isSubmitting || isProcessingPhotos} aria-label={`Remove before photo ${index + 1}`} onClick={() => removePhoto(index)} className="remove-photo-btn"><X size={18} aria-hidden="true" /></button>
                 </div>
               ))}
-              {/* Button only shows if under the dynamic limit */}
-              {beforePhotos.length < maxBeforePhotos && (
-                <label className="add-photo-box">
-                  <input type="file" className="add-photo-input" multiple accept="image/*" capture="environment" onChange={handlePhotoChange} />
-                  <span className="plus-icon">+</span>
-                  <span className="label-text">Add Photo</span>
-                </label>
-              )}
             </div>
-          </div>
+            {beforePhotos.length < maxBeforePhotos && <div className="indemnity-photo-actions">
+              <label className="indemnity-photo-picker">
+                <Camera size={18} aria-hidden="true" /><span>Take photo</span>
+                <input type="file" aria-label="Take before photo" accept="image/*" capture="environment" disabled={isSubmitting || isProcessingPhotos} onChange={handlePhotoChange} />
+              </label>
+              <label className="indemnity-photo-picker">
+                <span>Choose photos</span>
+                <input type="file" aria-label="Choose before photos" multiple accept="image/*" disabled={isSubmitting || isProcessingPhotos} onChange={handlePhotoChange} />
+              </label>
+            </div>}
+            {isProcessingPhotos && <p role="status" className="indemnity-help">Preparing photos…</p>}
+          </section>
 
-          <div className="signature-section">
-            <h3>Digital Signature</h3>
-            <div className="sig-canvas-container">
+          <section className="signature-section" aria-labelledby="signature-heading">
+            <div className="indemnity-section-heading"><PenLine size={20} aria-hidden="true" /><h2 id="signature-heading">3. Customer signature</h2></div>
+            <p id="signature-instructions" className="indemnity-help">Ask the customer to sign inside the box using their finger or a stylus.</p>
+            <div ref={signatureContainer} className="sig-canvas-container">
               <SignatureCanvas
                 ref={sigCanvas}
                 penColor="black"
-                canvasProps={{ className: "sigCanvas" }}
+                clearOnResize={false}
+                canvasProps={{ className: "sigCanvas", role: "img", "aria-label": "Customer signature drawing area", "aria-describedby": "signature-instructions" }}
               />
             </div>
-            <button type="button" onClick={clearSignature} className="btn-secondary">Clear Signature</button>
-          </div>
+            <button type="button" onClick={clearSignature} disabled={isSubmitting || isProcessingPhotos} className="indemnity-clear">Clear signature</button>
+          </section>
 
-          <div className="form-actions">
-            <button type="submit" className="btn btn-primary btn-full" disabled={isSubmitting}>
-              {isSubmitting ? "Verifying GPS & Uploading..." : "Accept & Submit Agreement"}
+          <div className="indemnity-actions">
+            <p className="indemnity-help">Submitting accepts the agreement and starts the job. Location permission is required to record the signing.</p>
+            <button type="submit" className="btn btn-primary" disabled={isSubmitting || isProcessingPhotos}>
+              <Check size={18} aria-hidden="true" />{isSubmitting ? "Verifying location & uploading…" : "Accept & start job"}
             </button>
           </div>
         </form>

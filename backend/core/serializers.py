@@ -100,6 +100,7 @@ class VehicleCreateSerializer(serializers.ModelSerializer):
 # --- DETAILED BOOKING SERIALIZER ---
 
 class BookingDetailSerializer(serializers.ModelSerializer):
+    can_start = serializers.BooleanField(read_only=True)
     customer = CustomerSerializer(read_only=True)
     vehicle = VehicleSerializer(read_only=True)
 
@@ -113,7 +114,7 @@ class BookingDetailSerializer(serializers.ModelSerializer):
         fields = [
             "id", "company", "status", "booking_date", "booking_time", "booking_end_time",
             "started_at", "completed_at", "notes", "admin_signature", "is_authorized",
-            "location_type", "customer_address",
+            "location_type", "customer_address", "can_start",
             "customer", "vehicle", "service_name", "total_price", 
             "indemnity_data"
         ]
@@ -138,6 +139,9 @@ def calculate_end_time(booking_date, booking_time, service):
 # --- BOOKING SERIALIZERS ---
 
 # --- BOOKING SERIALIZERS ---
+
+from .job_status import validate_job_transition
+
 
 class BookingSerializer(serializers.ModelSerializer):
     is_signed = serializers.SerializerMethodField()
@@ -189,18 +193,10 @@ class BookingSerializer(serializers.ModelSerializer):
             data["booking_end_time"] = end_dt.time()
 
         requested_status = data.get("status")
-        if instance and requested_status and requested_status.upper() == "IN_PROGRESS" and instance.status != "IN_PROGRESS":
-            agreement = getattr(instance, 'booking_indemnity', None)
-            if not agreement or not agreement.signature_image:
-                raise serializers.ValidationError({
-                    "status": "Cannot start booking: client signature is required."
-                })
-
-            before_photos_count = agreement.condition_photos.filter(photo_type='BEFORE').count()
-            if before_photos_count < 1:
-                raise serializers.ValidationError({
-                    "status": "Cannot start booking: upload at least one BEFORE image first."
-                })
+        if instance:
+            validate_job_transition(instance, requested_status)
+            if requested_status == "COMPLETED" and instance.status != "COMPLETED":
+                raise serializers.ValidationError({"status": "Use the completion action and upload at least one AFTER photo."})
             
         return data
 
@@ -267,6 +263,7 @@ class BookingCreateSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 class BookingListSerializer(serializers.ModelSerializer):
+    can_start = serializers.BooleanField(read_only=True)
     customer_name = serializers.ReadOnlyField(source='customer.firstname')
     customer_lastname = serializers.ReadOnlyField(source='customer.lastname')
     vehicle_details = serializers.SerializerMethodField()
@@ -282,7 +279,7 @@ class BookingListSerializer(serializers.ModelSerializer):
             "booking_date", "booking_time", "booking_end_time",
             "status", "total_price", "notes", "started_at",
             "completed_at", "is_signed", "admin_signature", "is_authorized", "created_at",
-            "location_type", "customer_address"
+            "location_type", "customer_address", "can_start"
         ]
 
     def get_vehicle_details(self, obj):
@@ -380,6 +377,7 @@ class ServiceSerializer(serializers.ModelSerializer):
 # core/serializers.py
 
 class BookingStatusSerializer(serializers.ModelSerializer):
+    expected_status = serializers.ChoiceField(choices=Booking.STATUS_CHOICES, write_only=True, required=False)
     uploaded_images = serializers.ListField(
         child=serializers.ImageField(allow_empty_file=False, use_url=False),
         write_only=True,
@@ -391,7 +389,7 @@ class BookingStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
         # 2. Add 'indemnity_data' to the fields list
-        fields = ["status", "uploaded_images", "started_at", "completed_at", "indemnity_data"]
+        fields = ["status", "expected_status", "uploaded_images", "started_at", "completed_at", "indemnity_data"]
         read_only_fields = ["started_at", "completed_at", "indemnity_data"]
 
     def validate(self, data):
@@ -401,6 +399,17 @@ class BookingStatusSerializer(serializers.ModelSerializer):
         new_status = data.get('status')
         uploaded_images = data.get('uploaded_images', [])
         request = self.context.get('request')
+        expected = data.pop("expected_status", None)
+        if expected and self.instance.status != expected:
+            raise serializers.ValidationError({"status": "This job was updated elsewhere. Reload before trying again."})
+        validate_job_transition(self.instance, new_status)
+        if new_status == "COMPLETED" and self.instance.status != "COMPLETED" and not uploaded_images:
+            raise serializers.ValidationError({"uploaded_images": "Upload at least one AFTER photo before completing this job."})
+        if uploaded_images:
+            if new_status != "COMPLETED" or self.instance.status != "IN_PROGRESS":
+                raise serializers.ValidationError({"uploaded_images": "AFTER photos may only be uploaded when completing a started job."})
+            if not getattr(self.instance, "booking_indemnity", None):
+                raise serializers.ValidationError({"uploaded_images": "Cannot upload photos: No signed indemnity agreement found for this booking."})
         
         if new_status == 'COMPLETED' and request:
             company = request.user.company
@@ -412,20 +421,6 @@ class BookingStatusSerializer(serializers.ModelSerializer):
                     "uploaded_images": f"Your {company.plan} plan allows a maximum of {limit} 'After' photos."
                 })
 
-        if new_status == 'IN_PROGRESS':
-            booking = self.instance
-            agreement = getattr(booking, 'booking_indemnity', None)
-            if not agreement or not agreement.signature_image:
-                raise serializers.ValidationError({
-                    "status": "Cannot start booking: client signature is required."
-                })
-
-            before_photos_count = agreement.condition_photos.filter(photo_type='BEFORE').count()
-            if before_photos_count < 1:
-                raise serializers.ValidationError({
-                    "status": "Cannot start booking: upload at least one BEFORE image first."
-                })
-        
         return data
 
     def update(self, instance, validated_data):
@@ -444,7 +439,7 @@ class BookingStatusSerializer(serializers.ModelSerializer):
         from django.utils import timezone
 
         # 2. Handle Status & Timestamps
-        if new_status == 'COMPLETED':
+        if new_status == 'COMPLETED' and instance.status != 'COMPLETED':
             instance.completed_at = timezone.now()
         elif new_status == 'IN_PROGRESS' and not instance.started_at:
             instance.started_at = timezone.now()

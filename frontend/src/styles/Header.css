@@ -3,9 +3,9 @@
   height: 64px;
   min-height: 64px;
   max-height: 64px;
-  background: rgba(7, 13, 24, 0.88);
-  border-bottom: 1px solid rgba(123, 154, 196, 0.22);
-  backdrop-filter: blur(8px);
+  background: var(--app-surface-alt);
+  border-bottom: 1px solid var(--app-primary);
+  backdrop-filter: none;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -35,7 +35,7 @@
 .dashboard-logo.mobile-only {
   display: none;
 }
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .dashboard-logo.mobile-only {
     display: flex;
     font-size: 1.2rem;
@@ -51,11 +51,11 @@
 }
 
 .header-install-btn {
-  border: 1px solid rgba(35, 180, 255, 0.5);
+  border: 1px solid var(--app-primary);
   border-radius: 999px;
   padding: 10px 16px;
-  background: linear-gradient(135deg, #0f84c8, #1bbf92);
-  color: #f8feff;
+  background: var(--app-primary);
+  color: var(--app-on-primary);
   font-size: 0.86rem;
   font-weight: 700;
   box-shadow: 0 14px 28px -18px rgba(15, 132, 200, 0.85);
@@ -65,7 +65,7 @@
   filter: brightness(1.08);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .dashboard-logo {
     font-size: 1.2rem;
     padding-left: 2px;
@@ -81,17 +81,17 @@
 
 .current-plan {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--app-primary);
   text-transform: uppercase;
   margin-left: 8px;
 }
 
 .mobile-menu-btn {
   display: none;
-  border: 1px solid rgba(123, 154, 196, 0.28);
-  background: rgba(18, 30, 48, 0.78);
-  color: #d9e8ff;
-  border-radius: 10px;
+  border: 1px solid var(--app-primary);
+  background: var(--app-primary);
+  color: var(--app-on-primary);
+  border-radius: 4px;
   width: 40px;
   height: 40px;
   font-size: 1.2rem;
@@ -111,27 +111,27 @@
   border: none;
   cursor: pointer;
   padding: 6px;
-  border-radius: 12px;
-  color: #d8e8ff;
+  border-radius: 4px;
+  color: var(--app-text);
   transition: background 0.2s;
 }
 
 .profile-trigger:hover {
-  background: rgba(123, 154, 196, 0.15);
+  background: var(--app-primary-soft);
 }
 
 /* if profile dropdown is open then highlight the profile-trigger */
 .profile-trigger.open {
-  background: rgba(123, 154, 196, 0.25);
+  background: var(--app-primary-soft);
 }
 
 .avatar {
   position: relative;
   width: 36px;
   height: 36px;
-  background: linear-gradient(145deg, #23b4ff, #32f0ca);
-  color: white;
-  border-radius: 10px;
+  background: var(--app-primary);
+  color: var(--app-on-primary);
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -146,8 +146,8 @@
   height: 18px;
   padding: 0 5px;
   border-radius: 9px;
-  background: #ef4444;
-  color: #ffffff;
+  background: var(--app-danger);
+  color: var(--app-on-primary);
   font-size: 10px;
   font-weight: 700;
   display: flex;
@@ -165,12 +165,12 @@
   display: block;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #eff6ff;
+  color: var(--app-text);
 }
 
 .user-role {
   font-size: 0.75rem;
-  color: #9ab2d2;
+  color: var(--app-muted);
   text-transform: capitalize;
 }
 
@@ -180,9 +180,9 @@
   top: calc(100% + 10px);
   right: 0;
   width: 220px;
-  background: rgba(12, 22, 36, 0.95);
-  border: 1px solid rgba(123, 154, 196, 0.24);
-  border-radius: 12px;
+  background: var(--app-surface-alt);
+  border: 1px solid var(--app-primary);
+  border-radius: 4px;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
   padding: 8px 0;
   animation: slideIn 0.2s ease-out;
@@ -190,12 +190,12 @@
 
 .dropdown-header {
   padding: 12px 16px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--app-border);
 }
 
 .signed-in-as {
   font-size: 0.7rem;
-  color: #94a3b8;
+  color: var(--app-primary);
   text-transform: uppercase;
   margin: 0;
 }
@@ -203,7 +203,7 @@
 .user-email {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #e5f0ff;
+  color: var(--app-text);
   word-break: break-all;
 }
 
@@ -217,7 +217,7 @@
   display: block;
   padding: 10px 16px;
   text-decoration: none;
-  color: #d8e8ff;
+  color: var(--app-text);
   font-size: 0.9rem;
   width: 100%;
   text-align: left;
@@ -238,7 +238,7 @@
   padding: 10px 16px;
   border: none;
   background: none;
-  color: #d8e8ff;
+  color: var(--app-text);
   font-size: 0.9rem;
   cursor: pointer;
   display: flex;
@@ -247,14 +247,14 @@
 }
 
 .dropdown-submenu-toggle:hover {
-  background: rgba(35, 180, 255, 0.12);
+  background: var(--app-primary-soft);
 }
 
 .dropdown-submenu {
   margin: 0 10px 8px;
-  border: 1px solid rgba(123, 154, 196, 0.24);
-  border-radius: 10px;
-  background: rgba(12, 22, 36, 0.55);
+  border: 1px solid var(--app-primary);
+  border-radius: 4px;
+  background: var(--app-surface);
 }
 
 .dropdown-submenu a {
@@ -262,16 +262,16 @@
 }
 
 .dropdown-links a:hover {
-  background: rgba(35, 180, 255, 0.12);
-  color: #e9f8ff;
+  background: var(--app-primary-soft);
+  color: var(--app-text);
 }
 
 .logout-btn {
-  color: #ef4444;
+  color: var(--app-danger);
 }
 
 .logout-btn:hover {
-  background: #fef2f2;
+  background: var(--app-surface);
 }
 
 @keyframes slideIn {
@@ -279,8 +279,8 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== Mobile Styles (<= 768px) ===== */
-@media (max-width: 768px) {
+/* ===== Mobile Styles (<= 767px) ===== */
+@media (max-width: 767px) {
   .app-header {
     height: 64px;
     min-height: 64px;
@@ -316,4 +316,3 @@
     width: min(88vw, 240px);
   }
 }
-

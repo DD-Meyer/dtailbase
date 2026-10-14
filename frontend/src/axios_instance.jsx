@@ -23,6 +23,7 @@ const isAuthRequest = (url = "") => {
   const normalizedUrl = String(url).replace(/^\/+/, "");
   return (
     normalizedUrl.startsWith("token/") ||
+    normalizedUrl.startsWith("auth/password-reset/") ||
     normalizedUrl.startsWith("auth/google-login/")
   );
 };

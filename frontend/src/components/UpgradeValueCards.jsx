@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { LockKeyhole } from "lucide-react";
 import api from "../axios_instance";
 import {
   DEFAULT_PRICE_FALLBACKS,
@@ -140,11 +141,8 @@ function UpgradeValueCards({ currentPlan }) {
   };
 
   return (
-    <section className="upgrade-value-wrap">
-      <div className="upgrade-value-header">
-        <h2>Scale Your Studio</h2>
-        <p>Deploy legal-grade workflows with high-speed performance built for detailing bays.</p>
-      </div>
+    <details className="upgrade-value-wrap">
+      <summary><LockKeyhole size={16} aria-hidden="true" />Need more capacity? Explore plan upgrades</summary>
       <div className="upgrade-value-grid">
         {visiblePlans.map((plan) => {
           const planPrice = getPlanPrice(plan.id);
@@ -154,23 +152,22 @@ function UpgradeValueCards({ currentPlan }) {
             <p className="plan-kicker">{plan.title}</p>
             <p className="plan-subtitle">{plan.subtitle}</p>
             <ul>
-              {plan.perks.map((perk) => (
+              {(isMobile ? plan.perks.slice(0, 3) : plan.perks).map((perk) => (
                 <li key={perk}>{perk}</li>
               ))}
             </ul>
+            {isMobile && plan.perks.length > 3 && <details className="plan-more"><summary>See all plan features</summary><ul>{plan.perks.slice(3).map(perk => <li key={perk}>{perk}</li>)}</ul></details>}
             <div className="plan-footer-row">
-              {!isMobile && planPrice && <span className="plan-price-inline">{planPrice}</span>}
+              {planPrice && <span className="plan-price-inline">{planPrice}</span>}
               <Link className="plan-cta" to={`/payments?plan=${plan.id}`}>
-                {isMobile
-                  ? `${planPrice ? `${planPrice} ` : ""}Upgrade`
-                  : `Upgrade to ${plan.title}`}
+                Upgrade to {plan.title}
               </Link>
             </div>
           </article>
           );
         })}
       </div>
-    </section>
+    </details>
   );
 }
 

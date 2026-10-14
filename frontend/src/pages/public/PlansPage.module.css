@@ -10,8 +10,7 @@
 .header {
   padding: clamp(48px, 8vw, 96px) 0 clamp(24px, 4vw, 40px);
   text-align: center;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(35, 180, 255, 0.15) 0%, transparent 60%);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .backBtn {
@@ -43,11 +42,11 @@
 }
 
 .title {
-  font-size: clamp(2rem, 4.5vw, 3.75rem);
-  font-weight: 800;
+  font-size: clamp(3rem, 5.3vw, 5.2rem);
+  font-weight: 700;
   color: var(--color-foreground);
-  letter-spacing: var(--tracking-tight);
-  line-height: 1.1;
+  letter-spacing: -0.055em;
+  line-height: 1;
   max-width: 720px;
   margin: 0 auto 20px;
 }
@@ -119,12 +118,30 @@
 }
 
 .cardFeatured {
-  border-color: var(--color-primary);
-  background:
-    radial-gradient(circle at 100% 0%, rgba(35, 180, 255, 0.10) 0%, transparent 60%),
-    var(--color-surface);
+  --color-foreground: #121312;
+  --color-text: #121312;
+  --color-text-muted: #35431b;
+  --color-text-subtle: #35431b;
+  --color-border: #647b2d;
+  --color-border-subtle: #849f42;
+  --color-primary-soft: #121312;
+  --color-primary-strong: #ffffff;
+  --color-muted: #e3f6b0;
+  --color-accent: #121312;
+  --color-on-accent: #ffffff;
+  --color-accent-strong: #30362a;
+  --color-accent-soft: #e3f6b0;
+  --upgrade-action: #121312;
+  --upgrade-action-hover: #30362a;
+  --upgrade-on-action: #ffffff;
+  border-color: #647b2d;
+  background: var(--marketing-lime);
 }
 
+.cardFeatured:hover { border-color: #121312; }
+.cardFeatured button:focus-visible { outline: 3px solid #121312; outline-offset: 3px; }
+.cardFeatured .popular { background: #121312; color: var(--marketing-lime); }
+.cardFeatured .currentTag { color: #121312; }
 .cardActive {
   border-color: var(--color-accent);
 }
@@ -139,8 +156,8 @@
   gap: 6px;
   padding: 6px 14px;
   border-radius: var(--radius-pill);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
+  background: var(--marketing-lime);
+  color: var(--marketing-ink);
   font-size: var(--fs-xs);
   font-weight: 800;
   text-transform: uppercase;
@@ -175,6 +192,7 @@
 
 .priceBox {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   gap: 2px;
   padding: 12px 0 4px;
@@ -254,12 +272,14 @@
 }
 
 .btnPrimary {
-  background: var(--color-accent);
-  color: var(--color-on-accent);
+  background: var(--upgrade-action);
+  color: var(--upgrade-on-action);
+  border: 1px solid var(--upgrade-border);
+  min-height: 44px;
 }
 
 .btnPrimary:hover {
-  background: var(--color-accent-strong);
+  background: var(--upgrade-action-hover);
   transform: translateY(-2px);
 }
 
@@ -279,6 +299,7 @@
   border-color: var(--color-primary);
   background: var(--color-primary-soft);
 }
+.cardFeatured .btnGhost:hover:not(:disabled) { background: #e3f6b0; border-color: #121312; }
 
 /* ---- Info ---- */
 .info { padding: 0 0 var(--section-py-lg); }

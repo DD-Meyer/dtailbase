@@ -5,12 +5,17 @@ import "../styles/Customers.css";
 import "../styles/EditableRow.css";
 import { useCompany } from "../context/CompanyContext";
 import EditableRow from "../components/EditableRow";
+import CompactRecords from "../components/CompactRecords";
+import RecordDialog from "../components/RecordDialog";
+import { jobError } from "../utils/jobStatus";
 import UpgradeValueCards from "../components/UpgradeValueCards";
 import PlanUsageBanner from "../components/PlanUsageBanner";
 import { showConfirm, showToast } from "../utils/uiFeedback";
+import { Search, Plus, Pencil, Trash2 } from "lucide-react";
 
 function Customers() {
   const [customers, setCustomers] = useState([]);
+  const [loadError, setLoadError] = useState("");
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showImportReport, setShowImportReport] = useState(false);
@@ -30,11 +35,13 @@ function Customers() {
     normalizedPlan === "ELITE";
 
   const fetchCustomers = async () => {
+    setLoadError("");
     try {
       const res = await api.get("customers/");
+      if (!Array.isArray(res.data)) throw new Error("Unexpected customer response.");
       setCustomers(res.data);
     } catch (err) {
-      console.error("Failed to fetch customers");
+      setLoadError(jobError(err));
     }
   };
 
@@ -249,19 +256,20 @@ function Customers() {
               Download CSV Template
             </button>
             <button
-              className={`btn ${canUseCsvUpload ? "btn-secondary" : "btn-primary"}`}
+              className={`btn ${canUseCsvUpload ? "btn-secondary" : "btn-premium"}`}
               onClick={handleCsvAction}
               title={canUseCsvUpload ? "Upload customers via CSV" : "Upgrade to Pro or Enterprise to unlock CSV import"}
             >
               {canUseCsvUpload ? "Import CSV" : "Upgrade for CSV Import"}
             </button>
             <button 
-              className={`btn ${isLimitReached ? 'btn-disabled opacity-50' : 'btn-primary'}`} 
-              onClick={handleAddNew}
-              disabled={isLimitReached} // Actually disable the button
+              className={`btn ${isLimitReached && nextPlan ? 'btn-premium' : 'btn-primary'}`}
+              onClick={isLimitReached && nextPlan ? () => navigate("/plans") : handleAddNew}
+              disabled={isLimitReached && !nextPlan}
               title={isLimitReached ? "Limit reached" : "Add new customer"}
             >
-              {isLimitReached ? "Limit Reached" : "+ Add Customer"}
+              {!isLimitReached && <Plus size={18} aria-hidden="true" />}
+              {isLimitReached ? nextPlan ? "Upgrade for more customers" : "Limit Reached" : "Add customer"}
             </button>
           </div>
         </div>
@@ -289,52 +297,27 @@ function Customers() {
             value={search}
             onChange={(e) => setSearch(e.target.value)} 
           />
-          <span className="search-icon">🔍</span>
+          <Search className="search-icon" size={18} aria-hidden="true" />
         </div>
       </div>
 
-      <div className="card customers-table-container">
-        <table className="table-standard customers-table">
-          <thead>
-            <tr>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((customer) => (
-              <tr key={customer.id}>
-                <td data-label="First Name">{customer.firstname}</td>
-                <td data-label="Last Name">{customer.lastname}</td>
-                <td data-label="Email">{customer.email}</td>
-                <td data-label="Phone">{customer.phone}</td>
-                <td data-label="Actions">
-                  <div>
-                    <button className="btn btn-xs team-action-btn team-action-edit" onClick={() => handleEdit(customer)}>
-                      Edit
-                    </button>
-                    <button className="btn btn-xs team-action-btn team-action-delete" onClick={() => deleteCustomer(customer.id)}>
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {loadError && <div className="record-fetch-error" role="alert">{loadError}<button className="btn btn-secondary" onClick={fetchCustomers}>Try again</button></div>}
+      {!loadError && <CompactRecords records={filtered.map((customer) => ({
+        id: customer.id, title: `${customer.firstname} ${customer.lastname}`.trim(),
+        subtitle: customer.email || "No email added", meta: customer.phone,
+        fields: [["First name", customer.firstname], ["Last name", customer.lastname],
+          ["Email", customer.email], ["Phone", customer.phone]],
+        actions: [{ label: "Edit customer", run: () => handleEdit(customer) },
+          { label: "Delete", danger: true, run: () => deleteCustomer(customer.id) }],
+      }))} emptyMessage="No customers match your search." />}
 
       {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h2>{editId ? "Edit Customer" : "New Customer"}</h2>
+        <RecordDialog title={editId ? "Edit customer" : "New customer"} onClose={cancelEdit}>
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label>First Name</label>
                 <input 
+                  aria-label="First name"
                   value={formData.firstname}
                   required 
                   onChange={e => setFormData({...formData, firstname: e.target.value})} 
@@ -343,6 +326,7 @@ function Customers() {
               <div className="form-group">
                 <label>Last Name</label>
                 <input 
+                  aria-label="Last name"
                   value={formData.lastname}
                   required 
                   onChange={e => setFormData({...formData, lastname: e.target.value})} 
@@ -352,6 +336,7 @@ function Customers() {
                 <label>Email</label>
                 <input 
                   type="email" 
+                  aria-label="Email"
                   value={formData.email}
                   onChange={e => setFormData({...formData, email: e.target.value})} 
                 />
@@ -359,6 +344,7 @@ function Customers() {
               <div className="form-group">
                 <label>Phone</label>
                 <input 
+                  aria-label="Phone"
                   value={formData.phone}
                   onChange={e => setFormData({...formData, phone: e.target.value})} 
                 />
@@ -372,8 +358,7 @@ function Customers() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+        </RecordDialog>
       )}
 
       {showImportReport && importReport && (

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../axios_instance";
 import "../styles/NewBooking.css"; // Reuse your existing wizard styles
 import { showToast } from "../utils/uiFeedback";
-import { Building2Icon, TruckIcon } from "lucide-react";
+import { Building2Icon, TruckIcon, Check } from "lucide-react";
 
 const STEPS = [
   { id: 1, label: "Your Info" },
@@ -136,7 +136,7 @@ const PublicBooking = () => {
         <div className="progress-container" style={{ "--progress-width": progressWidth }}>
           {STEPS.map((s) => (
             <div key={s.id} className={`step-item ${step >= s.id ? "active" : ""} ${step > s.id ? "completed" : ""}`}>
-              <div className="step-circle">{step > s.id ? "✓" : s.id}</div>
+              <div className="step-circle">{step > s.id ? <Check size={20} aria-hidden="true" /> : s.id}</div>
               <div className="step-label">{s.label}</div>
             </div>
           ))}

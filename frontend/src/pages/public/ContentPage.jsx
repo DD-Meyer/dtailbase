@@ -16,10 +16,9 @@ export default function ContentPage({
   const accent = highlight || subtitle;
 
   return (
-    <PublicShell>
+    <PublicShell marketing>
       <section className={styles.hero}>
         <div className={styles.container}>
-          <span className={styles.eyebrow}>DtailBase</span>
           <h1 className={styles.title}>
             {title}
             {accent && (
@@ -43,13 +42,9 @@ export default function ContentPage({
               const cardClass = `${styles.card} ${section.wide ? styles.cardWide : ""}`;
               return (
                 <li key={`${header}-${idx}`} className={cardClass}>
-                  {section.tag ? (
-                    <span className={styles.tag}>{section.tag}</span>
-                  ) : (
-                    <span className={styles.stepNum}>
-                      {String(idx + 1).padStart(2, "0")}
-                    </span>
-                  )}
+                  <span className={styles.stepNum}>
+                    {String(idx + 1).padStart(2, "0")}
+                  </span>
                   <h3 className={styles.cardTitle}>{header}</h3>
                   {body && <p className={styles.cardBody}>{body}</p>}
                   {cta && (

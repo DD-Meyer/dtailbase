@@ -36,6 +36,8 @@ from rest_framework.decorators import action
 from django.db.models import Case, When, Value, IntegerField
 from django.utils import timezone
 from django.db.models.deletion import ProtectedError
+from django.db import transaction
+from .job_status import with_start_readiness
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -456,7 +458,9 @@ class BookingListCreateAPIView(generics.ListCreateAPIView):
         return BookingCreateSerializer
 
     def get_queryset(self):
-        return Booking.objects.filter(company=self.request.user.company)
+        return with_start_readiness(Booking.objects.filter(company=self.request.user.company)).select_related(
+            "customer", "vehicle", "service", "booking_indemnity",
+        )
 
     def get_serializer_context(self):
         return {"request": self.request}
@@ -577,7 +581,7 @@ class BookingRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView)
         return BookingSerializer
 
     def get_queryset(self):
-        return Booking.objects.filter(company=self.request.user.company).select_related(
+        return with_start_readiness(Booking.objects.filter(company=self.request.user.company)).select_related(
             'customer', 
             'vehicle', 
             'service', 
@@ -910,7 +914,11 @@ class BookingStatusUpdateView(generics.UpdateAPIView):
 
     def get_serializer_context(self):
         return {"request": self.request}
+
+    def get_queryset(self):
+        return super().get_queryset().select_for_update()
     
+    @transaction.atomic
     def update(self, request, *args, **kwargs):
         # Get old status before update
         booking = self.get_object()

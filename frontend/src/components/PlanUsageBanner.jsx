@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import "../styles/PlanUsageBanner.css";
+import { Check, Lock } from "lucide-react";
 
 /**
  * PlanUsageBanner
@@ -30,9 +31,9 @@ function PlanUsageBanner({ metrics = [], currentPlan, nextPlan, light = false })
                 <div className="usage-header-row">
                   <span className="usage-label">{m.label}</span>
                   {m.available ? (
-                    <span className="usage-feature-available">✓ Available</span>
+                    <span className="usage-feature-available"><Check size={14} aria-hidden="true" /> Available</span>
                   ) : (
-                    <span className="usage-feature-locked">✗ Pro+ only</span>
+                    <span className="usage-feature-locked"><Lock size={14} aria-hidden="true" /> Pro+ only</span>
                   )}
                 </div>
                 <div className="usage-progress-track">

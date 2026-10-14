@@ -1,7 +1,7 @@
 import { useState, useContext, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  ArrowLeftCircleIcon,
+  ArrowLeftIcon,
   BadgeHelp,
   ChevronDown,
   ChevronUp,
@@ -15,7 +15,7 @@ import { AuthContext } from "../context/AuthContext";
 import { useSupportNotifications } from "../context/SupportNotificationContext";
 import "../styles/Header.css";
 
-function UserDropdownMenu() {
+function UserDropdownMenu({ installAction }) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { user, logout } = useContext(AuthContext);
@@ -30,10 +30,21 @@ function UserDropdownMenu() {
         setIsSettingsOpen(false);
       }
     };
+    const handleEscape = (event) => {
+      if (event.key === "Escape" && isDropdownOpen) {
+        setIsDropdownOpen(false);
+        setIsSettingsOpen(false);
+        dropdownRef.current?.querySelector(".profile-trigger")?.focus();
+      }
+    };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [isDropdownOpen]);
 
   const handleLogout = () => {
     setIsDropdownOpen(false);
@@ -47,6 +58,8 @@ function UserDropdownMenu() {
       <button
         type="button"
         className={`profile-trigger ${isDropdownOpen ? "open" : ""}`}
+        aria-label="Account menu"
+        aria-expanded={isDropdownOpen}
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
       >
         <div className="avatar">
@@ -74,8 +87,8 @@ function UserDropdownMenu() {
           </div>
           <ul className="dropdown-links">
             <li>
-              <Link className="flex items-center mt-1.5" to="/" onClick={() => setIsDropdownOpen(false)}>
-                <ArrowLeftCircleIcon size={16} /> Back
+              <Link className="inline-flex items-center mt-1.5" to="/" onClick={() => setIsDropdownOpen(false)}>
+                <ArrowLeftIcon size={14} className="inline-flex items-center align-middle" /> Exit Dashboard
               </Link>
             </li>
             <li>

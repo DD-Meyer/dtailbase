@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import SignatureCanvas from "react-signature-canvas";
 import api from "../axios_instance";
 import "../styles/NewBooking.css";
 import { useCompany } from "../context/CompanyContext";
 import { showToast } from "../utils/uiFeedback";
+import { Check, Building2, Car } from "lucide-react";
+import { localDate, parseCalendarDate } from "../utils/calendar";
 
 const STEPS = [
   { id: 1, label: "Customer" },
@@ -14,6 +16,8 @@ const STEPS = [
 
 const NewBooking = () => {
   const navigate = useNavigate();
+  const [search] = useSearchParams();
+  const requestedDate = search.get("date");
   const sigPad = useRef(null);
   const { planLimits } = useCompany();
   
@@ -33,7 +37,7 @@ const NewBooking = () => {
     customer: "",
     vehicle: "",
     service: "",
-    booking_date: "",
+    booking_date: parseCalendarDate(requestedDate) && requestedDate >= localDate() ? requestedDate : "",
     booking_time: "",
     notes: "",
     location_type: "ONSITE",
@@ -170,7 +174,7 @@ const NewBooking = () => {
         <div className="progress-container" style={{ "--progress-width": progressWidth }}>
           {STEPS.map((s) => (
             <div key={s.id} className={`step-item ${step >= s.id ? "active" : ""} ${step > s.id ? "completed" : ""}`}>
-              <div className="step-circle">{step > s.id ? "✓" : s.id}</div>
+              <div className="step-circle">{step > s.id ? <Check size={20} aria-hidden="true" /> : s.id}</div>
               <div className="step-label">{s.label}</div>
             </div>
           ))}
@@ -211,7 +215,7 @@ const NewBooking = () => {
               </div>
               <div className="form-group">
                 <label className="input-label">Date</label>
-                <input className="input-field" type="date" name="booking_date" min={new Date().toISOString().split("T")[0]} value={formData.booking_date} onChange={handleInputChange} />
+                <input className="input-field" type="date" name="booking_date" min={localDate()} value={formData.booking_date} onChange={handleInputChange} />
               </div>
             </div>
 
@@ -246,14 +250,14 @@ const NewBooking = () => {
                   className={`location-btn ${formData.location_type === 'ONSITE' ? 'active' : ''}`}
                   onClick={() => setFormData(prev => ({ ...prev, location_type: 'ONSITE', customer_address: '' }))}
                 >
-                  🏢 On-site at Company
+                  On-site at Company
                 </button>
                 <button
                   type="button"
                   className={`location-btn ${formData.location_type === 'MOBILE' ? 'active' : ''}`}
                   onClick={() => setFormData(prev => ({ ...prev, location_type: 'MOBILE' }))}
                 >
-                  🚗 Mobile (Go to Customer)
+                  Mobile (Go to Customer)
                 </button>
               </div>
             </div>
@@ -279,7 +283,7 @@ const NewBooking = () => {
                <p><strong>Customer:</strong> {customers.find(c => c.id == formData.customer)?.firstname} {customers.find(c => c.id == formData.customer)?.lastname}</p>
                <p><strong>Schedule:</strong> {formData.booking_date} at {formData.booking_time}</p>
                <p><strong>Service:</strong> {services.find(s => s.id == formData.service)?.name}</p>
-               <p><strong>Location:</strong> {formData.location_type === 'MOBILE' ? '🚗 Mobile – Go to Customer' : '🏢 On-site at Company'}</p>
+               <p className="record-location"><strong>Location:</strong> {formData.location_type === 'MOBILE' ? <><Car size={16} aria-hidden="true" />Mobile, at the customer</> : <><Building2 size={16} aria-hidden="true" />On-site at the workshop</>}</p>
                {formData.location_type === 'MOBILE' && formData.customer_address && (
                  <p><strong>Address:</strong> {formData.customer_address}</p>
                )}

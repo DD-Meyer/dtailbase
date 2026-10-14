@@ -1,12 +1,12 @@
 .public-bookings-container {
   min-height: 100vh;
-  background: linear-gradient(180deg, rgb(119, 197, 250), rgb(224, 242, 254));
+  background: var(--app-surface-alt);
   padding: 40px 20px;
 }
 
 .bookings-header {
   text-align: center;
-  color: white;
+  color: var(--app-text);
   margin-bottom: 40px;
 }
 
@@ -24,8 +24,8 @@
 .bookings-content {
   max-width: 900px;
   margin: 0 auto;
-  background: white;
-  border-radius: 12px;
+  background: var(--app-surface);
+  border-radius: 4px;
   padding: 40px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
 }
@@ -49,23 +49,25 @@
 .input-group input {
   flex: 1;
   padding: 14px 16px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
+  border: 2px solid var(--app-border);
+  border-radius: 4px;
   font-size: 16px;
+  background: var(--app-surface);
+  color: var(--app-text);
   transition: border-color 0.3s;
 }
 
 .input-group input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--app-primary);
 }
 
 .input-group button {
   padding: 14px 30px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: var(--app-primary);
+  color: var(--app-on-primary);
   border: none;
-  border-radius: 8px;
+  border-radius: 4px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
@@ -85,16 +87,16 @@
 
 /* Error Message */
 .error-message {
-  background: #fee;
-  border-left: 4px solid #dc3545;
+  background: var(--app-surface-alt);
+  border-left: 4px solid var(--app-danger);
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 4px;
   margin-bottom: 30px;
 }
 
 .error-message p {
   margin: 0 0 8px 0;
-  color: #333;
+  color: var(--app-text);
 }
 
 .error-message p:last-child {
@@ -103,7 +105,7 @@
 
 .error-hint {
   font-size: 14px;
-  color: #666;
+  color: var(--app-muted);
 }
 
 /* Bookings List */
@@ -122,14 +124,14 @@
   .bookings-list-header h2 {
     font-size: 24px;
     margin: 0;
-    color: #333;
+    color: var(--app-text);
   }
 
   .bookings-list-header button {
     white-space: nowrap;
     flex-shrink: 0;
   }
-  color: #333;
+  color: var(--app-text);
 }
 
 .bookings-grid {
@@ -139,22 +141,22 @@
 }
 
 .booking-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  border: 1px solid var(--app-border);
+  border-radius: 4px;
   overflow: hidden;
   transition: all 0.3s;
-  background: white;
+  background: var(--app-surface);
 }
 
 .booking-card:hover {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  border-color: #667eea;
+  border-color: var(--app-primary);
   transform: translateY(-4px);
 }
 
 .booking-header {
   padding: 20px;
-  background: #f8f9fa;
+  background: var(--app-surface);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -164,19 +166,19 @@
 .booking-header h3 {
   margin: 0;
   font-size: 18px;
-  color: #333;
+  color: var(--app-text);
 }
 
 .booking-id-small {
   font-size: 12px;
-  color: #999;
+  color: var(--app-muted);
   margin: 5px 0 0 0;
 }
 
 /* Status Badge */
 .status-badge {
   padding: 6px 12px;
-  border-radius: 20px;
+  border-radius: 4px;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
@@ -185,28 +187,28 @@
 }
 
 .status-pending {
-  background: #fff3cd;
-  color: #856404;
+  background: var(--app-warning-soft);
+  color: var(--app-warning);
 }
 
 .status-confirmed {
-  background: #d4edda;
-  color: #155724;
+  background: var(--app-surface-alt);
+  color: var(--app-success);
 }
 
 .status-in_progress {
-  background: #d1ecf1;
-  color: #0c5460;
+  background: var(--app-primary-soft);
+  color: var(--app-primary);
 }
 
 .status-completed {
-  background: #d4edda;
-  color: #155724;
+  background: var(--app-surface-alt);
+  color: var(--app-success);
 }
 
 .status-cancelled {
-  background: #f8d7da;
-  color: #721c24;
+  background: var(--app-danger-soft);
+  color: var(--app-danger);
 }
 
 /* Booking Details */
@@ -224,7 +226,7 @@
 
 .detail-item .label {
   font-size: 12px;
-  color: #999;
+  color: var(--app-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 5px;
@@ -233,14 +235,14 @@
 .detail-item .value {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--app-text);
 }
 
 /* Booking Footer */
 .booking-footer {
   padding: 15px 20px;
-  background: #f8f9fa;
-  border-top: 1px solid #e0e0e0;
+  background: var(--app-surface);
+  border-top: 1px solid var(--app-border);
 }
 
 .company-info {
@@ -254,20 +256,20 @@
 .booking-footer .company-name {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: var(--app-text);
   margin: 0;
 }
 
 .phone-link {
   font-size: 14px;
-  color: #667eea;
+  color: var(--app-primary);
   text-decoration: none;
   font-weight: 600;
   transition: color 0.3s;
 }
 
 .phone-link:hover {
-  color: #764ba2;
+  color: var(--app-primary);
 }
 
 /* Empty State */
@@ -283,19 +285,19 @@
 
 .empty-state h3 {
   font-size: 24px;
-  color: #333;
+  color: var(--app-text);
   margin: 0 0 10px 0;
 }
 
 .empty-state p {
-  color: #666;
+  color: var(--app-muted);
   margin: 0;
   font-size: 16px;
 }
 
 .empty-hint {
   font-size: 14px;
-  color: #999;
+  color: var(--app-muted);
   margin-top: 10px;
 }
 
@@ -312,12 +314,12 @@
 
 .welcome-section h2 {
   font-size: 28px;
-  color: #333;
+  color: var(--app-text);
   margin: 0 0 10px 0;
 }
 
 .welcome-section p {
-  color: #666;
+  color: var(--app-muted);
   font-size: 16px;
   margin: 0;
 }

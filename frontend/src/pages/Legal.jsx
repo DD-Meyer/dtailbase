@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PublicLayout from '../components/PublicLayout';
-import { MapPinCheckIcon, Scale3DIcon, CameraIcon, FolderIcon, LockIcon, UploadIcon, ClipboardIcon, Clock10Icon } from 'lucide-react';
+import { Check, MapPinCheckIcon, Scale3DIcon, CameraIcon, FolderIcon, LockIcon, UploadIcon, ClipboardIcon, Clock10Icon } from 'lucide-react';
 
 const LEGAL_SECTIONS = [
   {
@@ -235,7 +235,7 @@ const Legal = () => {
               <ul className="legal-highlights">
                 {section.highlights.map((h) => (
                   <li key={h}>
-                    <span className="check-mark">✓</span>
+                    <Check className="check-mark" size={18} aria-hidden="true" />
                     {h}
                   </li>
                 ))}

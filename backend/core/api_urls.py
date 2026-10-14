@@ -11,12 +11,15 @@ from .support_views import (
 )
 from rest_framework.routers import DefaultRouter
 from indemnity.views import *
+from .password_reset import PasswordResetRequestView, PasswordResetConfirmView
+from .dashboard import DashboardView
 
 router = DefaultRouter()
 # Change 'companies' to 'company'
 router.register(r'company', CompanyViewSet, basename='company')
 
 urlpatterns = [
+    path("dashboard/", DashboardView.as_view(), name="dashboard"),
     path("company/team/", CompanyTeamListView.as_view(), name="team-list"),
     path("company/team/<uuid:pk>/", CompanyUserDetailView.as_view(), name="team-detail"),
     path("company/location-verification/", CompanyLocationVerificationView.as_view(), name="company-location-verification"),
@@ -33,6 +36,8 @@ urlpatterns = [
     path("auth/users/me/", UserMeView.as_view(), name="user-me"),
     path("auth/google-config/", GoogleAuthConfigView.as_view(), name="google-config"),
     path("auth/google-login/", GoogleLoginView.as_view(), name="google-login"),
+    path("auth/password-reset/", PasswordResetRequestView.as_view(), name="password-reset"),
+    path("auth/password-reset/confirm/", PasswordResetConfirmView.as_view(), name="password-reset-confirm"),
     path("support/tickets/", SupportTicketListCreateView.as_view(), name="support-ticket-list-create"),
     path("support/tickets/<uuid:ticket_id>/", SupportTicketDetailUpdateView.as_view(), name="support-ticket-detail-update"),
     path("support/tickets/<uuid:ticket_id>/messages/", SupportTicketMessageListCreateView.as_view(), name="support-ticket-message-list-create"),

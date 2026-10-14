@@ -19,9 +19,9 @@ const ensureFeedbackStyles = () => {
     }
 
     .ui-feedback-toast {
-      border-radius: 10px;
+      border-radius: 4px;
       padding: 0.75rem 0.95rem;
-      color: #ffffff;
+      color: var(--app-text);
       font-weight: 600;
       line-height: 1.4;
       box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
@@ -35,16 +35,16 @@ const ensureFeedbackStyles = () => {
       transform: translateY(0);
     }
 
-    .ui-feedback-toast.success { background: #1f8a4c; }
-    .ui-feedback-toast.error { background: #c0392b; }
-    .ui-feedback-toast.info { background: #2563eb; }
-    .ui-feedback-toast.warning { background: #b7791f; }
+    .ui-feedback-toast.success { background: var(--app-success-soft); color: var(--app-success); border: 1px solid var(--app-success); }
+    .ui-feedback-toast.error { background: var(--app-danger-soft); color: var(--app-danger); border: 1px solid var(--app-danger); }
+    .ui-feedback-toast.info { background: var(--app-primary-soft); color: var(--app-primary); border: 1px solid var(--app-primary); }
+    .ui-feedback-toast.warning { background: var(--app-warning-soft); color: var(--app-warning); border: 1px solid var(--app-warning); }
 
     .ui-feedback-overlay {
       position: fixed;
       inset: 0;
       z-index: 12500;
-      background: rgba(15, 23, 42, 0.55);
+      background: var(--app-overlay);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -53,12 +53,12 @@ const ensureFeedbackStyles = () => {
 
     .ui-feedback-dialog {
       width: min(92vw, 480px);
-      border-radius: 14px;
-      background: #ffffff;
-      color: #0f172a;
+      border-radius: 4px;
+      background: var(--app-surface);
+      color: var(--app-text);
       box-shadow: 0 26px 48px rgba(15, 23, 42, 0.35);
       overflow: hidden;
-      border: 1px solid #e2e8f0;
+      border: 1px solid var(--app-border);
       animation: uiFeedbackPopIn 140ms ease-out;
     }
 
@@ -70,7 +70,7 @@ const ensureFeedbackStyles = () => {
 
     .ui-feedback-dialog-body {
       padding: 0.2rem 1.2rem 1rem;
-      color: #334155;
+      color: var(--app-muted);
       line-height: 1.45;
     }
 
@@ -78,15 +78,18 @@ const ensureFeedbackStyles = () => {
       width: calc(100% - 2.4rem);
       margin: 0 1.2rem 0.8rem;
       padding: 0.62rem 0.72rem;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
+      border: 1px solid var(--app-border);
+      border-radius: 4px;
+      background: var(--app-surface);
+      color: var(--app-text);
       font-size: 0.95rem;
       outline: none;
       transition: border-color 160ms ease;
     }
 
     .ui-feedback-dialog-input:focus {
-      border-color: #2563eb;
+      border-color: var(--app-primary);
+      outline: 2px solid var(--app-primary);
     }
 
     .ui-feedback-dialog-footer {
@@ -94,35 +97,39 @@ const ensureFeedbackStyles = () => {
       justify-content: flex-end;
       gap: 0.6rem;
       padding: 0.9rem 1.2rem 1.1rem;
-      border-top: 1px solid #e2e8f0;
-      background: #f8fafc;
+      border-top: 1px solid var(--app-border);
+      background: var(--app-surface-alt);
     }
 
     .ui-feedback-btn {
       border: none;
-      border-radius: 8px;
+      border-radius: 4px;
       padding: 0.55rem 0.85rem;
       font-weight: 600;
       cursor: pointer;
+      min-height: 44px;
     }
 
     .ui-feedback-btn.cancel {
-      color: #1e293b;
-      background: #e2e8f0;
+      color: var(--app-text);
+      background: var(--app-surface-alt);
     }
 
     .ui-feedback-btn.confirm {
-      color: #ffffff;
-      background: #2563eb;
+      color: var(--app-on-primary);
+      background: var(--app-primary);
     }
 
     .ui-feedback-btn.confirm.danger {
-      background: #b91c1c;
+      background: var(--app-danger);
     }
 
     @keyframes uiFeedbackPopIn {
       from { transform: scale(0.96); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .ui-feedback-toast, .ui-feedback-dialog { transition: none; animation: none; }
     }
   `;
 

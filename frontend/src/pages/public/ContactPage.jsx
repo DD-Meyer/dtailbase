@@ -71,12 +71,11 @@ export default function ContactPage() {
   };
 
   return (
-    <PublicShell>
+    <PublicShell marketing>
       <section className={styles.hero}>
         <div className={styles.container}>
-          <span className={styles.eyebrow}>Contact</span>
           <h1 className={styles.title}>
-            Talk to a real person &mdash;
+            Talk to a real person,
             <span className={styles.titleAccent}> not a bot.</span>
           </h1>
           <p className={styles.lede}>

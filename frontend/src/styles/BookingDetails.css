@@ -1,216 +1,48 @@
-/* ===== Desktop Styles ===== */
-.btn-map {
-  background-color: #34a853; /* Google Green */
-  color: white;
-  padding: 10px 15px;
-  border-radius: 5px;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  transition: background 0.2s;
-}
-
-.btn-map:hover {
-  background-color: #2d8e47;
-}
-
-.booking-details {
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 20px;
-  margin-top: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  transition: all 0.2s ease;
-}
-
-.booking-details:hover {
-  border-color: rgba(255, 255, 255, 0.6);
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.btn-secondary {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  color: #dcfce7;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-secondary:hover {
-  /* background: rgba(0, 0, 0, 0.1); */
-  border-color: rgba(255, 255, 255, 0.6);
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #10b981, #047857);
-  border: none;
-  color: #dcfce7;
-  padding: 10px 20px;
-  border-radius: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-primary:hover {
-  background: linear-gradient(135deg, #047857, #10b981);
-  filter: brightness(1.05);
-}
-
-  .booking-header-action-btns {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-  }
-
-.booking-header-action-btns > .btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  min-height: 40px;
-}
-
-.booking-header-action-btns > .btn-secondary svg {
-  display: block;
-}
-
-.booking-header-action-btns .action-buttons-grid {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-}
-
-.booking-header-action-btns .action-buttons-grid .btn-secondary,
-.booking-header-action-btns .action-buttons-grid .btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 40px;
-}
-
-.indemnity-text-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(2, 6, 23, 0.72);
-  backdrop-filter: blur(3px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1200;
-  padding: 20px;
-}
-
-.indemnity-text-modal {
-  width: min(900px, 100%);
-  max-height: 85vh;
-  background: rgba(215, 223, 242, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 14px;
-  padding: 20px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.indemnity-text-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-
-.indemnity-text-modal-header h3 {
-  margin: 0;
-}
-
-.indemnity-text-content {
-  margin-top: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  padding: 16px;
-  overflow-y: auto;
-  line-height: 1.7;
-  color: #dbe6f4;
-  background: rgba(102, 106, 123, 0.6);
-}
-
-.indemnity-text-content p,
-.indemnity-text-content h1,
-.indemnity-text-content h2,
-.indemnity-text-content h3,
-.indemnity-text-content li,
-.indemnity-text-content span,
-.indemnity-text-content strong {
-  color: #dbe6f4;
-}
-
-.indemnity-text-content h1,
-.indemnity-text-content h2,
-.indemnity-text-content h3,
-.indemnity-text-content h4 {
-  color: #f8fafc;
-}
-
-
-/* ===== Mobile Styles ===== */
-@media (max-width: 768px) {
-
-  /* buttons aligned in rows next to each other, smaller size buttons*/
-  .booking-header-action-btns {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .action-buttons-grid {
-    display: flex;
-    flex-direction: row;
-    gap: 8px;
-  }
-
-  .btn-map {
-    padding: 8px 12px;
-    font-size: 0.6rem;
-  }
-
-  .btn-secondary {
-    padding: 6px 12px;
-    font-size: 0.6rem;
-  }
-
-  .btn-primary {
-    padding: 8px 16px;
-    font-size: 0.7rem;
-  }
-
-  .booking-header-action-btns > .btn-secondary,
-  .booking-header-action-btns .action-buttons-grid .btn-secondary,
-  .booking-header-action-btns .action-buttons-grid .btn-primary {
-    min-height: 34px;
-  }
-
-  .indemnity-text-modal {
-    padding: 14px;
-    max-height: 90vh;
-  }
-
-  .indemnity-text-modal-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-
-
+.booking-report { display: grid; gap: 20px; max-width: 1200px; margin: auto; min-width: 0; color: var(--app-text); }
+.report-back { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; width: fit-content; color: var(--app-primary); text-decoration: none; font-size: 13px; }
+.report-heading, .report-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.report-heading h1 { margin: 4px 0 8px; font-size: clamp(24px, 3vw, 32px); font-weight: 700; line-height: 1.2; }
+.report-heading p, .report-section-heading p { margin: 0; color: var(--app-muted); font-size: 13px; }
+.report-heading .report-eyebrow { font-size: 12px; }
+.report-estimate { display: grid; gap: 4px; }
+.report-estimate span { color: var(--app-muted); font-size: 12px; }
+.report-estimate strong { font-size: 24px; color: var(--app-primary); }
+.report-workflow, .report-section { padding: 20px; border: 1px solid var(--app-border); border-radius: 14px; background: var(--app-surface); min-width: 0; }
+.report-section h2 { font-size: 17px; font-weight: 700; line-height: 1.4; margin: 0 0 16px; }
+.report-section-heading h2 { margin-bottom: 6px; }
+.report-progress { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 0 0 20px; padding: 0; list-style: none; }
+.report-progress li { display: flex; align-items: center; gap: 8px; color: var(--app-muted); font-size: 12px; padding-bottom: 12px; border-bottom: 2px solid var(--app-border); overflow-wrap: anywhere; }
+.report-progress li > span { display: grid; place-items: center; width: 26px; height: 26px; flex-shrink: 0; border-radius: 50%; background: var(--app-surface-alt); }
+.report-progress .is-reached { color: var(--app-primary); border-color: var(--app-primary); }
+.report-progress .is-reached > span { background: var(--app-primary-soft); }
+.report-progress [aria-current="step"] { font-weight: 800; }
+.report-workflow .job-record-footer { margin: 0; }
+.report-hint { color: var(--app-muted); font-size: 12px; line-height: 1.6; margin: 12px 0 0; }
+.report-info-grid, .report-gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.report-fields { display: grid; gap: 14px; margin: 0; font-size: 13px; }
+.report-fields > div { display: grid; grid-template-columns: minmax(90px, 1fr) minmax(0, 2fr); gap: 12px; }
+.report-fields dt { color: var(--app-muted); }
+.report-fields dd { margin: 0; overflow-wrap: anywhere; }
+.report-location { display: flex; align-items: start; gap: 6px; }
+.report-location svg { flex-shrink: 0; margin-top: 2px; }
+.report-gallery-section { padding: 16px; background: var(--app-bg); border-radius: 10px; min-width: 0; }
+.report-gallery-section h3 { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 14px; margin: 0 0 12px; }
+.report-gallery-section h3 span, .report-empty { font-size: 12px; font-weight: 400; color: var(--app-muted); }
+.report-photo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; }
+.report-photo-grid img { width: 100%; height: 140px; object-fit: cover; border-radius: 8px; }
+.report-signature { display: block; max-width: 100%; width: 180px; max-height: 130px; object-fit: contain; border: 1px solid var(--app-border); border-radius: 6px; background: #fff; }
+.report-document-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.booking-report .btn { display: inline-flex; justify-content: center; align-items: center; gap: 8px; min-height: 44px; padding: 10px 14px; font-size: 12px; text-decoration: none; margin: 0; }
+.report-agreement { display: flex; gap: 24px; align-items: start; margin: 20px 0; flex-wrap: wrap; }
+.report-agreement .report-fields { flex: 1 1 260px; }
+.report-notes { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; line-height: 1.7; margin: 0; }
+.report-signed-text { line-height: 1.7; overflow-wrap: anywhere; color: var(--app-text); }
+@media (max-width: 767px) {
+  .booking-report { gap: 16px; }
+  .report-info-grid, .report-gallery { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .report-workflow, .report-section { padding: 16px; }
+  .report-progress { gap: 8px; }
+  .report-progress li { flex-direction: column; align-items: start; font-size: 11px; }
+  .report-document-actions { width: 100%; }
+  .report-document-actions > .btn { flex: 1 1 150px; }
 }
