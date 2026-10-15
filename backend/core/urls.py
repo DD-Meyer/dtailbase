@@ -58,6 +58,8 @@ if settings.DEBUG:
         re_path(r'^(?P<path>sw\.js)$', _serve, {'document_root': _fb}),
         re_path(r'^(?P<path>manifest\.webmanifest)$', _serve, {'document_root': _fb}),
         re_path(r'^(?P<path>vite\.svg)$', _serve, {'document_root': _fb}),
+        re_path(r'^(?P<path>sitemap\.xml)$', _serve, {'document_root': _fb}),
+        re_path(r'^(?P<path>robots\.txt)$', _serve, {'document_root': _fb}),
     ]
 
 # THE CATCH-ALL: Keep this at the very bottom so media/api routes match first

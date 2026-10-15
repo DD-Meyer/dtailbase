@@ -1,5 +1,38 @@
 # Dtailbase
 
+## Google Search Console sitemap
+
+The sitemap source is [frontend/public/sitemap.xml](../frontend/public/sitemap.xml);
+[robots.txt](../frontend/public/robots.txt) advertises it to crawlers.
+Vite copies both files to the build root, and the existing deployment copies
+that build into `backend/frontend_build`. WhiteNoise/OpenLiteSpeed serve them
+in production; explicit Django routes serve them in development before the SPA
+catch-all.
+
+After building and deploying the frontend:
+
+1. Open `https://dtailbase.com/sitemap.xml` and confirm HTTP 200 with XML content,
+   not the app's HTML. Confirm `https://dtailbase.com/robots.txt` is plain text.
+2. In Google Search Console, select the `dtailbase.com` domain property or the
+   `https://dtailbase.com/` URL-prefix property.
+3. Under **Sitemaps**, submit `https://dtailbase.com/sitemap.xml` (or `sitemap.xml`
+   if the property prefix is already shown).
+
+The sitemap lists the six main public pages: home, products, plans, about,
+contact and legal. It intentionally excludes authentication, recovery, checkout,
+private app/customer routes, redirects and sample informational pages still
+defined inline in `App.jsx`. Add those informational pages when their content
+is ready for indexing. Add future public page URLs to the sitemap explicitly;
+do not invent `lastmod` values on every build.
+
+Sitemap URLs use the non-www HTTPS origin consistently. Both production
+hostnames currently respond without redirecting; configure a permanent
+www-to-non-www redirect in OpenLiteSpeed to consolidate duplicate hostnames.
+Do not block JavaScript/CSS/assets in robots.txt: Google needs them to render
+this React app. Sitemap exclusion and robots.txt are not access control or a
+`noindex` directive; existing API authentication remains responsible for
+protecting private data. Sitemap submission does not guarantee indexing.
+
 ## Email sign-in
 
 Account email identities are case-insensitive. The user manager resolves login
