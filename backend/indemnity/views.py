@@ -58,7 +58,12 @@ class IndemnityAgreementListView(generics.ListAPIView):
         history_limit = plan_limits.get('indemnity_history_limit', 0)
         
         # Start with all agreements for this company
-        queryset = IndemnityAgreement.objects.filter(company=company).order_by('-created_at')
+        queryset = (
+            IndemnityAgreement.objects.filter(company=company)
+            .select_related("template")
+            .prefetch_related("condition_photos")
+            .order_by('-signed_at', '-pk')
+        )
 
         # 🛡️If limit is 0, return an empty QuerySet immediately
         if history_limit == 0:

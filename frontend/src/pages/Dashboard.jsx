@@ -138,6 +138,7 @@ export default function Dashboard() {
         </div>
       </header>
       {requested && !parseCalendarDate(requested) && <p role="alert">Invalid calendar date. Showing today. <Link to="/dashboard">Clear date</Link></p>}
+      {data && error && <div className="record-fetch-error" role="alert"><p>Could not refresh your workspace. Showing the last loaded data. {error}</p><button className="btn btn-secondary" onClick={retry}>Try again</button></div>}
       {!data ? <DashboardFeedback error={error} retry={retry} /> : <>
         <div className="home-insights"><WeeklyChart week={data.week} currency={data.currency} metric={metric} setMetric={setMetric} active={active} setActive={setActive} />
           <BookingCalendar data={data} selected={selected} today={today} month={month} onMonth={setVisibleMonth} onSelect={select} focusDateRef={focusDateRef} /></div>

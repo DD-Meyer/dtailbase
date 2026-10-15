@@ -63,7 +63,6 @@ export default function ProductsPage() {
         </div>
         <figure className={styles.heroImage}>
           <img src="/landing/images/detailer-story.jpg" alt="Detailing professional at work beside a car" width="1200" height="900" />
-          <figcaption>Keep the admin close to the craft. Photo: Unsplash.</figcaption>
         </figure>
       </section>
       <nav className={styles.sectionNav} aria-label="Explore product capabilities">

@@ -11,7 +11,6 @@ export function useDashboardData(params) {
   const query = new URLSearchParams(params).toString();
   const [revision, setRevision] = useState(0);
   const [result, setResult] = useState(null);
-  const key = `${query}:${revision}`;
   useEffect(() => {
     const controller = new AbortController();
     api.get(`dashboard/?${query}`, { signal: controller.signal }).then(({ data }) => {
@@ -21,24 +20,29 @@ export function useDashboardData(params) {
           !/^[A-Z]{3}$/.test(data.currency)) {
         throw new Error("Unexpected dashboard response. Please reload and try again.");
       }
-      setResult({ key, data });
+      setResult({ query, data });
     }).catch((error) => {
       if (!controller.signal.aborted) {
         const details = typeof error.response?.data === "object" ? error.response.data : null;
         const validation = details && Object.entries(details).map(([field, value]) => `${field}: ${value}`).join(" ");
-        setResult({ key, error: details?.detail || validation || error.message || "Could not load your dashboard. Please try again." });
+        setResult((previous) => ({
+          query,
+          data: previous?.query === query ? previous.data : null,
+          error: details?.detail || validation || error.message || "Could not load your dashboard. Please try again.",
+        }));
       }
     });
     return () => controller.abort();
-  }, [query, key]);
+  }, [query, revision]);
   useEffect(() => {
     const refresh = () => setRevision((value) => value + 1);
     window.addEventListener("focus", refresh);
     return () => window.removeEventListener("focus", refresh);
   }, []);
   return {
-    data: result?.key === key ? result.data : null,
-    error: result?.key === key ? result.error : null,
+    // Focus refreshes after a native photo picker must not unmount upload forms.
+    data: result?.query === query ? result.data : null,
+    error: result?.query === query ? result.error : null,
     retry: () => setRevision((value) => value + 1),
   };
 }

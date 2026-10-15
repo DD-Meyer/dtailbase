@@ -122,3 +122,45 @@ connections. Django's threaded development server can otherwise exhaust the
 database connection limit during normal browser navigation or responsive tests.
 Production retains the existing 600-second connection lifetime. Restart the
 development API after changing settings to release already-retained connections.
+
+`DB_CONN_MAX_AGE` overrides that lifetime (seconds) for both `DATABASE_URL` and
+individual PostgreSQL variables. For connection exhaustion, set
+`DB_CONN_MAX_AGE=0` and restart all API workers to release persistent connections.
+This is a mitigation, not a connection pool or a concurrency cap: inspect
+`pg_stat_activity`, PostgreSQL `max_connections`, and the total worker/thread
+count across all API and background services. Reserve database capacity for
+administration. Do not simply raise `max_connections` without checking memory.
+
+## Sentry error follow-up
+
+- Agreement history is ordered by `signed_at`, not the nonexistent `created_at`.
+  Plan limits and company isolation are unchanged; templates and photos are
+  loaded in bounded queries. Booking detail also preloads the vehicle's customer
+  and the agreement's template. Booking list already preloads customers.
+- The custom user model uses `created_at`, not `date_joined`. No application
+  query currently references `date_joined`. An event originating in `__main__`
+  needs its full traceback and script/command to locate the caller; use
+  `created_at` in that caller rather than adding an unrelated schema field.
+- Geolocation uses HTTPS. Verify that the ipstack account supports HTTPS and has
+  sufficient quota. Successful results retain the 30-day cache; failures are
+  cached for five minutes instead of 30 days. HTTP 429 triggers a provider-wide
+  cooldown (numeric `Retry-After`, bounded to 1-3600 seconds; otherwise five
+  minutes). Cached successes still work during cooldown. Use a shared Django
+  cache to share this cooldown across workers. Provider errors remain logged,
+  but exception URLs and provider payloads are not included because they may
+  expose API keys. Rotate any exposed key and clear old `geoip_data_*` failure
+  cache entries if immediate recovery is needed. Existing pricing fallbacks
+  remain unchanged; an unavailable lookup does not grant a regional discount.
+- PayPal `verification_status=FAILURE` remains rejected. Check that
+  `PAYPAL_MODE`, client credentials, and `PAYPAL_WEBHOOK_ID` belong to the same
+  PayPal app/environment, and that the webhook URL and original signature
+  headers reach the backend unchanged. Do not bypass verification to silence
+  Sentry. The mocked tests cover both SUCCESS and FAILURE responses.
+- PayPal token DNS failures require checking the API host's DNS/outbound HTTPS
+  and the configured sandbox/live mode. They are not evidence of bad credentials.
+  Token retrieval already returns failure explicitly; no live PayPal request
+  or production DNS/deployment check is performed by the regression tests.
+
+Focused verification:
+`python manage.py test core.tests_sentry_regressions payments.tests_service_failures`.
+These tests mock provider requests and use isolated geolocation cache storage.

@@ -14,6 +14,27 @@ icon uses that padded variant; the 32px favicon PNG is a transparent fallback.
 Regenerate these derivatives from the canonical mark whenever the logo changes.
 Customer-uploaded business logos are separate and must not be replaced.
 Browsers and existing installed apps may retain cached icons after deployment.
+Manifest, icon and touch-icon references use the `20261015` asset revision to
+invalidate older cached artwork. The manifest has an explicit `/` identity,
+matching its existing start URL, so changing the manifest URL does not create
+a second app identity. Keep that identity stable on later releases. The home
+page also advertises the 192px PNG as a search-friendly favicon.
+
+Deploy the newly built HTML, manifest and icons together. Ensure OpenLiteSpeed
+serves `.webmanifest` as `application/manifest+json` (not
+`application/octet-stream`); Django's MIME mapping does not override files served
+directly by OpenLiteSpeed. The public production manifest returned
+`application/octet-stream` during the 2026-10-15 check. Production PNG/SVG icon
+bytes already matched the current source artwork, with a seven-day cache lifetime.
+Existing Android installs update their launcher icons on the browser's update
+schedule; after deployment, reopen the app and allow it to update. If an icon is
+still stale, reinstall only after finishing any unsaved work.
+
+Google Search icons are not Google account profile photos or OAuth consent-screen
+branding. After deploying the favicon links, request indexing of the homepage
+in Google Search Console. Google must recrawl/process it and may take days to
+weeks; a build cannot immediately invalidate Google's cached search icon.
+See [Google's favicon guidance](https://developers.google.com/search/docs/appearance/favicon-in-search).
 
 ## Public marketing design
 
@@ -85,6 +106,27 @@ device pixel density. Other record/completion dialogs keep their existing layout
 Validation and submission errors remain visible and receive focus so they are
 not missed below a long agreement. Signing QA uses an in-memory Axios adapter;
 never submit a real signature or start a real job during visual testing.
+
+Home and Schedule keep the last successful result mounted during same-filter
+background refreshes, including the window-focus event when Android returns
+from its photo picker. Refreshing must not unmount job cards or discard an open
+signing/completion sheet, selected photos, or signature strokes. Failed refreshes
+show an explicit retry notice alongside the retained data. Changing the date,
+month, status or page still hides the previous query's data until the new result
+arrives; a previous date must not masquerade as the newly selected date.
+
+Regression check (mock API responses, never real job mutations):
+1. At a 375px viewport in standalone display mode, open Sign & start from Home.
+2. Delay the dashboard response, dispatch window focus as the photo picker
+   returns, then choose a local image. The same dialog/input node and preview
+   must remain after the response completes.
+3. Repeat with a failed dashboard refresh: keep the form/photo and show a retry
+   notice. Repeat for AFTER photos and on Schedule.
+4. Change the schedule date while delaying its response. Show loading, not the
+   previous date's records; an initial-load failure must still show its error.
+5. Check the production preview build as well as development. Desktop browser
+   emulation verifies the focus/state-loss regression but does not replace a
+   real Android photo-picker and launcher-icon check after deployment.
 
 The reference photographs are served locally from `public/landing/images`:
 

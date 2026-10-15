@@ -134,7 +134,6 @@ export default function LandingPage() {
           <a className={styles.phoneFrame} href="/landing/images/app-customers-mobile.webp" target="_blank" rel="noreferrer" aria-label="View the full mobile app screenshot">
             <img src="/landing/images/app-customers-mobile.webp" alt="Compact mobile customer records showing fictional customers Maya Bennett and Noah Brooks" width="390" height="844" loading="lazy" decoding="async" />
           </a>
-          <figcaption>Actual mobile app. Fictional customer records.</figcaption>
         </figure>
         <div className={styles.mobileCopy}>
           <h2>Built for hands<br />that are <em>busy.</em></h2>
@@ -155,7 +154,6 @@ export default function LandingPage() {
             alt="Detailing professional working beside a black car"
             width="1200" height="900" loading="lazy" decoding="async"
           />
-          <figcaption>Photo: Unsplash</figcaption>
         </figure>
         <div className={styles.storyCopy}>
           <h2>Every car. Every photo.<br /><em>Everything together.</em></h2>

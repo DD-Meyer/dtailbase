@@ -38,6 +38,7 @@ export default function Schedule() {
         {Object.entries(BOOKING_STATUSES).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
       </select></label></fieldset>
     </section>
+    {data && error && <div className="record-fetch-error" role="alert"><p>Could not refresh your schedule. Showing the last loaded data. {error}</p><button className="btn btn-secondary" onClick={retry}>Try again</button></div>}
     {!data ? <DashboardFeedback error={error} retry={retry} /> : <section className="home-daily">
       <div className="home-panel-heading"><h2>{dateLabel(date)}</h2><span>{data.agenda.count} bookings</span></div>
       <BookingCards bookings={data.agenda.items} currency={data.currency} onUpdated={retry} />

@@ -11,8 +11,10 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 IPSTACK_API_KEY = getattr(settings, 'IPSTACK_API_KEY', '')
-IPSTACK_URL = 'http://api.ipstack.com'
+IPSTACK_URL = 'https://api.ipstack.com'
 CACHE_TIMEOUT = 86400 * 30  # Cache for 30 days
+FAILURE_CACHE_TIMEOUT = 300
+RATE_LIMIT_CACHE_KEY = 'geoip_provider_rate_limited'
 
 
 def get_geoip_data(ip_address):
@@ -29,9 +31,12 @@ def get_geoip_data(ip_address):
     if cached_data is not None:
         return cached_data
 
+    if cache.get(RATE_LIMIT_CACHE_KEY):
+        return {}
+
     if not IPSTACK_API_KEY:
         logger.warning("IPSTACK_API_KEY not configured in settings")
-        cache.set(cache_key, {}, CACHE_TIMEOUT)
+        cache.set(cache_key, {}, FAILURE_CACHE_TIMEOUT)
         return {}
 
     try:
@@ -40,23 +45,33 @@ def get_geoip_data(ip_address):
             params={'access_key': IPSTACK_API_KEY},
             timeout=5
         )
+        if response.status_code == 429:
+            try:
+                retry_after = int(response.headers.get('Retry-After', FAILURE_CACHE_TIMEOUT))
+            except (TypeError, ValueError):
+                retry_after = FAILURE_CACHE_TIMEOUT
+            retry_after = max(1, min(retry_after, 3600))
+            logger.warning("Geolocation provider rate limited requests; retrying after %s seconds", retry_after)
+            cache.set(RATE_LIMIT_CACHE_KEY, True, retry_after)
+            return {}
         response.raise_for_status()
 
         data = response.json()
+        if not isinstance(data, dict):
+            logger.error("Geolocation provider returned a non-object JSON payload")
+            cache.set(cache_key, {}, FAILURE_CACHE_TIMEOUT)
+            return {}
         if 'error' in data:
-            logger.warning(f"ipstack error for IP {ip_address}: {data['error']}")
-            cache.set(cache_key, {}, CACHE_TIMEOUT)
+            logger.warning("Geolocation provider returned an API error")
+            cache.set(cache_key, {}, FAILURE_CACHE_TIMEOUT)
             return {}
 
         cache.set(cache_key, data, CACHE_TIMEOUT)
         return data
-    except requests.RequestException as e:
-        logger.error(f"Failed to fetch geolocation for IP {ip_address}: {str(e)}")
-        cache.set(cache_key, {}, CACHE_TIMEOUT)
-        return {}
-    except Exception as e:
-        logger.error(f"Unexpected error in get_geoip_data: {str(e)}")
-        cache.set(cache_key, {}, CACHE_TIMEOUT)
+    except requests.RequestException as exc:
+        # Request exception messages can contain the access key in the URL.
+        logger.error("Failed to fetch geolocation (%s)", type(exc).__name__)
+        cache.set(cache_key, {}, FAILURE_CACHE_TIMEOUT)
         return {}
 
 

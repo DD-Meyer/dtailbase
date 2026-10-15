@@ -231,13 +231,14 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 # Use SQLite for local development, PostgreSQL for VPS production
 USE_POSTGRES = env_bool('USE_POSTGRES', default=False)
+DB_CONN_MAX_AGE = int(os.environ.get('DB_CONN_MAX_AGE', '0' if DEBUG else '600'))
 
 # Priority: DATABASE_URL > individual postgres vars > SQLite (local)
 if os.environ.get('DATABASE_URL'):
     DATABASES = {
         'default': dj_database_url.config(
             default=os.environ.get('DATABASE_URL'),
-            conn_max_age=0 if DEBUG else 600
+            conn_max_age=DB_CONN_MAX_AGE
         )
     }
 elif USE_POSTGRES:
@@ -251,7 +252,7 @@ elif USE_POSTGRES:
             'HOST': os.environ.get('DB_HOST', 'localhost'),
             'PORT': os.environ.get('DB_PORT', '5432'),
             'ATOMIC_REQUESTS': True,
-            'CONN_MAX_AGE': 0 if DEBUG else 600,
+            'CONN_MAX_AGE': DB_CONN_MAX_AGE,
         }
     }
 else:

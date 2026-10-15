@@ -67,7 +67,6 @@ export default function AboutPage() {
 
             <figure className={styles.storyVisual}>
               <img src="/landing/images/detailer-story.jpg" alt="Detailing professional working beside a black car" width="1200" height="900" loading="lazy" decoding="async" />
-              <figcaption>Photo: Unsplash</figcaption>
             </figure>
           </div>
         </div>

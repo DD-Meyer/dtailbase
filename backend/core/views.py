@@ -583,9 +583,9 @@ class BookingRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView)
     def get_queryset(self):
         return with_start_readiness(Booking.objects.filter(company=self.request.user.company)).select_related(
             'customer', 
-            'vehicle', 
+            'vehicle__customer',
             'service', 
-            'booking_indemnity'
+            'booking_indemnity__template'
         ).prefetch_related(
             'booking_indemnity__condition_photos'
         )
