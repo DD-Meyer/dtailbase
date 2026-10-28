@@ -26,6 +26,7 @@
 .primary:disabled { opacity: 0.65; cursor: wait; }
 .card :is(a, button):focus-visible { outline: 2px solid var(--marketing-blue); outline-offset: 3px; }
 .note { margin: 0; font-size: 13px; line-height: 1.6; color: var(--color-text-muted); }
+.secure { margin: 0; display: flex; align-items: center; justify-content: center; gap: 6px; padding-top: 14px; border-top: 1px solid var(--color-border); font-size: 13px; font-weight: 600; color: var(--color-text-muted); }
 .actions :global(.paypal-subscribe-button-wrapper) { margin: 0; width: 100%; }
 .actions :global(.btn-paypal-subscribe) { width: 100%; min-height: 48px; padding: 12px 16px; background: var(--marketing-blue); color: #fff; border: 1px solid var(--marketing-blue); border-radius: 6px; font-size: 15px; font-weight: 700; }
 .actions :global(.btn-paypal-subscribe:hover:not(:disabled)) { background: var(--marketing-blue-dark); transform: none; }

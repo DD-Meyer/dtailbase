@@ -7,6 +7,7 @@ import { AuthContext } from "../../context/AuthContext";
 import { showToast } from "../../utils/uiFeedback";
 import {
   DEFAULT_PRICE_FALLBACKS,
+  currencyLabel,
   extractPlanFeatures,
   fetchPricingWithFallback,
   isValidPricingPayload,
@@ -16,7 +17,7 @@ import styles from "./PlansPage.module.css";
 
 const PLAN_ORDER = { STARTER: 0, PRO: 1, ENTERPRISE: 2 };
 const PRICE_FALLBACKS = DEFAULT_PRICE_FALLBACKS;
-const detectBrowserCurrency = () => "USD";
+const detectBrowserCurrency = () => "ZAR";
 
 export default function PlansPage({ showBackToDashboard = false }) {
   const [loading, setLoading] = useState(false);
@@ -138,7 +139,14 @@ export default function PlansPage({ showBackToDashboard = false }) {
     fetchPricing();
   }, [isAuthenticated]);
 
-  const getCurrencySymbol = (c) => (c === "ZAR" ? "R" : "$");
+  const getCurrencySymbol = (c) => {
+    try {
+      return new Intl.NumberFormat("en", { style: "currency", currency: c, currencyDisplay: "narrowSymbol" })
+        .formatToParts(0).find((p) => p.type === "currency")?.value || c;
+    } catch {
+      return c;
+    }
+  };
 
   const plans = [
     {
@@ -216,7 +224,7 @@ export default function PlansPage({ showBackToDashboard = false }) {
           <p className={styles.currencyNote}>
             Prices in{" "}
             <strong>
-              {currency === "ZAR" ? "South African Rand (ZAR)" : "US Dollars (USD)"}
+              {currencyLabel(currency)}
             </strong>
           </p>
 
@@ -324,7 +332,7 @@ export default function PlansPage({ showBackToDashboard = false }) {
               </span>
               <h3 className={styles.infoTitle}>Billing details</h3>
               <ul className={styles.infoList}>
-                <li>Secure PayPal payments</li>
+                <li>Secure PayFast payments</li>
                 <li>Monthly recurring billing</li>
                 <li>Cancel anytime from your settings</li>
                 <li>Automatic invoice delivery</li>

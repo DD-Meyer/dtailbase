@@ -13,7 +13,7 @@ export function confirmSubscription(api, subscriptionId) {
 
 export function getVerificationResult(data) {
   if (!data || typeof data.success !== "boolean") {
-    return { kind: "error", message: "PayPal returned an unexpected response. Check again or contact support. Do not pay again." };
+    return { kind: "error", message: "PayFast returned an unexpected response. Check again or contact support. Do not pay again." };
   }
   if (data?.success && data.deferred_downgrade) {
     return { kind: "scheduled", plan: data.plan, targetPlan: data.target_plan || data.pending_plan };
@@ -29,7 +29,7 @@ export function getVerificationResult(data) {
   if (data?.success || ["APPROVAL_PENDING", "APPROVED", "UNKNOWN"].includes(data?.subscription_status)) {
     return { kind: "pending", plan: data.pending_plan || null };
   }
-  return { kind: "pending", message: data?.error || "PayPal has not confirmed activation yet." };
+  return { kind: "pending", message: data?.error || "PayFast has not confirmed activation yet." };
 }
 
 export function isUpgrade(previous, next) {

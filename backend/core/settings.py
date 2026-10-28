@@ -338,6 +338,19 @@ PAYPAL_CLIENT_SECRET = os.environ.get('PAYPAL_CLIENT_SECRET', '')
 PAYPAL_WEBHOOK_URL = os.environ.get('PAYPAL_WEBHOOK_URL', '')
 PAYPAL_WEBHOOK_ID = os.environ.get('PAYPAL_WEBHOOK_ID', '')
 
+# ========== PayFast Configuration ==========
+# PAYFAST_MODE selects which credential set is used: 'sandbox' or 'live'.
+PAYFAST_MODE = os.environ.get('PAYFAST_MODE', 'sandbox').strip().lower()
+PAYFAST_SANDBOX_MERCHANT_ID = os.environ.get('PAYFAST_SANDBOX_MERCHANT_ID', '')
+PAYFAST_SANDBOX_MERCHANT_KEY = os.environ.get('PAYFAST_SANDBOX_MERCHANT_KEY', '')
+PAYFAST_SANDBOX_PASSPHRASE = os.environ.get('PAYFAST_SANDBOX_PASSPHRASE', '')
+PAYFAST_LIVE_MERCHANT_ID = os.environ.get('PAYFAST_LIVE_MERCHANT_ID', '')
+PAYFAST_LIVE_MERCHANT_KEY = os.environ.get('PAYFAST_LIVE_MERCHANT_KEY', '')
+PAYFAST_LIVE_PASSPHRASE = os.environ.get('PAYFAST_LIVE_PASSPHRASE', '')
+PAYFAST_NOTIFY_URL = os.environ.get('PAYFAST_NOTIFY_URL', '')
+PAYFAST_SKIP_IP_CHECK = env_bool('PAYFAST_SKIP_IP_CHECK', default=False)
+PUBLIC_BASE_URL = os.environ.get('PUBLIC_BASE_URL', '')
+
 # ========== Geolocation Service (ipstack) ==========
 IPSTACK_API_KEY = os.environ.get('IPSTACK_API_KEY', '')
 

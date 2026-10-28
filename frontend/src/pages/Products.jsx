@@ -67,9 +67,9 @@ const FEATURES = [
     label: 'PAYMENTS / 05',
     title: 'Payment Processing & Subscriptions',
     description:
-      'Dtailbase subscriptions are managed through PayPal - one of the most trusted payment processors globally. Upgrade, downgrade, or cancel your plan directly from within the app. Automatic invoicing means no manual tracking of your software costs.',
+      'Dtailbase subscriptions are managed through PayFast - a trusted payment processor that bills you in your own currency. Upgrade, downgrade, or cancel your plan directly from within the app. Automatic invoicing means no manual tracking of your software costs.',
     highlights: [
-      'Secure PayPal subscription billing',
+      'Secure PayFast subscription billing',
       'Upgrade or downgrade plans at any time',
       'Cancel anytime - no lock-in contracts',
       'Automatic invoice delivery via email',

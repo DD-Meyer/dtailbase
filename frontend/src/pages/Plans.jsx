@@ -7,6 +7,7 @@ import { AuthContext } from '../context/AuthContext';
 import { showToast } from '../utils/uiFeedback';
 import {
   DEFAULT_PRICE_FALLBACKS,
+  currencyLabel,
   extractPlanFeatures,
   fetchPricingWithFallback,
   isValidPricingPayload,
@@ -21,7 +22,7 @@ const PLAN_ORDER = {
 const PRICE_FALLBACKS = DEFAULT_PRICE_FALLBACKS;
 
 const detectBrowserCurrency = () => {
-  return 'USD';
+  return 'ZAR';
 };
 
 const Plans = ({ showBackToDashboard = false }) => {
@@ -160,7 +161,12 @@ const Plans = ({ showBackToDashboard = false }) => {
   }, [isAuthenticated]);
 
   const getCurrencySymbol = (curr) => {
-    return curr === 'ZAR' ? 'R' : '$';
+    try {
+      return new Intl.NumberFormat('en', { style: 'currency', currency: curr, currencyDisplay: 'narrowSymbol' })
+        .formatToParts(0).find((p) => p.type === 'currency')?.value || curr;
+    } catch {
+      return curr;
+    }
   };
 
   // Features are now fetched from backend for single-source-of-truth
@@ -226,7 +232,7 @@ const Plans = ({ showBackToDashboard = false }) => {
             {downgradeModalPlan.id === 'STARTER' ? (
               <p>
                 Downgrading to <strong>{downgradeModalPlan.name}</strong> will cancel your current
-                PayPal subscription.
+                PayFast subscription.
               </p>
             ) : (
               <p>
@@ -235,7 +241,7 @@ const Plans = ({ showBackToDashboard = false }) => {
               </p>
             )}
             <p>
-              Any penalties due will be charged by PayPal based on your billing terms.
+              Any penalties due will be charged by PayFast based on your billing terms.
             </p>
             <div className="plan-modal-actions">
               <button className="btn-upgrade btn-current" onClick={() => setDowngradeModalPlan(null)}>
@@ -265,9 +271,7 @@ const Plans = ({ showBackToDashboard = false }) => {
         <p className="currency-note">
           Pricing displayed in:{' '}
           <strong>
-            {currency === 'ZAR'
-              ? 'South African Rand (ZAR)'
-              : 'US Dollars (USD)'}
+            {currencyLabel(currency)}
           </strong>
         </p>
 
@@ -360,7 +364,7 @@ const Plans = ({ showBackToDashboard = false }) => {
       <div className="payment-info">
         <h3>Payment Information</h3>
         <ul>
-          <li>Secure PayPal payments</li>
+          <li>Secure PayFast payments</li>
           <li>Monthly recurring billing</li>
           <li>Cancel anytime from your settings</li>
           <li>Automatic invoice delivery</li>

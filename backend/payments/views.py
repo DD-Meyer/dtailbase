@@ -10,6 +10,7 @@ from rest_framework import status
 from core.models import Company
 from core.permissions import IsAccountAdmin
 from payments.geolocation import detect_pricing_context
+from payments.payfast_service import get_pricing, normalize_currency
 from payments.paypal_service import (
     create_paypal_subscription,
     get_subscription_plan,
@@ -52,14 +53,20 @@ class PlansView(APIView):
 
             effective_country_code = company_country_code or detected_country_code
             country_code = (effective_country_code or 'US').upper()
-            currency = 'USD'
-            pricing = get_effective_pricing().get('USD', {})
+            company_currency = None
+            if request.user.is_authenticated and getattr(request.user, 'company', None):
+                company_currency = request.user.company.currency
+            currency = normalize_currency(company_currency or pricing_context.get('currency'))
+            pricing = {
+                plan: {'amount': f"{amount:.2f}", 'currency': currency}
+                for plan, amount in get_pricing(currency).items()
+            }
 
             plans = {}
             for plan_name in PLAN_CONFIG:
                 plan_config = PLAN_CONFIG[plan_name]
                 display_features = plan_config.get('features', [])
-                limits = safe_plan({k: v for k, v in plan_config.items() if k != 'features'})
+                limits = safe_plan({k: v for k, v in plan_config.items() if k not in ('features', 'prices')})
                 if plan_name == 'STARTER':
                     price = '0'
                 else:
@@ -74,6 +81,8 @@ class PlansView(APIView):
             return Response({
                 'country_code': country_code,
                 'currency': currency,
+                'billing_currency': currency,
+                'billing_amounts': {k: v['amount'] for k, v in pricing.items()},
                 'vpn_detected': vpn_detected,
                 'pricing': pricing,
                 'plans': plans

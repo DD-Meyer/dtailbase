@@ -600,7 +600,7 @@ function Settings() {
                   <label>Subscription ID</label>
                   <input
                     className="input-readonly"
-                    value={isStarterPlan ? "Not available" : (billingSummary?.paypal_subscription_id || "Not available")}
+                    value={isStarterPlan ? "Not available" : (billingSummary?.subscription_reference || "Not available")}
                     readOnly
                   />
                 </div>

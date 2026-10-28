@@ -1,4 +1,14 @@
-PLAN_CONFIG = {
+# Plan pricing and limits are edited in the Django admin (Core > Plan configurations).
+# DEFAULT_PLAN_CONFIG below only seeds the database and is the fallback when the DB
+# is unavailable. Everything in the app reads PLAN_CONFIG, which is DB-backed.
+# PayFast bills in ZAR only (international cards are converted by the cardholder's bank).
+import threading
+import time
+from collections.abc import Mapping
+
+BILLING_CURRENCY = 'ZAR'
+
+DEFAULT_PLAN_CONFIG = {
     'STARTER': {
         'monthly_bookings': 10,
         'max_users': 1,
@@ -9,7 +19,7 @@ PLAN_CONFIG = {
         'max_customers': 1000,
         'indemnity_history_limit': 0, # No history saved
         'buffer_timer': False,
-        'price_usd': 0,
+        'price': 0,
         'features': [
             '10 Monthly Bookings',
             '1 User Account',
@@ -28,7 +38,7 @@ PLAN_CONFIG = {
         'max_customers': 5000,
         'indemnity_history_limit': 5,
         'buffer_timer': True,
-        'price_usd': 99,
+        'price': 399,
         'features': [
             '60 Monthly Bookings',
             '10 Team Members',
@@ -53,7 +63,7 @@ PLAN_CONFIG = {
         'max_linked_service_templates': 20,
         'storage_limit_gb': 100,
         'buffer_timer': True,
-        'price_usd': 199,
+        'price': 999,
         'features': [
             'Unlimited Bookings',
             '50 Team Members',
@@ -69,3 +79,49 @@ PLAN_CONFIG = {
         ],
     }
 }
+
+
+_CACHE_TTL_SECONDS = 30
+_cache = {'data': None, 'expires': 0.0}
+_cache_lock = threading.Lock()
+
+
+def clear_plan_config_cache():
+    with _cache_lock:
+        _cache['data'] = None
+        _cache['expires'] = 0.0
+
+
+def _load_plan_config():
+    """Defaults overlaid with any rows saved in the admin. Never raises."""
+    data = {plan: dict(cfg) for plan, cfg in DEFAULT_PLAN_CONFIG.items()}
+    try:
+        from core.models import PlanConfiguration
+        for row in PlanConfiguration.objects.all():
+            data[row.plan] = row.as_config()
+    except Exception:
+        pass  # table missing (pre-migrate) or DB unavailable: use defaults
+    return data
+
+
+class _PlanConfigMapping(Mapping):
+    """Read-only dict-like view of the current plan configuration."""
+
+    def _data(self):
+        with _cache_lock:
+            if _cache['data'] is None or time.monotonic() >= _cache['expires']:
+                _cache['data'] = _load_plan_config()
+                _cache['expires'] = time.monotonic() + _CACHE_TTL_SECONDS
+            return _cache['data']
+
+    def __getitem__(self, key):
+        return self._data()[key]
+
+    def __iter__(self):
+        return iter(self._data())
+
+    def __len__(self):
+        return len(self._data())
+
+
+PLAN_CONFIG = _PlanConfigMapping()

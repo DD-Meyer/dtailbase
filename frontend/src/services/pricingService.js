@@ -1,7 +1,17 @@
 const isObject = (value) => value !== null && typeof value === "object";
 
+export const currencyLabel = (code) => {
+  try {
+    const name = new Intl.DisplayNames(["en"], { type: "currency" }).of(code);
+    return `${name} (${code})`;
+  } catch {
+    return code;
+  }
+};
+
 export const DEFAULT_PRICE_FALLBACKS = {
   USD: { PRO: "129.00", ENTERPRISE: "299.00" },
+  ZAR: { PRO: "1800.00", ENTERPRISE: "3600.00" },
 };
 
 export const DEFAULT_PLAN_FEATURES = {

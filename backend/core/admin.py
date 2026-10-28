@@ -57,6 +57,28 @@ class CustomerAdmin(admin.ModelAdmin):
     list_display = ("firstname", "lastname", "company")
     inlines = [VehicleInline]
 
+@admin.register(PlanConfiguration)
+class PlanConfigurationAdmin(admin.ModelAdmin):
+    """Single place to edit plan pricing, limits and feature lists."""
+    list_display = ("plan", "price", "monthly_bookings", "max_users", "max_customers", "buffer_timer")
+    fieldsets = (
+        (None, {"fields": ("plan", "price", "prices", "features")}),
+        ("Usage limits", {"fields": ("monthly_bookings", "max_users", "max_customers",
+                                     "indemnity_history_limit", "max_linked_service_templates",
+                                     "storage_limit_gb", "buffer_timer")}),
+        ("Photos", {"fields": ("max_images_before", "max_images_after", "max_image_width", "max_image_height")}),
+    )
+
+    def get_readonly_fields(self, request, obj=None):
+        return ("plan",) if obj else ()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return PlanConfiguration.objects.count() < len(PlanConfiguration.PLAN_CHOICES)
+
+
 # Register remaining models
 admin.site.register(Service)
 admin.site.register(Vehicle)

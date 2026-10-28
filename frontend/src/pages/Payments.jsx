@@ -1,5 +1,6 @@
 import { useEffect, useContext, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Lock } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import { useCompany } from '../context/CompanyContext';
 import PayPalSubscribeButton from '../components/PayPalSubscribeButton';
@@ -35,13 +36,21 @@ function Payments() {
     typeof PLAN_ORDER[currentPlan] === 'number' &&
     typeof PLAN_ORDER[planId] === 'number' &&
     PLAN_ORDER[currentPlan] > PLAN_ORDER[planId];
-  const paypalButtonLabel = isDowngradeFlow ? 'Downgrade via PayPal' : 'Upgrade via PayPal';
+  const paypalButtonLabel = isDowngradeFlow ? 'Downgrade via PayFast' : 'Upgrade via PayFast';
   const selectedPlanFeatures = planFeatures;
 
+  const [planCurrency, setPlanCurrency] = useState('ZAR');
   const formattedPlanPrice = useMemo(() => {
     if (!planPrice) return null;
-    return `$${String(planPrice).replace(/\.00$/, '')} / month`;
-  }, [planPrice]);
+    const amount = String(planPrice).replace(/\.00$/, '');
+    try {
+      const symbol = new Intl.NumberFormat('en', { style: 'currency', currency: planCurrency, currencyDisplay: 'narrowSymbol' })
+        .formatToParts(0).find((p) => p.type === 'currency')?.value || planCurrency;
+      return `${symbol}${amount} / month`;
+    } catch {
+      return `${planCurrency} ${amount} / month`;
+    }
+  }, [planPrice, planCurrency]);
 
   useEffect(() => {
     if (!isAuthenticated && isPaidPlan) {
@@ -72,17 +81,17 @@ function Payments() {
         const plansData = response.data?.plans || {};
 
         setPlanFeatures(extractPlanFeatures(plansData, planId));
-
+        setPlanCurrency((response.data?.currency || 'ZAR').toUpperCase());
         setPlanPrice(
           String(
             pricingData?.[planId]?.amount ||
             plansData?.[planId]?.price ||
-            PRICE_FALLBACKS.USD[planId] ||
+            PRICE_FALLBACKS.ZAR[planId] ||
             '0.00'
           )
         );
       } catch {
-        setPlanPrice(PRICE_FALLBACKS.USD[planId] || '0.00');
+        setPlanPrice(PRICE_FALLBACKS.ZAR[planId] || '0.00');
         setPlanFeatures(extractPlanFeatures({}, planId));
       }
     };
@@ -92,7 +101,7 @@ function Payments() {
 
   if (!isPaidPlan) {
     return (
-      <PaymentFlowCard step={1} title="Choose your plan" description="Select Professional or Enterprise to continue securely through PayPal.">
+      <PaymentFlowCard step={1} title="Choose your plan" description="Select Professional or Enterprise to continue securely through PayFast.">
         <Link className={styles.primary} to="/plans">Go to Plans</Link>
       </PaymentFlowCard>
     );
@@ -103,7 +112,7 @@ function Payments() {
   }
 
   return (
-    <PaymentFlowCard step={1} title={PLAN_LABELS[planId]} description="Review your plan, then continue securely through PayPal.">
+    <PaymentFlowCard step={1} title={PLAN_LABELS[planId]} description="Review your plan, then continue securely through PayFast.">
       <div className={styles.summary} aria-label="Selected plan summary">
         <dl>
           <div className={styles.row}>
@@ -129,6 +138,9 @@ function Payments() {
         <PayPalSubscribeButton planId={planId} buttonLabel={paypalButtonLabel} />
         <Link className={styles.secondary} to="/plans">Back to Plans</Link>
       </div>
+      <p className={styles.secure}>
+        <Lock size={14} aria-hidden="true" /> Secured by PayFast
+      </p>
     </PaymentFlowCard>
   );
 }

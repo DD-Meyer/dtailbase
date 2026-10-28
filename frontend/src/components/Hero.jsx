@@ -286,7 +286,7 @@ const Hero = ({ isAuthenticated }) => {
             </div>
           ))}
         </div>
-        <p className="pricing-note">Legally-Binding Asset Vault included &nbsp;·&nbsp; Secure PayPal billing &nbsp;·&nbsp; Cancel anytime</p>
+        <p className="pricing-note">Legally-Binding Asset Vault included &nbsp;·&nbsp; Secure PayFast billing &nbsp;·&nbsp; Cancel anytime</p>
       </section>
 
       <section className="features-section container">

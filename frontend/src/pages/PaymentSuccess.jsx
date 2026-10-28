@@ -129,11 +129,11 @@ function Verification({ subscriptionId, refreshCompany, currentPlan, companyLoad
     error: "Verification unavailable",
   }[state.kind];
   const description = {
-    checking: "Checking securely with PayPal. This may take a moment.",
-    pending: "Your subscription is not active yet. Check again shortly—there is no need to pay again.",
+    checking: "Checking securely with PayFast. This may take a moment.",
+    pending: "Your subscription is not active yet. Check again shortly, there is no need to pay again.",
     active: "Your subscription is confirmed. You can continue working.",
     scheduled: "Your current plan remains available until the scheduled change takes effect.",
-    missing: "Return using the PayPal approval link. If you were charged, contact support before starting another subscription.",
+    missing: "Return using the PayFast payment link. If you were charged, contact support before starting another subscription.",
     error: state.message,
   }[state.kind];
   const Icon = active ? CheckCircle2 : ["pending", "checking"].includes(state.kind) ? Clock3 : Info;
@@ -151,11 +151,11 @@ function Verification({ subscriptionId, refreshCompany, currentPlan, companyLoad
           {scheduled && <div className={styles.row}><dt>Scheduled plan</dt><dd>{PAYMENT_PLAN_LABELS[state.targetPlan] || "Check your plan in Settings"}</dd></div>}
         </dl>
       </div>}
-      {state.refreshFailed && <p role="status" className={styles.note}>PayPal confirmation succeeded, but we could not refresh your workspace access. Refresh access below. Do not pay again.</p>}
+      {state.refreshFailed && <p role="status" className={styles.note}>PayFast confirmation succeeded, but we could not refresh your workspace access. Refresh access below. Do not pay again.</p>}
       <div className={styles.actions}>
         {["checking", "pending", "error"].includes(state.kind) && !state.permission &&
           <button className={styles.primary} disabled={state.kind === "checking"} onClick={retry}>
-            {state.kind === "checking" ? "Checking with PayPal…" : "Check again"}
+            {state.kind === "checking" ? "Checking with PayFast…" : "Check again"}
           </button>}
         {state.refreshFailed && <button className={styles.primary} disabled={refreshBusy} onClick={retryRefresh}>
           {refreshBusy ? "Refreshing access…" : "Refresh workspace access"}

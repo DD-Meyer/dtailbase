@@ -3,12 +3,24 @@ import api from '../axios_instance';
 import { showToast } from '../utils/uiFeedback';
 import '../styles/PayPalSubscribeButton.css';
 
+function loadOnsiteEngine(src) {
+  if (window.payfast_do_onsite_payment) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    script.onload = () => (window.payfast_do_onsite_payment ? resolve() : reject(new Error('engine missing')));
+    script.onerror = () => reject(new Error('engine failed to load'));
+    document.head.appendChild(script);
+  });
+}
+
 const PayPalSubscribeButton = ({
   planId,
   onSuccess,
   onError,
   disabled = false,
-  buttonLabel = 'Upgrade via PayPal',
+  buttonLabel = 'Upgrade via PayFast',
 }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -21,17 +33,40 @@ const PayPalSubscribeButton = ({
     setError(null);
 
     try {
-      // Call backend to create PayPal subscription.
+      // Ask the backend for a signed PayFast checkout (onsite modal, redirect fallback).
       const response = await api.post('/payments/subscribe/', {
         plan_id: planId,
+        mode: 'onsite',
       });
 
       if (!response.data.success) {
         throw new Error(response.data.error || 'Failed to create subscription');
       }
 
+      if (response.data.scheduled && response.data.redirect_url) {
+        if (onSuccess) onSuccess(response.data);
+        window.location.href = response.data.redirect_url;
+        return response.data.subscription_id || null;
+      }
+
+      if (response.data.onsite_uuid) {
+        try {
+          await loadOnsiteEngine(response.data.onsite_engine_url);
+          if (onSuccess) onSuccess(response.data);
+          window.payfast_do_onsite_payment(
+            { uuid: response.data.onsite_uuid, return_url: response.data.return_url, cancel_url: response.data.cancel_url },
+            (completed) => {
+              if (completed === true) window.location.href = response.data.return_url;
+            },
+          );
+          return response.data.subscription_id || null;
+        } catch (onsiteErr) {
+          console.warn('PayFast onsite unavailable, using redirect', onsiteErr);
+        }
+      }
+
       if (!response.data.approval_url) {
-        throw new Error('PayPal did not provide an approval link. Please try again.');
+        throw new Error('PayFast did not provide a checkout link. Please try again.');
       }
       if (onSuccess) onSuccess(response.data);
       window.location.href = response.data.approval_url;

@@ -1125,8 +1125,6 @@ class CompanyUserDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsAccountAdmin]
 
-    plan_limits = PLAN_CONFIG.get('STARTER')  # Default to STARTER if something goes wrong
-
     def get_queryset(self):
         company = self.request.user.company
         return User.objects.filter(company=company)
