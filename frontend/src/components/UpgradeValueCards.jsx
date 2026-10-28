@@ -25,6 +25,7 @@ const PRICE_FALLBACKS = DEFAULT_PRICE_FALLBACKS;
 function UpgradeValueCards({ currentPlan }) {
   const [isMobile, setIsMobile] = useState(() => window.matchMedia("(max-width: 768px)").matches);
   const [pricing, setPricing] = useState(null);
+  const [currency, setCurrency] = useState("ZAR");
   const [planContent, setPlanContent] = useState([]);
 
   useEffect(() => {
@@ -44,14 +45,17 @@ function UpgradeValueCards({ currentPlan }) {
         }
         const apiPricing = response.data?.pricing || {};
         const plansPricing = response.data?.plans || {};
+        const apiCurrency = String(response.data?.currency || "ZAR").toUpperCase();
+        const fallbacks = PRICE_FALLBACKS[apiCurrency] || PRICE_FALLBACKS.ZAR;
+        setCurrency(apiCurrency);
 
         setPricing({
           PRO: {
-            amount: String(apiPricing?.PRO?.amount || plansPricing?.PRO?.price || PRICE_FALLBACKS.USD.PRO),
+            amount: String(apiPricing?.PRO?.amount || plansPricing?.PRO?.price || fallbacks.PRO),
           },
           ENTERPRISE: {
             amount: String(
-              apiPricing?.ENTERPRISE?.amount || plansPricing?.ENTERPRISE?.price || PRICE_FALLBACKS.USD.ENTERPRISE
+              apiPricing?.ENTERPRISE?.amount || plansPricing?.ENTERPRISE?.price || fallbacks.ENTERPRISE
             ),
           },
         });
@@ -76,8 +80,8 @@ function UpgradeValueCards({ currentPlan }) {
       } catch {
         // Keep safe defaults if pricing endpoint is unavailable.
         setPricing({
-          PRO: { amount: PRICE_FALLBACKS.USD.PRO },
-          ENTERPRISE: { amount: PRICE_FALLBACKS.USD.ENTERPRISE },
+          PRO: { amount: PRICE_FALLBACKS.ZAR.PRO },
+          ENTERPRISE: { amount: PRICE_FALLBACKS.ZAR.ENTERPRISE },
         });
         setPlanContent([
           {
@@ -128,7 +132,13 @@ function UpgradeValueCards({ currentPlan }) {
     return null;
   }
 
-  const currencySymbol = "$";
+  let currencySymbol = currency;
+  try {
+    currencySymbol = new Intl.NumberFormat("en", { style: "currency", currency, currencyDisplay: "narrowSymbol" })
+      .formatToParts(0).find((p) => p.type === "currency")?.value || currency;
+  } catch {
+    // keep the ISO code
+  }
 
   const getPlanPrice = (planId) => {
     const amount = pricing?.[planId]?.amount;

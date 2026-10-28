@@ -21,6 +21,7 @@ class CompanyAdmin(admin.ModelAdmin):
             'fields': (
                 'plan',
                 'is_subscription_active',
+                'payfast_token',
                 'paypal_subscription_id',
                 'paypal_customer_id',
                 'pending_downgrade_plan',
@@ -50,7 +51,23 @@ class CompanyAdmin(admin.ModelAdmin):
 
             new_plan = obj.plan
 
-            if old_plan and old_plan != new_plan and obj.paypal_subscription_id:
+            if old_plan and old_plan != new_plan and obj.payfast_token:
+                from payments.payfast_service import cancel_subscription as payfast_cancel
+                result = payfast_cancel(obj.payfast_token)
+                if result.get('success'):
+                    obj.payfast_token = ''
+                    messages.success(request, f'Plan changed {old_plan} → {new_plan}. PayFast subscription cancelled.')
+                else:
+                    messages.warning(
+                        request,
+                        f'Plan changed locally, but PayFast cancellation failed: {result.get("error", "unknown error")}. '
+                        f'Cancel it on the PayFast dashboard.'
+                    )
+                obj.pending_downgrade_plan = ''
+                obj.subscription_ends_at = None
+                if new_plan == 'STARTER':
+                    obj.is_subscription_active = False
+            elif old_plan and old_plan != new_plan and obj.paypal_subscription_id:
                 from payments.paypal_service import cancel_subscription
                 result = cancel_subscription(obj.paypal_subscription_id)
                 if result.get('success'):
