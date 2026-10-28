@@ -71,7 +71,7 @@ class PlansView(APIView):
                 if plan_name == 'STARTER':
                     price = '0'
                 else:
-                    price = pricing[plan_name]['amount']
+                    price = pricing.get(plan_name, {}).get('amount', '0.00')
                 plans[plan_name] = {
                     'features': display_features,
                     'limits': limits,
@@ -89,8 +89,8 @@ class PlansView(APIView):
                 'plans': plans
             })
         except Exception as e:
-            logger.error(f"Error in PlansView: {str(e)}")
-            return Response({'error': str(e)}, status=500)
+            logger.exception("Error in PlansView")
+            return Response({'error': 'Unable to load plans'}, status=500)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
