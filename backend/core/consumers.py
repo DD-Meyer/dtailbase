@@ -23,7 +23,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         
         if user and user.is_authenticated:
             self.user = user
-            self.company_id = user.company.id if hasattr(user, 'company') else None
+            self.company_id = await self.get_company_id(user)
             self.is_platform_admin = bool(user.is_superuser or user.is_staff)
             
             if self.company_id:
@@ -119,6 +119,15 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         payload['type'] = 'support_ticket_created'
         await self.send(text_data=json.dumps(payload))
     
+    @database_sync_to_async
+    def get_company_id(self, user):
+        """Resolve the user's company id (lazy relation needs a sync DB context)."""
+        try:
+            company = getattr(user, 'company', None)
+            return company.id if company else None
+        except Exception:
+            return None
+
     @database_sync_to_async
     def get_user_from_token(self):
         """Extract user from JWT token in query string"""
