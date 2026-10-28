@@ -77,10 +77,11 @@ def _paid_plans():
 
 
 def normalize_currency(currency=None):
-    """The currency to bill in: the requested one if the admin has priced it, else ZAR."""
+    """The currency to bill in: the requested one if every paid plan is priced in it, else ZAR."""
     code = (currency or '').upper()
-    if code and code != BILLING_CURRENCY and any(
-        (cfg.get('prices') or {}).get(code) for _, cfg in _paid_plans()
+    paid = _paid_plans()
+    if code and code != BILLING_CURRENCY and paid and all(
+        (cfg.get('prices') or {}).get(code) for _, cfg in paid
     ):
         return code
     return BILLING_CURRENCY

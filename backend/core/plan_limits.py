@@ -2,6 +2,7 @@
 # DEFAULT_PLAN_CONFIG below only seeds the database and is the fallback when the DB
 # is unavailable. Everything in the app reads PLAN_CONFIG, which is DB-backed.
 # PayFast bills in ZAR only (international cards are converted by the cardholder's bank).
+import logging
 import threading
 import time
 from collections.abc import Mapping
@@ -126,7 +127,8 @@ def _load_plan_config():
         for row in PlanConfiguration.objects.all():
             data[row.plan] = row.as_config()
     except Exception:
-        pass  # table missing (pre-migrate) or DB unavailable: use defaults
+        # table missing (pre-migrate) or DB unavailable: use defaults
+        logging.getLogger(__name__).exception("Could not load PlanConfiguration; using defaults")
     return data
 
 

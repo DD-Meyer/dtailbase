@@ -50,8 +50,28 @@ class PlanConfiguration(models.Model):
     def __str__(self):
         return self.get_plan_display()
 
+    @staticmethod
+    def _parse_amount(value):
+        return float(str(value).replace(',', '').replace(' ', '').strip())
+
+    def clean(self):
+        super().clean()
+        cleaned = {}
+        for code, value in (self.prices or {}).items():
+            try:
+                cleaned[str(code).strip().upper()] = f"{self._parse_amount(value):.2f}"
+            except (TypeError, ValueError):
+                raise ValidationError({'prices': f'"{code}" has an invalid price: {value!r}'})
+        self.prices = cleaned
+
     def as_config(self):
         inf = float('inf')
+        prices = {}
+        for code, value in (self.prices or {}).items():
+            try:
+                prices[str(code).strip().upper()] = self._parse_amount(value)
+            except (TypeError, ValueError):
+                continue  # ignore malformed entries rather than breaking every plan lookup
         cfg = {
             'monthly_bookings': inf if self.monthly_bookings is None else self.monthly_bookings,
             'max_users': self.max_users,
@@ -63,7 +83,7 @@ class PlanConfiguration(models.Model):
             'indemnity_history_limit': self.indemnity_history_limit,
             'buffer_timer': self.buffer_timer,
             'price': float(self.price),
-            'prices': {str(k).upper(): float(v) for k, v in (self.prices or {}).items()},
+            'prices': prices,
             'features': list(self.features or []),
         }
         if self.max_linked_service_templates is not None:
