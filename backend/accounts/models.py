@@ -6,7 +6,7 @@ from django.forms import IntegerField
 from django.utils.text import slugify
 from django.db.models import Case, When, Value, IntegerField
 
-from core.plan_limits import PLAN_CONFIG
+from core.plan_limits import PLAN_CONFIG, SUPPORTED_CURRENCIES
 
 logger = logging.getLogger(__name__)
 
@@ -51,10 +51,7 @@ class Company(models.Model):
     subscription_ends_at = models.DateTimeField(null=True, blank=True)
     
     # Geolocation and Currency
-    CURRENCY_CHOICES = [
-        ('ZAR', 'South African Rand'),
-        ('USD', 'US Dollar'),
-    ]
+    CURRENCY_CHOICES = SUPPORTED_CURRENCIES
     country_code = models.CharField(max_length=2, default='US', blank=True)  # ISO country code
     currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default='USD')
     requested_country_code = models.CharField(max_length=2, blank=True, default='')

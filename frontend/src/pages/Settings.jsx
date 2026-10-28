@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { countryOptions, getCountryLabel } from "../utils/countries";
 import { showConfirm, showPrompt } from "../utils/uiFeedback";
+import { currencyLabel } from "../services/pricingService";
 
 function Settings() {
   const [company, setCompany] = useState(null);
@@ -194,7 +195,7 @@ function Settings() {
         country_code: res.data.country_code,
         currency: res.data.currency,
         requested_country_code: requestedCountryCode,
-        requested_currency: "USD",
+        requested_currency: res.data.currency,
         location_verification_status: res.data.status,
         location_verification_score: res.data.score,
         location_verification_notes: res.data.message,
@@ -328,7 +329,7 @@ function Settings() {
   }
 
   const billingCountryLabel = getCountryLabel(company?.country_code || "US");
-  const billingCurrency = 'USD';
+  const billingCurrency = (billingSummary?.currency || company?.currency || 'USD').toUpperCase();
   const effectivePlan = (billingSummary?.plan || company?.plan || currentPlan || "STARTER").toUpperCase();
   const isStarterPlan = effectivePlan === "STARTER";
   const hasActiveSubscription = Boolean(billingSummary?.is_subscription_active || company?.is_subscription_active);
@@ -632,7 +633,7 @@ function Settings() {
                 <div className="input-group full-width">
                   <label>Billing Notice</label>
                   <p className="settings-note">
-                    This admin account is registered in <strong>{billingCountryLabel}</strong>. All subscriptions are billed in <strong>US Dollars</strong>.
+                    This admin account is registered in <strong>{billingCountryLabel}</strong>. All subscriptions are billed in <strong>{currencyLabel(billingCurrency)}</strong>.
                   </p>
                 </div>
               </div>
@@ -649,7 +650,7 @@ function Settings() {
 
               <div className="input-group">
                 <label><BadgeDollarSign size={14} aria-hidden="true" /> Billing Currency</label>
-                <input className="input-readonly" value="USD" readOnly />
+                <input className="input-readonly" value={billingCurrency} readOnly />
               </div>
 
               <div className="input-group full-width">

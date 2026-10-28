@@ -11,6 +11,7 @@ from core.models import Company
 from core.permissions import IsAccountAdmin
 from payments.geolocation import detect_pricing_context
 from payments.payfast_service import get_pricing, normalize_currency
+from core.plan_limits import currency_for_country
 from payments.paypal_service import (
     create_paypal_subscription,
     get_subscription_plan,
@@ -56,7 +57,7 @@ class PlansView(APIView):
             company_currency = None
             if request.user.is_authenticated and getattr(request.user, 'company', None):
                 company_currency = request.user.company.currency
-            currency = normalize_currency(company_currency or pricing_context.get('currency'))
+            currency = normalize_currency(company_currency or currency_for_country(country_code))
             pricing = {
                 plan: {'amount': f"{amount:.2f}", 'currency': currency}
                 for plan, amount in get_pricing(currency).items()

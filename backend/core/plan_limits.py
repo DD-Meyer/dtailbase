@@ -8,6 +8,32 @@ from collections.abc import Mapping
 
 BILLING_CURRENCY = 'ZAR'
 
+
+def currency_for_country(country_code):
+    """Billing currency for a country: a PayFast-enabled local currency, else USD."""
+    return COUNTRY_CURRENCY.get((country_code or '').upper(), 'USD')
+
+
+# Currencies enabled on the PayFast account (ZAR is always on).
+SUPPORTED_CURRENCIES = [
+    ('ZAR', 'South African Rand'), ('USD', 'US Dollar'), ('EUR', 'Euro'),
+    ('GBP', 'British Pound Sterling'), ('BWP', 'Botswana Pula'),
+    ('AUD', 'Australian Dollar'), ('CAD', 'Canadian Dollar'),
+    ('MZN', 'Mozambican Metical'), ('MUR', 'Mauritian Rupee'),
+    ('RWF', 'Rwandan Franc'), ('TZS', 'Tanzanian Shilling'),
+    ('AED', 'UAE Dirham'), ('AFN', 'Afghan Afghani'), ('ALL', 'Albanian Lek'),
+]
+
+_EURO_COUNTRIES = (
+    'AT BE HR CY EE FI FR DE GR IE IT LV LT LU MT NL PT SK SI ES AD MC SM VA ME XK'
+).split()
+COUNTRY_CURRENCY = {
+    'ZA': 'ZAR', 'GB': 'GBP', 'AU': 'AUD', 'CA': 'CAD', 'BW': 'BWP', 'MZ': 'MZN',
+    'MU': 'MUR', 'RW': 'RWF', 'TZ': 'TZS', 'AE': 'AED', 'AF': 'AFN', 'AL': 'ALL',
+    **{code: 'EUR' for code in _EURO_COUNTRIES},
+}
+
+
 DEFAULT_PLAN_CONFIG = {
     'STARTER': {
         'monthly_bookings': 10,

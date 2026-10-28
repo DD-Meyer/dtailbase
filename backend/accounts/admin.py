@@ -22,8 +22,6 @@ class CompanyAdmin(admin.ModelAdmin):
                 'plan',
                 'is_subscription_active',
                 'payfast_token',
-                'paypal_subscription_id',
-                'paypal_customer_id',
                 'pending_downgrade_plan',
                 'subscription_ends_at',
             ),
@@ -67,35 +65,8 @@ class CompanyAdmin(admin.ModelAdmin):
                 obj.subscription_ends_at = None
                 if new_plan == 'STARTER':
                     obj.is_subscription_active = False
-            elif old_plan and old_plan != new_plan and obj.paypal_subscription_id:
-                from payments.paypal_service import cancel_subscription
-                result = cancel_subscription(obj.paypal_subscription_id)
-                if result.get('success'):
-                    obj.paypal_subscription_id = ''
-                    obj.paypal_customer_id = ''
-                    obj.pending_downgrade_plan = ''
-                    obj.subscription_ends_at = None
-                    if new_plan == 'STARTER':
-                        obj.is_subscription_active = False
-                    messages.success(
-                        request,
-                        f'Plan changed {old_plan} → {new_plan}. '
-                        f'PayPal subscription cancelled. '
-                        f'Company must re-subscribe to activate a new billing agreement.'
-                    )
-                else:
-                    obj.pending_downgrade_plan = ''
-                    obj.subscription_ends_at = None
-                    if new_plan == 'STARTER':
-                        obj.is_subscription_active = False
-                    messages.warning(
-                        request,
-                        f'Plan changed {old_plan} → {new_plan} locally, but PayPal cancellation '
-                        f'failed: {result.get("error", "unknown error")}. '
-                        f'Please cancel the subscription manually on the PayPal dashboard.'
-                    )
             elif old_plan and old_plan != new_plan:
-                # No PayPal subscription — just update local state.
+                # No PayFast subscription: just update local state.
                 obj.pending_downgrade_plan = ''
                 obj.subscription_ends_at = None
                 if new_plan == 'STARTER':

@@ -25,7 +25,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .permissions import IsCompanyUser, CanUpdateBookingStatus, IsAccountAdmin
-from .plan_limits import PLAN_CONFIG
+from .plan_limits import PLAN_CONFIG, currency_for_country
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from datetime import time, timedelta, datetime
 from core.models import Booking, Service
@@ -236,7 +236,7 @@ class CompanyLocationVerificationView(APIView):
         score = sum([c.get("score", 0.0) for c in passing_checks if c.get("verified")])
         score = round(score / max(1, len(passing_checks)), 4)
 
-        requested_currency = "USD"
+        requested_currency = currency_for_country(requested_country_code)
         company.requested_country_code = requested_country_code
         company.requested_currency = requested_currency
         company.location_verification_document = uploaded_document
@@ -996,14 +996,17 @@ class CompanyViewSet(viewsets.ModelViewSet):
         if not company:
             return Response({"detail": "User has no company assigned."}, status=404)
 
-        # Normalize legacy records: billing is USD-only for all countries.
+        # Billing currency follows the registered country (ZA -> ZAR, otherwise USD).
         fields_to_update = []
-        if (company.currency or "").upper() != "USD":
-            company.currency = "USD"
+        expected_currency = currency_for_country(company.country_code)
+        if (company.currency or "").upper() != expected_currency:
+            company.currency = expected_currency
             fields_to_update.append("currency")
-        if company.requested_currency and (company.requested_currency or "").upper() != "USD":
-            company.requested_currency = "USD"
-            fields_to_update.append("requested_currency")
+        if company.requested_country_code:
+            expected_requested = currency_for_country(company.requested_country_code)
+            if (company.requested_currency or "").upper() != expected_requested:
+                company.requested_currency = expected_requested
+                fields_to_update.append("requested_currency")
         if fields_to_update:
             company.save(update_fields=fields_to_update)
         
