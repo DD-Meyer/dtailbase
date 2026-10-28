@@ -130,6 +130,7 @@ log "Running Django migrations and collectstatic"
 preflight_db_env_check
 cd "$BACKEND_DIR"
 python manage.py migrate --noinput
+python manage.py createcachetable
 python manage.py collectstatic --noinput
 
 log "Fixing ownership and permissions for OLS app user"
@@ -151,6 +152,14 @@ sudo systemctl restart lsws
 
 log "Restarting Gunicorn service for DtailBase"
 sudo systemctl restart dtailbase-gunicorn.service
+
+if [[ -f "$APP_DIR/deploy/dtailbase-asgi.service" ]]; then
+  log "Installing/restarting ASGI (WebSocket) service"
+  sudo cp "$APP_DIR/deploy/dtailbase-asgi.service" /etc/systemd/system/dtailbase-asgi.service
+  sudo systemctl daemon-reload
+  sudo systemctl enable dtailbase-asgi.service
+  sudo systemctl restart dtailbase-asgi.service
+fi
 
 log "Deployment completed successfully"
 log "Quick checks:"

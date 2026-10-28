@@ -1,0 +1,16 @@
+[Unit]
+Description=DtailBase ASGI (WebSockets via Daphne)
+After=network.target redis-server.service
+Wants=redis-server.service
+
+[Service]
+User=lsadm
+Group=lsadm
+WorkingDirectory=/var/www/dtailbase/backend
+EnvironmentFile=-/var/www/dtailbase/backend/.env
+ExecStart=/var/www/dtailbase/venv/bin/daphne -b 127.0.0.1 -p 8001 core.asgi:application
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
