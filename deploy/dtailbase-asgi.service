@@ -8,6 +8,7 @@ User=lsadm
 Group=lsadm
 WorkingDirectory=/var/www/dtailbase/backend
 EnvironmentFile=-/var/www/dtailbase/backend/.env
+Environment=PYTHONUNBUFFERED=1
 ExecStart=/var/www/dtailbase/venv/bin/daphne -b 127.0.0.1 -p 8001 core.asgi:application
 Restart=always
 RestartSec=3
