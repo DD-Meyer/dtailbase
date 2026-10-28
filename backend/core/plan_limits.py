@@ -123,8 +123,13 @@ def _load_plan_config():
     """Defaults overlaid with any rows saved in the admin. Never raises."""
     data = {plan: dict(cfg) for plan, cfg in DEFAULT_PLAN_CONFIG.items()}
     try:
+        from django.db import transaction
         from core.models import PlanConfiguration
-        for row in PlanConfiguration.objects.all():
+        # Savepoint: on PostgreSQL (ATOMIC_REQUESTS) a failed query would otherwise
+        # poison the whole request transaction even though we swallow the error.
+        with transaction.atomic():
+            rows = list(PlanConfiguration.objects.all())
+        for row in rows:
             data[row.plan] = row.as_config()
     except Exception:
         # table missing (pre-migrate) or DB unavailable: use defaults
